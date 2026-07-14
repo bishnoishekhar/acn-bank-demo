@@ -114,7 +114,8 @@ footer span{font-size:11px;color:#B0A0C8;}
 
 /* ── Combo card ── */
 .acn-combo-card{background:#fff;border:1px solid #EBEBEB;border-top:3px solid #A100FF;border-radius:4px 18px 18px 18px;max-width:98%;align-self:flex-start;overflow:hidden;}
-.acn-combo-text{padding:15px 17px 10px;font-size:14px;font-weight:600;color:#140025;line-height:1.65;}
+.acn-combo-text{padding:15px 17px 6px;font-size:14px;font-weight:600;color:#140025;line-height:1.65;}
+.acn-combo-subtitle{padding:0 17px 10px;font-size:13px;font-weight:400;color:#6E6E80;line-height:1.5;}
 .acn-combo-tiles{padding:4px 12px 12px;}
 .acn-tile{background:#fff;border:1px solid #EBEBEB;border-radius:10px;padding:10px 14px;margin-bottom:6px;cursor:pointer;display:block;width:100%;text-align:left;transition:border-color .18s,background .18s;}
 .acn-tile:last-child{margin-bottom:0;}
