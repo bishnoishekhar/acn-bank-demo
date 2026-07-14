@@ -1,16 +1,17 @@
 import { useRef, useEffect } from 'react';
 
-function escHtml(s) {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
 export default function ComboCard({ heading, actions, onSelect }) {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (ref.current) {
-      ref.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }
+    if (!ref.current) return;
+    // Scroll the entire combo card into view with a small delay
+    // to allow the DOM to finish rendering all tiles first
+    setTimeout(() => {
+      if (ref.current) {
+        ref.current.scrollIntoView({ behavior: 'instant', block: 'end' });
+      }
+    }, 80);
   }, []);
 
   return (
