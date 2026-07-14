@@ -116,7 +116,8 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
     return lines;
   }, []);
 
-  const isFallbackHeading = (h) => {
+  // defined outside renders — no stale closure risk in useCallback
+  const isFH = (h) => {
     if (!h) return false; const l = h.toLowerCase();
     return l.startsWith('please type') || l.startsWith('please enter') || l.startsWith('type your') || l.startsWith('enter your');
   };
@@ -127,11 +128,11 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         const li = [...prev].reverse().findIndex((m) => m.type === 'bot');
         if (li !== -1) {
           const ri = prev.length - 1 - li, h = prev[ri].text;
-          return [...prev.filter((_, i) => i !== ri), { type: 'combo', heading: h, actions, id: uid(), compact: isFallbackHeading(h) }];
+          return [...prev.filter((_, i) => i !== ri), { type: 'combo', heading: h, actions, id: uid(), compact: isFH(h) }];
         }
       }
       const h = fHead || summary || 'How can I help?';
-      return [...prev, { type: 'combo', heading: h, subtitle: fSub, actions, id: uid(), compact: isFallbackHeading(h) }];
+      return [...prev, { type: 'combo', heading: h, subtitle: fSub, actions, id: uid(), compact: isFH(h) }];
     });
   }, []);
 
@@ -143,8 +144,8 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         const tc = parseToolCode(text);
         if (tc) {
           const sl = extractSayLines(text);
-          if (sl.length >= 2) setMessages((prev) => [...prev, { type: 'combo', heading: sl[0], subtitle: sl[1], actions: tc.actions, id: uid(), compact: false }]);
-          else if (sl.length === 1) setMessages((prev) => [...prev, { type: 'combo', heading: sl[0], actions: tc.actions, id: uid(), compact: false }]);
+          if (sl.length >= 2) setMessages((prev) => [...prev, { type: 'combo', heading: sl[0], subtitle: sl[1], actions: tc.actions, id: uid(), compact: isFH(sl[0]) }]);
+          else if (sl.length === 1) setMessages((prev) => [...prev, { type: 'combo', heading: sl[0], actions: tc.actions, id: uid(), compact: isFH(sl[0]) }]);
           else showCombo(tc.actions, tc.summary);
           return;
         }
