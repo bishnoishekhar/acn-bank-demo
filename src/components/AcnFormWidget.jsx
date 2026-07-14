@@ -36,12 +36,24 @@ export default function AcnFormWidget({ payload, onSubmit }) {
     const errs = validate();
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
     setSubmitted(true);
-    // Build submission string: prefix:field1value (single field) or prefix:field1=val&field2=val
+
+    // Build submission value: prefix:value
     const parts = fields.map((f) => values[f.field_id] || '');
     const value = cta_value_prefix
       ? `${cta_value_prefix}:${parts.join('&')}`
       : parts.join(' ');
-    onSubmit(value);
+
+    // Build display text — mask sensitive fields (tel/password/pin)
+    const displayParts = fields.map((f) => {
+      const v = values[f.field_id] || '';
+      if (f.type === 'tel' || f.type === 'password' || f.field_id === 'pin' || f.field_id === 'otp') {
+        return '•'.repeat(v.length);
+      }
+      return v;
+    });
+    const displayText = displayParts.join(' ');
+
+    onSubmit(value, displayText);
   };
 
   return (
@@ -57,7 +69,8 @@ export default function AcnFormWidget({ payload, onSubmit }) {
             <input
               ref={i === 0 ? firstRef : null}
               className={`acn-form-input-el${errors[f.field_id] ? ' error' : ''}`}
-              type={f.type || 'text'}
+              type={f.type === 'tel' ? 'password' : (f.type || 'text')}
+              inputMode={f.type === 'tel' ? 'numeric' : undefined}
               placeholder={f.placeholder || ''}
               value={values[f.field_id] || ''}
               disabled={submitted}
