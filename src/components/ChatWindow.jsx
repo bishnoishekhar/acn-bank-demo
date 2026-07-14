@@ -98,32 +98,36 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
     try {
       const actions = [];
 
-      // Strategy: find each action block by locating 'content' keys,
-      // then search forward up to the next 'content' key for utterance/description
-      const contentRe = /['"]?content['"]?\s*[=:]\s*['"]([^'"]+)['"]/g;
-      const allContentMatches = [...text.matchAll(contentRe)];
+      // Split on action object boundaries — each action starts with content=
+      // Works for both: content='...' and 'content': '...'
+      // Use a greedy approach: find all content= occurrences then grab text until next one
+      const contentPattern = /content\s*[=:]\s*(['"])((?:(?!).)*)/g;
+      const allMatches = [];
+      let m;
+      while ((m = contentPattern.exec(text)) !== null) {
+        allMatches.push({ index: m.index, content: m[2] });
+      }
 
-      allContentMatches.forEach((m, i) => {
-        const content = m[1].trim();
-        // Snippet from this content to next content (or end of text)
-        const nextMatch = allContentMatches[i + 1];
-        const end = nextMatch ? nextMatch.index : Math.min(m.index + 800, text.length);
-        const snippet = text.slice(m.index, end);
+      allMatches.forEach((match, i) => {
+        const content = match.content.trim();
+        const nextIdx = allMatches[i + 1] ? allMatches[i + 1].index : Math.min(match.index + 900, text.length);
+        const snippet = text.slice(match.index, nextIdx);
 
-        const uttM = snippet.match(/['"]?utterance['"]?\s*[=:]\s*['"]([^'"]+)['"]/);
-        const descM = snippet.match(/['"]?description['"]?\s*[=:]\s*['"]([^'"]+)['"]/);
+        // utterance and description — handle both formats, allow apostrophes
+        const uttM = snippet.match(/utterance\s*[=:]\s*(['"])((?:(?!).)*)/);
+        const descM = snippet.match(/description\s*[=:]\s*(['"])((?:(?!).)*)/);
 
         if (content && uttM) {
           actions.push({
             content,
-            description: descM ? descM[1].trim() : '',
-            utterance: uttM[1].trim()
+            description: descM ? descM[2].trim() : '',
+            utterance: uttM[2].trim()
           });
         }
       });
 
-      const sumM = text.match(/['"]?summary['"]?\s*[=:]\s*['"]([^'"]+)['"]/);
-      const summary = sumM ? sumM[1].trim() : 'What can I help you with?';
+      const sumM = text.match(/summary\s*[=:]\s*(['"])((?:(?!).)*)/);
+      const summary = sumM ? sumM[2].trim() : 'What can I help you with?';
       return actions.length > 0 ? { actions, summary } : null;
     } catch (e) { return null; }
   }, []);
@@ -172,10 +176,19 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         const toolCode = parseToolCode(text);
         if (toolCode) {
           const sayLines = extractSayLines(text);
-          if (sayLines.length > 0) {
-            // Additional Say: lines (index 1+) become bot bubbles above
+          if (sayLines.length >= 2) {
+            // Multiple Say: lines:
+            // - First line becomes the combo card heading (e.g. "👋 Welcome to ACN Bank!")
+            // - Middle lines become bot bubbles above the card (e.g. tagline)
+            // - Last bot bubble before combo is NOT absorbed (we pass heading explicitly)
+            const heading = sayLines[0];
             sayLines.slice(1).forEach((line) => addBot(line));
-            // First Say: line becomes the combo heading
+            setMessages((prev) => [
+              ...prev,
+              { type: 'combo', heading, actions: toolCode.actions, id: uid() }
+            ]);
+          } else if (sayLines.length === 1) {
+            // Single Say: line becomes combo heading
             setMessages((prev) => [
               ...prev,
               { type: 'combo', heading: sayLines[0], actions: toolCode.actions, id: uid() }
@@ -264,9 +277,11 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
   }, [addUser, showTyping]);
 
   /* ── Form submit ── */
-  const handleFormSubmit = useCallback((value) => {
+  const handleFormSubmit = useCallback((value, displayText) => {
     setActiveForm(null);
-    addUser(value.split(':').slice(1).join(':') || value); // show friendly value not prefix
+    // Show masked display text if provided (e.g. for PIN), otherwise show value after prefix
+    const show = displayText || value.split(':').slice(1).join(':') || value;
+    addUser(show);
     showTyping();
     gecxSend(value);
   }, [addUser, showTyping]);
