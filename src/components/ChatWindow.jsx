@@ -42,12 +42,27 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
 
   /* ── Scroll to bottom ── */
   const scrollToBottom = useCallback(() => {
-    const snap = () => { if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight; };
-    snap();
-    requestAnimationFrame(snap);
-    setTimeout(snap, 50);
-    setTimeout(snap, 150);
-    setTimeout(snap, 350); // catch combo card full render
+    const el = msgsRef.current;
+    if (!el) return;
+    const doScroll = () => {
+      if (!msgsRef.current) return;
+      // If there's a combo card, scroll so its bottom edge is visible
+      const combo = msgsRef.current.querySelector('[data-combo="true"]:last-child');
+      if (combo) {
+        const comboBottom = combo.offsetTop + combo.offsetHeight;
+        const viewBottom = msgsRef.current.scrollTop + msgsRef.current.clientHeight;
+        if (comboBottom > viewBottom) {
+          msgsRef.current.scrollTop = comboBottom - msgsRef.current.clientHeight + 16;
+        }
+      } else {
+        msgsRef.current.scrollTop = msgsRef.current.scrollHeight;
+      }
+    };
+    doScroll();
+    requestAnimationFrame(doScroll);
+    setTimeout(doScroll, 50);
+    setTimeout(doScroll, 200);
+    setTimeout(doScroll, 400);
   }, []);
 
   /* ── Add messages ── */
@@ -360,12 +375,13 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
             }
             if (msg.type === 'combo') {
               return (
-                <ComboCard
-                  key={msg.id}
-                  heading={msg.heading}
-                  actions={msg.actions}
-                  onSelect={(action) => handleTileSelect(action, msg.id)}
-                />
+                <div key={msg.id} data-combo="true">
+                  <ComboCard
+                    heading={msg.heading}
+                    actions={msg.actions}
+                    onSelect={(action) => handleTileSelect(action, msg.id)}
+                  />
+                </div>
               );
             }
             return null;
