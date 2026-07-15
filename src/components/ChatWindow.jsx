@@ -131,25 +131,15 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
     setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
   }, []);
 
-  // clearTypingBubble: removes dots, re-shows them after 300ms
-  // Keeps isResponding=true — agent is still processing between LLM turns
+  // clearTypingBubble: removes dots but keeps isResponding=true
+  // Used for text-only responses where agent is still processing
   const clearTypingBubble = useCallback(() => {
     setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
-    // Re-show typing dots so user sees agent is still working
-    setTimeout(() => {
-      setMessages((prev) => {
-        if (!prev.some((m) => m.type === 'typing')) {
-          return [...prev, { type: 'typing', id: uid() }];
-        }
-        return prev;
-      });
-    }, 300);
-    // Safety: if no combo/form arrives within 10s, release input anyway
+    // Safety: if no combo/form arrives within 4s, release input anyway
     if (finalTimerRef.current) clearTimeout(finalTimerRef.current);
     finalTimerRef.current = setTimeout(() => {
       setIsResponding(false);
-      setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
-    }, 10000);
+    }, 8000);
   }, []);
 
   /* ── Parse tool_code quick_actions ──
