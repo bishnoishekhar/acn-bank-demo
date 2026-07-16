@@ -180,17 +180,33 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
     const pendingSub = pendingSubtitleRef.current;
     pendingHeadingRef.current = null;
     pendingSubtitleRef.current = null;
-    console.log('\[ACN\] showCombo — pending:', pending?.slice(0, 50), '| sub:', pendingSub?.slice(0, 30), '| comboCreated:', comboCreatedRef.current);
+    console.log('[ACN] showCombo — pending:', pending?.slice(0, 50), '| sub:', pendingSub?.slice(0, 30), '| comboCreated:', comboCreatedRef.current);
 
-    if (comboCreatedRef.current && !forcedHeading) {
-      console.log('\[ACN\] showCombo skipped — duplicate prevention');
-      return;
-    }
     comboCreatedRef.current = true;
+
+    // Merge two tile lists without repeating an action (dedupe by content+utterance).
+    // Lets duplicate/re-delivered payloads collapse instead of stacking cards.
+    const mergeActions = (existing, incoming) => {
+      const key = (a) => `${a.content || ''}|${a.utterance || ''}`;
+      const seen = new Set(existing.map(key));
+      return [...existing, ...incoming.filter((a) => !seen.has(key(a)))];
+    };
+
     setMessages((prev) => {
       if (forcedHeading) {
         return [...prev, { type: 'combo', heading: forcedHeading, subtitle: forcedSubtitle, actions, id: uid(), compact: isFH(forcedHeading) }];
       }
+
+      // CX streams follow-up quick_actions as their own output with no heading.
+      // Fold them into the combo we just built rather than spawning a duplicate
+      // card or cannibalizing an unrelated bot message.
+      if (!pending) {
+        const last = prev[prev.length - 1];
+        if (last && last.type === 'combo') {
+          return [...prev.slice(0, -1), { ...last, actions: mergeActions(last.actions, actions) }];
+        }
+      }
+
       if (pending) {
         const li = [...prev].reverse().findIndex((m) => m.type === 'bot' && m.text.startsWith(pending));
         if (li !== -1) {
@@ -200,6 +216,9 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         }
         return [...prev, { type: 'combo', heading: pending, subtitle: pendingSub, actions, id: uid(), compact: isFH(pending) }];
       }
+
+      // No pending heading: promote the most recent bot bubble into a combo so the
+      // tiles sit under the text that introduced them.
       const li = [...prev].reverse().findIndex((m) => m.type === 'bot');
       if (li !== -1) {
         const ri = prev.length - 1 - li;
@@ -210,8 +229,9 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         const without = prev.filter((_, i) => i !== ri);
         return [...without, { type: 'combo', heading, subtitle, actions, id: uid(), compact: isFH(heading) }];
       }
-      const h = summary || 'What can I help you with?';
-      return [...prev, { type: 'combo', heading: h, actions, id: uid(), compact: isFH(h) }];
+
+      // Nothing to anchor to — render tiles only, don't invent placeholder copy.
+      return [...prev, { type: 'combo', heading: summary || undefined, actions, id: uid(), compact: false }];
     });
   }, []);
 
