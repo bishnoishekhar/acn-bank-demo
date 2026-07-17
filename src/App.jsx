@@ -2,44 +2,21 @@ import { useState, useEffect, useRef } from 'react';
 import ChatWindow from './components/ChatWindow';
 import { bootstrapGecx } from './components/gecx';
 
-/* ── Hero mockup scenes ── */
-const SCENES = [
-  {
-    user: 'Transfer $500 to Maria',
-    bot: <>On it! Transferring <strong>CAD 500</strong> to Maria Badillo.</>,
-    receipt: { icon: '✅', title: 'Transfer complete', sub: 'CAD 500.00 → Maria Badillo · 3s' },
-  },
-  {
-    user: "What's my balance?",
-    bot: 'Here are your accounts:',
-    cards: [
-      { label: 'Chequing', val: 'CAD 12,450', color: 'purple' },
-      { label: 'Savings', val: 'CAD 28,750', color: 'green' },
-    ],
-  },
-  {
-    user: 'Apply for the Platinum Card',
-    bot: <>Great choice! You're <strong>pre-approved</strong>.</>,
-    receipt: { icon: '🎁', title: 'Pre-approved offer ready', sub: '5× points · CAD 300 bonus' },
-  },
-];
+/* Hero product visual — premium credit card (replaces the old rotating chat mockup) */
 
 export default function App() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatIntent, setChatIntent] = useState(null);
   const [showBadge, setShowBadge] = useState(true);
   const [showTooltip, setShowTooltip] = useState(false);
-  const [sceneIdx, setSceneIdx] = useState(0);
   const tooltipTimer = useRef(null);
 
   /* ── Bootstrap GECX once on mount ── */
   useEffect(() => {
     bootstrapGecx();
     tooltipTimer.current = setTimeout(() => setShowTooltip(true), 6000);
-    const sceneInterval = setInterval(() => setSceneIdx((i) => (i + 1) % SCENES.length), 3500);
     return () => {
       clearTimeout(tooltipTimer.current);
-      clearInterval(sceneInterval);
     };
   }, []);
 
@@ -56,8 +33,6 @@ export default function App() {
     setShowTooltip(false);
     clearTimeout(tooltipTimer.current);
   };
-
-  const scene = SCENES[sceneIdx];
 
   return (
     <>
@@ -102,44 +77,33 @@ export default function App() {
             </div>
           </div>
 
-          {/* Mockup */}
+          {/* Product visual — premium credit card */}
           <div className="hero-right">
-            <div className="chat-mockup">
-              <div className="cm-header">
-                <div className="cm-avatar">A</div>
-                <div>
-                  <div className="cm-title">ACN Bank AI</div>
-                  <div className="cm-status"><span className="cm-dot" />Online · Responding now</div>
+            <div className="acn-card-stage">
+              <div className="acn-credit-card">
+                <div className="acn-cc-sheen" />
+                <div className="acn-cc-top">
+                  <span className="acn-cc-bank">ACN Bank</span>
+                  <span className="acn-cc-flag">Platinum</span>
+                </div>
+                <div className="acn-cc-chip" />
+                <div className="acn-cc-number">
+                  <span>5412</span><span>7534</span><span>8901</span><span>4242</span>
+                </div>
+                <div className="acn-cc-bottom">
+                  <div>
+                    <div className="acn-cc-label">Card Holder</div>
+                    <div className="acn-cc-value">CHANDER BISHNOI</div>
+                  </div>
+                  <div>
+                    <div className="acn-cc-label">Expires</div>
+                    <div className="acn-cc-value">09/29</div>
+                  </div>
+                  <div className="acn-cc-network">VISA</div>
                 </div>
               </div>
-              <div className="cm-body">
-                <div className="cm-scene" key={sceneIdx}>
-                  <div className="cm-user">{scene.user}</div>
-                  <div className="cm-bot-bubble">{scene.bot}</div>
-                  {scene.receipt && (
-                    <div className="cm-receipt">
-                      <div className="cm-receipt-icon">{scene.receipt.icon}</div>
-                      <div>
-                        <div className="cm-receipt-title">{scene.receipt.title}</div>
-                        <div className="cm-receipt-sub">{scene.receipt.sub}</div>
-                      </div>
-                    </div>
-                  )}
-                  {scene.cards && (
-                    <div className="cm-cards-row">
-                      {scene.cards.map((c) => (
-                        <div key={c.label} className={`cm-mini-card ${c.color}`}>
-                          <div className="cm-mini-label">{c.label}</div>
-                          <div className="cm-mini-val">{c.val}</div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="cm-footer">
-                <div className="cm-input-mock">Ask me anything...</div>
-              </div>
+              <div className="acn-float acn-float-1">✅&nbsp; Transfer complete · 3s</div>
+              <div className="acn-float acn-float-2">🎁&nbsp; Pre-approved · 5× points</div>
             </div>
           </div>
         </div>

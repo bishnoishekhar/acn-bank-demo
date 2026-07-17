@@ -240,7 +240,9 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
       if (o.payload) {
         return o.payload.type === 'quick_actions' ||
                o.payload.name === 'acn-form-input' ||
-               o.payload.name === 'acn-payment-carousel';
+               o.payload.name === 'acn-payment-carousel' ||
+               o.payload.name === 'acn-payee-selector' ||
+               o.payload.name === 'acn-payment-receipt';
       }
       if (!o.text) return false;
       const t = o.text;
@@ -261,7 +263,9 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
     const hasFinalWidget = outputs.some(o => o.payload && (
       o.payload.type === 'quick_actions' ||
       o.payload.name === 'acn-form-input' ||
-      o.payload.name === 'acn-payment-carousel'
+      o.payload.name === 'acn-payment-carousel' ||
+      o.payload.name === 'acn-payee-selector' ||
+      o.payload.name === 'acn-payment-receipt'
     ));
     const hasOnlyText = outputs.every(o => o.text && !o.payload);
 
@@ -316,8 +320,11 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         setActiveForm({ payload: p, id: uid() });
         setMessages((prev) => prev.map((m) => m.type === 'combo' ? { ...m, compact: true } : m));
       }
-      if (p.name === 'acn-payment-carousel') {
+      if (p.name === 'acn-payment-carousel' || p.name === 'acn-payee-selector') {
         setMessages((prev) => [...prev, { type: 'carousel', payload: p, id: uid() }]);
+      }
+      if (p.name === 'acn-payment-receipt') {
+        setMessages((prev) => [...prev, { type: 'receipt', payload: p, id: uid() }]);
       }
     });
   }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines]);
@@ -462,6 +469,20 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
                 />
               </div>
             );
+            if (msg.type === 'receipt') {
+              const r = msg.payload || {};
+              const amt = Number(r.amount);
+              return (
+                <div key={msg.id} className="acn-msg-enter acn-receipt" data-combo="true">
+                  <div className="acn-receipt-check">✓</div>
+                  <div className="acn-receipt-title">{r.title || 'Done'}</div>
+                  {r.payee_name && <div className="acn-receipt-row"><span>To</span><span>{r.payee_name}</span></div>}
+                  {!Number.isNaN(amt) && amt > 0 && <div className="acn-receipt-row"><span>Amount</span><span>{(r.currency || 'CAD')} {amt.toLocaleString('en-CA', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>}
+                  {r.date_or_frequency && <div className="acn-receipt-row"><span>Date</span><span>{r.date_or_frequency}</span></div>}
+                  {r.receipt_id && <div className="acn-receipt-ref">Ref: {r.receipt_id}</div>}
+                </div>
+              );
+            }
             if (msg.type === 'combo') return (
               <div key={msg.id} data-combo="true">
                 <ComboCard
