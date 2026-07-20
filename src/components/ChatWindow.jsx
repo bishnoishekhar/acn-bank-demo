@@ -363,8 +363,15 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
 
       // Pass 1: session-scoped tool registry — toolCalls and chunk.payloads land
       // in different messages, so per-message scoping loses the widget name.
+      // quick_actions is collected in a separate queue because it never emits a
+      // chunk.payload. Carousel/insight tools pass args directly (not under a
+      // "payload" key) so they also never enter widgetOrder — their data arrives
+      // as chunk.payload from the tool response. Mixing quick_actions into
+      // widgetOrder caused carousel chunk.payloads to consume its widgetOrder slot,
+      // incrementing payloadIdx past widgetOrder.length so Pass 3 never ran.
       const toolMeta = {};
       const widgetOrder = [];
+      const quickActionQueue = [];
       for (const msg of turnMessages) {
         if (msg.role === 'user') continue;
         for (const chunk of msg.chunks || []) {
@@ -378,9 +385,8 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
               toolMeta[tc.id].argsPayload = tc.args.payload;
               widgetOrder.push(tc.id);
             } else if (tc.args?.actions) {
-              // quick_actions sends actions/summary directly, not wrapped in payload
-              toolMeta[tc.id].argsPayload = { actions: tc.args.actions, summary: tc.args.summary };
-              widgetOrder.push(tc.id);
+              // quick_actions: args-only, never produces a chunk.payload
+              quickActionQueue.push({ actions: tc.args.actions, summary: tc.args.summary, name: tc.displayName });
             }
           }
           if (tr?.id) {
@@ -392,12 +398,15 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
       }
 
       // Pass 2: text and chunk.payloads in document order, annotated with widget name.
+      // Non-widget payloads (DFCX richContent etc.) are dropped — they have no renderer
+      // and must not shift payloadIdx.
       let payloadIdx = 0;
       for (const msg of turnMessages) {
         if (msg.role === 'user') continue;
         for (const chunk of msg.chunks || []) {
           if (chunk.text) outputs.push({ text: chunk.text });
           if (chunk.payload) {
+            if (!isKnownPayload(chunk.payload)) continue;
             const meta = toolMeta[widgetOrder[payloadIdx]];
             const withName = meta?.name ? { ...chunk.payload, name: meta.name } : chunk.payload;
             const annotated = (meta?.summary && !withName.summary) ? { ...withName, summary: meta.summary } : withName;
@@ -407,14 +416,22 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
         }
       }
 
-      // Pass 3: widgets that never produce chunk.payload (e.g. quick_actions).
+      // Pass 3: widgetOrder entries whose tool returned no chunk.payload.
       for (let i = payloadIdx; i < widgetOrder.length; i++) {
         const meta = toolMeta[widgetOrder[i]];
-        if (meta?.argsPayload && meta?.name) {
-          const withName = { ...meta.argsPayload, name: meta.name };
+        if (meta?.argsPayload) {
+          const withName = meta?.name ? { ...meta.argsPayload, name: meta.name } : meta.argsPayload;
           const annotated = meta.summary && !withName.summary ? { ...withName, summary: meta.summary } : withName;
           outputs.push({ payload: annotated });
         }
+      }
+
+      // Pass 4: quick_actions — always args-only, never in widgetOrder or chunk.payloads.
+      for (const qa of quickActionQueue) {
+        const p = qa.name
+          ? { actions: qa.actions, summary: qa.summary, name: qa.name }
+          : { actions: qa.actions, summary: qa.summary };
+        outputs.push({ payload: p });
       }
 
       if (outputs.length) {
