@@ -355,11 +355,17 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
       if (!data?.messages) return;
       const outputs = [];
 
+      // Only process the latest turn (assistant messages after the last user message).
+      // Processing the full session history re-adds previous turns' combo cards on every
+      // response, which buries the user bubble and duplicates earlier menus.
+      const lastUserIdx = data.messages.reduce((acc, msg, i) => msg.role === 'user' ? i : acc, -1);
+      const turnMessages = data.messages.slice(lastUserIdx + 1);
+
       // Pass 1: session-scoped tool registry — toolCalls and chunk.payloads land
       // in different messages, so per-message scoping loses the widget name.
       const toolMeta = {};
       const widgetOrder = [];
-      for (const msg of data.messages) {
+      for (const msg of turnMessages) {
         if (msg.role === 'user') continue;
         for (const chunk of msg.chunks || []) {
           const tc = chunk.toolCall;
@@ -368,8 +374,14 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
             if (!toolMeta[tc.id]) toolMeta[tc.id] = {};
             if (tc.displayName) toolMeta[tc.id].name = tc.displayName;
             if (tc.args?.summary) toolMeta[tc.id].summary = tc.args.summary;
-            if (tc.args?.payload) toolMeta[tc.id].argsPayload = tc.args.payload;
-            if (tc.args?.payload) widgetOrder.push(tc.id);
+            if (tc.args?.payload) {
+              toolMeta[tc.id].argsPayload = tc.args.payload;
+              widgetOrder.push(tc.id);
+            } else if (tc.args?.actions) {
+              // quick_actions sends actions/summary directly, not wrapped in payload
+              toolMeta[tc.id].argsPayload = { actions: tc.args.actions, summary: tc.args.summary };
+              widgetOrder.push(tc.id);
+            }
           }
           if (tr?.id) {
             if (!toolMeta[tr.id]) toolMeta[tr.id] = {};
@@ -381,7 +393,7 @@ export default function ChatWindow({ isOpen, onClose, onReset, intent }) {
 
       // Pass 2: text and chunk.payloads in document order, annotated with widget name.
       let payloadIdx = 0;
-      for (const msg of data.messages) {
+      for (const msg of turnMessages) {
         if (msg.role === 'user') continue;
         for (const chunk of msg.chunks || []) {
           if (chunk.text) outputs.push({ text: chunk.text });
