@@ -7,6 +7,22 @@ export function setResponseHandler(fn) {
   _onResponse = fn;
 }
 
+/* ── Clear GECX-owned session storage ─────────────────────────────────────────
+   Our app only writes keys that start with 'acn_'. Everything else in
+   sessionStorage belongs to the GECX SDK (session ID, token, etc.).
+   Clearing those keys forces the SDK to start a brand-new session on the next
+   registerContext() call and fire the enableWelcomeEvent runSession.
+── */
+export function clearGecxSession() {
+  try {
+    const removed = Object.keys(sessionStorage).filter(k => !k.startsWith('acn_'));
+    removed.forEach(k => sessionStorage.removeItem(k));
+    if (removed.length) console.log('[ACN] cleared GECX session keys:', removed);
+  } catch (e) {
+    // ignore — storage may be restricted in some environments
+  }
+}
+
 export function initGecx() {
   if (_initDone) return;
   _initDone = true;
@@ -60,14 +76,18 @@ export function installFetchInterceptor() {
   const _orig = window.fetch;
   window.fetch = function (url, opts) {
     const p = _orig.apply(this, arguments);
-    if (url && url.toString().includes('runSession')) {
+    const urlStr = url ? url.toString() : '';
+    if (urlStr.includes('runSession')) {
+      console.log('[ACN] fetch interceptor caught runSession:', urlStr);
       p.then((r) => {
         r.clone().json().then((data) => {
+          console.log('[ACN] runSession response keys:', Object.keys(data || {}));
           if (_onResponse && data?.outputs) {
+            console.log('[ACN] calling _onResponse with outputs:', data.outputs?.length);
             _onResponse(data.outputs);
           }
-        }).catch(() => {});
-      }).catch(() => {});
+        }).catch((e) => { console.warn('[ACN] runSession JSON parse error:', e); });
+      }).catch((e) => { console.warn('[ACN] runSession fetch error:', e); });
     }
     return p;
   };
@@ -89,4 +109,19 @@ export function bootstrapGecx() {
   installFetchInterceptor();
   installEventListeners();
   /* Do NOT call initGecx here — enableWelcomeEvent must fire AFTER chat opens */
+}
+
+/* ── Soft-reset: clears init flag so next open triggers a fresh initGecx().
+   Does NOT click the reset button — that auto-starts a new GECX session which
+   would conflict with the subsequent initGecx() call in the isOpen effect.
+   The sessionStorage cleanup is handled by clearGecxSession() in the isOpen
+   effect before initGecx() is called.
+── */
+export function softResetGecx() {
+  _initDone = false;
+}
+
+/* Keep for backward-compat — a lighter flag-only reset used on mount. */
+export function clearGecxDone() {
+  _initDone = false;
 }
