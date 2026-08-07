@@ -1,6 +1,6 @@
 import { useAuth } from '../../context/AuthContext';
 
-export default function TopNav({ onOpenChat, onSignIn, onSignOut, chatOpen = false }) {
+export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, chatOpen = false }) {
   const { authState, customerName } = useAuth();
   const isAuth = authState === 'authenticated';
 
@@ -12,12 +12,23 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, chatOpen = fal
         ACN Bank
       </div>
 
-      {/* Centre links */}
+      {/* Centre — nav links normally; AI identity when chat is open */}
       <div className="nav-links">
-        <a href="#products">Products</a>
-        <a href="#services">Services</a>
-        <a href="#investing">Investing</a>
-        <a href="#about">About</a>
+        {chatOpen ? (
+          <div className="nav-ai-identity" aria-live="polite">
+            <span className="nav-ai-dot" aria-hidden="true" />
+            <span className="nav-ai-name">ACN Bank AI</span>
+            <span className="nav-ai-sep" aria-hidden="true">·</span>
+            <span className="nav-ai-status">Online</span>
+          </div>
+        ) : (
+          <>
+            <a href="#products">Products</a>
+            <a href="#services">Services</a>
+            <a href="#investing">Investing</a>
+            <a href="#about">About</a>
+          </>
+        )}
       </div>
 
       {/* Right-side actions */}
@@ -35,7 +46,23 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, chatOpen = fal
           </button>
         )}
 
-        {/* Chat toggle — slides panel down when clicked */}
+        {/* Reset button — only visible when chat is open */}
+        {chatOpen && (
+          <button
+            className="nav-icon-btn"
+            onClick={onResetChat}
+            title="New conversation"
+            aria-label="Start new conversation"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <polyline points="1 4 1 10 7 10"/>
+              <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
+            </svg>
+          </button>
+        )}
+
+        {/* Chat toggle — slides panel down; shows ✕ when open */}
         <button
           className={`nav-btn nav-btn-chat${chatOpen ? ' nav-btn-chat--active' : ''}`}
           onClick={onOpenChat}
@@ -43,14 +70,12 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, chatOpen = fal
           aria-expanded={chatOpen}
         >
           {chatOpen ? (
-            /* X icon when panel is open */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <line x1="18" y1="6" x2="6" y2="18"/>
               <line x1="6" y1="6" x2="18" y2="18"/>
             </svg>
           ) : (
-            /* Chat bubble icon when panel is closed */
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                  strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />

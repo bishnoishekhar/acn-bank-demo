@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import TopNav      from './components/layout/TopNav';
 import Dashboard   from './components/layout/Dashboard';
@@ -17,6 +17,9 @@ function AppContent() {
 
   /* Bootstrap GECX once on mount */
   useEffect(() => { bootstrapGecx(); }, []);
+
+  // Holds the ChatPanel reset function — set by ChatPanel via onExposeReset
+  const chatResetRef = useRef(null);
 
   /* ── Helpers ── */
   // Always opens the chat (used by dashboard CTAs, sign-in success, etc.)
@@ -54,6 +57,7 @@ function AppContent() {
         onOpenChat={toggleChat}
         onSignIn={openSignIn}
         onSignOut={handleSignOut}
+        onResetChat={() => chatResetRef.current?.()}
         chatOpen={chatOpen}
       />
 
@@ -63,6 +67,7 @@ function AppContent() {
         isOpen={chatOpen}
         onClose={closeChat}
         onReset={() => {}}
+        onExposeReset={(fn) => { chatResetRef.current = fn; }}
         intent={chatIntent}
         onRequestSignIn={openSignIn}
         resetSignal={resetSignal}

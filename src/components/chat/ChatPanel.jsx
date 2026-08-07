@@ -85,7 +85,7 @@ const AUTH_TRIGGER_PHRASES = [
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
-export default function ChatPanel({ isOpen, onClose, onReset, intent, onRequestSignIn, resetSignal = 0 }) {
+export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, intent, onRequestSignIn, resetSignal = 0 }) {
   const { authState, customerName } = useAuth();
 
   const [messages,     setMessages]     = useState([]);
@@ -608,6 +608,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, intent, onRequestS
     onReset?.();
   }, [showTyping, onReset]);
 
+  // Expose handleReset to parent (App) so the nav reset button can call it
+  useEffect(() => { onExposeReset?.(handleReset); }, [handleReset, onExposeReset]);
+
   const toggleVoice = useCallback(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       alert('Voice input not supported in this browser.');
@@ -681,41 +684,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, intent, onRequestS
         </chat-messenger>
       </div>
 
-      {/* Side panel */}
+      {/* Side panel — no internal header; controls live in the top nav */}
       <aside className={`chat-panel${isOpen ? ' open' : ''}`} aria-label="ACN Bank AI assistant">
-
-        {/* ── Header ── */}
-        <div className="cp-header">
-          <div className="cp-avatar" aria-hidden="true">AB</div>
-          <div className="cp-header-info">
-            <div className="cp-title">ACN Bank AI</div>
-            <div className={`cp-status${isResponding ? ' responding' : ''}`}>
-              <span className="cp-status-dot" aria-hidden="true" />
-              {isResponding
-                ? 'Responding…'
-                : authState === 'authenticated'
-                  ? `Signed in as ${customerName}`
-                  : 'Online · Ready'}
-            </div>
-          </div>
-          <div className="cp-header-btns">
-            <button className="cp-icon-btn" onClick={handleReset}
-                    title="New conversation" aria-label="Start new conversation">
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="1 4 1 10 7 10"/>
-                <path d="M3.51 15a9 9 0 1 0 .49-4.95"/>
-              </svg>
-            </button>
-            <button className="cp-icon-btn cp-close-btn" onClick={onClose} aria-label="Close chat">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                   strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <line x1="18" y1="6" x2="6" y2="18"/>
-                <line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          </div>
-        </div>
 
         {/* ── Messages ── */}
         <div className="cp-messages" ref={msgsRef} role="log" aria-live="polite" aria-label="Chat messages">
