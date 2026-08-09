@@ -12,23 +12,12 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
         ACN Bank
       </div>
 
-      {/* Centre — nav links normally; AI identity when chat is open */}
+      {/* Centre nav links — always visible */}
       <div className="nav-links">
-        {chatOpen ? (
-          <div className="nav-ai-identity" aria-live="polite">
-            <span className="nav-ai-dot" aria-hidden="true" />
-            <span className="nav-ai-name">ACN Bank AI</span>
-            <span className="nav-ai-sep" aria-hidden="true">·</span>
-            <span className="nav-ai-status">Online</span>
-          </div>
-        ) : (
-          <>
-            <a href="#products">Products</a>
-            <a href="#services">Services</a>
-            <a href="#investing">Investing</a>
-            <a href="#about">About</a>
-          </>
-        )}
+        <a href="#products">Products</a>
+        <a href="#services">Services</a>
+        <a href="#investing">Investing</a>
+        <a href="#about">About</a>
       </div>
 
       {/* Right-side actions */}
@@ -46,7 +35,7 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
           </button>
         )}
 
-        {/* Reset button — only visible when chat is open */}
+        {/* Reset button — only when chat is open */}
         {chatOpen && (
           <button
             className="nav-icon-btn"
@@ -62,7 +51,7 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
           </button>
         )}
 
-        {/* Chat toggle — slides panel down; shows ✕ when open */}
+        {/* Chat toggle */}
         <button
           className={`nav-btn nav-btn-chat${chatOpen ? ' nav-btn-chat--active' : ''}`}
           onClick={onOpenChat}
@@ -82,10 +71,6 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
             </svg>
           )}
           Chat with AI
-        </button>
-
-        <button className="nav-btn nav-btn-solid" onClick={onSignIn}>
-          Open account
         </button>
       </div>
     </nav>

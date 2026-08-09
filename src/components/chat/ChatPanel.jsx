@@ -83,6 +83,28 @@ const AUTH_TRIGGER_PHRASES = [
   'to access your account', 'please log in',
 ];
 
+// ── Static data ───────────────────────────────────────────────────────────────
+
+const CANADIAN_BILLERS = [
+  { id: 'rogers',       name: 'Rogers',                  sub: 'Telecommunications', emoji: '📡' },
+  { id: 'bell',         name: 'Bell Canada',             sub: 'Telecommunications', emoji: '🔔' },
+  { id: 'telus',        name: 'TELUS',                   sub: 'Telecommunications', emoji: '📱' },
+  { id: 'hydro-one',    name: 'Hydro One',               sub: 'Bill Payment',       emoji: '⚡' },
+  { id: 'toronto-h',   name: 'Toronto Hydro',           sub: 'Bill Payment',       emoji: '💡' },
+  { id: 'enbridge',     name: 'Enbridge Gas',            sub: 'Bill Payment',       emoji: '🔥' },
+  { id: 'cra',          name: 'Canada Revenue Agency',   sub: 'Government',         emoji: '🏛️' },
+  { id: 'shaw',         name: 'Shaw / Freedom',          sub: 'Internet & TV',      emoji: '📺' },
+];
+
+const AI_SUGGESTIONS = [
+  { label: '💰 Check balance',       utterance: 'Check my balance' },
+  { label: '💸 Send money',          utterance: 'Transfer money' },
+  { label: '📊 Recent transactions', utterance: 'Show my recent transactions' },
+  { label: '💳 Apply for a card',    utterance: 'I want to apply for a credit card' },
+  { label: '🔔 Report fraud',        utterance: 'Report a fraudulent transaction' },
+  { label: '💡 What can you do?',    utterance: 'What can you help me with?' },
+];
+
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
 export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, intent, onRequestSignIn, resetSignal = 0 }) {
@@ -93,6 +115,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   const [activeForm,   setActiveForm]   = useState(null);
   const [voiceActive,  setVoiceActive]  = useState(false);
   const [isResponding, setIsResponding] = useState(false);
+  const [activeMenu,   setActiveMenu]   = useState(null); // 'plus' | 'contact' | 'ai'
+  const [contactTab,   setContactTab]   = useState('recipients');
 
   // ── sessionStarted as a REF (not state) ───────────────────────────────────
   // Must be a ref so the resetSignal watcher (Effect A) and the isOpen effect
@@ -104,6 +128,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   const msgsRef        = useRef(null);
   const inputRef       = useRef(null);
   const recognitionRef = useRef(null);
+  const galleryInputRef = useRef(null);
+  const cameraInputRef  = useRef(null);
+  const fileInputRef    = useRef(null);
   const respondingTimer = useRef(null);
   const finalTimer      = useRef(null);
   const pendingHeading  = useRef(null);
@@ -637,6 +664,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     e.target.value = '';
   }, [addUser, showTyping]);
 
+  const closeMenu  = useCallback(() => setActiveMenu(null), []);
+  const toggleMenu = useCallback((menu) => setActiveMenu((prev) => prev === menu ? null : menu), []);
+
   // Auth success from inline card — clear prompt, send re-auth message to CES
   const handleAuthSuccess = useCallback((authPromptId, result) => {
     setMessages((prev) => [
@@ -689,6 +719,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
 
         {/* ── Messages ── */}
         <div className="cp-messages" ref={msgsRef} role="log" aria-live="polite" aria-label="Chat messages">
+          {/* Top spacer: absorbs empty space to center content when few messages exist.
+              Shrinks to 0 automatically when the list overflows (scroll mode). */}
+          <div className="cp-spacer" aria-hidden="true" />
           {messages.map((msg, idx) => {
             const consBot = msg.type === 'bot' && messages[idx - 1]?.type === 'bot';
 
@@ -785,6 +818,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
 
             return null;
           })}
+          {/* Bottom spacer: mirrors the top spacer so content stays vertically centered */}
+          <div className="cp-spacer" aria-hidden="true" />
         </div>
 
         {/* ── Active form (floats above input bar) ── */}
@@ -798,20 +833,122 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
           </div>
         )}
 
+        {/* ── Pop-up menu sheet (slides up above input bar) ── */}
+        {activeMenu && (
+          <div className="cp-menu-sheet" role="dialog" aria-label="Input options">
+
+            {/* ── Plus menu: Camera / Photo / File ── */}
+            {activeMenu === 'plus' && (
+              <div className="cp-menu-plus">
+                <button className="cp-menu-item" onClick={() => { cameraInputRef.current.click(); closeMenu(); }}>
+                  <span className="cp-menu-item-icon">📷</span>
+                  <span>Camera</span>
+                </button>
+                <button className="cp-menu-item" onClick={() => { galleryInputRef.current.click(); closeMenu(); }}>
+                  <span className="cp-menu-item-icon">🖼️</span>
+                  <span>Photo</span>
+                </button>
+                <button className="cp-menu-item" onClick={() => { fileInputRef.current.click(); closeMenu(); }}>
+                  <span className="cp-menu-item-icon">📄</span>
+                  <span>File</span>
+                </button>
+              </div>
+            )}
+
+            {/* ── @ menu: Recipients + Billers ── */}
+            {activeMenu === 'contact' && (
+              <div className="cp-menu-contact">
+                <div className="cp-menu-tabs">
+                  <button className={`cp-menu-tab${contactTab === 'recipients' ? ' active' : ''}`}
+                          onClick={() => setContactTab('recipients')}>Recipients</button>
+                  <button className={`cp-menu-tab${contactTab === 'billers' ? ' active' : ''}`}
+                          onClick={() => setContactTab('billers')}>Billers</button>
+                </div>
+
+                {contactTab === 'recipients' && (
+                  <div className="cp-menu-empty">
+                    <span className="cp-menu-empty-icon">👥</span>
+                    <p>Contact list coming soon</p>
+                  </div>
+                )}
+
+                {contactTab === 'billers' && (
+                  <div className="cp-menu-billers">
+                    <div className="cp-menu-section-label">Popular billers in Canada</div>
+                    {CANADIAN_BILLERS.map((b) => (
+                      <button key={b.id} className="cp-menu-biller-row"
+                              onClick={() => { addUser(`Pay ${b.name}`); showTyping(); gecxSend(`I want to pay my ${b.name} bill`); closeMenu(); }}>
+                        <div className="cp-menu-biller-avatar">{b.emoji}</div>
+                        <div>
+                          <div className="cp-menu-biller-name">{b.name}</div>
+                          <div className="cp-menu-biller-sub">{b.sub}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* ── AI suggestions ── */}
+            {activeMenu === 'ai' && (
+              <div className="cp-menu-ai">
+                <div className="cp-menu-section-label">Quick actions</div>
+                <div className="cp-ai-pills">
+                  {AI_SUGGESTIONS.map((s, i) => (
+                    <button key={i} className="cp-ai-pill"
+                            onClick={() => { addUser(s.label); showTyping(); gecxSend(s.utterance); closeMenu(); }}>
+                      {s.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        )}
+
         {/* ── Input bar ── */}
+        {/* Hidden file inputs */}
+        <input ref={galleryInputRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleFileUpload} />
+        <input ref={cameraInputRef}  type="file" accept="image/*" capture="environment" style={{ display: 'none' }} onChange={handleFileUpload} />
+        <input ref={fileInputRef}    type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
+
         <div className="cp-input-bar">
-          <button
-            className="cp-icon-input-btn"
-            title="Attach file"
-            aria-label="Attach file"
-            onClick={() => document.getElementById('cp-file-input').click()}
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+
+          {/* + Attach */}
+          <button className={`cp-icon-input-btn${activeMenu === 'plus' ? ' active' : ''}`}
+                  onClick={() => toggleMenu('plus')} title="Add attachment" aria-label="Add attachment">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
             </svg>
           </button>
-          <input id="cp-file-input" type="file" style={{ display: 'none' }} onChange={handleFileUpload} />
+
+          {/* Gallery */}
+          <button className="cp-icon-input-btn" onClick={() => { galleryInputRef.current.click(); closeMenu(); }}
+                  title="Gallery" aria-label="Choose from gallery">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </button>
+
+          {/* @ Recipients / Billers */}
+          <button className={`cp-icon-input-btn cp-icon-input-btn--at${activeMenu === 'contact' ? ' active' : ''}`}
+                  onClick={() => toggleMenu('contact')} title="Recipients & Billers" aria-label="Recipients and Billers">
+            @
+          </button>
+
+          {/* ✦ AI suggestions */}
+          <button className={`cp-icon-input-btn${activeMenu === 'ai' ? ' active' : ''}`}
+                  onClick={() => toggleMenu('ai')} title="AI Suggestions" aria-label="Show AI suggestions">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z"/>
+              <path d="M5 3l.9 2.7L8.6 6.5l-2.7.9L5 10l-.9-2.7L1.4 6.5l2.7-.9L5 3z" opacity=".6"/>
+            </svg>
+          </button>
 
           <input
             ref={inputRef}
@@ -822,25 +959,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
+            onFocus={closeMenu}
             disabled={isResponding}
             aria-label="Message input"
           />
-
-          <button
-            className={`cp-icon-input-btn${voiceActive ? ' active' : ''}`}
-            title="Voice input"
-            aria-label={voiceActive ? 'Stop voice input' : 'Start voice input'}
-            onClick={toggleVoice}
-            disabled={isResponding}
-          >
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                 strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-              <line x1="12" y1="19" x2="12" y2="23"/>
-              <line x1="8" y1="23" x2="16" y2="23"/>
-            </svg>
-          </button>
 
           <button
             className={`cp-send-btn${isResponding ? ' disabled' : ''}`}

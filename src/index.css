@@ -104,25 +104,6 @@ a      { text-decoration: none; color: inherit; }
 
 .nav-links a:hover { color: #fff; }
 
-/* AI identity — shown in center nav when chat is open */
-.nav-ai-identity {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  font-size: 13px;
-  font-weight: 600;
-  color: rgba(255,255,255,.9);
-  letter-spacing: -.1px;
-}
-.nav-ai-dot {
-  width: 7px; height: 7px;
-  border-radius: 50%;
-  background: #4ADE80;
-  box-shadow: 0 0 6px rgba(74,222,128,.6);
-  flex-shrink: 0;
-}
-.nav-ai-sep  { color: rgba(255,255,255,.3); font-weight: 400; }
-.nav-ai-status { font-size: 12px; font-weight: 500; color: #4ADE80; }
 
 .nav-actions {
   display: flex;
@@ -508,14 +489,17 @@ a      { text-decoration: none; color: inherit; }
   right: 0;
   bottom: 0;
   width: 100vw;
-  /* Base canvas for the soft gradient theme */
-  background: linear-gradient(160deg, #EDE5FF 0%, #F5EEFF 55%, #FAFAFF 100%);
+  /* ACN Bank purple mesh gradient — mirrors Ryt AI's blue→pink feel but in brand purple */
+  background:
+    radial-gradient(ellipse 85% 65% at -8% 0%,   #2E0060 0%, transparent 55%),
+    radial-gradient(ellipse 65% 55% at 108% 100%, rgba(161,0,255,.65) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 45% at 55% 48%,   rgba(90,0,154,.35) 0%, transparent 60%),
+    linear-gradient(148deg, #0D001A 0%, #1C0038 52%, #0F001F 100%);
   display: flex;
   flex-direction: column;
   /* Stay BELOW the nav (z-index 200) so the panel slides from behind it */
   z-index: 199;
-  box-shadow: 0 12px 40px rgba(0,0,0,.18), 0 2px 8px rgba(161,0,255,.12);
-  border-bottom: 1px solid var(--border);
+  box-shadow: 0 12px 40px rgba(0,0,0,.4);
   /* Hidden: slides UP behind the header */
   transform: translateY(-100%);
   transition: transform .32s cubic-bezier(.4,0,.2,1);
@@ -590,17 +574,12 @@ a      { text-decoration: none; color: inherit; }
 .cp-icon-btn:hover     { background: rgba(255,255,255,.18); color: #fff; }
 .cp-close-btn          { font-size: 16px; }
 
-/* Messages area */
+/* Messages area — transparent so panel gradient shows through */
 .cp-messages {
   flex: 1;
   overflow-y: auto;
-  /* Centered conversation column: max ~900px wide */
-  padding: 20px max(16px, calc(50% - 450px)) 32px;
-  /* Layered radial glows on top of the transparent base (inherits panel gradient) */
-  background:
-    radial-gradient(ellipse 55% 30% at 18% 12%, rgba(161,0,255,.10) 0%, transparent 65%),
-    radial-gradient(ellipse 45% 25% at 84% 85%, rgba(112,0,187,.08) 0%, transparent 65%),
-    transparent;
+  padding: 8px max(16px, calc(50% - 450px)) 8px;
+  background: transparent;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -608,29 +587,38 @@ a      { text-decoration: none; color: inherit; }
   scroll-behavior: auto;
 }
 .cp-messages::-webkit-scrollbar       { width: 4px; }
-.cp-messages::-webkit-scrollbar-thumb { background: rgba(161,0,255,.25); border-radius: 4px; }
+.cp-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,.18); border-radius: 4px; }
 .cp-messages::-webkit-scrollbar-track { background: transparent; }
 
-/* Bot bubble */
+/* Vertical centering spacer — flex:1 absorbs empty space when few messages exist.
+   In overflow/scroll mode the flex container uses content height, so flex:1 → 0px. */
+.cp-spacer {
+  flex: 1;
+  min-height: 16px;
+  pointer-events: none;
+}
+
+/* Bot bubble — frosted glass, white text */
 .cp-bot-bubble {
-  background: rgba(255,255,255,.82);
-  border: 1px solid rgba(161,0,255,.14);
-  box-shadow: 0 2px 10px rgba(161,0,255,.07);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.20);
+  box-shadow: 0 2px 16px rgba(0,0,0,.2);
   border-radius: 4px 16px 16px 16px;
   padding: 12px 16px;
   font-size: 13.5px;
-  color: var(--navy) !important;
+  color: rgba(255,255,255,.92) !important;
   line-height: 1.65;
   max-width: 82%;
   align-self: flex-start;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .cp-bot-bubble.consecutive { border-radius: 16px; margin-top: -2px; }
 
-/* User bubble */
+/* User bubble — semi-transparent purple glass, white text */
 .cp-user-bubble {
-  background: linear-gradient(135deg, var(--purple), var(--purple-dark));
+  background: rgba(161,0,255,.4);
+  border: 1px solid rgba(161,0,255,.55);
   color: #fff;
   border-radius: 16px 4px 16px 16px;
   padding: 11px 16px;
@@ -639,26 +627,28 @@ a      { text-decoration: none; color: inherit; }
   line-height: 1.55;
   max-width: 78%;
   align-self: flex-end;
-  box-shadow: 0 3px 14px rgba(161,0,255,.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 3px 16px rgba(161,0,255,.3);
 }
 
-/* Typing indicator */
+/* Typing indicator — same glass as bot bubble */
 .cp-typing {
-  background: rgba(255,255,255,.75);
-  border: 1px solid rgba(161,0,255,.14);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
   border-radius: 4px 16px 16px 16px;
   padding: 12px 16px;
   align-self: flex-start;
   display: flex;
   gap: 5px;
   align-items: center;
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 .cp-typing span {
   width: 7px; height: 7px;
   border-radius: 50%;
-  background: var(--purple-border);
+  background: rgba(255,255,255,.5);
   animation: acnTyping 1.2s infinite;
 }
 .cp-typing span:nth-child(2) { animation-delay: .2s; }
@@ -667,20 +657,19 @@ a      { text-decoration: none; color: inherit; }
 /* Active form area */
 .cp-form-area {
   padding: 0 max(12px, calc(50% - 450px)) 8px;
-  border-top: 1px solid rgba(161,0,255,.14);
-  background: rgba(255,255,255,.75);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-/* Input bar */
-.cp-input-bar {
-  background: rgba(255,255,255,.85);
-  border-top: 1px solid rgba(161,0,255,.14);
+  border-top: 1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.25);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  /* Matches the messages column width */
-  padding: 10px max(12px, calc(50% - 450px));
+}
+
+/* Input bar — dark glass at the bottom */
+.cp-input-bar {
+  background: rgba(0,0,0,.3);
+  border-top: 1px solid rgba(255,255,255,.10);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 12px max(12px, calc(50% - 450px));
   display: flex;
   align-items: center;
   gap: 6px;
@@ -688,34 +677,179 @@ a      { text-decoration: none; color: inherit; }
 }
 .cp-text-input {
   flex: 1;
-  background: rgba(255,255,255,.7);
-  border: 1px solid rgba(161,0,255,.2);
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
   border-radius: 22px;
-  padding: 10px 16px;
+  padding: 11px 16px;
   font-size: 13px;
   font-family: 'DM Sans', -apple-system, sans-serif;
-  color: var(--navy);
+  color: #fff;
   outline: none;
   transition: border-color .18s, background .18s, box-shadow .18s;
 }
-.cp-text-input:focus       { border-color: var(--purple); background: #fff; box-shadow: 0 0 0 3px rgba(161,0,255,.08); }
-.cp-text-input::placeholder { color: rgba(100,80,140,.5); }
-.cp-text-input:disabled    { opacity: .6; cursor: not-allowed; }
+.cp-text-input:focus        { border-color: rgba(161,0,255,.8); background: rgba(255,255,255,.14); box-shadow: 0 0 0 3px rgba(161,0,255,.2); }
+.cp-text-input::placeholder { color: rgba(255,255,255,.38); }
+.cp-text-input:disabled     { opacity: .5; cursor: not-allowed; }
 
 .cp-icon-input-btn {
   width: 34px; height: 34px;
   border-radius: 50%;
   background: transparent;
   border: none;
-  color: rgba(100,80,140,.6);
+  color: rgba(255,255,255,.55);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
   transition: background .15s, color .15s;
 }
-.cp-icon-input-btn:hover  { background: rgba(161,0,255,.1); color: var(--purple); }
-.cp-icon-input-btn.active { color: var(--purple); background: rgba(161,0,255,.15); }
-.cp-icon-input-btn:disabled { opacity: .4; cursor: not-allowed; }
+.cp-icon-input-btn:hover  { background: rgba(255,255,255,.12); color: #fff; }
+.cp-icon-input-btn.active { color: #fff; background: rgba(161,0,255,.35); }
+.cp-icon-input-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+/* @ button — text-based, same sizing as icon buttons */
+.cp-icon-input-btn--at {
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+}
+
+/* ── Pop-up menu sheet ──────────────────────────────────────────────────────── */
+
+.cp-menu-sheet {
+  background: rgba(8, 0, 18, 0.88);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-top: 1px solid rgba(255,255,255,.12);
+  padding: 16px max(12px, calc(50% - 450px)) 12px;
+  flex-shrink: 0;
+  animation: cpMenuIn .22s cubic-bezier(.4,0,.2,1);
+}
+@keyframes cpMenuIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Plus menu — Camera / Photo / File */
+.cp-menu-plus {
+  display: flex;
+  gap: 10px;
+}
+.cp-menu-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 18px 12px;
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 18px;
+  color: rgba(255,255,255,.88);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, transform .1s;
+  font-family: 'DM Sans', sans-serif;
+}
+.cp-menu-item:hover { background: rgba(255,255,255,.15); transform: translateY(-2px); }
+.cp-menu-item-icon  { font-size: 30px; line-height: 1; }
+
+/* Contact menu */
+.cp-menu-tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255,255,255,.1);
+  margin-bottom: 12px;
+}
+.cp-menu-tab {
+  flex: 1;
+  padding: 10px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: rgba(255,255,255,.4);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+  font-family: 'DM Sans', sans-serif;
+}
+.cp-menu-tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+
+.cp-menu-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 16px;
+  gap: 8px;
+  color: rgba(255,255,255,.35);
+}
+.cp-menu-empty-icon { font-size: 32px; }
+.cp-menu-empty p    { font-size: 13px; text-align: center; margin: 0; }
+
+.cp-menu-billers { max-height: 230px; overflow-y: auto; }
+
+.cp-menu-section-label {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255,255,255,.35);
+  letter-spacing: .9px;
+  text-transform: uppercase;
+  padding-bottom: 8px;
+}
+
+.cp-menu-biller-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 6px;
+  background: none;
+  border: none;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  text-align: left;
+  border-radius: 0;
+  transition: background .12s;
+}
+.cp-menu-biller-row:last-child { border-bottom: none; }
+.cp-menu-biller-row:hover { background: rgba(255,255,255,.06); border-radius: 10px; }
+
+.cp-menu-biller-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.cp-menu-biller-name { font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,.88); }
+.cp-menu-biller-sub  { font-size: 11.5px; color: rgba(255,255,255,.4); margin-top: 1px; }
+
+/* AI suggestions */
+.cp-menu-ai { padding-bottom: 4px; }
+
+.cp-ai-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 4px;
+}
+.cp-ai-pill {
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 20px;
+  padding: 9px 15px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: rgba(255,255,255,.88);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: 'DM Sans', sans-serif;
+  backdrop-filter: blur(8px);
+  transition: background .15s, transform .1s;
+}
+.cp-ai-pill:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
 
 .cp-send-btn {
   width: 34px; height: 34px;
@@ -729,7 +863,7 @@ a      { text-decoration: none; color: inherit; }
 }
 .cp-send-btn:hover         { background: var(--purple-dark); transform: scale(1.05); }
 .cp-send-btn:active        { transform: scale(0.96); }
-.cp-send-btn.disabled      { background: #DDDDDD; box-shadow: none; cursor: not-allowed; transform: none; }
+.cp-send-btn.disabled      { background: rgba(255,255,255,.15); box-shadow: none; cursor: not-allowed; transform: none; }
 
 /* ── 9. Chat message enter animation ─────────────────────────────────────── */
 
@@ -773,49 +907,92 @@ a      { text-decoration: none; color: inherit; }
 .acn-receipt-row span:last-child  { color: #000; font-weight: 600; text-align: right; }
 .acn-receipt-ref { font-size: 10px; color: #AAA; margin-top: 8px; letter-spacing: .3px; }
 
-/* ── 11. Chat widget: combo card (quick actions) ─────────────────────────── */
+/* ── 11. Chat widget: combo card (quick actions) — pill grid style ─────── */
 
+/* Card wrapper is transparent — tiles sit directly on the gradient bg */
 .acn-combo-card {
-  background: #fff;
-  border: 1px solid #E8E0F3;
-  border-radius: 4px 14px 14px 14px;
-  max-width: 86%;
-  align-self: flex-start;
-  overflow: hidden;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  max-width: 100%;
+  align-self: stretch;
+  overflow: visible;
+  padding: 0;
 }
-.acn-combo-text     { padding: 12px 14px 6px; font-size: 13.5px; font-weight: 600; color: #000; line-height: 1.55; }
-.acn-combo-subtitle { padding: 0 14px 8px; font-size: 12px; font-weight: 400; color: #666; line-height: 1.5; }
-.acn-combo-tiles    { padding: 4px 10px 10px; display: flex; flex-direction: column; gap: 6px; }
 
+/* Heading — large, centered, white on dark gradient */
+.acn-combo-text {
+  padding: 8px 0 4px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.3;
+  text-align: center;
+  letter-spacing: -.5px;
+}
+.acn-combo-subtitle {
+  padding: 0 0 14px;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255,255,255,.6);
+  text-align: center;
+  line-height: 1.5;
+}
+
+/* Irregular flex-wrap pill layout — width follows text length */
+.acn-combo-tiles {
+  padding: 4px 0 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+/* Individual pill — auto-width, dark glass */
 .acn-tile {
-  background: #fff;
-  border: 1px solid #EBEBEB;
-  border-radius: 10px;
-  padding: 10px 12px;
+  background: rgba(255,255,255,.10);
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 14px;
+  padding: 13px 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 10px;
-  width: 100%;
+  gap: 9px;
+  width: auto;       /* size to content */
+  min-width: 130px;
   text-align: left;
-  transition: border-color .15s, background .15s, transform .1s;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: background .15s, border-color .18s, transform .12s, box-shadow .15s;
 }
-.acn-tile:hover  { border-color: var(--purple); background: #FDF8FF; transform: translateY(-1px); }
+.acn-tile:hover {
+  background: rgba(255,255,255,.18);
+  border-color: rgba(255,255,255,.35);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+}
 .acn-tile:active { transform: translateY(0); }
 
-.acn-tile-icon  { font-size: 16px; width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: var(--purple-light); border-radius: 8px; line-height: 1; }
+/* Emoji icon */
+.acn-tile-icon  { font-size: 20px; width: 26px; height: 26px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: none; border-radius: 0; line-height: 1; }
 .acn-tile-body  { flex: 1; min-width: 0; }
-.acn-tile-title { font-size: 13px; font-weight: 600; color: #000 !important; display: block; line-height: 1.3; }
-.acn-tile-desc  { font-size: 11.5px; color: #777 !important; display: block; line-height: 1.3; margin-top: 1px; }
-.acn-tile-chev  { font-size: 18px; color: #CCCCCC; flex-shrink: 0; line-height: 1; }
+.acn-tile-title { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.9) !important; display: block; line-height: 1.35; }
+/* Description and chevron hidden in pill mode */
+.acn-tile-desc  { display: none; }
+.acn-tile-chev  { display: none; }
 
-/* Compact mode (appears when a form is active) */
-.acn-combo-card.compact .acn-combo-text  { padding: 10px 13px 4px; font-size: 13px; }
-.acn-combo-card.compact .acn-combo-tiles { padding: 2px 8px 8px; gap: 5px; }
-.acn-combo-card.compact .acn-tile        { padding: 8px 10px; border-radius: 8px; gap: 8px; }
-.acn-combo-card.compact .acn-tile-icon   { width: 26px; height: 26px; font-size: 14px; border-radius: 7px; }
-.acn-combo-card.compact .acn-tile-title  { font-size: 12.5px; }
-.acn-combo-card.compact .acn-tile-chev   { font-size: 16px; }
+/* Compact mode — when a form is active */
+.acn-combo-card.compact .acn-combo-text     { font-size: 13.5px; font-weight: 700; text-align: left; padding: 4px 0 2px; }
+.acn-combo-card.compact .acn-combo-subtitle { padding: 0 0 8px; font-size: 12px; text-align: left; color: rgba(255,255,255,.5); }
+.acn-combo-card.compact .acn-combo-tiles    { gap: 6px; }
+.acn-combo-card.compact .acn-tile           { padding: 9px 12px; border-radius: 10px; gap: 7px; min-width: 100px; }
+.acn-combo-card.compact .acn-tile-icon      { font-size: 15px; width: 18px; height: 18px; }
+.acn-combo-card.compact .acn-tile-title     { font-size: 11.5px; }
+
+/* Single-column fallback on narrow screens */
+@media (max-width: 420px) {
+  .acn-combo-tiles { grid-template-columns: 1fr; }
+}
 
 /* ── 12. Chat widget: form ───────────────────────────────────────────────── */
 
