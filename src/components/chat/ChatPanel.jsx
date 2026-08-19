@@ -7,6 +7,7 @@ import AccountCarousel from '../AccountCarousel';
 import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
 import InlineAuthCard from '../auth/InlineAuthCard';
+import { fetchP2PContacts } from '../../firebase';
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
 
@@ -60,8 +61,11 @@ function resolvePayloadName(p) {
     return 'quick_actions';
   if (p.insight_type != null || p.headline != null) return 'acn-insight-card';
   if (Array.isArray(p.payments) || Array.isArray(p.payees)) return 'acn-payment-carousel';
+  if (Array.isArray(p.contacts)) return 'acn-contact-selector';
   if (Array.isArray(p.fields) && p.fields.length > 0) return 'acn-form-input';
-  if (p.receipt_id != null || p.reference_number != null) return 'acn-payment-receipt';
+  if (p.receipt_id != null || p.reference_number != null ||
+      p.confirmation_number != null || p.confirmation_id != null ||
+      p.transaction_id != null) return 'acn-payment-receipt';
   if (p.min_amount != null || p.max_amount != null) return 'acn-amount-input';
   return null;
 }
@@ -69,10 +73,10 @@ function resolvePayloadName(p) {
 function isKnownPayload(p) {
   const n = resolvePayloadName(p);
   return (
-    n === 'quick_actions'       || n === 'acn-form-input'      ||
-    n === 'acn-payment-carousel'|| n === 'acn-payee-selector'  ||
-    n === 'acn-payment-receipt' || n === 'acn-insight-card'    ||
-    n === 'acn-amount-input'
+    n === 'quick_actions'         || n === 'acn-form-input'      ||
+    n === 'acn-payment-carousel'  || n === 'acn-payee-selector'  ||
+    n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
+    n === 'acn-amount-input'      || n === 'acn-contact-selector'
   );
 }
 
@@ -108,15 +112,17 @@ const AI_SUGGESTIONS = [
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
 export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, intent, onRequestSignIn, resetSignal = 0 }) {
-  const { authState, customerName } = useAuth();
+  const { authState, customerName, customerId } = useAuth();
 
-  const [messages,     setMessages]     = useState([]);
-  const [inputVal,     setInputVal]     = useState('');
-  const [activeForm,   setActiveForm]   = useState(null);
-  const [voiceActive,  setVoiceActive]  = useState(false);
-  const [isResponding, setIsResponding] = useState(false);
-  const [activeMenu,   setActiveMenu]   = useState(null); // 'plus' | 'contact' | 'ai'
-  const [contactTab,   setContactTab]   = useState('recipients');
+  const [messages,        setMessages]        = useState([]);
+  const [inputVal,        setInputVal]        = useState('');
+  const [activeForm,      setActiveForm]      = useState(null);
+  const [voiceActive,     setVoiceActive]     = useState(false);
+  const [isResponding,    setIsResponding]    = useState(false);
+  const [activeMenu,      setActiveMenu]      = useState(null); // 'plus' | 'contact' | 'ai'
+  const [contactTab,      setContactTab]      = useState('recipients');
+  const [p2pContacts,     setP2pContacts]     = useState([]);   // Firebase contacts
+  const [contactsLoading, setContactsLoading] = useState(false);
 
   // ── sessionStarted as a REF (not state) ───────────────────────────────────
   // Must be a ref so the resetSignal watcher (Effect A) and the isOpen effect
@@ -311,7 +317,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     lastProcessed.current = { time: now, sig };
 
     const hasVisible = outputs.some((o) => {
-      if (o.payload) return isKnownPayload(o.payload);
+      if (o.payload) return true; // any payload counts — unknown ones are logged below
       if (!o.text) return false;
       const t = o.text;
       if (t.includes('narration_checkpoint')) return false;
@@ -321,7 +327,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     });
     if (!hasVisible) return;
 
-    const hasFinalWidget = outputs.some((o) => o.payload && isKnownPayload(o.payload));
+    const hasFinalWidget = outputs.some((o) => o.payload);
     const hasOnlyText    = outputs.every((o) => o.text && !o.payload);
 
     if (hasFinalWidget || hasOnlyText) removeTyping();
@@ -390,6 +396,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
       if (!output.payload) return;
       const p     = output.payload;
       const pname = resolvePayloadName(p);
+      if (!pname) { console.warn('[ACN] unrecognized payload — add handler:', JSON.stringify(p)); return; }
 
       if (pname === 'quick_actions' && p.actions) showCombo(p.actions, p.summary);
 
@@ -416,6 +423,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
 
       if (pname === 'acn-amount-input')
         setMessages((prev) => [...prev, { type: 'amount', payload: p, id: uid() }]);
+
+      if (pname === 'acn-contact-selector')
+        setMessages((prev) => [...prev, { type: 'p2p-contacts', payload: p, id: uid() }]);
 
       if (pname === 'acn-payment-receipt')
         setMessages((prev) => [...prev, { type: 'receipt', payload: p, id: uid() }]);
@@ -591,9 +601,28 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     setTimeout(() => inputRef.current?.focus(), 300);
   }, [isOpen]); // eslint-disable-line
 
+  // ── Menu helpers (must be defined before handleTileSelect which references them) ──
+  const closeMenu  = useCallback(() => setActiveMenu(null), []);
+  const toggleMenu = useCallback((menu) => setActiveMenu((prev) => prev === menu ? null : menu), []);
+
   // ── Interaction handlers ───────────────────────────────────────────────────
   const handleTileSelect = useCallback((action, comboId) => {
     if (action.isSignIn) { onRequestSignIn?.(); return; }
+
+    // Handle P2P contact selection: "select_p2p_contact:CUST_001:@intan"
+    const cta = action.utterance || action.content || '';
+    if (cta.startsWith('select_p2p_contact:')) {
+      const parts   = cta.split(':');
+      const username = parts[2] || '';
+      setMessages((prev) => prev.filter((m) => m.id !== comboId));
+      const msg = username ? `Transfer money to ${username}` : 'Pay a contact';
+      addUser(msg);
+      showTyping();
+      gecxSend(msg);
+      closeMenu();
+      return;
+    }
+
     setMessages((prev) => prev.filter((m) => m.id !== comboId));
     addUser(action.content || action.utterance);
     showTyping();
@@ -601,7 +630,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     setTimeout(() => {
       if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight;
     }, 50);
-  }, [addUser, showTyping, onRequestSignIn]);
+  }, [addUser, showTyping, onRequestSignIn, closeMenu]);
 
   const handleFormSubmit = useCallback((value, displayText) => {
     setActiveForm(null);
@@ -664,8 +693,16 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     e.target.value = '';
   }, [addUser, showTyping]);
 
-  const closeMenu  = useCallback(() => setActiveMenu(null), []);
-  const toggleMenu = useCallback((menu) => setActiveMenu((prev) => prev === menu ? null : menu), []);
+  // ── Load Firebase contacts when @ menu opens ───────────────────────────────
+  useEffect(() => {
+    if (activeMenu !== 'contact' || contactTab !== 'recipients') return;
+    if (p2pContacts.length > 0 || contactsLoading) return; // already loaded
+    setContactsLoading(true);
+    fetchP2PContacts(customerId).then((list) => {
+      setP2pContacts(list);
+      setContactsLoading(false);
+    });
+  }, [activeMenu, contactTab, customerId, p2pContacts.length, contactsLoading]);
 
   // Auth success from inline card — clear prompt, send re-auth message to CES
   const handleAuthSuccess = useCallback((authPromptId, result) => {
@@ -754,7 +791,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
                 <AccountCarousel
                   payload={msg.payload}
-                  onCta={(v) => { showTyping(); gecxSend(v); }}
+                  onCta={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    showTyping();
+                    gecxSend(v);
+                  }}
                 />
               </div>
             );
@@ -772,10 +813,43 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
                 <AmountInput
                   payload={msg.payload}
-                  onSubmit={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                  onSubmit={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    addUser(v);
+                    showTyping();
+                    gecxSend(v);
+                  }}
                 />
               </div>
             );
+
+            if (msg.type === 'p2p-contacts') {
+              const contacts = msg.payload?.contacts || [];
+              return (
+                <div key={msg.id} className="acn-msg-enter acn-p2p-selector" data-combo="true">
+                  {msg.payload?.title && <div className="acn-p2p-title">{msg.payload.title}</div>}
+                  {msg.payload?.subtitle && <div className="acn-p2p-subtitle">{msg.payload.subtitle}</div>}
+                  <div className="acn-p2p-list">
+                    {contacts.map((c, i) => (
+                      <button key={i} className="acn-p2p-row"
+                              onClick={() => {
+                                setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                                addUser(`Transfer money to ${c.username}`);
+                                showTyping();
+                                gecxSend(c.cta_value || `Transfer money to ${c.username}`);
+                              }}>
+                        <div className="acn-p2p-avatar">{(c.display_name||'?').split(' ').map(w=>w[0]).slice(0,2).join('')}</div>
+                        <div className="acn-p2p-info">
+                          <div className="acn-p2p-name">{c.display_name}</div>
+                          <div className="acn-p2p-username">{c.username}</div>
+                        </div>
+                        <div className="acn-p2p-arrow">›</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
 
             if (msg.type === 'receipt') {
               const r   = msg.payload || {};
@@ -866,9 +940,34 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
                 </div>
 
                 {contactTab === 'recipients' && (
-                  <div className="cp-menu-empty">
-                    <span className="cp-menu-empty-icon">👥</span>
-                    <p>Contact list coming soon</p>
+                  <div className="cp-menu-billers">
+                    {contactsLoading && (
+                      <div className="cp-menu-empty">
+                        <span className="cp-menu-empty-icon">⏳</span>
+                        <p>Loading contacts…</p>
+                      </div>
+                    )}
+                    {!contactsLoading && p2pContacts.length === 0 && (
+                      <div className="cp-menu-empty">
+                        <span className="cp-menu-empty-icon">👥</span>
+                        <p>No ACN Bank contacts found</p>
+                      </div>
+                    )}
+                    {!contactsLoading && p2pContacts.map((c) => (
+                      <button key={c.customer_id} className="cp-menu-biller-row"
+                              onClick={() => {
+                                const msg = `Transfer money to ${c.username}`;
+                                addUser(msg); showTyping(); gecxSend(msg); closeMenu();
+                              }}>
+                        <div className="cp-menu-biller-avatar cp-contact-avatar">
+                          {c.avatar_initials}
+                        </div>
+                        <div>
+                          <div className="cp-menu-biller-name">{c.display_name}</div>
+                          <div className="cp-menu-biller-sub">{c.username}</div>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 )}
 

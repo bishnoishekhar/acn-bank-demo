@@ -839,6 +839,58 @@ a      { text-decoration: none; color: inherit; }
 .cp-menu-biller-name { font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,.88); }
 .cp-menu-biller-sub  { font-size: 11.5px; color: rgba(255,255,255,.4); margin-top: 1px; }
 
+/* Contact avatar — shows initials instead of emoji */
+.cp-contact-avatar {
+  font-size: 13px !important;
+  font-weight: 700;
+  color: rgba(255,255,255,.9);
+  background: rgba(161,0,255,.35) !important;
+  border: 1px solid rgba(161,0,255,.4);
+  letter-spacing: -.5px;
+}
+
+/* ── P2P contact selector widget (in message list) ───────────────────────── */
+.acn-p2p-selector {
+  background: rgba(255,255,255,.08);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 4px 14px 14px 14px;
+  padding: 14px 14px 10px;
+  max-width: 86%;
+  align-self: flex-start;
+  backdrop-filter: blur(12px);
+}
+.acn-p2p-title    { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.92); margin-bottom: 2px; }
+.acn-p2p-subtitle { font-size: 12px; color: rgba(240,232,255,.5); margin-bottom: 10px; }
+.acn-p2p-list     { display: flex; flex-direction: column; gap: 4px; }
+.acn-p2p-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+.acn-p2p-row:hover { background: rgba(161,0,255,.2); border-color: rgba(161,0,255,.35); }
+.acn-p2p-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: rgba(161,0,255,.3);
+  border: 1px solid rgba(161,0,255,.4);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700;
+  color: rgba(255,255,255,.9);
+  flex-shrink: 0;
+  letter-spacing: -.5px;
+}
+.acn-p2p-info   { flex: 1; min-width: 0; }
+.acn-p2p-name   { font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,.88); }
+.acn-p2p-username { font-size: 11.5px; color: rgba(197,96,255,.85); margin-top: 1px; }
+.acn-p2p-arrow  { font-size: 18px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+
 /* AI suggestions */
 .cp-menu-ai { padding-bottom: 4px; }
 
