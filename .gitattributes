@@ -1,0 +1,16 @@
+# Normalise line endings to LF in the repo for all text files.
+# Developers on Windows will have CRLF in their working copy (autocrlf=true),
+# but the repo always stores LF — this prevents the stat-cache confusion that
+# makes `git add` silently do nothing on Windows with mixed LF/CRLF files.
+* text=auto eol=lf
+
+# Explicitly binary — never touch line endings
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.ico  binary
+*.woff binary
+*.woff2 binary
+*.ttf  binary
+*.eot  binary
