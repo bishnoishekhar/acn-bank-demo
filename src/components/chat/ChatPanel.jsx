@@ -6,7 +6,6 @@ import AcnFormWidget  from '../AcnFormWidget';
 import AccountCarousel from '../AccountCarousel';
 import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
-import InlineAuthCard from '../auth/InlineAuthCard';
 import { fetchP2PContacts } from '../../firebase';
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
@@ -80,13 +79,6 @@ function isKnownPayload(p) {
   );
 }
 
-// Phrases that signal the CES agent needs the user to authenticate (Feature 3).
-const AUTH_TRIGGER_PHRASES = [
-  'verify your identity', 'please sign in', 'authentication required',
-  'need to verify',       'sign in to continue', 'authenticate yourself',
-  'to access your account', 'please log in',
-];
-
 // ── Static data ───────────────────────────────────────────────────────────────
 
 const CANADIAN_BILLERS = [
@@ -112,7 +104,7 @@ const AI_SUGGESTIONS = [
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
 export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, intent, onRequestSignIn, resetSignal = 0 }) {
-  const { authState, customerName, customerId } = useAuth();
+  const { customerId } = useAuth();
 
   const [messages,        setMessages]        = useState([]);
   const [inputVal,        setInputVal]        = useState('');
@@ -333,21 +325,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     if (hasFinalWidget || hasOnlyText) removeTyping();
     else if (outputs.length > 0) clearTypingBubble();
 
-    // Feature 3: detect auth-trigger phrases and show inline auth card
-    if (authState === 'guest') {
-      const needsAuth = outputs.some(
-        (o) => o.text && AUTH_TRIGGER_PHRASES.some((ph) => o.text.toLowerCase().includes(ph)),
-      );
-      if (needsAuth) {
-        setMessages((prev) => [
-          ...prev.filter((m) => m.type !== 'typing'),
-          { type: 'auth-prompt', id: uid() },
-        ]);
-        setIsResponding(false);
-        return;
-      }
-    }
-
     // Pass 1: text outputs
     outputs.forEach((output) => {
       if (!output.text) return;
@@ -430,7 +407,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
       if (pname === 'acn-payment-receipt')
         setMessages((prev) => [...prev, { type: 'receipt', payload: p, id: uid() }]);
     });
-  }, [authState, removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines]);
+  }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines]);
 
   const processOutputsRef = useRef(processOutputs);
   useEffect(() => { processOutputsRef.current = processOutputs; }, [processOutputs]);
@@ -704,17 +681,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     });
   }, [activeMenu, contactTab, customerId, p2pContacts.length, contactsLoading]);
 
-  // Auth success from inline card — clear prompt, send re-auth message to CES
-  const handleAuthSuccess = useCallback((authPromptId, result) => {
-    setMessages((prev) => [
-      ...prev.filter((m) => m.id !== authPromptId),
-      { type: 'bot', text: `Welcome, ${result.firstName}! Let me pull up your accounts now.`, id: uid() },
-    ]);
-    showTyping();
-    // TODO (GAP #3): Replace with the proper CES session-handoff mechanism once known
-    gecxSend('I am now authenticated as customer ' + result.customerId);
-  }, [showTyping]);
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
@@ -778,14 +744,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
               </div>
             );
 
-            // Feature 3: inline auth prompt
-            if (msg.type === 'auth-prompt') return (
-              <InlineAuthCard
-                key={msg.id}
-                onSuccess={(result) => handleAuthSuccess(msg.id, result)}
-                onDismiss={() => setMessages((prev) => prev.filter((m) => m.id !== msg.id))}
-              />
-            );
+
 
             if (msg.type === 'carousel') return (
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
