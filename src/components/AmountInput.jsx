@@ -17,24 +17,27 @@ export default function AmountInput({ payload, onSubmit }) {
 
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E8E8E8',
+      background: 'rgba(255,255,255,.08)',
+      border: '1px solid rgba(255,255,255,.14)',
       borderTop: '3px solid #A100FF',
       borderRadius: '4px 14px 14px 14px',
-      overflow: 'hidden', fontSize: 13,
-      maxWidth: '98%',
+      fontSize: 13,
+      maxWidth: '86%',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
     }}>
       {(title || subtitle) && (
-        <div style={{ padding: '10px 13px 8px', borderBottom: '1px solid #EBEBEB' }}>
-          {title && <div style={{ fontSize: 13, fontWeight: 600, color: '#000' }}>{title}</div>}
-          {subtitle && <div style={{ fontSize: 11, color: '#888', marginTop: 2 }}>{subtitle}</div>}
+        <div style={{ padding: '10px 13px 8px', borderBottom: '1px solid rgba(255,255,255,.10)' }}>
+          {title && <div style={{ fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.92)' }}>{title}</div>}
+          {subtitle && <div style={{ fontSize: 11, color: 'rgba(240,232,255,.55)', marginTop: 2 }}>{subtitle}</div>}
         </div>
       )}
 
       <div style={{
         display: 'flex', alignItems: 'center', gap: 8,
-        padding: 13, borderBottom: '1px solid #F0F0F0',
+        padding: 13, borderBottom: '1px solid rgba(255,255,255,.08)',
       }}>
-        <span style={{ fontSize: 15, fontWeight: 600, color: '#555', flexShrink: 0 }}>{currency}</span>
+        <span style={{ fontSize: 15, fontWeight: 600, color: 'rgba(240,232,255,.55)', flexShrink: 0 }}>{currency}</span>
         <input
           type="number"
           placeholder={placeholder}
@@ -45,7 +48,7 @@ export default function AmountInput({ payload, onSubmit }) {
           onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
           style={{
             flex: 1, fontSize: 22, fontWeight: 600,
-            fontFamily: 'inherit', color: '#000',
+            fontFamily: 'inherit', color: '#fff',
             border: 'none', outline: 'none', background: 'none', minWidth: 0,
           }}
         />
@@ -59,8 +62,9 @@ export default function AmountInput({ payload, onSubmit }) {
               style={{
                 fontSize: 11, fontWeight: 500, fontFamily: 'inherit',
                 padding: '5px 10px', borderRadius: 100,
-                border: '1px solid #D8D8D8', background: '#fff',
-                color: '#333', cursor: 'pointer',
+                border: '1px solid rgba(255,255,255,.18)',
+                background: 'rgba(255,255,255,.08)',
+                color: 'rgba(240,232,255,.85)', cursor: 'pointer',
               }}
             >{q.label}</button>
           ))}

@@ -1,7 +1,14 @@
+// Strip trailing Material Icons ligature names (e.g. "Confirm transfer graph_markup" → "Confirm transfer").
+// The GECX backend appends icon names expecting Material Icons font; our UI doesn't load it.
+function stripMaterialIcon(s = '') {
+  return s.replace(/\s+[a-z][a-z_]{1,30}[a-z]$/, '').trim();
+}
+
 // Splits a leading emoji off the label so we can render it as an icon chip.
 function splitIcon(s = '') {
-  const m = s.match(/^\s*(\p{Extended_Pictographic}(?:️)?)\s*(.*)$/u);
-  return m ? { icon: m[1], text: m[2] } : { icon: '', text: s };
+  const cleaned = stripMaterialIcon(s);
+  const m = cleaned.match(/^\s*(\p{Extended_Pictographic}(?:️)?)\s*(.*)$/u);
+  return m ? { icon: m[1], text: m[2] } : { icon: '', text: cleaned };
 }
 
 export default function ComboCard({ heading, subtitle, actions, onSelect, compact = false }) {
