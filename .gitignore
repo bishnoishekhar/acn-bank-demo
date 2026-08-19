@@ -3,3 +3,4 @@ dist/
 ACN-Bank CES/
 images/
 .env
+src/firebase.js
