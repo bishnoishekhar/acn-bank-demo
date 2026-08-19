@@ -3,4 +3,5 @@ dist/
 ACN-Bank CES/
 images/
 .env
-src/firebase.js
+.env.local
+.env.*.local
