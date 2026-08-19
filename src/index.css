@@ -1004,6 +1004,58 @@ a      { text-decoration: none; color: inherit; }
   line-height: 1.5;
 }
 
+/* Fallback renderer for markdown pipe-tables that slip through from GECX —
+   replaces raw "| Field | Detail |" text with a scannable card. */
+.acn-combo-table {
+  margin: 0 auto 14px;
+  max-width: 340px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 12px;
+  padding: 4px 14px;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.acn-combo-table-prefix {
+  font-size: 12.5px;
+  color: rgba(255,255,255,.6);
+  text-align: center;
+  padding: 10px 0 2px;
+}
+
+/* 2-column tables ("Field | Detail") render as a key/value list */
+.acn-combo-table-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 12.5px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.acn-combo-table-row:last-child { border-bottom: none; }
+.acn-combo-table-key { color: rgba(255,255,255,.55); flex-shrink: 0; }
+.acn-combo-table-val { color: rgba(255,255,255,.92); font-weight: 600; text-align: right; }
+
+/* Wider tables (accounts, transactions) render as a header + grid */
+.acn-combo-table { max-width: 100%; overflow-x: auto; }
+.acn-combo-table-grid {
+  display: grid;
+  row-gap: 7px;
+  column-gap: 16px;
+  padding: 10px 0;
+  font-size: 12px;
+}
+.acn-combo-table-grid .hdr {
+  color: rgba(255,255,255,.45);
+  font-size: 10.5px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(255,255,255,.12);
+}
+.acn-combo-table-grid .cell { color: rgba(255,255,255,.9); }
+
 /* Irregular flex-wrap pill layout — width follows text length */
 .acn-combo-tiles {
   padding: 4px 0 8px;

@@ -10,6 +10,22 @@ import { fetchP2PContacts } from '../../firebase';
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
 
+// CES has no reliable grounding for "today's date" — it hallucinates plausible
+// but wrong timestamps (wrong month, wrong year). The receipt widget fires the
+// moment a transfer/payment actually completes, so we stamp it with the real
+// browser clock instead of trusting whatever date string CES sent.
+// Produces e.g. "19 August 2026, 11:38 pm".
+function formatFriendlyDate(d = new Date()) {
+  const day = d.getDate();
+  const month = d.toLocaleString('en-US', { month: 'long' });
+  const year = d.getFullYear();
+  let hours = d.getHours();
+  const minutes = String(d.getMinutes()).padStart(2, '0');
+  const ampm = hours >= 12 ? 'pm' : 'am';
+  hours = hours % 12 || 12;
+  return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
+}
+
 function stripMarkdown(text) {
   if (!text) return '';
   return text
@@ -405,7 +421,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
         setMessages((prev) => [...prev, { type: 'p2p-contacts', payload: p, id: uid() }]);
 
       if (pname === 'acn-payment-receipt')
-        setMessages((prev) => [...prev, { type: 'receipt', payload: p, id: uid() }]);
+        setMessages((prev) => [
+          ...prev,
+          { type: 'receipt', payload: { ...p, date_or_frequency: formatFriendlyDate() }, id: uid() },
+        ]);
     });
   }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines]);
 
