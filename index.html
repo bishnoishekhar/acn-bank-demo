@@ -8,6 +8,27 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap" rel="stylesheet">
   <script>
+    /* ── Pre-clear GECX session storage ──────────────────────────────────────────
+       The GECX SDK (deferred) reads sessionStorage when the <chat-messenger>
+       custom element first registers its context. If the previous page load left
+       an authenticated CES session token in storage, the SDK reuses that session
+       and the before_model_callback sees the old customer name even though the
+       frontend is now in guest mode.
+
+       Running this clear synchronously (inline, before any defer script) beats the
+       SDK to the read. Only our own 'acn_' keys are preserved; everything else is
+       assumed to belong to the SDK.
+    ── */
+    (function () {
+      try {
+        var keys = Object.keys(sessionStorage);
+        for (var i = 0; i < keys.length; i++) {
+          if (!keys[i].startsWith('acn_')) sessionStorage.removeItem(keys[i]);
+        }
+      } catch (e) { /* storage may be restricted (e.g. private browsing) — ignore */ }
+    })();
+  </script>
+  <script>
     /* Must run before chat-messenger.js (which is deferred) so GECX captures our
        patched fetch. Fires 'acn-session-data' on window for ChatWindow.jsx to handle. */
     (function () {

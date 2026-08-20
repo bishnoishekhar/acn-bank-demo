@@ -1,11 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { initGecx, resetGecx, gecxSend, setResponseHandler, clearGecxDone, softResetGecx, clearGecxSession } from '../gecx';
+import { initGecx, gecxSend, setResponseHandler, setRateLimitHandler, clearGecxDone, softResetGecx, clearGecxSession } from '../gecx';
 import { useAuth } from '../../context/AuthContext';
 import ComboCard      from '../ComboCard';
 import AcnFormWidget  from '../AcnFormWidget';
 import AccountCarousel from '../AccountCarousel';
 import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
+import { CardCarousel, CardCompare } from '../CardWidgets';
 import { fetchP2PContacts } from '../../firebase';
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
@@ -74,6 +75,12 @@ function resolvePayloadName(p) {
   if (p.type === 'quick_actions') return 'quick_actions';
   if (Array.isArray(p.actions) && p.actions.length > 0 && p.actions[0]?.utterance !== undefined)
     return 'quick_actions';
+  // CES card widgets: card_check (PRODUCT_COMPARISON) carries a features array
+  // alongside productDetails; card_comparison (PRODUCT_CAROUSEL) does not.
+  if (Array.isArray(p.productDetails) && p.productDetails.length > 0)
+    return Array.isArray(p.features) && p.features.length > 0
+      ? 'acn-card-compare'
+      : 'acn-card-carousel';
   if (p.insight_type != null || p.headline != null) return 'acn-insight-card';
   if (Array.isArray(p.payments) || Array.isArray(p.payees)) return 'acn-payment-carousel';
   if (Array.isArray(p.contacts)) return 'acn-contact-selector';
@@ -91,7 +98,8 @@ function isKnownPayload(p) {
     n === 'quick_actions'         || n === 'acn-form-input'      ||
     n === 'acn-payment-carousel'  || n === 'acn-payee-selector'  ||
     n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
-    n === 'acn-amount-input'      || n === 'acn-contact-selector'
+    n === 'acn-amount-input'      || n === 'acn-contact-selector' ||
+    n === 'acn-card-carousel'     || n === 'acn-card-compare'
   );
 }
 
@@ -108,19 +116,43 @@ const CANADIAN_BILLERS = [
   { id: 'shaw',         name: 'Shaw / Freedom',          sub: 'Internet & TV',      emoji: '📺' },
 ];
 
-const AI_SUGGESTIONS = [
+/* Sentinel utterance the CES auth gate emits to ask the page to open the
+   sign-in modal. Kept in one place because both the agent instructions and this
+   file must agree on the exact string. See Identity/auth-gate steps in CES. */
+export const SIGN_IN_SENTINEL = '__ACN_SIGN_IN__';
+
+/* Tags any quick action that should open the sign-in modal instead of being
+   sent to CES as a normal utterance. */
+const markSignInActions = (actions = []) =>
+  actions.map((a) =>
+    (a.utterance || '').trim() === SIGN_IN_SENTINEL ? { ...a, isSignIn: true } : a,
+  );
+
+// Suggestions differ by auth state — offering "check my balance" to a guest just
+// walks them into an auth wall, so guests get the things they can actually do.
+const GUEST_SUGGESTIONS = [
+  { label: '💳 Explore credit cards', utterance: 'Show me your credit cards' },
+  { label: '⚖️ Compare cards',        utterance: 'Compare your credit cards' },
+  { label: '✈️ Best card for travel', utterance: 'Which card is best for travel?' },
+  { label: '📝 Apply for a card',     utterance: 'I want to apply for a credit card' },
+  { label: '🔐 Sign in',              utterance: SIGN_IN_SENTINEL },
+  { label: '💡 What can you do?',     utterance: 'What can you help me with?' },
+];
+
+const CUSTOMER_SUGGESTIONS = [
   { label: '💰 Check balance',       utterance: 'Check my balance' },
   { label: '💸 Send money',          utterance: 'Transfer money' },
   { label: '📊 Recent transactions', utterance: 'Show my recent transactions' },
-  { label: '💳 Apply for a card',    utterance: 'I want to apply for a credit card' },
-  { label: '🔔 Report fraud',        utterance: 'Report a fraudulent transaction' },
-  { label: '💡 What can you do?',    utterance: 'What can you help me with?' },
+  { label: '🧾 Pay a bill',          utterance: 'I want to pay a bill' },
+  { label: '🎁 My offers',           utterance: 'Show my pre-approved offers' },
+  { label: '🚫 Block my card',       utterance: 'I need to block my card' },
 ];
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
-export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, intent, onRequestSignIn, resetSignal = 0 }) {
-  const { customerId } = useAuth();
+export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0 }) {
+  const { customerId, isAuthenticated, customerName } = useAuth();
+  const AI_SUGGESTIONS = isAuthenticated ? CUSTOMER_SUGGESTIONS : GUEST_SUGGESTIONS;
 
   const [messages,        setMessages]        = useState([]);
   const [inputVal,        setInputVal]        = useState('');
@@ -131,6 +163,14 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   const [contactTab,      setContactTab]      = useState('recipients');
   const [p2pContacts,     setP2pContacts]     = useState([]);   // Firebase contacts
   const [contactsLoading, setContactsLoading] = useState(false);
+
+  // ── GECX element key ──────────────────────────────────────────────────────
+  // Incrementing this forces React to unmount + remount <chat-messenger>.
+  // The remount triggers the SDK's connectedCallback which re-reads sessionStorage.
+  // Since clearGecxSession() is always called first (storage is empty at that
+  // point), the SDK generates a FRESH session ID — the only reliable way to
+  // escape a stale authenticated CES session without access to the SDK internals.
+  const [messengerKey, setMessengerKey] = useState(0);
 
   // ── sessionStarted as a REF (not state) ───────────────────────────────────
   // Must be a ref so the resetSignal watcher (Effect A) and the isOpen effect
@@ -265,7 +305,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   }, []);
 
   // ── showCombo ──────────────────────────────────────────────────────────────
-  const showCombo = useCallback((actions, summary, forcedHeading, forcedSubtitle) => {
+  const showCombo = useCallback((rawActions, summary, forcedHeading, forcedSubtitle) => {
+    const actions    = markSignInActions(rawActions);
     const pending    = pendingHeading.current;
     const pendingSub = pendingSubtitle.current;
     pendingHeading.current  = null;
@@ -353,13 +394,13 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
           comboCreated.current = true;
           setMessages((prev) => [
             ...prev,
-            { type: 'combo', heading: sl[0], subtitle: sl[1], actions: tc.actions, id: uid(), compact: isFH(sl[0]) },
+            { type: 'combo', heading: sl[0], subtitle: sl[1], actions: markSignInActions(tc.actions), id: uid(), compact: isFH(sl[0]) },
           ]);
         } else if (sl.length === 1) {
           comboCreated.current = true;
           setMessages((prev) => [
             ...prev,
-            { type: 'combo', heading: sl[0], actions: tc.actions, id: uid(), compact: isFH(sl[0]) },
+            { type: 'combo', heading: sl[0], actions: markSignInActions(tc.actions), id: uid(), compact: isFH(sl[0]) },
           ]);
         } else {
           showCombo(tc.actions, tc.summary);
@@ -414,6 +455,19 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
         });
       }
 
+      if (pname === 'acn-card-carousel' || pname === 'acn-card-compare') {
+        const kind = pname === 'acn-card-compare' ? 'card-compare' : 'card-carousel';
+        setMessages((prev) => {
+          // CES sometimes re-emits the same widget within one turn; de-dupe on
+          // the product set so the transcript does not stack identical tables.
+          const sig  = (p.productDetails ?? []).map((d) => d.productId).join('|');
+          const last = [...prev].reverse().find((m) => m.type === kind);
+          if (last && (last.payload?.productDetails ?? []).map((d) => d.productId).join('|') === sig)
+            return prev;
+          return [...prev, { type: kind, payload: p, id: uid() }];
+        });
+      }
+
       if (pname === 'acn-amount-input')
         setMessages((prev) => [...prev, { type: 'amount', payload: p, id: uid() }]);
 
@@ -455,8 +509,21 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
     if (respondingTimer.current) clearTimeout(respondingTimer.current);
     if (finalTimer.current)      clearTimeout(finalTimer.current);
 
-    // Kill the old CES session token; _initDone → false so the next open
-    // triggers a fresh initGecx() / registerContext() as a guest.
+    // Kill the old CES session completely:
+    //
+    //  1. clearGecxSession() — wipes sessionStorage + localStorage GECX keys NOW,
+    //     before the element remounts, so connectedCallback reads empty storage.
+    //
+    //  2. setMessengerKey() — forces React to unmount then remount the
+    //     <chat-messenger> element. The SDK's connectedCallback fires on the
+    //     fresh element and reads the (now empty) sessionStorage → generates a
+    //     brand-new CES session ID. This is the only reliable escape from a
+    //     session ID that the SDK cached in memory at initial page load.
+    //
+    //  3. softResetGecx() — clears _initDone so the next chat open calls
+    //     initGecx() / registerContext() and fires a guest welcome event.
+    clearGecxSession();
+    setMessengerKey((k) => k + 1);
     softResetGecx();
   }, [resetSignal]);
 
@@ -464,6 +531,17 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   useEffect(() => {
     setResponseHandler((outs) => processOutputsRef.current(outs));
   }, []);
+
+  // ── Rate-limit (429) handler ────────────────────────────────────────────────
+  // Without this, a 429 leaves the typing indicator spinning for 12s and then
+  // just vanishing with no message — looks like the bot "stopped responding
+  // for no reason". Surface it immediately instead.
+  useEffect(() => {
+    setRateLimitHandler(() => {
+      removeTyping();
+      addBot("I'm getting a lot of requests right now — please wait a few seconds and try again.");
+    });
+  }, [removeTyping, addBot]);
 
   // ── acn-session-data (full session replay from the index.html interceptor) ─
   useEffect(() => {
@@ -603,7 +681,14 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
 
   // ── Interaction handlers ───────────────────────────────────────────────────
   const handleTileSelect = useCallback((action, comboId) => {
-    if (action.isSignIn) { onRequestSignIn?.(); return; }
+    // Auth gate: hand off to the page's sign-in modal instead of CES. Nothing is
+    // sent to the agent — App resumes the journey once auth succeeds.
+    if (action.isSignIn) {
+      setMessages((prev) => prev.filter((m) => m.id !== comboId));
+      addUser(action.content || 'Sign in');
+      onRequestSignIn?.();
+      return;
+    }
 
     // Handle P2P contact selection: "select_p2p_contact:CUST_001:@intan"
     const cta = action.utterance || action.content || '';
@@ -663,6 +748,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   // Expose handleReset to parent (App) so the nav reset button can call it
   useEffect(() => { onExposeReset?.(handleReset); }, [handleReset, onExposeReset]);
 
+  /* ── Resume after an agent-gated sign-in ────────────────────────────────────
+     The transcript is kept intact. By the time this runs, App has already pushed
+     the authenticated variables into the CES session, so the agent sees
+     auth_mode="authenticated" on this very turn and continues from the
+     target_intent it stored before gating. */
+  const handleResumeAfterSignIn = useCallback(() => {
+    const name = customerName ? `, ${customerName}` : '';
+    setMessages((prev) => [
+      ...prev,
+      { type: 'bot', text: `You're signed in${name}. Picking up where we left off…`, id: uid() },
+    ]);
+    showTyping();
+    gecxSend('I have signed in. Please continue with what I was doing.');
+  }, [customerName, showTyping]);
+
+  useEffect(() => { onExposeResume?.(handleResumeAfterSignIn); },
+    [handleResumeAfterSignIn, onExposeResume]);
+
   const toggleVoice = useCallback(() => {
     if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
       alert('Voice input not supported in this browser.');
@@ -692,13 +795,17 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
   // ── Load Firebase contacts when @ menu opens ───────────────────────────────
   useEffect(() => {
     if (activeMenu !== 'contact' || contactTab !== 'recipients') return;
+    if (!isAuthenticated) return;                          // guests have no recipients
     if (p2pContacts.length > 0 || contactsLoading) return; // already loaded
     setContactsLoading(true);
     fetchP2PContacts(customerId).then((list) => {
       setP2pContacts(list);
       setContactsLoading(false);
     });
-  }, [activeMenu, contactTab, customerId, p2pContacts.length, contactsLoading]);
+  }, [activeMenu, contactTab, customerId, isAuthenticated, p2pContacts.length, contactsLoading]);
+
+  // Drop cached contacts on sign-out so the next customer never sees them.
+  useEffect(() => { if (!isAuthenticated) setP2pContacts([]); }, [isAuthenticated]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -724,6 +831,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
         }}
       >
         <chat-messenger
+          key={messengerKey}
           id="gecx-messenger"
           url-allowlist="*"
           language-code="en"
@@ -774,6 +882,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
                     showTyping();
                     gecxSend(v);
                   }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'card-carousel') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <CardCarousel
+                  payload={msg.payload}
+                  onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'card-compare') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <CardCompare
+                  payload={msg.payload}
+                  onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
                 />
               </div>
             );
@@ -917,7 +1043,17 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
                           onClick={() => setContactTab('billers')}>Billers</button>
                 </div>
 
-                {contactTab === 'recipients' && (
+                {contactTab === 'recipients' && !isAuthenticated && (
+                  <div className="cp-menu-empty">
+                    <span className="cp-menu-empty-icon">🔐</span>
+                    <p>Sign in to see your recipients</p>
+                    <button className="cp-menu-signin" onClick={() => { closeMenu(); onRequestSignIn?.(); }}>
+                      Sign in
+                    </button>
+                  </div>
+                )}
+
+                {contactTab === 'recipients' && isAuthenticated && (
                   <div className="cp-menu-billers">
                     {contactsLoading && (
                       <div className="cp-menu-empty">
@@ -974,7 +1110,18 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, int
                 <div className="cp-ai-pills">
                   {AI_SUGGESTIONS.map((s, i) => (
                     <button key={i} className="cp-ai-pill"
-                            onClick={() => { addUser(s.label); showTyping(); gecxSend(s.utterance); closeMenu(); }}>
+                            onClick={() => {
+                              closeMenu();
+                              // The sign-in pill is handled by the page, not CES —
+                              // sending the sentinel as a message would just
+                              // confuse the agent.
+                              if (s.utterance === SIGN_IN_SENTINEL) {
+                                addUser('Sign in');
+                                onRequestSignIn?.();
+                                return;
+                              }
+                              addUser(s.label); showTyping(); gecxSend(s.utterance);
+                            }}>
                       {s.label}
                     </button>
                   ))}

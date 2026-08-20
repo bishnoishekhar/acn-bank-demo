@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../../context/AuthContext';
 
-export default function SignInModal({ isOpen, onClose, onSuccess }) {
+// Firestore stores a 4-digit mobile_pin (customers/{id}/security/profile).
+const PIN_LENGTH = 4;
+
+export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav' }) {
   const { signIn, error, clearError } = useAuth();
   const [phone,   setPhone]   = useState('');
   const [pin,     setPin]     = useState('');
@@ -28,7 +31,7 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
   const handleSubmit = async (e) => {
     e?.preventDefault();
     const digits = phone.replace(/\D/g, '');
-    if (digits.length < 11 || pin.length < 6) return;
+    if (digits.length < 11 || pin.length < PIN_LENGTH) return;
     setLoading(true);
     const result = await signIn(`+${digits}`, pin);
     setLoading(false);
@@ -40,7 +43,9 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
 
   if (!isOpen) return null;
 
-  const ready = phone.replace(/\D/g, '').length >= 11 && pin.length >= 6;
+  const ready = phone.replace(/\D/g, '').length >= 11 && pin.length >= PIN_LENGTH;
+  // Explain *why* the modal appeared when the agent triggered it mid-conversation.
+  const fromChat = context === 'chat';
 
   return (
     <div
@@ -59,8 +64,12 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
           <span className="si-brand-name">ACN Bank</span>
         </div>
 
-        <h2 className="si-title">Welcome back</h2>
-        <p className="si-sub">Sign in to access your accounts</p>
+        <h2 className="si-title">{fromChat ? 'Verify your identity' : 'Welcome back'}</h2>
+        <p className="si-sub">
+          {fromChat
+            ? 'Sign in to continue — your assistant will pick up right where you left off.'
+            : 'Sign in to access your accounts'}
+        </p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="si-field">
@@ -80,7 +89,7 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
 
           <div className="si-field">
             <label className="si-label" htmlFor="si-pin">
-              PIN <span className="si-label-hint">6 digits</span>
+              Mobile PIN <span className="si-label-hint">{PIN_LENGTH} digits</span>
             </label>
             <input
               id="si-pin"
@@ -88,10 +97,10 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
               type="password"
               inputMode="numeric"
               pattern="[0-9]*"
-              placeholder="••••••"
-              maxLength={6}
+              placeholder={'•'.repeat(PIN_LENGTH)}
+              maxLength={PIN_LENGTH}
               value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, PIN_LENGTH))}
               autoComplete="current-password"
             />
           </div>
@@ -111,8 +120,10 @@ export default function SignInModal({ isOpen, onClose, onSuccess }) {
           </button>
         </form>
 
+        {/* Live Firestore credentials (customers/{id}/security/profile.mobile_pin) */}
         <p className="si-demo-hint">
-          <strong>Demo:</strong> +1 (416) 555-0199 · PIN 123456
+          <strong>Demo:</strong> +1 (226) 927-4374 · PIN 2244<br />
+          <span className="si-demo-alt">or +1 (217) 858-2973 · PIN 1234</span>
         </p>
       </div>
     </div>

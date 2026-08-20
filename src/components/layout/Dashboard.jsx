@@ -1,4 +1,5 @@
 import { useAuth } from '../../context/AuthContext';
+import CardsSection from './CardsSection';
 
 const PRODUCTS = [
   {
@@ -22,10 +23,26 @@ const PRODUCTS = [
 ];
 
 export default function Dashboard({ onOpenChat, onSignIn }) {
-  const { authState, customerName } = useAuth();
+  const { authState, customerName, customer } = useAuth();
+  // Hero card art shows the real cardholder once signed in, a placeholder before.
+  const cardHolder = customer?.legalName?.toUpperCase() || 'YOUR NAME HERE';
 
   return (
     <main className="dashboard">
+
+      {/* Guest banner — makes the two modes legible before anything is clicked */}
+      {authState !== 'authenticated' && (
+        <div className="guest-banner" role="status">
+          <span className="guest-banner-icon" aria-hidden="true">👋</span>
+          <span>
+            You're browsing as a <strong>guest</strong>. Explore cards and ask
+            anything — sign in when you want to see your accounts or apply.
+          </span>
+          <button className="guest-banner-cta" onClick={onSignIn}>
+            Sign in
+          </button>
+        </div>
+      )}
 
       {/* Auth welcome banner */}
       {authState === 'authenticated' && (
@@ -106,7 +123,7 @@ export default function Dashboard({ onOpenChat, onSignIn }) {
                 <div className="acn-cc-bottom">
                   <div>
                     <div className="acn-cc-label">Card Holder</div>
-                    <div className="acn-cc-value">CHANDER BISHNOI</div>
+                    <div className="acn-cc-value">{cardHolder}</div>
                   </div>
                   <div>
                     <div className="acn-cc-label">Expires</div>
@@ -138,6 +155,9 @@ export default function Dashboard({ onOpenChat, onSignIn }) {
           ))}
         </div>
       </section>
+
+      {/* ── Public card catalogue (guest-browsable, scenario 1) ── */}
+      <CardsSection onOpenChat={onOpenChat} />
 
       {/* ── Footer ── */}
       <footer className="site-footer">

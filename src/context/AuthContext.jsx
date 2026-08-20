@@ -1,18 +1,21 @@
 import { createContext, useContext, useReducer, useCallback } from 'react';
-
-// ── Mock customer registry ─────────────────────────────────────────────────────
-// Stub until POST /customers/auth is live. Phone must be entered as E.164.
-const MOCK_CUSTOMERS = {
-  '+14165550199': { pin: '123456', customerId: 'CUST-9921-X', firstName: 'Chander', lastName: 'Bishnoi' },
-  '+16135550101': { pin: '654321', customerId: 'CUST-7777',   firstName: 'Sarah',   lastName: 'Thompson' },
-};
+import { authenticateCustomer } from '../firebase';
 
 // ── State machine: GUEST → AUTHENTICATING → AUTHENTICATED ─────────────────────
+// `customer` holds the full Firestore profile once authenticated. It is the
+// single source of truth for both the page chrome and the CES variable bridge,
+// so the chatbot and the web page can never disagree about who is signed in.
 const initialState = {
-  authState:    'guest',   // 'guest' | 'authenticating' | 'authenticated'
-  customerId:   null,
-  customerName: null,
-  error:        null,
+  authState: 'guest',   // 'guest' | 'authenticating' | 'authenticated'
+  customer:  null,
+  error:     null,
+};
+
+const ERROR_COPY = {
+  unknown_phone:  'We could not find an account with that phone number.',
+  no_credentials: 'That account has no PIN set up yet. Please contact support.',
+  bad_pin:        'Incorrect PIN. Please try again.',
+  error:          'Connection error. Please try again.',
 };
 
 function authReducer(state, action) {
@@ -20,9 +23,9 @@ function authReducer(state, action) {
     case 'TRIGGER_AUTH':
       return { ...state, authState: 'authenticating', error: null };
     case 'SIGN_IN_SUCCESS':
-      return { ...state, authState: 'authenticated', customerId: action.customerId, customerName: action.customerName, error: null };
+      return { authState: 'authenticated', customer: action.customer, error: null };
     case 'SIGN_IN_ERROR':
-      return { ...state, error: action.error };
+      return { ...state, authState: 'guest', error: action.error };
     case 'SIGN_OUT':
       return { ...initialState };
     case 'CLEAR_ERROR':
@@ -38,29 +41,20 @@ export function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   const signIn = useCallback(async (phone, pin) => {
-    try {
-      // TODO (GAP #1): Replace stub with real endpoint once live:
-      //   POST /customers/auth  →  { customerId, firstName, token }
-      const normalized = phone.replace(/\D/g, '');
-      const entry = Object.entries(MOCK_CUSTOMERS).find(
-        ([p]) => p.replace(/\D/g, '') === normalized,
-      );
-      await new Promise((r) => setTimeout(r, 1100)); // simulate network
+    dispatch({ type: 'TRIGGER_AUTH' });
+    const result = await authenticateCustomer(phone, pin);
 
-      if (entry && entry[1].pin === pin) {
-        const { customerId, firstName } = entry[1];
-        // sessionStorage only — never localStorage (PCI requirement)
-        sessionStorage.setItem('acn_customer_id',   customerId);
-        sessionStorage.setItem('acn_customer_name', firstName);
-        dispatch({ type: 'SIGN_IN_SUCCESS', customerId, customerName: firstName });
-        return { success: true, customerId, firstName };
-      }
-      dispatch({ type: 'SIGN_IN_ERROR', error: 'Invalid phone number or PIN. Please try again.' });
-      return { success: false };
-    } catch {
-      dispatch({ type: 'SIGN_IN_ERROR', error: 'Connection error. Please try again.' });
-      return { success: false };
+    if (!result.ok) {
+      dispatch({ type: 'SIGN_IN_ERROR', error: ERROR_COPY[result.reason] ?? ERROR_COPY.error });
+      return { success: false, reason: result.reason };
     }
+
+    // sessionStorage only — never localStorage (PCI requirement). Values are
+    // non-secret profile fields; the PIN is never persisted anywhere.
+    sessionStorage.setItem('acn_customer_id',   result.customer.customerId);
+    sessionStorage.setItem('acn_customer_name', result.customer.prefName);
+    dispatch({ type: 'SIGN_IN_SUCCESS', customer: result.customer });
+    return { success: true, customer: result.customer };
   }, []);
 
   const signOut = useCallback(() => {
@@ -69,11 +63,23 @@ export function AuthProvider({ children }) {
     dispatch({ type: 'SIGN_OUT' });
   }, []);
 
-  const triggerAuth = useCallback(() => dispatch({ type: 'TRIGGER_AUTH' }), []);
-  const clearError  = useCallback(() => dispatch({ type: 'CLEAR_ERROR'  }), []);
+  const clearError = useCallback(() => dispatch({ type: 'CLEAR_ERROR' }), []);
+
+  const { customer } = state;
 
   return (
-    <AuthContext.Provider value={{ ...state, signIn, signOut, triggerAuth, clearError }}>
+    <AuthContext.Provider
+      value={{
+        ...state,
+        // Flattened conveniences — several components only need these two.
+        customerId:   customer?.customerId ?? null,
+        customerName: customer?.prefName   ?? null,
+        isAuthenticated: state.authState === 'authenticated',
+        signIn,
+        signOut,
+        clearError,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

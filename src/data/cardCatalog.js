@@ -1,0 +1,230 @@
+// ─────────────────────────────────────────────────────────────────────────────
+//  ACN Bank — credit card catalogue (Canada, CAD, English)
+//
+//  SINGLE SOURCE OF TRUTH for card data. Consumed by:
+//    1. src/components/layout/CardsSection.jsx  — the public cards section
+//    2. scripts/seedCardCatalog.mjs             — writes these docs to Firestore
+//                                                 (collection: card_catalog)
+//    3. CES tool credit_card_repository         — mirrors this data in Python
+//
+//  If you change a card here, re-run `node scripts/seedCardCatalog.mjs` and
+//  mirror the change in the CES tool. The three copies exist because CES python
+//  tools have no Firestore client of their own, and the web page must render
+//  instantly without waiting on a read.
+//
+//  Pricing is illustrative demo data, not real ACN Bank pricing.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export const CARD_CATEGORIES = {
+  premium_travel: { label: 'Travel & rewards', blurb: 'Earn on flights, hotels and dining.' },
+  cashback:       { label: 'Cash back',        blurb: 'Money back on everyday spending.' },
+  low_interest:   { label: 'Low interest',     blurb: 'Carry a balance for less.' },
+  starter:        { label: 'Building credit',  blurb: 'Start or rebuild your credit history.' },
+};
+
+export const CARD_CATALOG = [
+  {
+    card_id: 'acn-infinite-travel-visa',
+    card_name: 'ACN Infinite Travel Visa',
+    network: 'Visa',
+    tier: 'Infinite',
+    category: 'premium_travel',
+    tagline: 'Our flagship travel card, for people who are rarely home.',
+    annual_fee: 149,
+    annual_fee_display: 'CAD 149 / year',
+    apr_purchase: '20.99%',
+    apr_cash_advance: '22.99%',
+    foreign_tx_fee: 'None',
+    min_income: 80000,
+    min_credit_score: 760,
+    recommended_limit: 15000,
+    welcome_offer: '60,000 bonus points after CAD 3,000 in purchases in 90 days',
+    top_rewards: '5x points on travel, 3x on dining',
+    credits: 'CAD 150 annual travel credit · 6 airport lounge passes',
+    rewards: [
+      '5x points on flights, hotels and car rentals',
+      '3x points on restaurants and food delivery',
+      '1x points on everything else',
+    ],
+    perks: [
+      'No foreign transaction fees',
+      'CAD 150 annual travel credit',
+      '6 airport lounge passes per year',
+      'Comprehensive travel medical and trip cancellation insurance',
+      'Mobile device and purchase protection',
+    ],
+    best_for: ['Frequent flyers', 'Dining out', 'Spending abroad'],
+    fit_score_base: 96,
+    accent: '#1a1f36',
+    accent_2: '#2f3d6b',
+  },
+  {
+    card_id: 'acn-travel-rewards-visa',
+    card_name: 'ACN Travel Rewards Visa',
+    network: 'Visa',
+    tier: 'Platinum',
+    category: 'premium_travel',
+    tagline: 'Travel rewards without the flagship price tag.',
+    annual_fee: 89,
+    annual_fee_display: 'CAD 89 / year',
+    apr_purchase: '20.99%',
+    apr_cash_advance: '22.99%',
+    foreign_tx_fee: 'None',
+    min_income: 40000,
+    min_credit_score: 700,
+    recommended_limit: 8000,
+    welcome_offer: '30,000 bonus points after CAD 1,500 in purchases in 90 days',
+    top_rewards: '3x points on travel and dining',
+    credits: 'No foreign transaction fees on any purchase',
+    rewards: [
+      '3x points on travel and dining worldwide',
+      '1.5x points on groceries and transit',
+      '1x points on everything else',
+    ],
+    perks: [
+      'No foreign transaction fees',
+      'Travel accident and baggage delay insurance',
+      'Points never expire while the account is open',
+      'Free additional cards',
+    ],
+    best_for: ['Occasional travel', 'Dining out', 'First rewards card'],
+    fit_score_base: 90,
+    accent: '#0b3d5c',
+    accent_2: '#1f7a9c',
+  },
+  {
+    card_id: 'acn-cash-back-mastercard',
+    card_name: 'ACN Cash Back Mastercard',
+    network: 'Mastercard',
+    tier: 'World',
+    category: 'cashback',
+    tagline: 'The most cash back on the things you buy every week.',
+    annual_fee: 0,
+    annual_fee_display: 'No annual fee',
+    apr_purchase: '20.99%',
+    apr_cash_advance: '22.99%',
+    foreign_tx_fee: '2.5%',
+    min_income: 25000,
+    min_credit_score: 680,
+    recommended_limit: 6000,
+    welcome_offer: 'CAD 75 cash back after your first CAD 500 in purchases',
+    top_rewards: '4% on groceries, 3% on gas and transit',
+    credits: 'Cash back paid out monthly, no minimum redemption',
+    rewards: [
+      '4% cash back on groceries',
+      '3% cash back on gas and public transit',
+      '2% cash back on recurring bills',
+      '1% cash back on everything else',
+    ],
+    perks: [
+      'No annual fee',
+      'Cash back paid monthly, not once a year',
+      'Purchase protection and extended warranty',
+      'Free additional cards',
+    ],
+    best_for: ['Groceries', 'Commuting', 'No annual fee'],
+    fit_score_base: 92,
+    accent: '#0f4d3a',
+    accent_2: '#1f9068',
+  },
+  {
+    card_id: 'acn-everyday-cash-mastercard',
+    card_name: 'ACN Everyday Cash Mastercard',
+    network: 'Mastercard',
+    tier: 'Standard',
+    category: 'cashback',
+    tagline: 'Pick your best category and earn more on it.',
+    annual_fee: 0,
+    annual_fee_display: 'No annual fee',
+    apr_purchase: '20.99%',
+    apr_cash_advance: '22.99%',
+    foreign_tx_fee: '2.5%',
+    min_income: 15000,
+    min_credit_score: 640,
+    recommended_limit: 3000,
+    welcome_offer: 'CAD 25 cash back after your first purchase',
+    top_rewards: '2% on one category you choose',
+    credits: 'Switch your bonus category once a year',
+    rewards: [
+      '2% cash back on one category you choose',
+      '1% cash back on everything else',
+    ],
+    perks: [
+      'No annual fee',
+      'Change your bonus category annually',
+      'No minimum redemption',
+    ],
+    best_for: ['Simple rewards', 'Lower income', 'No annual fee'],
+    fit_score_base: 80,
+    accent: '#3b3355',
+    accent_2: '#6f5f9e',
+  },
+  {
+    card_id: 'acn-low-rate-visa',
+    card_name: 'ACN Low Rate Visa',
+    network: 'Visa',
+    tier: 'Classic',
+    category: 'low_interest',
+    tagline: 'For balances you plan to pay down, not points.',
+    annual_fee: 29,
+    annual_fee_display: 'CAD 29 / year',
+    apr_purchase: '12.99%',
+    apr_cash_advance: '14.99%',
+    foreign_tx_fee: '2.5%',
+    min_income: 20000,
+    min_credit_score: 660,
+    recommended_limit: 5000,
+    welcome_offer: '0% on balance transfers for the first 10 months',
+    top_rewards: 'Not a rewards card — the low rate is the benefit',
+    credits: 'Roughly 8 percentage points below our standard purchase APR',
+    rewards: [
+      'No rewards programme — the savings come from the interest rate',
+    ],
+    perks: [
+      '12.99% purchase APR instead of 20.99%',
+      '0% on balance transfers for 10 months',
+      'Fixed, predictable minimum payments',
+    ],
+    best_for: ['Carrying a balance', 'Consolidating debt', 'Lower interest'],
+    fit_score_base: 84,
+    accent: '#4a2c2a',
+    accent_2: '#96574f',
+  },
+  {
+    card_id: 'acn-starter-visa',
+    card_name: 'ACN Starter Visa',
+    network: 'Visa',
+    tier: 'Starter',
+    category: 'starter',
+    tagline: 'No income requirement. Build a credit history from zero.',
+    annual_fee: 0,
+    annual_fee_display: 'No annual fee',
+    apr_purchase: '20.99%',
+    apr_cash_advance: '22.99%',
+    foreign_tx_fee: '2.5%',
+    min_income: 0,
+    min_credit_score: 0,
+    recommended_limit: 1000,
+    welcome_offer: 'No welcome bonus — approval with no credit history instead',
+    top_rewards: '1% cash back on all purchases',
+    credits: 'Reports to both Canadian credit bureaus every month',
+    rewards: [
+      '1% cash back on every purchase, no categories to track',
+    ],
+    perks: [
+      'No annual fee and no minimum income',
+      'Available to students and newcomers to Canada',
+      'Reports to Equifax and TransUnion monthly',
+      'Automatic limit review after 12 months of on-time payments',
+    ],
+    best_for: ['No credit history', 'Students', 'Newcomers to Canada'],
+    fit_score_base: 88,
+    accent: '#1c3b57',
+    accent_2: '#4a7fa8',
+  },
+];
+
+export const findCard = (id) => CARD_CATALOG.find((c) => c.card_id === id) ?? null;
+
+export const cardsByCategory = (category) =>
+  CARD_CATALOG.filter((c) => c.category === category);
