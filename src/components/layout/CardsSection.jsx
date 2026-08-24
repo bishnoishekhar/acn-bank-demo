@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { CARD_CATALOG, CARD_CATEGORIES } from '../../data/cardCatalog';
-import { fetchCardCatalog } from '../../firebase';
+import { fetchCardCatalog, fetchCustomerCardHoldings } from '../../firebase';
 
 /* Maps a pre-approved offer id from financials/profile onto a catalogue card,
    so a signed-in customer sees their own offer flagged on the right product. */
@@ -40,10 +40,11 @@ function CardArt({ card }) {
 }
 
 export default function CardsSection({ onOpenChat }) {
-  const { isAuthenticated, customer } = useAuth();
+  const { isAuthenticated, customer, customerId } = useAuth();
   const [filter,  setFilter]  = useState('all');
   const [catalog, setCatalog] = useState(CARD_CATALOG);
   const [openId,  setOpenId]  = useState(null);   // which card has details expanded
+  const [holdings, setHoldings] = useState({ heldCardIds: new Set(), heldCardNames: [] });
 
   /* Prefer the Firestore catalogue so card data can be updated without a
      redeploy. The bundled module renders immediately and remains the fallback
@@ -56,6 +57,22 @@ export default function CardsSection({ onOpenChat }) {
     return () => { alive = false; };
   }, []);
 
+  /* Cards the customer already holds are removed from the grid entirely —
+     showing someone a product they own reads as not knowing your own customer.
+     Guests see the full catalogue; so does a signed-in customer whose holdings
+     could not be read, because a failed lookup must never hide products. */
+  useEffect(() => {
+    let alive = true;
+    if (!isAuthenticated || !customerId) {
+      setHoldings({ heldCardIds: new Set(), heldCardNames: [] });
+      return undefined;
+    }
+    fetchCustomerCardHoldings(customerId).then((result) => {
+      if (alive) setHoldings(result);
+    });
+    return () => { alive = false; };
+  }, [isAuthenticated, customerId]);
+
   const preApprovedCardIds = useMemo(() => {
     if (!isAuthenticated) return new Set();
     return new Set(
@@ -65,9 +82,14 @@ export default function CardsSection({ onOpenChat }) {
     );
   }, [isAuthenticated, customer]);
 
+  const available = useMemo(
+    () => catalog.filter((c) => !holdings.heldCardIds.has(c.card_id)),
+    [catalog, holdings],
+  );
+
   const visible = filter === 'all'
-    ? catalog
-    : catalog.filter((c) => c.category === filter);
+    ? available
+    : available.filter((c) => c.category === filter);
 
   return (
     <section className="cards-section" id="cards">
@@ -79,6 +101,16 @@ export default function CardsSection({ onOpenChat }) {
           Compare fees, rates and rewards below — or ask the assistant to narrow it
           down for you. You only need to sign in when you decide to apply.
         </p>
+
+        {/* Say what has been hidden and why, rather than silently shrinking the
+            grid and leaving the customer wondering where a card went. */}
+        {holdings.heldCardNames.length > 0 && (
+          <p className="cs-held-note">
+            You already hold {holdings.heldCardNames.join(' and ')}, so
+            {holdings.heldCardNames.length === 1 ? ' it is' : ' they are'} not
+            shown below.
+          </p>
+        )}
       </div>
 
       {/* Category filter */}
@@ -95,6 +127,14 @@ export default function CardsSection({ onOpenChat }) {
           </button>
         ))}
       </div>
+
+      {visible.length === 0 && (
+        <p className="cs-empty">
+          {available.length === 0
+            ? 'You already hold every card we currently offer. Ask the assistant if you would like to review a limit instead.'
+            : 'No cards in this category are available to you right now — try another category.'}
+        </p>
+      )}
 
       <div className="cs-grid">
         {visible.map((card) => {

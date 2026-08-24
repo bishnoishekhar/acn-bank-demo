@@ -720,8 +720,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     gecxSend(value);
   }, [addUser, showTyping]);
 
-  const sendMessage = useCallback(() => {
-    const text = inputVal.trim();
+  const sendMessage = useCallback((textOverride) => {
+    const text = (typeof textOverride === 'string' ? textOverride : inputVal).trim();
     if (!text || isResponding) return;
     setInputVal('');
     addUser(text);
@@ -776,7 +776,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     const rec = new SR();
     rec.lang           = 'en-CA';
     rec.interimResults = false;
-    rec.onresult = (e) => { setInputVal(e.results[0][0].transcript); setTimeout(sendMessage, 100); };
+    rec.onresult = (e) => {
+      const transcript = e.results[0][0].transcript;
+      setInputVal(transcript);       // show it in the box
+      sendMessage(transcript);       // send immediately with the fresh text
+    };
     rec.onend    = ()  => setVoiceActive(false);
     rec.start();
     recognitionRef.current = rec;
@@ -1178,7 +1182,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             ref={inputRef}
             className="cp-text-input"
             type="text"
-            placeholder="Type a message…"
+            placeholder={voiceActive ? 'Listening…' : 'Type a message…'}
             autoComplete="off"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
@@ -1187,6 +1191,31 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             disabled={isResponding}
             aria-label="Message input"
           />
+
+          {/* 🎙 Mic / voice input */}
+          <button
+            className={`cp-icon-input-btn cp-mic-btn${voiceActive ? ' recording' : ''}`}
+            onClick={toggleVoice}
+            title={voiceActive ? 'Stop listening' : 'Voice input'}
+            aria-label={voiceActive ? 'Stop voice input' : 'Start voice input'}
+            disabled={isResponding}
+          >
+            {voiceActive ? (
+              /* Stop / square icon while recording */
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <rect x="4" y="4" width="16" height="16" rx="2"/>
+              </svg>
+            ) : (
+              /* Microphone icon */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="9" y="2" width="6" height="12" rx="3"/>
+                <path d="M5 10a7 7 0 0 0 14 0"/>
+                <line x1="12" y1="19" x2="12" y2="22"/>
+                <line x1="8"  y1="22" x2="16" y2="22"/>
+              </svg>
+            )}
+          </button>
 
           <button
             className={`cp-send-btn${isResponding ? ' disabled' : ''}`}

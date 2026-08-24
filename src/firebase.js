@@ -240,4 +240,92 @@ export async function fetchCardCatalog() {
   }
 }
 
+// ── Card holdings ────────────────────────────────────────────────────────────
+/**
+ * Reads the credit cards a signed-in customer already holds.
+ *
+ * Used to hide products the customer owns from the public catalogue. Debit
+ * cards, and closed or cancelled cards, are ignored — a blocked card still
+ * counts as held, because they still have it.
+ *
+ * card_catalog_id / product_name / credit_limit are written by
+ * scripts/seedCustomerCardHoldings.mjs. Cards seeded before that script ran
+ * simply won't match a catalogue id, and are left out of heldCardIds rather
+ * than guessed at.
+ *
+ * Returns { heldCardIds: Set<string>, heldCardNames: string[], totalCreditLimit }
+ * and an empty set on any failure, so a read error never hides the catalogue.
+ */
+const CREDIT_CARD_TYPES = new Set(['credit', 'credit_card', 'creditcard']);
+/* Everything except these counts as held — including a card awaiting
+   activation, which has been granted and must not be offered again. */
+const CLOSED_CARD_STATUSES = new Set(['closed', 'cancelled', 'canceled', 'expired']);
+
+export async function fetchCustomerCardHoldings(customerId) {
+  const empty = { heldCardIds: new Set(), heldCardNames: [], totalCreditLimit: 0 };
+  if (!customerId) return empty;
+
+  try {
+    await ensureAnonAuth();
+    const snap = await getDocs(collection(db, 'customers', customerId, 'cards'));
+
+    const heldCardIds = new Set();
+    const heldCardNames = [];
+    let totalCreditLimit = 0;
+
+    snap.forEach((d) => {
+      const card = d.data();
+      const type = String(card.type ?? '').toLowerCase();
+      const status = String(card.status ?? '').toLowerCase();
+      if (!CREDIT_CARD_TYPES.has(type)) return;
+      if (CLOSED_CARD_STATUSES.has(status)) return;
+
+      totalCreditLimit += Number(card.credit_limit ?? 0);
+      if (card.card_catalog_id) {
+        heldCardIds.add(card.card_catalog_id);
+        if (card.product_name) heldCardNames.push(card.product_name);
+      }
+    });
+
+    return { heldCardIds, heldCardNames, totalCreditLimit };
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerCardHoldings failed:', err.message);
+    return empty;
+  }
+}
+
+// ── Application status ───────────────────────────────────────────────────────
+/**
+ * Reads one card application for the emailed status page.
+ *
+ * The token in the link is the authorisation: it is compared against the token
+ * stored on the record, and a mismatch is reported as not-found rather than
+ * "wrong token", so the link cannot be used to probe which references exist.
+ *
+ * The token itself is never returned to the caller.
+ *
+ * Returns { ok: true, application } or { ok: false, reason }.
+ *   reason: 'not_found' | 'error'
+ */
+export async function fetchApplicationStatus(applicationId, token) {
+  if (!applicationId || !token) return { ok: false, reason: 'not_found' };
+
+  try {
+    await ensureAnonAuth();
+    const snap = await getDoc(doc(db, 'card_applications', applicationId));
+    if (!snap.exists()) return { ok: false, reason: 'not_found' };
+
+    const data = snap.data();
+    if (String(data.status_token ?? '') !== String(token)) {
+      return { ok: false, reason: 'not_found' };
+    }
+
+    const { status_token, document_ref_hash, ...safe } = data;
+    return { ok: true, application: { application_id: snap.id, ...safe } };
+  } catch (err) {
+    console.warn('[Firebase] fetchApplicationStatus failed:', err.message);
+    return { ok: false, reason: 'error' };
+  }
+}
+
 export { db, auth };

@@ -4,7 +4,23 @@ import TopNav      from './components/layout/TopNav';
 import Dashboard   from './components/layout/Dashboard';
 import ChatPanel   from './components/chat/ChatPanel';
 import SignInModal from './components/auth/SignInModal';
+import ApplicationStatus from './components/ApplicationStatus';
 import { bootstrapGecx, setCesVariables, clearCesVariables } from './components/gecx';
+
+/* The link in both applicant emails lands here:
+     ?application=APP_20260820_7F3A9C&token=<opaque>
+   Read once at module load — this is a landing page, not a route the user
+   navigates between. */
+function readApplicationLink() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const applicationId = params.get('application');
+    const token = params.get('token');
+    return applicationId && token ? { applicationId, token } : null;
+  } catch {
+    return null;
+  }
+}
 
 /* ── CES session variables ─────────────────────────────────────────────────────
    Built from the Firestore profile and pushed into the CES session so the agent
@@ -53,6 +69,7 @@ function customerVariables(c) {
 function AppContent() {
   const { customer, authState, signOut } = useAuth();
 
+  const [appLink, setAppLink] = useState(readApplicationLink);
   const [chatOpen,    setChatOpen]    = useState(false);
   const [chatIntent,  setChatIntent]  = useState(null);
   const [resetSignal, setResetSignal] = useState(0);  // increment → soft-reset GECX without remounting
@@ -125,6 +142,29 @@ function AppContent() {
     setChatOpen(false);
     setChatIntent(null);
   };
+
+  /* Leaving the status page drops the query string so a refresh, or the
+     browser's back button, returns to the normal site rather than re-opening
+     the emailed link. */
+  const exitApplicationStatus = () => {
+    setAppLink(null);
+    try {
+      window.history.replaceState({}, '', window.location.pathname);
+    } catch { /* non-fatal — the state change alone is enough */ }
+  };
+
+  /* An emailed status link takes over the page. Deliberately no TopNav or chat:
+     the recipient may be a prospect with no account, and the one thing they
+     came for is the status of their application. */
+  if (appLink) {
+    return (
+      <ApplicationStatus
+        applicationId={appLink.applicationId}
+        token={appLink.token}
+        onExit={exitApplicationStatus}
+      />
+    );
+  }
 
   return (
     <>
