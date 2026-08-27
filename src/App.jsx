@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import TopNav      from './components/layout/TopNav';
-import Dashboard   from './components/layout/Dashboard';
-import ChatPanel   from './components/chat/ChatPanel';
-import SignInModal from './components/auth/SignInModal';
-import ApplicationStatus from './components/ApplicationStatus';
+import TopNav               from './components/layout/TopNav';
+import Dashboard            from './components/layout/Dashboard';
+import ChatPanel            from './components/chat/ChatPanel';
+import FloatingChatWidget   from './components/chat/FloatingChatWidget';
+import SignInModal          from './components/auth/SignInModal';
+import ApplicationStatus    from './components/ApplicationStatus';
 import { bootstrapGecx, setCesVariables, clearCesVariables } from './components/gecx';
 
 /* The link in both applicant emails lands here:
@@ -74,6 +75,25 @@ function AppContent() {
   const [chatIntent,  setChatIntent]  = useState(null);
   const [resetSignal, setResetSignal] = useState(0);  // increment → soft-reset GECX without remounting
   const [signInOpen,  setSignInOpen]  = useState(false);
+
+  // ── Floating chat widget state ────────────────────────────────────────────
+  // Mirrors the header ChatPanel's messages so the widget shows the same thread.
+  const [floatOpen,     setFloatOpen]     = useState(false);
+  const [floatMessages, setFloatMessages] = useState([]);
+  const floatSendRef   = useRef(null);   // set by ChatPanel via onExposeSend
+  const prevChatOpen   = useRef(false);  // detects header panel closing
+
+  /* When the header chat panel closes AND there are messages, auto-open the
+     floating widget so the conversation doesn't feel like it disappeared. */
+  useEffect(() => {
+    if (!chatOpen && prevChatOpen.current) {
+      const hasContent = floatMessages.some(
+        (m) => m.type === 'bot' || m.type === 'user' || m.type === 'combo',
+      );
+      if (hasContent) setFloatOpen(true);
+    }
+    prevChatOpen.current = chatOpen;
+  }, [chatOpen, floatMessages]);
 
   /* Where the sign-in request came from decides what happens afterwards:
        'nav'  → header button: start a clean authenticated session.
@@ -187,12 +207,23 @@ function AppContent() {
         intent={chatIntent}
         onRequestSignIn={openSignInFromChat}
         resetSignal={resetSignal}
+        onMessagesChange={setFloatMessages}
+        onExposeSend={(fn) => { floatSendRef.current = fn; }}
       />
 
       {/* Backdrop — dims page behind the drop-down panel */}
       {chatOpen && (
         <div className="chat-backdrop" onClick={closeChat} aria-hidden="true" />
       )}
+
+      {/* ── Floating chat widget — mirrors the header chat session ── */}
+      <FloatingChatWidget
+        messages={floatMessages}
+        isOpen={floatOpen}
+        onOpen={() => setFloatOpen(true)}
+        onClose={() => setFloatOpen(false)}
+        onSend={(text) => floatSendRef.current?.(text)}
+      />
 
       {/* Sign-in modal — shared by the header button and the agent's auth gate */}
       <SignInModal

@@ -27,7 +27,18 @@ function formatFriendlyDate(d = new Date()) {
   return `${day} ${month} ${year}, ${hours}:${minutes} ${ampm}`;
 }
 
+// For display: strips code blocks/headings but keeps **bold** so BotText can render <strong>.
 function stripMarkdown(text) {
+  if (!text) return '';
+  return text
+    .replace(/```[a-z]*\n[\s\S]*?\n```/g, '')
+    .replace(/(?<!\*)\*(?!\*)([^*\n]+)(?<!\*)\*(?!\*)/g, '$1') // italic only, not bold
+    .replace(/^#{1,3}\s+/gm, '')
+    .trim();
+}
+
+// For TTS and combo headings: strips ALL markdown so speech sounds natural.
+function stripMarkdownForTTS(text) {
   if (!text) return '';
   return text
     .replace(/```[a-z]*\n[\s\S]*?\n```/g, '')
@@ -38,13 +49,23 @@ function stripMarkdown(text) {
 }
 
 function BotText({ text }) {
+  // Render **bold** segments inside a line as <strong> elements.
+  function parseBold(str) {
+    const parts = str.split(/(\*\*[^*\n]+\*\*)/g);
+    if (parts.length === 1) return str;
+    return parts.map((part, i) => {
+      const m = part.match(/^\*\*([^*\n]+)\*\*$/);
+      return m ? <strong key={i}>{m[1]}</strong> : part;
+    });
+  }
+
   const lines = text.split('\n').filter(Boolean);
-  if (lines.length <= 1) return <>{text}</>;
+  if (lines.length <= 1) return <>{parseBold(text)}</>;
   return (
     <>
       {lines.map((line, i) => (
         <span key={i} style={{ display: 'block', marginBottom: i < lines.length - 1 ? '6px' : 0 }}>
-          {line}
+          {parseBold(line)}
         </span>
       ))}
     </>
@@ -150,7 +171,7 @@ const CUSTOMER_SUGGESTIONS = [
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
-export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0 }) {
+export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0, onMessagesChange, onExposeSend }) {
   const { customerId, isAuthenticated, customerName } = useAuth();
   const AI_SUGGESTIONS = isAuthenticated ? CUSTOMER_SUGGESTIONS : GUEST_SUGGESTIONS;
 
@@ -158,6 +179,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const [inputVal,        setInputVal]        = useState('');
   const [activeForm,      setActiveForm]      = useState(null);
   const [voiceActive,     setVoiceActive]     = useState(false);
+  const [voiceMode,       setVoiceMode]       = useState(false);  // voice conversation mode (STT + TTS loop)
+  const [ttsPlaying,      setTTSPlaying]      = useState(false);  // TTS audio currently playing
   const [isResponding,    setIsResponding]    = useState(false);
   const [activeMenu,      setActiveMenu]      = useState(null); // 'plus' | 'contact' | 'ai'
   const [contactTab,      setContactTab]      = useState('recipients');
@@ -191,6 +214,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const pendingSubtitle = useRef(null);
   const comboCreated    = useRef(false);
   const lastProcessed   = useRef({ time: 0, sig: '' });
+  // Voice conversation refs — readable from async callbacks without stale closures
+  const voiceModeRef   = useRef(false);   // mirrors voiceMode state
+  const ttsQueueRef    = useRef('');      // accumulates bot text per turn for TTS playback
+  const sendMessageRef = useRef(null);    // updated after sendMessage is defined
+  const playTTSRef     = useRef(null);    // updated after playTTS is defined
+  const startVoiceRef  = useRef(null);    // updated after startVoiceRecognition is defined
 
   // ── Scroll ─────────────────────────────────────────────────────────────────
   const scrollToBottom = useCallback(() => {
@@ -214,14 +243,19 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   // ── Message helpers ────────────────────────────────────────────────────────
   const addBot = useCallback((text) => {
-    const clean = stripMarkdown(text);
-    if (!clean) return;
-    const lines = clean.split('\n').filter(Boolean);
+    const display = stripMarkdown(text);         // keeps **bold** for <strong> rendering
+    if (!display) return;
+    const ttsText = stripMarkdownForTTS(text);   // fully clean for TTS + combo headings
+    const lines   = display.split('\n').filter(Boolean);
     if (!pendingHeading.current) {
-      pendingHeading.current  = lines[0];
+      pendingHeading.current  = stripMarkdownForTTS(lines[0]);   // clean title in combo
       if (lines.length > 1) pendingSubtitle.current = lines.slice(1).join(' ');
     }
-    setMessages((prev) => [...prev, { type: 'bot', text: clean, id: uid() }]);
+    setMessages((prev) => [...prev, { type: 'bot', text: display, id: uid() }]);
+    // Accumulate TTS text per bot turn (played when removeTyping fires)
+    if (voiceModeRef.current) {
+      ttsQueueRef.current += (ttsQueueRef.current ? ' ' : '') + ttsText;
+    }
   }, []);
 
   const addUser = useCallback((text) => {
@@ -232,6 +266,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     pendingHeading.current  = null;
     pendingSubtitle.current = null;
     comboCreated.current    = false;
+    ttsQueueRef.current     = '';   // fresh queue for the upcoming bot turn
     setIsResponding(true);
     setMessages((prev) => [
       ...prev.filter((m) => m.type !== 'typing'),
@@ -249,6 +284,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     if (finalTimer.current)      clearTimeout(finalTimer.current);
     setIsResponding(false);
     setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
+    // Play accumulated bot text via TTS when in voice conversation mode
+    if (voiceModeRef.current && ttsQueueRef.current.trim()) {
+      const ttsText      = ttsQueueRef.current.trim();
+      ttsQueueRef.current = '';
+      playTTSRef.current?.(ttsText);
+    }
   }, []);
 
   const clearTypingBubble = useCallback(() => {
@@ -704,7 +745,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       return;
     }
 
-    setMessages((prev) => prev.filter((m) => m.id !== comboId));
+    // Replace the combo card with its heading as a plain bot bubble so the
+    // bot's response stays visible while the quick action gets processed.
+    setMessages((prev) => prev.map((m) => {
+      if (m.id !== comboId) return m;
+      return m.heading ? { type: 'bot', text: m.heading, id: m.id } : null;
+    }).filter(Boolean));
     addUser(action.content || action.utterance);
     showTyping();
     gecxSend(action.utterance || action.content);
@@ -728,6 +774,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     showTyping();
     gecxSend(text);
   }, [inputVal, addUser, showTyping, isResponding]);
+  // Keep sendMessageRef current so startVoiceRecognition can call it without a stale closure.
+  useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
+  // Sync messages to parent (App) so FloatingChatWidget can mirror the conversation.
+  useEffect(() => { onMessagesChange?.(messages); }, [messages, onMessagesChange]);
+  // Expose sendMessage so FloatingChatWidget can send through this panel's session.
+  useEffect(() => { onExposeSend?.(sendMessage); }, [sendMessage, onExposeSend]);
 
   const handleReset = useCallback(() => {
     setMessages([]);
@@ -766,26 +818,78 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   useEffect(() => { onExposeResume?.(handleResumeAfterSignIn); },
     [handleResumeAfterSignIn, onExposeResume]);
 
-  const toggleVoice = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Voice input not supported in this browser.');
-      return;
-    }
-    if (voiceActive) { recognitionRef.current?.stop(); setVoiceActive(false); return; }
+  // ── STT helper — starts a single recognition pass and sends the result ────────
+  const startVoiceRecognition = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
     const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new SR();
     rec.lang           = 'en-CA';
     rec.interimResults = false;
     rec.onresult = (e) => {
       const transcript = e.results[0][0].transcript;
-      setInputVal(transcript);       // show it in the box
-      sendMessage(transcript);       // send immediately with the fresh text
+      setInputVal(transcript);
+      sendMessageRef.current?.(transcript);
     };
-    rec.onend    = ()  => setVoiceActive(false);
+    rec.onerror = () => setVoiceActive(false);
+    rec.onend   = () => setVoiceActive(false);
     rec.start();
     recognitionRef.current = rec;
     setVoiceActive(true);
-  }, [voiceActive, sendMessage]);
+  }, []);
+  useEffect(() => { startVoiceRef.current = startVoiceRecognition; }, [startVoiceRecognition]);
+
+  // ── ElevenLabs TTS via Cloud Run proxy ────────────────────────────────────────
+  // The Cloud Run service holds the API key and Voice ID — no credentials needed here.
+  // POST /tts  →  audio/mpeg  →  play, then restart STT if still in voice mode.
+  const playTTS = useCallback(async (text) => {
+    if (!text?.trim()) return;
+    setTTSPlaying(true);
+    try {
+      const res = await fetch('https://elevenlabs-tts-v2-483471568825.us-central1.run.app/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.trim() }),
+      });
+      if (!res.ok) throw new Error(`TTS ${res.status}`);
+      const blob     = await res.blob();
+      const audioUrl = URL.createObjectURL(blob);
+      const audio    = new Audio(audioUrl);
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        setTTSPlaying(false);
+        // Re-enable microphone for the next voice turn
+        if (voiceModeRef.current) startVoiceRef.current?.();
+      };
+      await audio.play();
+    } catch (err) {
+      console.error('[ACN TTS]', err);
+      setTTSPlaying(false);
+      if (voiceModeRef.current) startVoiceRef.current?.();
+    }
+  }, []);
+  useEffect(() => { playTTSRef.current = playTTS; }, [playTTS]);
+
+  // ── Voice conversation mode toggle ────────────────────────────────────────────
+  // Activating starts STT → user speaks → GECX responds → TTS plays → STT restarts.
+  const toggleVoice = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+      alert('Voice input not supported in this browser.');
+      return;
+    }
+    if (voiceMode) {
+      // Deactivate: stop listening, clear queued TTS text
+      recognitionRef.current?.stop();
+      setVoiceActive(false);
+      setVoiceMode(false);
+      voiceModeRef.current = false;
+      ttsQueueRef.current  = '';
+      return;
+    }
+    // Activate voice conversation mode
+    setVoiceMode(true);
+    voiceModeRef.current = true;
+    startVoiceRecognition();
+  }, [voiceMode, startVoiceRecognition]);
 
   const handleFileUpload = useCallback((e) => {
     const file = e.target.files[0];
@@ -1192,16 +1296,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             aria-label="Message input"
           />
 
-          {/* 🎙 Mic / voice input */}
+          {/* 🎙 Mic / voice conversation toggle */}
           <button
-            className={`cp-icon-input-btn cp-mic-btn${voiceActive ? ' recording' : ''}`}
+            className={`cp-icon-input-btn cp-mic-btn${voiceMode ? ` voice-mode${ttsPlaying ? ' speaking' : ''}` : ''}${voiceActive ? ' recording' : ''}`}
             onClick={toggleVoice}
-            title={voiceActive ? 'Stop listening' : 'Voice input'}
-            aria-label={voiceActive ? 'Stop voice input' : 'Start voice input'}
-            disabled={isResponding}
+            title={voiceMode ? (ttsPlaying ? 'AI speaking…' : voiceActive ? 'Listening… (click to stop)' : 'Voice mode on — click to stop') : 'Start voice conversation'}
+            aria-label={voiceMode ? 'Stop voice conversation' : 'Start voice conversation'}
+            disabled={isResponding && !voiceMode}
           >
-            {voiceActive ? (
-              /* Stop / square icon while recording */
+            {ttsPlaying ? (
+              /* Speaker wave icon while TTS plays */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+              </svg>
+            ) : voiceActive ? (
+              /* Stop / square icon while listening */
               <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <rect x="4" y="4" width="16" height="16" rx="2"/>
               </svg>
