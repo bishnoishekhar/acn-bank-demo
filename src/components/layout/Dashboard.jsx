@@ -22,7 +22,7 @@ const PRODUCTS = [
   },
 ];
 
-export default function Dashboard({ onOpenChat, onSignIn }) {
+export default function Dashboard({ onOpenChat }) {
   const { authState, customerName, customer } = useAuth();
   // Hero card art shows the real cardholder once signed in, a placeholder before.
   const cardHolder = customer?.legalName?.toUpperCase() || 'YOUR NAME HERE';
@@ -30,33 +30,7 @@ export default function Dashboard({ onOpenChat, onSignIn }) {
   return (
     <main className="dashboard">
 
-      {/* Guest banner — makes the two modes legible before anything is clicked */}
-      {authState !== 'authenticated' && (
-        <div className="guest-banner" role="status">
-          <span className="guest-banner-icon" aria-hidden="true">👋</span>
-          <span>
-            You're browsing as a <strong>guest</strong>. Explore cards and ask
-            anything — sign in when you want to see your accounts or apply.
-          </span>
-          <button className="guest-banner-cta" onClick={onSignIn}>
-            Sign in
-          </button>
-        </div>
-      )}
-
-      {/* Auth welcome banner */}
-      {authState === 'authenticated' && (
-        <div className="auth-banner" role="status">
-          <span className="auth-banner-icon" aria-hidden="true">✅</span>
-          <span>
-            Welcome back, <strong>{customerName}</strong>!
-            Your AI assistant is ready — open the chat to get started.
-          </span>
-          <button className="auth-banner-cta" onClick={() => onOpenChat()}>
-            Open chat →
-          </button>
-        </div>
-      )}
+      {/* Auth/guest status is shown in the top nav — no separate banner needed */}
 
       {/* ── Hero ── */}
       <section className="hero" id="hero">

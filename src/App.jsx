@@ -196,7 +196,7 @@ function AppContent() {
         chatOpen={chatOpen}
       />
 
-      <Dashboard onOpenChat={openChat} onSignIn={openSignInFromNav} />
+      <Dashboard onOpenChat={openChat} />
 
       <ChatPanel
         isOpen={chatOpen}
@@ -223,6 +223,7 @@ function AppContent() {
         onOpen={() => setFloatOpen(true)}
         onClose={() => setFloatOpen(false)}
         onSend={(text) => floatSendRef.current?.(text)}
+        onRequestSignIn={openSignInFromChat}
       />
 
       {/* Sign-in modal — shared by the header button and the agent's auth gate */}
