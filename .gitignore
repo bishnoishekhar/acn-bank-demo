@@ -1,7 +1,6 @@
 node_modules/
 dist/
 ACN_Bank_Demo/
-images/
 .env
 .env.local
 .env.*.local

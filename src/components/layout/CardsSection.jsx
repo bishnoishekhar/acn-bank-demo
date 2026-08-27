@@ -9,6 +9,22 @@ const OFFER_TO_CARD = {
   OFFER_TRAVEL_CC: 'acn-travel-rewards-visa',
 };
 
+/* Card images — served from /public/images.
+   Vite sets BASE_URL to the configured base (e.g. /acn-bank-demo/ in prod,
+   / in plain dev). Prefixing with it ensures the path resolves correctly in
+   both environments. */
+const BASE = import.meta.env.BASE_URL;
+const img  = (name) => `${BASE}images/${name}`;
+
+const CARD_IMAGES = {
+  'acn-infinite-travel-visa':     img('image 1.png'),
+  'acn-travel-rewards-visa':      img('image 2.png'),
+  'acn-cash-back-mastercard':     img('image 3.png'),
+  'acn-everyday-cash-mastercard': img('image 4.png'),
+  'acn-low-rate-visa':            img('image 5.png'),
+  'acn-starter-visa':             img('image 6.png'),
+};
+
 const FILTERS = [
   { id: 'all', label: 'All cards' },
   ...Object.entries(CARD_CATEGORIES).map(([id, { label }]) => ({ id, label })),
@@ -17,8 +33,22 @@ const FILTERS = [
 const fmtIncome = (v) =>
   v > 0 ? `CAD ${v.toLocaleString('en-CA')}` : 'No minimum';
 
-/* ── Mini card art ─────────────────────────────────────────────────────────── */
+/* ── Card art — real photo when available, gradient fallback ──────────────── */
 function CardArt({ card }) {
+  const imgSrc = CARD_IMAGES[card.card_id];
+  if (imgSrc) {
+    return (
+      <div className="cs-art cs-art--photo" aria-hidden="true"
+           style={{ background: `linear-gradient(135deg, ${card.accent} 0%, ${card.accent_2} 100%)` }}>
+        <img
+          src={imgSrc}
+          alt=""
+          className="cs-art-photo"
+          draggable={false}
+        />
+      </div>
+    );
+  }
   return (
     <div
       className="cs-art"
