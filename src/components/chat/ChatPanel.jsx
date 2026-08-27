@@ -181,6 +181,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const [voiceActive,     setVoiceActive]     = useState(false);
   const [voiceMode,       setVoiceMode]       = useState(false);  // voice conversation mode (STT + TTS loop)
   const [ttsPlaying,      setTTSPlaying]      = useState(false);  // TTS audio currently playing
+  const [ttsEnabled,      setTTSEnabled]      = useState(true);   // bot speaks every response (default on, user can mute)
   const [isResponding,    setIsResponding]    = useState(false);
   const [activeMenu,      setActiveMenu]      = useState(null); // 'plus' | 'contact' | 'ai'
   const [contactTab,      setContactTab]      = useState('recipients');
@@ -216,7 +217,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const lastProcessed   = useRef({ time: 0, sig: '' });
   // Voice conversation refs — readable from async callbacks without stale closures
   const voiceModeRef   = useRef(false);   // mirrors voiceMode state
+  const ttsEnabledRef  = useRef(true);    // mirrors ttsEnabled state (auto-speak bot responses)
+  const ttsAudioRef    = useRef(null);    // current TTS Audio element, so we can stop it on mute
   const ttsQueueRef    = useRef('');      // accumulates bot text per turn for TTS playback
+  const ttsFlushTimer  = useRef(null);    // debounce timer — plays queue once streaming quiets down
   const sendMessageRef = useRef(null);    // updated after sendMessage is defined
   const playTTSRef     = useRef(null);    // updated after playTTS is defined
   const startVoiceRef  = useRef(null);    // updated after startVoiceRecognition is defined
@@ -241,6 +245,23 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     setTimeout(snap, 400);
   }, []);
 
+  // ── TTS flush — debounced so streaming chunks batch into one utterance ────
+  // processOutputs calls removeTyping BEFORE addBot fills the queue, so we
+  // can't play TTS from removeTyping directly. Instead every addBot bumps a
+  // 400ms timer; once the bot stops emitting, the whole queue is spoken once.
+  const scheduleTTSFlush = useCallback(() => {
+    if (ttsFlushTimer.current) clearTimeout(ttsFlushTimer.current);
+    ttsFlushTimer.current = setTimeout(() => {
+      ttsFlushTimer.current = null;
+      const shouldSpeak = voiceModeRef.current || ttsEnabledRef.current;
+      if (!shouldSpeak) { ttsQueueRef.current = ''; return; }
+      const ttsText = ttsQueueRef.current.trim();
+      if (!ttsText) return;
+      ttsQueueRef.current = '';
+      playTTSRef.current?.(ttsText);
+    }, 400);
+  }, []);
+
   // ── Message helpers ────────────────────────────────────────────────────────
   const addBot = useCallback((text) => {
     const display = stripMarkdown(text);         // keeps **bold** for <strong> rendering
@@ -252,11 +273,14 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       if (lines.length > 1) pendingSubtitle.current = lines.slice(1).join(' ');
     }
     setMessages((prev) => [...prev, { type: 'bot', text: display, id: uid() }]);
-    // Accumulate TTS text per bot turn (played when removeTyping fires)
-    if (voiceModeRef.current) {
+    // Accumulate TTS text per bot turn (played when streaming quiets down).
+    // Queue whenever the bot should audibly respond — either voice-conversation
+    // mode is on, or the user has left the "bot speaks" toggle enabled.
+    if (voiceModeRef.current || ttsEnabledRef.current) {
       ttsQueueRef.current += (ttsQueueRef.current ? ' ' : '') + ttsText;
+      scheduleTTSFlush();
     }
-  }, []);
+  }, [scheduleTTSFlush]);
 
   const addUser = useCallback((text) => {
     setMessages((prev) => [...prev, { type: 'user', text, id: uid() }]);
@@ -267,6 +291,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     pendingSubtitle.current = null;
     comboCreated.current    = false;
     ttsQueueRef.current     = '';   // fresh queue for the upcoming bot turn
+    if (ttsFlushTimer.current) {    // cancel any pending flush from the previous turn
+      clearTimeout(ttsFlushTimer.current);
+      ttsFlushTimer.current = null;
+    }
     setIsResponding(true);
     setMessages((prev) => [
       ...prev.filter((m) => m.type !== 'typing'),
@@ -284,12 +312,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     if (finalTimer.current)      clearTimeout(finalTimer.current);
     setIsResponding(false);
     setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
-    // Play accumulated bot text via TTS when in voice conversation mode
-    if (voiceModeRef.current && ttsQueueRef.current.trim()) {
-      const ttsText      = ttsQueueRef.current.trim();
-      ttsQueueRef.current = '';
-      playTTSRef.current?.(ttsText);
-    }
+    // TTS playback is driven from addBot's debounced flush — not from here.
+    // processOutputs calls removeTyping *before* addBot, so the queue would
+    // still be empty at this point. See scheduleTTSFlush above.
   }, []);
 
   const clearTypingBubble = useCallback(() => {
@@ -843,9 +868,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   // POST /tts  →  audio/mpeg  →  play, then restart STT if still in voice mode.
   const playTTS = useCallback(async (text) => {
     if (!text?.trim()) return;
+    // If a previous TTS is still playing (e.g. user sent a new message
+    // before the last response finished speaking), stop it first.
+    if (ttsAudioRef.current) {
+      try { ttsAudioRef.current.pause(); } catch { /* ignore */ }
+      ttsAudioRef.current = null;
+    }
     setTTSPlaying(true);
     try {
-      const res = await fetch('https://elevenlabs-tts-v2-483471568825.us-central1.run.app/tts', {
+      const res = await fetch('https://elevenlabs-tts-en-483471568825.us-central1.run.app/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: text.trim() }),
@@ -854,10 +885,13 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       const blob     = await res.blob();
       const audioUrl = URL.createObjectURL(blob);
       const audio    = new Audio(audioUrl);
+      ttsAudioRef.current = audio;
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        if (ttsAudioRef.current === audio) ttsAudioRef.current = null;
         setTTSPlaying(false);
-        // Re-enable microphone for the next voice turn
+        // Re-enable microphone ONLY when in full voice-conversation mode.
+        // Auto-speak (ttsEnabled) alone should not turn the mic on.
         if (voiceModeRef.current) startVoiceRef.current?.();
       };
       await audio.play();
@@ -868,6 +902,32 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     }
   }, []);
   useEffect(() => { playTTSRef.current = playTTS; }, [playTTS]);
+
+  // ── Bot-speaks toggle (mute / unmute) ─────────────────────────────────────
+  // Independent of the mic. When enabled, every bot response is spoken aloud
+  // via the ElevenLabs TTS endpoint. Muting also stops any in-flight playback
+  // so the user is not stuck listening to a response they wanted silenced.
+  const toggleTTS = useCallback(() => {
+    setTTSEnabled((prev) => {
+      const next = !prev;
+      ttsEnabledRef.current = next;
+      if (!next) {
+        // Muting mid-playback: cut current audio, drop the queue, cancel any
+        // debounced flush that would otherwise fire after mute.
+        if (ttsAudioRef.current) {
+          try { ttsAudioRef.current.pause(); } catch { /* ignore */ }
+          ttsAudioRef.current = null;
+        }
+        if (ttsFlushTimer.current) {
+          clearTimeout(ttsFlushTimer.current);
+          ttsFlushTimer.current = null;
+        }
+        ttsQueueRef.current = '';
+        setTTSPlaying(false);
+      }
+      return next;
+    });
+  }, []);
 
   // ── Voice conversation mode toggle ────────────────────────────────────────────
   // Activating starts STT → user speaks → GECX responds → TTS plays → STT restarts.
@@ -1280,6 +1340,33 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               <path d="M12 2l2.09 6.26L20 10l-5.91 1.74L12 18l-2.09-6.26L4 10l5.91-1.74L12 2z"/>
               <path d="M5 3l.9 2.7L8.6 6.5l-2.7.9L5 10l-.9-2.7L1.4 6.5l2.7-.9L5 3z" opacity=".6"/>
             </svg>
+          </button>
+
+          {/* 🔊 Bot-speaks toggle (mute / unmute ElevenLabs TTS on every reply) */}
+          <button
+            className={`cp-icon-input-btn cp-speaker-btn${ttsEnabled ? ' active' : ''}${ttsPlaying && ttsEnabled ? ' speaking' : ''}`}
+            onClick={toggleTTS}
+            title={ttsEnabled ? (ttsPlaying ? 'AI speaking… (click to mute)' : 'Bot speaks replies — click to mute') : 'Bot is muted — click to enable voice'}
+            aria-label={ttsEnabled ? 'Mute bot voice' : 'Enable bot voice'}
+            aria-pressed={ttsEnabled}
+          >
+            {ttsEnabled ? (
+              /* Speaker on — with sound waves */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07"/>
+                <path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>
+              </svg>
+            ) : (
+              /* Speaker muted — with slash */
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/>
+                <line x1="23" y1="9"  x2="17" y2="15"/>
+                <line x1="17" y1="9"  x2="23" y2="15"/>
+              </svg>
+            )}
           </button>
 
           <input

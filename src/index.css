@@ -1394,6 +1394,21 @@ a      { text-decoration: none; color: inherit; }
   50%       { box-shadow: 0 0 0 8px rgba(161,0,255,0);  }
 }
 
+/* Speaker (bot-speaks / mute) toggle — always visible in the input bar. */
+.cp-speaker-btn        { color: rgba(80,0,140,.45); }
+.cp-speaker-btn:hover  { color: #6600CC; background: rgba(161,0,255,.10); }
+.cp-speaker-btn.active {
+  color: var(--purple);
+  background: rgba(161,0,255,.14);
+}
+.cp-speaker-btn.active:hover { background: rgba(161,0,255,.22); }
+/* Gentle pulse while a bot reply is being spoken */
+.cp-speaker-btn.speaking {
+  color: #C084FC;
+  background: rgba(161,0,255,.22);
+  animation: cp-speak-pulse 1.4s ease-in-out infinite;
+}
+
 /* ── 9. Chat message enter animation ─────────────────────────────────────── */
 
 @keyframes acnMsgIn {
