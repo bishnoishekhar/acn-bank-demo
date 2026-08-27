@@ -1301,30 +1301,30 @@ a      { text-decoration: none; color: inherit; }
   display: flex; align-items: center; gap: 10px;
   padding: 8px 10px;
   border-radius: 10px;
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(161,0,255,.05);
+  border: 1px solid rgba(161,0,255,.12);
   cursor: pointer;
   transition: background .15s, border-color .15s;
   font-family: inherit;
   text-align: left;
   width: 100%;
 }
-.acn-p2p-row:hover { background: rgba(161,0,255,.2); border-color: rgba(161,0,255,.35); }
+.acn-p2p-row:hover { background: rgba(161,0,255,.12); border-color: rgba(161,0,255,.30); }
 .acn-p2p-avatar {
   width: 36px; height: 36px;
   border-radius: 50%;
-  background: rgba(161,0,255,.3);
-  border: 1px solid rgba(161,0,255,.4);
+  background: #A100FF;
+  border: none;
   display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 700;
-  color: rgba(255,255,255,.9);
+  color: #fff;
   flex-shrink: 0;
   letter-spacing: -.5px;
 }
 .acn-p2p-info   { flex: 1; min-width: 0; }
-.acn-p2p-name   { font-size: 13.5px; font-weight: 600; color: rgba(255,255,255,.88); }
-.acn-p2p-username { font-size: 11.5px; color: rgba(197,96,255,.85); margin-top: 1px; }
-.acn-p2p-arrow  { font-size: 18px; color: rgba(255,255,255,.3); flex-shrink: 0; }
+.acn-p2p-name   { font-size: 13.5px; font-weight: 600; color: #1A0030; }
+.acn-p2p-username { font-size: 11.5px; color: #7C3AED; margin-top: 1px; }
+.acn-p2p-arrow  { font-size: 18px; color: rgba(80,0,140,.3); flex-shrink: 0; }
 
 /* AI suggestions */
 .cp-menu-ai { padding-bottom: 4px; }
@@ -1336,20 +1336,20 @@ a      { text-decoration: none; color: inherit; }
   padding-top: 4px;
 }
 .cp-ai-pill {
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.18);
+  background: #fff;
+  border: 1px solid rgba(161,0,255,.20);
   border-radius: 20px;
   padding: 9px 15px;
   font-size: 12.5px;
   font-weight: 600;
-  color: rgba(255,255,255,.88);
+  color: #2D0050;
   cursor: pointer;
   white-space: nowrap;
   font-family: 'DM Sans', sans-serif;
-  backdrop-filter: blur(8px);
-  transition: background .15s, transform .1s;
+  box-shadow: 0 1px 6px rgba(161,0,255,.08);
+  transition: background .15s, transform .1s, border-color .15s;
 }
-.cp-ai-pill:hover { background: rgba(255,255,255,.18); transform: translateY(-1px); }
+.cp-ai-pill:hover { background: #F5EEFF; border-color: rgba(161,0,255,.40); transform: translateY(-1px); }
 
 .cp-send-btn {
   width: 34px; height: 34px;
@@ -1449,12 +1449,12 @@ a      { text-decoration: none; color: inherit; }
   padding: 0;
 }
 
-/* Heading — large, centered, white on dark gradient */
+/* Heading — large, centered, dark on light gradient */
 .acn-combo-text {
   padding: 8px 0 4px;
   font-size: 22px;
   font-weight: 800;
-  color: #fff;
+  color: #1A0030;
   line-height: 1.3;
   text-align: center;
   letter-spacing: -.5px;
@@ -1463,7 +1463,7 @@ a      { text-decoration: none; color: inherit; }
   padding: 0 0 14px;
   font-size: 13px;
   font-weight: 400;
-  color: rgba(255,255,255,.6);
+  color: rgba(80,0,140,.55);
   text-align: center;
   line-height: 1.5;
 }
@@ -1473,16 +1473,14 @@ a      { text-decoration: none; color: inherit; }
 .acn-combo-table {
   margin: 0 auto 14px;
   max-width: 340px;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(161,0,255,.05);
+  border: 1px solid rgba(161,0,255,.14);
   border-radius: 12px;
   padding: 4px 14px;
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
 }
 .acn-combo-table-prefix {
   font-size: 12.5px;
-  color: rgba(255,255,255,.6);
+  color: rgba(80,0,140,.55);
   text-align: center;
   padding: 10px 0 2px;
 }
@@ -1494,11 +1492,11 @@ a      { text-decoration: none; color: inherit; }
   gap: 12px;
   padding: 8px 0;
   font-size: 12.5px;
-  border-bottom: 1px solid rgba(255,255,255,.08);
+  border-bottom: 1px solid rgba(161,0,255,.08);
 }
 .acn-combo-table-row:last-child { border-bottom: none; }
-.acn-combo-table-key { color: rgba(255,255,255,.55); flex-shrink: 0; }
-.acn-combo-table-val { color: rgba(255,255,255,.92); font-weight: 600; text-align: right; }
+.acn-combo-table-key { color: rgba(80,0,140,.5); flex-shrink: 0; }
+.acn-combo-table-val { color: #1A0030; font-weight: 600; text-align: right; }
 
 /* Wider tables (accounts, transactions) render as a header + grid */
 .acn-combo-table { max-width: 100%; overflow-x: auto; }
@@ -1510,15 +1508,15 @@ a      { text-decoration: none; color: inherit; }
   font-size: 12px;
 }
 .acn-combo-table-grid .hdr {
-  color: rgba(255,255,255,.45);
+  color: rgba(80,0,140,.45);
   font-size: 10.5px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .04em;
   padding-bottom: 6px;
-  border-bottom: 1px solid rgba(255,255,255,.12);
+  border-bottom: 1px solid rgba(161,0,255,.12);
 }
-.acn-combo-table-grid .cell { color: rgba(255,255,255,.9); }
+.acn-combo-table-grid .cell { color: #1A0030; }
 
 /* Irregular flex-wrap pill layout — width follows text length */
 .acn-combo-tiles {
@@ -1528,10 +1526,10 @@ a      { text-decoration: none; color: inherit; }
   gap: 9px;
 }
 
-/* Individual pill — auto-width, dark glass */
+/* Individual pill — white card, dark text */
 .acn-tile {
-  background: rgba(255,255,255,.10);
-  border: 1px solid rgba(255,255,255,.18);
+  background: #fff;
+  border: 1px solid rgba(161,0,255,.18);
   border-radius: 14px;
   padding: 13px 16px;
   cursor: pointer;
@@ -1541,30 +1539,28 @@ a      { text-decoration: none; color: inherit; }
   width: auto;       /* size to content */
   min-width: 130px;
   text-align: left;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(161,0,255,.08);
   transition: background .15s, border-color .18s, transform .12s, box-shadow .15s;
 }
 .acn-tile:hover {
-  background: rgba(255,255,255,.18);
-  border-color: rgba(255,255,255,.35);
+  background: #F5EEFF;
+  border-color: rgba(161,0,255,.40);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  box-shadow: 0 6px 20px rgba(161,0,255,.14);
 }
 .acn-tile:active { transform: translateY(0); }
 
 /* Emoji icon */
 .acn-tile-icon  { font-size: 20px; width: 26px; height: 26px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: none; border-radius: 0; line-height: 1; }
 .acn-tile-body  { flex: 1; min-width: 0; }
-.acn-tile-title { font-size: 12.5px; font-weight: 600; color: rgba(255,255,255,.9) !important; display: block; line-height: 1.35; }
+.acn-tile-title { font-size: 12.5px; font-weight: 600; color: #1A0030 !important; display: block; line-height: 1.35; }
 /* Description and chevron hidden in pill mode */
 .acn-tile-desc  { display: none; }
 .acn-tile-chev  { display: none; }
 
 /* Compact mode — when a form is active */
 .acn-combo-card.compact .acn-combo-text     { font-size: 13.5px; font-weight: 700; text-align: left; padding: 4px 0 2px; }
-.acn-combo-card.compact .acn-combo-subtitle { padding: 0 0 8px; font-size: 12px; text-align: left; color: rgba(255,255,255,.5); }
+.acn-combo-card.compact .acn-combo-subtitle { padding: 0 0 8px; font-size: 12px; text-align: left; color: rgba(80,0,140,.5); }
 .acn-combo-card.compact .acn-combo-tiles    { gap: 6px; }
 .acn-combo-card.compact .acn-tile           { padding: 9px 12px; border-radius: 10px; gap: 7px; min-width: 100px; }
 .acn-combo-card.compact .acn-tile-icon      { font-size: 15px; width: 18px; height: 18px; }
@@ -2012,7 +2008,8 @@ a      { text-decoration: none; color: inherit; }
 }
 
 /* ── 21. CSS isolation — prevent leakage into chat widgets ───────────────── */
-.cp-messages a    { color: inherit !important; text-decoration: none !important; }
+.cp-messages a    { color: #7C3AED !important; text-decoration: none !important; }
+.cp-messages a:hover { text-decoration: underline !important; }
 .cp-messages p    { margin: 0; padding: 0; }
 .cp-messages span { color: inherit; }
 
@@ -2025,7 +2022,7 @@ a      { text-decoration: none; color: inherit; }
   border-radius: var(--radius-sm);
   background: rgba(161,0,255,.14);
   border: 1px solid rgba(161,0,255,.32);
-  color: rgba(240,232,255,.86);
+  color: #4B0082;
   font-size: 12.5px;
   line-height: 1.55;
 }
@@ -2033,9 +2030,9 @@ a      { text-decoration: none; color: inherit; }
 .cs-empty {
   padding: 26px 20px;
   border-radius: var(--radius-md);
-  background: rgba(255,255,255,.05);
-  border: 1px dashed rgba(255,255,255,.18);
-  color: rgba(240,232,255,.62);
+  background: rgba(161,0,255,.04);
+  border: 1px dashed rgba(161,0,255,.20);
+  color: rgba(80,0,140,.5);
   font-size: 13.5px;
   line-height: 1.6;
   text-align: center;
