@@ -811,6 +811,23 @@ a      { text-decoration: none; color: inherit; }
 }
 .cw-art-dots { font-size: 8.5px; color: rgba(255,255,255,.7); letter-spacing: .6px; }
 
+/* Photo variant — real card image, white background blended away.
+   Mirrors .cs-art--photo on the landing page. */
+.cw-art--photo {
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #e8e8f0 0%, #d0d0e0 100%) !important;
+}
+.cw-art-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  user-select: none;
+  mix-blend-mode: multiply;
+}
+
 /* Carousel */
 .cw-carousel { margin: 4px 0 2px; }
 .cw-scroll {
@@ -907,15 +924,14 @@ a      { text-decoration: none; color: inherit; }
 .cw-table tr:last-child td { border-bottom: none; }
 .cw-spec-img { max-width: 56px; border-radius: 4px; }
 
-.cw-compare-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 11px;
+.cw-actions-row td {
   padding-top: 11px;
   border-top: 1px solid var(--border-light);
+  border-bottom: none;
+  text-align: center;
+  vertical-align: middle;
 }
-.cw-compare-actions .cw-btn { flex: 1 1 auto; min-width: 96px; }
+.cw-actions-row .cw-btn { width: 100%; }
 
 /* ── 7. Footer ───────────────────────────────────────────────────────────── */
 

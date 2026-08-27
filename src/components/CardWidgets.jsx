@@ -8,10 +8,13 @@
 //  This app replaces the GECX default renderer with its own chat surface, so
 //  without these both payloads were being dropped as "unrecognized payload".
 //
-//  The catalogue has no product photography, so cards are drawn with CSS using
-//  a hash of the product id for a stable accent — the same card always gets the
-//  same colour across turns.
+//  When src/data/cardImages.js has a photo for the productId, MiniCard renders
+//  it — matching the landing-page grid. Cards without a photo fall back to a
+//  CSS gradient keyed off a hash of the product id, so the same card always
+//  gets the same colour across turns.
 // ─────────────────────────────────────────────────────────────────────────────
+
+import { cardImageFor } from '../data/cardImages';
 
 const ACCENTS = [
   ['#1a1f36', '#2f3d6b'],
@@ -31,7 +34,21 @@ function accentFor(id = '') {
 const isPreApproved = (p) => /pre-?approved/i.test(p.subtitle || '');
 
 function MiniCard({ product }) {
+  const photo = cardImageFor(product.productId);
   const [a, b] = accentFor(product.productId || product.title);
+
+  if (photo) {
+    return (
+      <div
+        className="cw-art cw-art--photo"
+        style={{ background: `linear-gradient(135deg, ${a} 0%, ${b} 100%)` }}
+        aria-hidden="true"
+      >
+        <img src={photo} alt="" className="cw-art-photo" draggable={false} />
+      </div>
+    );
+  }
+
   return (
     <div
       className="cw-art"
@@ -137,19 +154,25 @@ export function CardCompare({ payload, onCta }) {
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            {/* A real row in the same table, so each button lines up under
+                its own card column instead of drifting from a separate
+                flex row that doesn't know the table's column widths. */}
+            <tr className="cw-actions-row">
+              <td className="cw-td-label" aria-hidden="true" />
+              {products.map((p) => (
+                <td key={(p.productId || p.title) + '-cta'}>
+                  <button
+                    className="cw-btn"
+                    onClick={() => onCta?.(`I want to apply for the ${p.title}`)}
+                  >
+                    Apply for {p.title.replace(/^ACN\s+/, '')}
+                  </button>
+                </td>
+              ))}
+            </tr>
+          </tfoot>
         </table>
-      </div>
-
-      <div className="cw-compare-actions">
-        {products.map((p) => (
-          <button
-            key={p.productId || p.title}
-            className="cw-btn"
-            onClick={() => onCta?.(`I want to apply for the ${p.title}`)}
-          >
-            Apply for {p.title.replace(/^ACN\s+/, '')}
-          </button>
-        ))}
       </div>
     </div>
   );

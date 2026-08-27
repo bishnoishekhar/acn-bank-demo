@@ -1,28 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { CARD_CATALOG, CARD_CATEGORIES } from '../../data/cardCatalog';
+import { CARD_IMAGES } from '../../data/cardImages';
 import { fetchCardCatalog, fetchCustomerCardHoldings } from '../../firebase';
 
 /* Maps a pre-approved offer id from financials/profile onto a catalogue card,
    so a signed-in customer sees their own offer flagged on the right product. */
 const OFFER_TO_CARD = {
   OFFER_TRAVEL_CC: 'acn-travel-rewards-visa',
-};
-
-/* Card images — served from /public/images.
-   Vite sets BASE_URL to the configured base (e.g. /acn-bank-demo/ in prod,
-   / in plain dev). Prefixing with it ensures the path resolves correctly in
-   both environments. */
-const BASE = import.meta.env.BASE_URL;
-const img  = (name) => `${BASE}images/${name}`;
-
-const CARD_IMAGES = {
-  'acn-infinite-travel-visa':     img('image 1.png'),
-  'acn-travel-rewards-visa':      img('image 2.png'),
-  'acn-cash-back-mastercard':     img('image 3.png'),
-  'acn-everyday-cash-mastercard': img('image 4.png'),
-  'acn-low-rate-visa':            img('image 5.png'),
-  'acn-starter-visa':             img('image 6.png'),
 };
 
 const FILTERS = [
