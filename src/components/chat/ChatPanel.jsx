@@ -167,7 +167,7 @@ const GUEST_SUGGESTIONS = [
   { label: '✈️ Best card for travel', utterance: 'Which card is best for travel?' },
   { label: '📝 Apply for a card',     utterance: 'I want to apply for a credit card' },
   { label: '🔐 Sign in',              utterance: SIGN_IN_SENTINEL },
-  { label: '💡 What can you do?',     utterance: 'What can you help me with?' },
+  { label: '💡 What can you do?',     utterance: 'How can you help me with?' },
 ];
 
 const CUSTOMER_SUGGESTIONS = [
