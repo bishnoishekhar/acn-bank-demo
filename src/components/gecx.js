@@ -1,8 +1,13 @@
 const DEPLOYMENT = 'projects/483471568825/locations/us/apps/27be6c70-74dc-4e50-a3e8-25b032e7c965/deployments/7cbb68f9-147f-4698-be02-e7ea5fa5d1a3';
 
+const SIGN_IN_RESUME_MESSAGE =
+  'I have signed in. Please continue with what I was doing.';
+
 let _initDone = false;
 let _onResponse = null;
 let _onRateLimited = null;
+let _authResumeInFlight = false;
+let _variableRetryTimer = null;
 
 export function setResponseHandler(fn) {
   _onResponse = fn;
@@ -15,100 +20,383 @@ export function setRateLimitHandler(fn) {
   _onRateLimited = fn;
 }
 
-/* ── Clear GECX-owned session storage ─────────────────────────────────────────
-   Our app only writes keys that start with 'acn_'. Everything else in
+/* Clear GECX-owned session storage.
+   Our app only writes keys that start with "acn_". Everything else in
    sessionStorage belongs to the GECX SDK (session ID, token, etc.).
    Clearing those keys forces the SDK to start a brand-new session on the next
    registerContext() call and fire the enableWelcomeEvent runSession.
 
    We also sweep localStorage for common GECX key patterns in case the SDK
-   persists the session there on some browsers / SDK versions.
-── */
+   persists the session there on some browsers or SDK versions.
+*/
 export function clearGecxSession() {
   try {
-    const ssRemoved = Object.keys(sessionStorage).filter(k => !k.startsWith('acn_'));
-    ssRemoved.forEach(k => sessionStorage.removeItem(k));
-    if (ssRemoved.length) console.log('[ACN] cleared GECX sessionStorage keys:', ssRemoved);
-  } catch (e) { /* ignore — storage may be restricted */ }
-
-  // Also sweep localStorage for GECX keys (sdk version-dependent)
-  try {
-    const lsRemoved = Object.keys(localStorage).filter(k =>
-      !k.startsWith('acn_') && (
-        k.startsWith('ce_')   || k.startsWith('goog_') ||
-        k.startsWith('df-')   || k.startsWith('chat-') ||
-        k.includes('session') || k.includes('Session')
-      )
+    const ssRemoved = Object.keys(sessionStorage).filter(
+      (key) => !key.startsWith('acn_')
     );
-    lsRemoved.forEach(k => localStorage.removeItem(k));
-    if (lsRemoved.length) console.log('[ACN] cleared GECX localStorage keys:', lsRemoved);
-  } catch (e) { /* ignore */ }
+
+    ssRemoved.forEach((key) => sessionStorage.removeItem(key));
+
+    if (ssRemoved.length) {
+      console.log(
+        '[ACN] cleared GECX sessionStorage keys:',
+        ssRemoved
+      );
+    }
+  } catch (error) {
+    // Ignore. Storage may be restricted.
+  }
+
+  try {
+    const lsRemoved = Object.keys(localStorage).filter(
+      (key) =>
+        !key.startsWith('acn_') &&
+        (key.startsWith('ce_') ||
+          key.startsWith('goog_') ||
+          key.startsWith('df-') ||
+          key.startsWith('chat-') ||
+          key.includes('session') ||
+          key.includes('Session'))
+    );
+
+    lsRemoved.forEach((key) => localStorage.removeItem(key));
+
+    if (lsRemoved.length) {
+      console.log(
+        '[ACN] cleared GECX localStorage keys:',
+        lsRemoved
+      );
+    }
+  } catch (error) {
+    // Ignore. Storage may be restricted.
+  }
 }
 
-/* ── Rotate the SDK session ID ─────────────────────────────────────────────────
-   The GECX / Dialogflow CX Messenger SDK honours the `session-id` attribute on
-   the <chat-messenger> element. Setting it to a fresh random value forces the SDK
-   to create a brand-new CES session even when it has a prior session ID cached in
-   memory — which is the case after a within-tab sign-out.
-
-   Called by the ChatPanel resetSignal effect so that clearing sessionStorage (done
-   separately) is reinforced by an in-memory session rotate. The next open will then
-   call initGecx() / registerContext() and the welcome event fires on the new session.
-── */
+/* Rotate the SDK session ID.
+   The GECX / Dialogflow CX Messenger SDK honours the "session-id" attribute on
+   the <chat-messenger> element. Setting it to a fresh random value forces the
+   SDK to create a brand-new CES session even when it has a prior session ID
+   cached in memory.
+*/
 export function rotateGecxSessionId() {
   try {
-    const el = document.querySelector('chat-messenger');
-    if (!el) return;
-    const newId = 'acn-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
-    el.setAttribute('session-id', newId);
-    console.log('[ACN] rotated GECX session-id →', newId);
-  } catch (e) { /* ignore */ }
+    const messenger = document.querySelector('chat-messenger');
+    if (!messenger) return;
+
+    const newId =
+      'acn-' +
+      Date.now().toString(36) +
+      '-' +
+      Math.random().toString(36).slice(2, 8);
+
+    messenger.setAttribute('session-id', newId);
+    console.log('[ACN] rotated GECX session-id:', newId);
+  } catch (error) {
+    // Ignore.
+  }
 }
 
-/* ── CES session variables (frontend → agent bridge) ───────────────────────────
-   The GECX SDK exposes `setVariables()` on the <chat-messenger> element. What it
-   stores is appended to EVERY CES request as an extra input:
-
-       { config: {...}, inputs: [ { text: "..." }, { variables: {...} } ] }
-
-   On the wire `variables` is a google.protobuf.Struct — a plain JSON object of
-   name → value. CES receives those as session variables (they must also be
-   declared in app.json variableDeclarations to be readable by agents).
-
-   This is how the web page tells the agent who is signed in, so a header
-   sign-in lets the chatbot skip its own authentication, and a chat sign-in is
-   reflected back into the page. One source of truth, no hidden system messages.
-
-   Applied on both the welcome event and every subsequent turn.
-── */
+/* CES session variables (frontend -> agent bridge).
+   The GECX SDK exposes setVariables() on the <chat-messenger> element. The
+   variables are appended to CES requests as session inputs.
+*/
 let _cesVars = {};
 
+const sleep = (milliseconds) =>
+  new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+function waitForTwoPaints() {
+  return new Promise((resolve) => {
+    if (typeof requestAnimationFrame !== 'function') {
+      setTimeout(resolve, 32);
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+}
+
+function getMessenger() {
+  return document.querySelector('chat-messenger');
+}
+
 function applyCesVariables() {
-  const el = document.querySelector('chat-messenger');
-  if (!el || typeof el.setVariables !== 'function') return false;
-  try {
-    el.setVariables({ ..._cesVars });
-    return true;
-  } catch (e) {
-    // presenter not attached yet — caller retries
+  const messenger = getMessenger();
+
+  if (
+    !messenger ||
+    typeof messenger.setVariables !== 'function'
+  ) {
     return false;
   }
+
+  try {
+    messenger.setVariables({ ..._cesVars });
+    return true;
+  } catch (error) {
+    // The presenter may not be attached yet. The caller can retry.
+    return false;
+  }
+}
+
+function scheduleCesVariableRetry() {
+  if (_variableRetryTimer) {
+    clearInterval(_variableRetryTimer);
+  }
+
+  let tries = 0;
+
+  _variableRetryTimer = setInterval(() => {
+    tries += 1;
+
+    if (applyCesVariables() || tries > 40) {
+      clearInterval(_variableRetryTimer);
+      _variableRetryTimer = null;
+    }
+  }, 100);
+}
+
+async function waitForReadyMessenger(timeoutMs = 5000) {
+  const deadline = Date.now() + timeoutMs;
+
+  while (Date.now() < deadline) {
+    const messenger = getMessenger();
+
+    if (
+      messenger &&
+      typeof messenger.setVariables === 'function' &&
+      typeof messenger.sendRequest === 'function'
+    ) {
+      return messenger;
+    }
+
+    await sleep(50);
+  }
+
+  throw new Error(
+    'GECX messenger did not become ready within the expected time.'
+  );
+}
+
+/* Apply the latest variable snapshot and give the web component enough time
+   to consume it before another runSession request starts. */
+async function flushCesVariables({ settleMs = 100 } = {}) {
+  const messenger = await waitForReadyMessenger();
+
+  const result = messenger.setVariables({ ..._cesVars });
+
+  // Compatible whether setVariables returns void or a Promise.
+  if (result && typeof result.then === 'function') {
+    await result;
+  }
+
+  await waitForTwoPaints();
+  await sleep(settleMs);
+
+  return messenger;
 }
 
 /* Merge variables into the CES session and flush them to the SDK.
    Retries briefly because the element is upgraded asynchronously by the SDK. */
 export function setCesVariables(vars) {
-  _cesVars = { ..._cesVars, ...vars };
-  console.log('[ACN] CES variables →', Object.keys(_cesVars).join(', '));
-  if (applyCesVariables()) return;
-  let tries = 0;
-  const t = setInterval(() => {
-    if (applyCesVariables() || ++tries > 40) clearInterval(t);
-  }, 100);
+  if (!vars || typeof vars !== 'object') {
+    console.warn(
+      '[ACN] ignoring invalid CES variables payload:',
+      vars
+    );
+    return;
+  }
+
+  _cesVars = {
+    ..._cesVars,
+    ...vars,
+  };
+
+  console.log('[ACN] CES variables updated:', {
+    auth_mode: _cesVars.auth_mode,
+    authentication_status: _cesVars.authentication_status,
+    auth_level: _cesVars.auth_level,
+    customerId: _cesVars.customerId,
+  });
+
+  if (!applyCesVariables()) {
+    scheduleCesVariableRetry();
+  }
 }
 
-/* Wipe the variable store — used on sign-out so a stale customerId can never
-   leak into the next (guest) session. */
+function firstPresentValue(...values) {
+  return values.find(
+    (value) =>
+      value !== undefined &&
+      value !== null &&
+      value !== ''
+  );
+}
+
+function addIfPresent(target, key, ...values) {
+  const value = firstPresentValue(...values);
+
+  if (value !== undefined) {
+    target[key] = value;
+  }
+}
+
+/* Build the trusted authenticated snapshot from the customer object returned
+   by the login operation. Do not build this object from React state
+   immediately after calling setState(). */
+export function buildAuthenticatedCesVariables(customer) {
+  const customerId = String(
+    firstPresentValue(
+      customer?.customerId,
+      customer?.customer_id
+    ) || ''
+  ).trim();
+
+  if (!customerId) {
+    throw new Error(
+      'Cannot build authenticated CES variables without customerId.'
+    );
+  }
+
+  const variables = {
+    auth_mode: 'authenticated',
+    authentication_status: true,
+    auth_level: 2,
+    is_existing_customer: true,
+    customerId,
+    customer_id:
+      firstPresentValue(
+        customer?.customer_id,
+        customerId
+      ) || customerId,
+    web_channel: true,
+  };
+
+  addIfPresent(
+    variables,
+    'pref_name',
+    customer?.pref_name,
+    customer?.preferred_name,
+    customer?.first_name
+  );
+
+  addIfPresent(
+    variables,
+    'customer_name',
+    customer?.customer_name,
+    customer?.full_name,
+    customer?.name
+  );
+
+  addIfPresent(
+    variables,
+    'customer_global_status',
+    customer?.customer_global_status,
+    customer?.global_status,
+    'active'
+  );
+
+  addIfPresent(
+    variables,
+    'annual_income',
+    customer?.annual_income
+  );
+
+  addIfPresent(
+    variables,
+    'credit_score_value',
+    customer?.credit_score_value,
+    customer?.credit_score
+  );
+
+  addIfPresent(
+    variables,
+    'spending_persona',
+    customer?.spending_persona
+  );
+
+  addIfPresent(
+    variables,
+    'kyc_expires_at',
+    customer?.kyc_expires_at
+  );
+
+  addIfPresent(
+    variables,
+    'email',
+    customer?.email,
+    customer?.email_address
+  );
+
+  addIfPresent(
+    variables,
+    'mobile_number',
+    customer?.mobile_number,
+    customer?.mobileNumber,
+    customer?.phone_number,
+    customer?.phoneNumber
+  );
+
+  return variables;
+}
+
+/* Store an authenticated customer snapshot without sending a conversational
+   turn. Use this for a normal header sign-in or before the chat is opened. */
+export function setAuthenticatedCustomerVariables(customer) {
+  const variables = buildAuthenticatedCesVariables(customer);
+  setCesVariables(variables);
+  return variables;
+}
+
+/* Atomically store the authenticated customer, flush the variables to the
+   messenger, and only then send the continuation turn.
+
+   Use this after a sign-in initiated from an open chat conversation. */
+export async function resumeGecxAfterSignIn(customer) {
+  if (_authResumeInFlight) {
+    console.warn(
+      '[ACN] ignoring duplicate sign-in resume request.'
+    );
+    return;
+  }
+
+  _authResumeInFlight = true;
+
+  try {
+    const authVariables =
+      buildAuthenticatedCesVariables(customer);
+
+    _cesVars = {
+      ..._cesVars,
+      ...authVariables,
+    };
+
+    console.log('[ACN] CES authenticated snapshot ready:', {
+      auth_mode: _cesVars.auth_mode,
+      authentication_status: _cesVars.authentication_status,
+      auth_level: _cesVars.auth_level,
+      customerId: _cesVars.customerId,
+    });
+
+    const messenger = await flushCesVariables();
+
+    const result = messenger.sendRequest(
+      'query',
+      SIGN_IN_RESUME_MESSAGE
+    );
+
+    if (result && typeof result.then === 'function') {
+      await result;
+    }
+  } finally {
+    _authResumeInFlight = false;
+  }
+}
+
+/* Wipe the variable store. Used on sign-out so a stale customerId can never
+   leak into the next guest session. */
 export function clearCesVariables() {
   _cesVars = {};
   applyCesVariables();
@@ -120,116 +408,199 @@ export function getCesVariables() {
 
 export function initGecx() {
   if (_initDone) return;
+
   _initDone = true;
+
   const doRegister = () => {
     try {
+      // Best effort before registration. This helps when the user signed in
+      // from the header before opening the chat.
+      applyCesVariables();
+
       window.chatSdk.registerContext(
         window.chatSdk.prebuilts.ces.createContext({
           deploymentName: DEPLOYMENT,
-          tokenBroker: { enableTokenBroker: true, enableRecaptcha: false },
+          tokenBroker: {
+            enableTokenBroker: true,
+            enableRecaptcha: false,
+          },
           enableWelcomeEvent: true,
         })
       );
+
       console.log('[ACN] GECX registered');
-      // Re-flush after registration: the presenter only exists from here on,
-      // and the welcome-event runSession fires immediately after.
+
+      // Re-apply after registration because the CES presenter may only be
+      // attached from this point forward.
       applyCesVariables();
-      setTimeout(applyCesVariables, 0);
-    } catch (e) {
-      console.error('[ACN] GECX init error:', e);
+
+      Promise.resolve().then(() => {
+        applyCesVariables();
+      });
+
+      setTimeout(() => {
+        applyCesVariables();
+      }, 50);
+    } catch (error) {
+      _initDone = false;
+      console.error('[ACN] GECX init error:', error);
     }
   };
+
   if (window.chatSdk) {
     doRegister();
   } else {
-    window.addEventListener('chat-messenger-loaded', doRegister);
+    window.addEventListener(
+      'chat-messenger-loaded',
+      doRegister,
+      { once: true }
+    );
   }
 }
 
 export function resetGecx() {
-  // Click the hidden GECX reset button to clear session token
-  const resetBtn = document.querySelector('chat-reset-session-button');
-  if (resetBtn) resetBtn.click();
-  // Try messenger built-in reset
-  const messenger = document.querySelector('chat-messenger');
-  if (messenger && typeof messenger.resetSession === 'function') messenger.resetSession();
-  // Re-register with fresh session
+  // Click the hidden GECX reset button to clear the session token.
+  const resetButton = document.querySelector(
+    'chat-reset-session-button'
+  );
+
+  if (resetButton) {
+    resetButton.click();
+  }
+
+  // Try the messenger built-in reset.
+  const messenger = getMessenger();
+
+  if (
+    messenger &&
+    typeof messenger.resetSession === 'function'
+  ) {
+    messenger.resetSession();
+  }
+
+  // Re-register with a fresh session.
   _initDone = false;
   setTimeout(() => initGecx(), 500);
 }
 
-/* ── Send message to GECX ── */
+/* Send a normal message to GECX.
+   Do not use this function for the immediate post-login continuation. Use
+   resumeGecxAfterSignIn(customer) instead. */
 export function gecxSend(text) {
-  const m = document.querySelector('chat-messenger');
-  if (m && typeof m.sendRequest === 'function') {
-    // Re-assert session variables first. clearGecxSession() wipes the SDK's
-    // own sessionStorage (including its variable store), so this guarantees
-    // every outgoing turn carries the current auth context.
+  const messenger = getMessenger();
+
+  if (
+    messenger &&
+    typeof messenger.sendRequest === 'function'
+  ) {
     applyCesVariables();
-    m.sendRequest('query', text);
+    return messenger.sendRequest('query', text);
   }
+
+  return undefined;
 }
 
 let _interceptorInstalled = false;
 
-/* ── Fetch interceptor — catches runSession responses ── */
+/* Fetch interceptor: catches runSession responses. */
 export function installFetchInterceptor() {
   if (_interceptorInstalled) return;
+
   _interceptorInstalled = true;
-  const _orig = window.fetch;
-  window.fetch = function (url, opts) {
-    const p = _orig.apply(this, arguments);
-    const urlStr = url ? url.toString() : '';
-    if (urlStr.includes('runSession')) {
-      console.log('[ACN] fetch interceptor caught runSession:', urlStr);
-      p.then((r) => {
-        if (r.status === 429) {
-          console.warn('[ACN] runSession rate-limited (429) — CES project quota exhausted');
-          if (_onRateLimited) _onRateLimited();
-          return;
-        }
-        r.clone().json().then((data) => {
-          console.log('[ACN] runSession response keys:', Object.keys(data || {}));
-          if (_onResponse && data?.outputs) {
-            console.log('[ACN] calling _onResponse with outputs:', data.outputs?.length);
-            _onResponse(data.outputs);
+
+  const originalFetch = window.fetch;
+
+  window.fetch = function (url, options) {
+    const promise = originalFetch.apply(this, arguments);
+    const urlString = url ? url.toString() : '';
+
+    if (urlString.includes('runSession')) {
+      console.log(
+        '[ACN] fetch interceptor caught runSession:',
+        urlString
+      );
+
+      promise
+        .then((response) => {
+          if (response.status === 429) {
+            console.warn(
+              '[ACN] runSession rate-limited (429). CES project quota exhausted.'
+            );
+
+            if (_onRateLimited) {
+              _onRateLimited();
+            }
+
+            return;
           }
-        }).catch((e) => { console.warn('[ACN] runSession JSON parse error:', e); });
-      }).catch((e) => { console.warn('[ACN] runSession fetch error:', e); });
+
+          response
+            .clone()
+            .json()
+            .then((data) => {
+              console.log(
+                '[ACN] runSession response keys:',
+                Object.keys(data || {})
+              );
+
+              if (_onResponse && data?.outputs) {
+                console.log(
+                  '[ACN] calling response handler with outputs:',
+                  data.outputs.length
+                );
+
+                _onResponse(data.outputs);
+              }
+            })
+            .catch((error) => {
+              console.warn(
+                '[ACN] runSession JSON parse error:',
+                error
+              );
+            });
+        })
+        .catch((error) => {
+          console.warn(
+            '[ACN] runSession fetch error:',
+            error
+          );
+        });
     }
-    return p;
+
+    return promise;
   };
 }
 
-/* ── Fallback event listeners ── */
+/* Fallback event listeners. */
 export function installEventListeners() {
-  ['df-response-received', 'ces-response-received', 'chat-response-received'].forEach((n) => {
-    window.addEventListener(n, (e) => {
-      if (_onResponse && e.detail?.outputs) {
-        _onResponse(e.detail.outputs);
+  [
+    'df-response-received',
+    'ces-response-received',
+    'chat-response-received',
+  ].forEach((eventName) => {
+    window.addEventListener(eventName, (event) => {
+      if (_onResponse && event.detail?.outputs) {
+        _onResponse(event.detail.outputs);
       }
     });
   });
 }
 
-/* ── Bootstrap — install interceptors on page load only, NOT initGecx ── */
+/* Bootstrap: install interceptors on page load only, not initGecx(). */
 export function bootstrapGecx() {
   installFetchInterceptor();
   installEventListeners();
-  /* Do NOT call initGecx here — enableWelcomeEvent must fire AFTER chat opens */
+
+  // Do not call initGecx here. enableWelcomeEvent must fire after chat opens.
 }
 
-/* ── Soft-reset: clears init flag so next open triggers a fresh initGecx().
-   Does NOT click the reset button — that auto-starts a new GECX session which
-   would conflict with the subsequent initGecx() call in the isOpen effect.
-   The sessionStorage cleanup is handled by clearGecxSession() in the isOpen
-   effect before initGecx() is called.
-── */
+/* Soft reset: clear the init flag so the next open starts a fresh initGecx().
+   It does not click the reset button. */
 export function softResetGecx() {
   _initDone = false;
 }
 
-/* Keep for backward-compat — a lighter flag-only reset used on mount. */
+/* Kept for backward compatibility. */
 export function clearGecxDone() {
   _initDone = false;
 }
