@@ -1,5 +1,15 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { initGecx, gecxSend, setResponseHandler, setRateLimitHandler, clearGecxDone, softResetGecx, clearGecxSession } from '../gecx';
+import {
+  initGecx,
+  gecxSend,
+  resumeGecxAfterSignIn,
+  resetGecx,
+  setResponseHandler,
+  setRateLimitHandler,
+  clearGecxDone,
+  softResetGecx,
+  clearGecxSession,
+} from '../gecx';
 import { useAuth } from '../../context/AuthContext';
 import ComboCard      from '../ComboCard';
 import AcnFormWidget  from '../AcnFormWidget';
@@ -224,6 +234,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const sendMessageRef = useRef(null);    // updated after sendMessage is defined
   const playTTSRef     = useRef(null);    // updated after playTTS is defined
   const startVoiceRef  = useRef(null);    // updated after startVoiceRecognition is defined
+  const authResumeInFlightRef = useRef(false); // prevents duplicate post-login resume turns
 
   // ── Scroll ─────────────────────────────────────────────────────────────────
   const scrollToBottom = useCallback(() => {
@@ -826,19 +837,41 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   useEffect(() => { onExposeReset?.(handleReset); }, [handleReset, onExposeReset]);
 
   /* ── Resume after an agent-gated sign-in ────────────────────────────────────
-     The transcript is kept intact. By the time this runs, App has already pushed
-     the authenticated variables into the CES session, so the agent sees
-     auth_mode="authenticated" on this very turn and continues from the
-     target_intent it stored before gating. */
-  const handleResumeAfterSignIn = useCallback(() => {
+     Keep the transcript intact, but do not send the continuation turn until
+     AuthContext has published auth_mode="authenticated" and a non-empty
+     customerId through setCesVariables(). This closes the race where React had
+     updated the page, but the GECX request still carried the previous guest
+     snapshot. */
+  const handleResumeAfterSignIn = useCallback(async () => {
+    if (authResumeInFlightRef.current) return;
+    authResumeInFlightRef.current = true;
+
     const name = customerName ? `, ${customerName}` : '';
+
     setMessages((prev) => [
       ...prev,
-      { type: 'bot', text: `You're signed in${name}. Picking up where we left off…`, id: uid() },
+      {
+        type: 'bot',
+        text: `You're signed in${name}. Picking up where we left off…`,
+        id: uid(),
+      },
     ]);
+
     showTyping();
-    gecxSend('I have signed in. Please continue with what I was doing.');
-  }, [customerName, showTyping]);
+
+    try {
+      const resumed = await resumeGecxAfterSignIn();
+
+      if (!resumed) {
+        removeTyping();
+        addBot(
+          "You're signed in, but I couldn't resume the previous step automatically. Please send your request again."
+        );
+      }
+    } finally {
+      authResumeInFlightRef.current = false;
+    }
+  }, [customerName, showTyping, removeTyping, addBot]);
 
   useEffect(() => { onExposeResume?.(handleResumeAfterSignIn); },
     [handleResumeAfterSignIn, onExposeResume]);
