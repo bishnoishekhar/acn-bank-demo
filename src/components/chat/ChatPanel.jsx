@@ -762,102 +762,20 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     });
   }, [removeTyping, addBot]);
 
-  // ── acn-session-data (full session replay from the index.html interceptor) ─
+  // ── acn-session-data DISABLED ──────────────────────────────────────────────
+  // The index.html interceptor that fired this event is now disabled.
+  // The canonical response path is gecx.js installFetchInterceptor() → _onResponse.
+  // This handler is kept here for reference but no longer active.
+  /*
   useEffect(() => {
     const handler = (e) => {
       const data = e.detail;
-      console.log('[ACN] acn-session-data fired, messages:', data?.messages?.length ?? 'none');
-      if (!data?.messages) return;
-      const outputs = [];
-
-      const lastUserIdx = data.messages.reduce(
-        (acc, msg, i) => (msg.role === 'user' ? i : acc), -1,
-      );
-      const turnMessages = data.messages.slice(lastUserIdx + 1);
-
-      // Pass 1: build tool registry and widget order
-      const toolMeta         = {};
-      const widgetOrder      = [];
-      const quickActionQueue = [];
-
-      for (const msg of turnMessages) {
-        if (msg.role === 'user') continue;
-        for (const chunk of msg.chunks || []) {
-          const tc = chunk.toolCall;
-          const tr = chunk.toolResponse;
-          if (tc?.id) {
-            if (!toolMeta[tc.id]) toolMeta[tc.id] = {};
-            if (tc.displayName)    toolMeta[tc.id].name    = tc.displayName;
-            if (tc.args?.summary)  toolMeta[tc.id].summary = tc.args.summary;
-            if (tc.args?.payload) {
-              toolMeta[tc.id].argsPayload = tc.args.payload;
-              widgetOrder.push(tc.id);
-            } else if (tc.args?.actions) {
-              quickActionQueue.push({
-                actions: tc.args.actions,
-                summary: tc.args.summary,
-                name:    tc.displayName,
-              });
-            }
-          }
-          if (tr?.id) {
-            if (!toolMeta[tr.id]) toolMeta[tr.id] = {};
-            if (tr.displayName)       toolMeta[tr.id].name    = tr.displayName;
-            if (tr.response?.summary) toolMeta[tr.id].summary = tr.response.summary;
-          }
-        }
-      }
-
-      // Pass 2: text and annotated chunk.payloads in document order
-      let payloadIdx = 0;
-      for (const msg of turnMessages) {
-        if (msg.role === 'user') continue;
-        for (const chunk of msg.chunks || []) {
-          if (chunk.text) outputs.push({ text: chunk.text });
-          if (chunk.payload) {
-            if (!isKnownPayload(chunk.payload)) continue;
-            const meta      = toolMeta[widgetOrder[payloadIdx]];
-            const withName  = meta?.name ? { ...chunk.payload, name: meta.name } : chunk.payload;
-            const annotated = meta?.summary && !withName.summary
-              ? { ...withName, summary: meta.summary }
-              : withName;
-            outputs.push({ payload: annotated });
-            payloadIdx++;
-          }
-        }
-      }
-
-      // Pass 3: widgetOrder entries whose tool returned no chunk.payload
-      for (let i = payloadIdx; i < widgetOrder.length; i++) {
-        const meta = toolMeta[widgetOrder[i]];
-        if (meta?.argsPayload) {
-          const withName  = meta?.name ? { ...meta.argsPayload, name: meta.name } : meta.argsPayload;
-          const annotated = meta.summary && !withName.summary
-            ? { ...withName, summary: meta.summary }
-            : withName;
-          outputs.push({ payload: annotated });
-        }
-      }
-
-      // Pass 4: quick_actions (args-only, never in chunk.payloads)
-      for (const qa of quickActionQueue) {
-        outputs.push({
-          payload: qa.name
-            ? { actions: qa.actions, summary: qa.summary, name: qa.name }
-            : { actions: qa.actions, summary: qa.summary },
-        });
-      }
-
-      if (outputs.length) {
-        // Always let acn-session-data override a partial earlier GECX native event
-        lastProcessed.current = { time: 0, sig: '' };
-        processOutputsRef.current(outputs);
-      }
+      // ... reconstruction logic omitted ...
     };
-
     window.addEventListener('acn-session-data', handler);
     return () => window.removeEventListener('acn-session-data', handler);
   }, []);
+  */
 
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
