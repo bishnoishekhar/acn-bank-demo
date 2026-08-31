@@ -29,26 +29,31 @@
     })();
   </script>
   <script>
-    /* Must run before chat-messenger.js (which is deferred) so GECX captures our
-       patched fetch. Fires 'acn-session-data' on window for ChatWindow.jsx to handle. */
-    (function () {
-      var _origFetch = window.fetch;
-      window.fetch = function () {
-        var p = _origFetch.apply(this, arguments);
-        var raw = arguments[0];
-        var url = (raw && typeof raw === 'object' && raw.url) ? raw.url : String(raw || '');
-        if (url.indexOf('runSession') !== -1) {
-          p.then(function (r) {
-            r.clone().json().then(function (d) {
-              if (d && d.messages) {
-                window.dispatchEvent(new CustomEvent('acn-session-data', { detail: d }));
-              }
-            }).catch(function () {});
-          }).catch(function () {});
-        }
-        return p;
-      };
-    })();
+    /* DISABLED: Fetch interceptor that fired acn-session-data events.
+       The canonical response path is now gecx.js installFetchInterceptor(),
+       which extracts data.outputs directly from runSession responses.
+       Disabling this prevents duplicate response processing.
+       
+       Original code:
+       (function () {
+         var _origFetch = window.fetch;
+         window.fetch = function () {
+           var p = _origFetch.apply(this, arguments);
+           var raw = arguments[0];
+           var url = (raw && typeof raw === 'object' && raw.url) ? raw.url : String(raw || '');
+           if (url.indexOf('runSession') !== -1) {
+             p.then(function (r) {
+               r.clone().json().then(function (d) {
+                 if (d && d.messages) {
+                   window.dispatchEvent(new CustomEvent('acn-session-data', { detail: d }));
+                 }
+               }).catch(function () {});
+             }).catch(function () {});
+           }
+           return p;
+         };
+       })();
+    */
   </script>
   <script defer src="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/chat-messenger.js"></script>
   <link rel="stylesheet" href="https://www.gstatic.com/chat-messenger/sdk/prod/v1.16/themes/chat-messenger-default.css">

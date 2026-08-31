@@ -516,6 +516,10 @@ export function gecxSend(text) {
 let _interceptorInstalled = false;
 
 /* Fetch interceptor: catches runSession responses. */
+/* Fetch interceptor: catches runSession responses.
+   This is the CANONICAL response path. runSession returns { outputs: [...], turnCompleted, ... }
+   directly in the response body. We extract outputs and pass to _onResponse.
+*/
 export function installFetchInterceptor() {
   if (_interceptorInstalled) return;
 
@@ -528,11 +532,6 @@ export function installFetchInterceptor() {
     const urlString = url ? url.toString() : '';
 
     if (urlString.includes('runSession')) {
-      console.log(
-        '[ACN] fetch interceptor caught runSession:',
-        urlString
-      );
-
       promise
         .then((response) => {
           if (response.status === 429) {
@@ -551,32 +550,17 @@ export function installFetchInterceptor() {
             .clone()
             .json()
             .then((data) => {
-              console.log(
-                '[ACN] runSession response keys:',
-                Object.keys(data || {})
-              );
-
+              // CANONICAL PATH: runSession returns { outputs: [...] } directly
               if (_onResponse && data?.outputs) {
-                console.log(
-                  '[ACN] calling response handler with outputs:',
-                  data.outputs.length
-                );
-
                 _onResponse(data.outputs);
               }
             })
             .catch((error) => {
-              console.warn(
-                '[ACN] runSession JSON parse error:',
-                error
-              );
+              console.warn('[ACN] runSession JSON parse error:', error);
             });
         })
         .catch((error) => {
-          console.warn(
-            '[ACN] runSession fetch error:',
-            error
-          );
+          console.warn('[ACN] runSession fetch error:', error);
         });
     }
 
@@ -584,8 +568,17 @@ export function installFetchInterceptor() {
   };
 }
 
-/* Fallback event listeners. */
+/* Fallback event listeners — DISABLED to prevent duplicate response processing.
+   These listeners (df-response-received, ces-response-received, chat-response-received)
+   could deliver the same runSession responses as the canonical fetch interceptor path.
+   To prevent duplicates, they are disabled.
+   
+   Re-enable only if a separate feature demonstrably requires these events.
+*/
 export function installEventListeners() {
+  // DISABLED: Event listeners removed to prevent duplicate response processing
+  // Original code:
+  /*
   [
     'df-response-received',
     'ces-response-received',
@@ -597,9 +590,13 @@ export function installEventListeners() {
       }
     });
   });
+  */
 }
 
-/* Bootstrap: install interceptors on page load only, not initGecx(). */
+/* Bootstrap: install interceptors on page load only, not initGecx().
+   The fetch interceptor (installFetchInterceptor) is the CANONICAL response path.
+   It catches runSession calls and extracts data.outputs for processing.
+*/
 export function bootstrapGecx() {
   installFetchInterceptor();
   installEventListeners();
