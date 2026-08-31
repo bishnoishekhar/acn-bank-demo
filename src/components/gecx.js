@@ -353,18 +353,26 @@ export function setAuthenticatedCustomerVariables(customer) {
 /* Atomically store the authenticated customer, flush the variables to the
    messenger, and only then send the continuation turn.
 
-   Use this after a sign-in initiated from an open chat conversation. */
+   Use this after a sign-in initiated from an open chat conversation.
+   
+   Returns: true if the continuation was successfully dispatched, false otherwise.
+   The caller must not leave uncaught promise errors. */
 export async function resumeGecxAfterSignIn(customer) {
   if (_authResumeInFlight) {
     console.warn(
       '[ACN] ignoring duplicate sign-in resume request.'
     );
-    return;
+    return false;
   }
 
   _authResumeInFlight = true;
 
   try {
+    if (!customer) {
+      console.error('[ACN] resumeGecxAfterSignIn called without customer object');
+      return false;
+    }
+
     const authVariables =
       buildAuthenticatedCesVariables(customer);
 
@@ -390,6 +398,11 @@ export async function resumeGecxAfterSignIn(customer) {
     if (result && typeof result.then === 'function') {
       await result;
     }
+
+    return true;
+  } catch (error) {
+    console.error('[ACN] resumeGecxAfterSignIn error:', error);
+    return false;
   } finally {
     _authResumeInFlight = false;
   }

@@ -1079,13 +1079,22 @@ a      { text-decoration: none; color: inherit; }
   box-shadow: 0 2px 12px rgba(161,0,255,.08);
   border-radius: 4px 16px 16px 16px;
   padding: 12px 16px;
-  font-size: 13.5px;
+  font-size: 15px;
   color: #2D0050 !important;
   line-height: 1.65;
   max-width: 82%;
   align-self: flex-start;
 }
 .cp-bot-bubble.consecutive { border-radius: 16px; margin-top: -2px; }
+
+/* Bot widget — lightweight container for widget-only turns (no text bubble) */
+.cp-bot-widget {
+  align-self: flex-start;
+  max-width: 82%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
 
 /* User bubble — solid purple, white text */
 .cp-user-bubble {
@@ -1094,7 +1103,7 @@ a      { text-decoration: none; color: inherit; }
   color: #fff;
   border-radius: 16px 4px 16px 16px;
   padding: 11px 16px;
-  font-size: 13.5px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1.55;
   max-width: 78%;
@@ -1469,7 +1478,7 @@ a      { text-decoration: none; color: inherit; }
 
 /* ── 11. Chat widget: combo card (quick actions) — pill grid style ─────── */
 
-/* Card wrapper is transparent — tiles sit directly on the gradient bg */
+/* Card wrapper — when heading exists, use white bubble styling for recommendation text */
 .acn-combo-card {
   background: transparent;
   border: none;
@@ -1478,24 +1487,35 @@ a      { text-decoration: none; color: inherit; }
   align-self: stretch;
   overflow: visible;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-/* Heading — large, centered, dark on light gradient */
+/* Heading text — render as normal bot message (white bubble, left-aligned, standard size).
+   This handles recommendation/explanatory text before quick actions, which should use
+   the same conversational styling as the rest of bot history, not landing-page hero style. */
 .acn-combo-text {
-  padding: 8px 0 4px;
-  font-size: 22px;
-  font-weight: 800;
-  color: #1A0030;
-  line-height: 1.3;
-  text-align: center;
-  letter-spacing: -.5px;
+  background: #fff;
+  border: 1px solid rgba(161,0,255,.16);
+  box-shadow: 0 2px 12px rgba(161,0,255,.08);
+  border-radius: 4px 16px 16px 16px;
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 400;
+  color: #2D0050;
+  line-height: 1.5;
+  text-align: left;
+  letter-spacing: 0;
+  max-width: 82%;
 }
+
 .acn-combo-subtitle {
   padding: 0 0 14px;
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 400;
   color: rgba(80,0,140,.55);
-  text-align: center;
+  text-align: left;
   line-height: 1.5;
 }
 
@@ -1510,7 +1530,7 @@ a      { text-decoration: none; color: inherit; }
   padding: 4px 14px;
 }
 .acn-combo-table-prefix {
-  font-size: 12.5px;
+  font-size: 13px;
   color: rgba(80,0,140,.55);
   text-align: center;
   padding: 10px 0 2px;
@@ -1522,7 +1542,7 @@ a      { text-decoration: none; color: inherit; }
   justify-content: space-between;
   gap: 12px;
   padding: 8px 0;
-  font-size: 12.5px;
+  font-size: 13px;
   border-bottom: 1px solid rgba(161,0,255,.08);
 }
 .acn-combo-table-row:last-child { border-bottom: none; }
@@ -1536,11 +1556,11 @@ a      { text-decoration: none; color: inherit; }
   row-gap: 7px;
   column-gap: 16px;
   padding: 10px 0;
-  font-size: 12px;
+  font-size: 13px;
 }
 .acn-combo-table-grid .hdr {
   color: rgba(80,0,140,.45);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .04em;
@@ -1549,26 +1569,28 @@ a      { text-decoration: none; color: inherit; }
 }
 .acn-combo-table-grid .cell { color: #1A0030; }
 
-/* Irregular flex-wrap pill layout — width follows text length */
+/* Irregular flex-wrap pill layout — width follows text length, wraps responsively */
 .acn-combo-tiles {
   padding: 4px 0 8px;
   display: flex;
   flex-wrap: wrap;
   gap: 9px;
+  justify-content: flex-start;
 }
 
-/* Individual pill — white card, dark text */
+/* Individual pill — white card, dark text, min-height ~42px per requirements */
 .acn-tile {
   background: #fff;
   border: 1px solid rgba(161,0,255,.18);
   border-radius: 14px;
-  padding: 13px 16px;
+  padding: 10px 16px;
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 9px;
   width: auto;       /* size to content */
   min-width: 130px;
+  min-height: 42px;
   text-align: left;
   box-shadow: 0 2px 10px rgba(161,0,255,.08);
   transition: background .15s, border-color .18s, transform .12s, box-shadow .15s;
@@ -1584,22 +1606,38 @@ a      { text-decoration: none; color: inherit; }
 /* Emoji icon */
 .acn-tile-icon  { font-size: 20px; width: 26px; height: 26px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: none; border-radius: 0; line-height: 1; }
 .acn-tile-body  { flex: 1; min-width: 0; }
-.acn-tile-title { font-size: 12.5px; font-weight: 600; color: #1A0030 !important; display: block; line-height: 1.35; }
+.acn-tile-title { font-size: 14px; font-weight: 600; color: #1A0030 !important; display: block; line-height: 1.35; word-wrap: break-word; overflow-wrap: break-word; }
 /* Description and chevron hidden in pill mode */
 .acn-tile-desc  { display: none; }
 .acn-tile-chev  { display: none; }
 
-/* Compact mode — when a form is active */
-.acn-combo-card.compact .acn-combo-text     { font-size: 13.5px; font-weight: 700; text-align: left; padding: 4px 0 2px; }
-.acn-combo-card.compact .acn-combo-subtitle { padding: 0 0 8px; font-size: 12px; text-align: left; color: rgba(80,0,140,.5); }
+/* Compact mode — when a form is active, reduce heading size and remove bubble styling */
+.acn-combo-card.compact .acn-combo-text {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  padding: 4px 0 2px;
+  max-width: 100%;
+}
+.acn-combo-card.compact .acn-combo-subtitle { padding: 0 0 8px; font-size: 13px; text-align: left; color: rgba(80,0,140,.5); }
 .acn-combo-card.compact .acn-combo-tiles    { gap: 6px; }
-.acn-combo-card.compact .acn-tile           { padding: 9px 12px; border-radius: 10px; gap: 7px; min-width: 100px; }
+.acn-combo-card.compact .acn-tile           { padding: 8px 12px; border-radius: 10px; gap: 7px; min-width: 100px; min-height: 38px; }
 .acn-combo-card.compact .acn-tile-icon      { font-size: 15px; width: 18px; height: 18px; }
-.acn-combo-card.compact .acn-tile-title     { font-size: 11.5px; }
+.acn-combo-card.compact .acn-tile-title     { font-size: 12px; }
 
 /* Single-column fallback on narrow screens */
 @media (max-width: 420px) {
   .acn-combo-tiles { grid-template-columns: 1fr; }
+}
+
+/* Combo card wrapper in message list — ensure bot-side alignment */
+[data-combo="true"] {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── 12. Chat widget: form ───────────────────────────────────────────────── */
@@ -2036,6 +2074,16 @@ a      { text-decoration: none; color: inherit; }
   .nav-btn-solid  { display: none; }
   .hero-stats     { grid-template-columns: repeat(2, 1fr); }
   .si-card        { padding: 28px 20px 22px; }
+
+  /* Mobile typography normalization for chat */
+  .cp-bot-bubble,
+  .cp-user-bubble { font-size: 14px; }
+  
+  .acn-combo-text { font-size: 15px; }
+  .acn-combo-subtitle { font-size: 13px; }
+  .acn-tile-title { font-size: 13px; }
+  .acn-combo-card.compact .acn-combo-text { font-size: 13px; }
+  .acn-combo-card.compact .acn-tile-title { font-size: 11px; }
 }
 
 /* ── 21. CSS isolation — prevent leakage into chat widgets ───────────────── */
