@@ -36,7 +36,8 @@ export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav
     const result = await signIn(`+${digits}`, pin);
     setLoading(false);
     if (result.success) {
-      onSuccess?.(result);
+      // Pass both the success flag and the customer object to the callback
+      onSuccess?.(result.customer);
       onClose();
     }
   };

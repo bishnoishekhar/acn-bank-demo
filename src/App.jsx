@@ -134,14 +134,15 @@ function AppContent() {
   const openSignInFromChat = () => { signInOrigin.current = 'chat'; setSignInOpen(true); };
   const closeSignIn        = () => setSignInOpen(false);
 
-  /* After a successful sign-in the auth effect above has already pushed the new
-     variables into the CES session, so both paths below are only about what the
-     user should see next. */
-  const handleSignInSuccess = () => {
+  /* After a successful sign-in, the Chat origin needs the customer object
+     directly from the login call, not from React state (which updates asynchronously).
+     The auth effect that pushes variables to CES fires independently. */
+  const handleSignInSuccess = (customer) => {
     if (signInOrigin.current === 'chat') {
       // The agent asked us to authenticate mid-flow. Keep the transcript and
-      // let CES pick the journey back up from its own target_intent.
-      chatResumeRef.current?.();
+      // resume with the customer object passed from SignInModal (not from state).
+      // This avoids the race where React hasn't updated state yet.
+      chatResumeRef.current?.(customer);
       setChatOpen(true);
       return;
     }

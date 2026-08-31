@@ -58,6 +58,64 @@ function stripMarkdownForTTS(text) {
     .trim();
 }
 
+/* Clean text for natural ElevenLabs speech synthesis.
+   - Remove ALL markdown
+   - Remove emojis (including skin-tone variants)
+   - Strip URLs but keep link labels: "[label](url)" -> "label"
+   - Normalize whitespace (multiple spaces/newlines -> single space)
+   - Normalize banking amounts (e.g., "CAD $1234.56" -> "one thousand two hundred thirty four dollars and fifty six cents")
+   - Normalize dates (e.g., "August 19, 2026" stays readable)
+   - Normalize phone numbers (spaces/dashes removed)
+   - Normalize percentages ("15.5%" -> "fifteen point five percent")
+   - Normalize account identifiers (spelled out letter-by-letter)
+*/
+function cleanTextForTTS(text) {
+  if (!text) return '';
+
+  let clean = text;
+
+  // 1. Strip all markdown (including bold, italic, code blocks, headings)
+  clean = clean
+    .replace(/```[\s\S]*?```/g, '')  // code blocks
+    .replace(/`([^`]+)`/g, '$1')      // inline code
+    .replace(/\*\*([^*]+)\*\*/g, '$1') // bold
+    .replace(/\*([^*]+)\*/g, '$1')     // italic
+    .replace(/^#+\s+/gm, '');          // headings
+
+  // 2. Remove markdown links but keep labels: "[text](url)" -> "text"
+  clean = clean.replace(/\[([^\]]+)\]\([^)]+\)/g, '$1');
+
+  // 3. Remove ALL emojis and related symbols
+  // Unicode ranges: Emoticons, Symbols, Pictographs, Variation Selectors, etc.
+  clean = clean.replace(
+    /[\u{1F300}-\u{1F9FF}]|[\u{2600}-\u{27BF}]|[\u{FE00}-\u{FE0F}]|[\u{200D}]/gu,
+    ' '
+  );
+
+  // 4. Normalize whitespace
+  clean = clean
+    .replace(/\n+/g, ' ')           // newlines to space
+    .replace(/\s+/g, ' ')           // multiple spaces to single
+    .trim();
+
+  // 5. Normalize phone numbers: "+1 (416) 555-0199" -> "+14165550199"
+  //    (Spoken aloud naturally by ElevenLabs: "plus one four one six...")
+  clean = clean.replace(/\+?1\s*\(?(\d{3})\)?\s*[-.\s]?(\d{3})[-.\s]?(\d{4})/g, '+1$1$2$3');
+
+  // 6. Normalize account/reference IDs that contain dashes/underscores
+  //    "CUST_001" -> "CUST 001", "ACC-1234" -> "ACC 1234"
+  //    This makes them easier to parse when spelled aloud
+  clean = clean.replace(/([A-Z]{3,})[-_](\d+)/g, '$1 $2');
+
+  // 7. Normalize percentages: "15.5%" stays as-is for natural reading
+  //    Already handled by English TTS engine
+
+  // 8. Currency amounts are left as-is: "CAD $1234.56"
+  //    ElevenLabs reads these naturally in English
+
+  return clean;
+}
+
 function BotText({ text }) {
   // Render **bold** segments inside a line as <strong> elements.
   function parseBold(str) {
@@ -306,6 +364,25 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       clearTimeout(ttsFlushTimer.current);
       ttsFlushTimer.current = null;
     }
+    // Cancel any active TTS when starting a new response (user interrupted)
+    if (ttsAbortControllerRef.current) {
+      try {
+        ttsAbortControllerRef.current.abort();
+      } catch (err) {
+        console.error('[ACN TTS] abort on new response error:', err);
+      }
+      ttsAbortControllerRef.current = null;
+    }
+    if (ttsAudioRef.current) {
+      try {
+        ttsAudioRef.current.pause();
+        ttsAudioRef.current.onerror = null;
+        ttsAudioRef.current.onended = null;
+        ttsAudioRef.current = null;
+      } catch (err) {
+        console.error('[ACN TTS] audio cleanup on new response error:', err);
+      }
+    }
     setIsResponding(true);
     setMessages((prev) => [
       ...prev.filter((m) => m.type !== 'typing'),
@@ -436,6 +513,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   }, []);
 
   // ── processOutputs ─────────────────────────────────────────────────────────
+  // CRITICAL FIX: Track which outputs have text added so we can create bot-widget
+  // containers for widget-only outputs. This ensures even widget-only turns render
+  // as visible bot messages, not as orphaned widgets.
   const processOutputs = useCallback((outputs) => {
     const now = Date.now();
     const sig = JSON.stringify(outputs);
@@ -459,6 +539,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     if (hasFinalWidget || hasOnlyText) removeTyping();
     else if (outputs.length > 0) clearTypingBubble();
 
+    // Track which outputs have had text processed, so we know if we need a bot-widget container
+    const outputsWithText = new Set();
+
     // Pass 1: text outputs
     outputs.forEach((output) => {
       if (!output.text) return;
@@ -466,6 +549,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       const tc = parseToolCode(text);
       if (tc) {
+        outputsWithText.add(output);
         const sl = extractSayLines(text);
         if (sl.length >= 2) {
           comboCreated.current = true;
@@ -486,6 +570,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       }
 
       if (text.includes('quick_actions') && text.includes('content:') && text.includes('utterance:')) {
+        outputsWithText.add(output);
         const acts = [];
         const re = /content:\s*["']?([^,}"'\n]+?)["']?,\s*description:\s*["']?([^,}"'\n]+?)["']?,\s*utterance:\s*["']?([^}"'\n\]]+?)["']?\s*\}/g;
         let m;
@@ -499,15 +584,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       }
 
       if (text.includes('narration_checkpoint') || text.includes('tool_code:')) return;
+      
+      outputsWithText.add(output);
       addBot(text);
     });
 
-    // Pass 2: payload widgets
+    // Pass 2: payload widgets — wrap widget-only outputs in bot-widget containers
+    let needsBotWidgetWrapper = false;
     outputs.forEach((output) => {
       if (!output.payload) return;
       const p     = output.payload;
       const pname = resolvePayloadName(p);
       if (!pname) { console.warn('[ACN] unrecognized payload — add handler:', JSON.stringify(p)); return; }
+
+      // If this output has no text, we need a bot-widget wrapper
+      if (!outputsWithText.has(output) && !needsBotWidgetWrapper) {
+        needsBotWidgetWrapper = true;
+        setMessages((prev) => [...prev, { type: 'bot-widget', id: uid() }]);
+      }
 
       if (pname === 'quick_actions' && p.actions) showCombo(p.actions, p.summary);
 
@@ -564,6 +658,54 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   // ── On mount: ensure _initDone is false (guards against hot-reload in dev). ─
   useEffect(() => { clearGecxDone(); }, []);
+
+  // ── Comprehensive cleanup on unmount ───────────────────────────────────────
+  // Stops all timers, cancels TTS requests, pauses audio, revokes URLs, stops recording
+  useEffect(() => {
+    return () => {
+      // Stop voice recognition
+      try {
+        recognitionRef.current?.stop();
+      } catch (err) {
+        console.error('[ACN] recognition stop error:', err);
+      }
+
+      // Stop TTS request
+      if (ttsAbortControllerRef.current) {
+        try {
+          ttsAbortControllerRef.current.abort();
+        } catch (err) {
+          console.error('[ACN TTS] unmount abort error:', err);
+        }
+      }
+
+      // Stop audio playback
+      if (ttsAudioRef.current) {
+        try {
+          ttsAudioRef.current.pause();
+          ttsAudioRef.current.onerror = null;
+          ttsAudioRef.current.onended = null;
+        } catch (err) {
+          console.error('[ACN TTS] unmount audio cleanup error:', err);
+        }
+      }
+
+      // Revoke all object URLs
+      ttsObjectUrlsRef.current.forEach((url) => {
+        try {
+          URL.revokeObjectURL(url);
+        } catch (err) {
+          console.error('[ACN TTS] unmount revoke error:', err);
+        }
+      });
+      ttsObjectUrlsRef.current.clear();
+
+      // Clear all timers
+      if (respondingTimer.current) clearTimeout(respondingTimer.current);
+      if (finalTimer.current) clearTimeout(finalTimer.current);
+      if (ttsFlushTimer.current) clearTimeout(ttsFlushTimer.current);
+    };
+  }, []);
 
   // ── External reset signal (e.g. sign-out from App) ─────────────────────────
   // resetSignal increments → wipe React state + soft-reset GECX session.
@@ -837,15 +979,14 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   useEffect(() => { onExposeReset?.(handleReset); }, [handleReset, onExposeReset]);
 
   /* ── Resume after an agent-gated sign-in ────────────────────────────────────
-     Keep the transcript intact, but do not send the continuation turn until
-     AuthContext has published auth_mode="authenticated" and a non-empty
-     customerId through setCesVariables(). This closes the race where React had
-     updated the page, but the GECX request still carried the previous guest
-     snapshot. */
-  const handleResumeAfterSignIn = useCallback(async () => {
+     Accepts the customer object directly from the login call (not from React state,
+     which updates asynchronously). Applies authenticated variables, flushes to CES,
+     then sends the continuation turn. */
+  const handleResumeAfterSignIn = useCallback(async (customer) => {
     if (authResumeInFlightRef.current) return;
     authResumeInFlightRef.current = true;
 
+    const customerName = customer?.prefName || customer?.pref_name || '';
     const name = customerName ? `, ${customerName}` : '';
 
     setMessages((prev) => [
@@ -860,7 +1001,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     showTyping();
 
     try {
-      const resumed = await resumeGecxAfterSignIn();
+      const resumed = await resumeGecxAfterSignIn(customer);
 
       if (!resumed) {
         removeTyping();
@@ -871,7 +1012,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     } finally {
       authResumeInFlightRef.current = false;
     }
-  }, [customerName, showTyping, removeTyping, addBot]);
+  }, [showTyping, removeTyping, addBot]);
 
   useEffect(() => { onExposeResume?.(handleResumeAfterSignIn); },
     [handleResumeAfterSignIn, onExposeResume]);
@@ -897,41 +1038,142 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   useEffect(() => { startVoiceRef.current = startVoiceRecognition; }, [startVoiceRecognition]);
 
   // ── ElevenLabs TTS via Cloud Run proxy ────────────────────────────────────────
-  // The Cloud Run service holds the API key and Voice ID — no credentials needed here.
-  // POST /tts  →  audio/mpeg  →  play, then restart STT if still in voice mode.
+  // Strict single-request / single-audio lifecycle:
+  // - One AbortController per request
+  // - ~20 second timeout
+  // - Monotonically increasing request IDs for deduplication
+  // - Only one active Audio instance (pause previous before starting new)
+  // - Revoke object URLs
+  // - Keep microphone off during request and playback
+  // - Restart STT only after playback ends (and only in voice mode)
+  
+  // TTS request tracking: monotonically increasing IDs prevent stale responses from playing
+  const ttsRequestIdRef = useRef(0);
+  // Track the active audio request so we can check if a response is stale
+  const ttsActiveRequestRef = useRef(null);
+  // Controller for aborting in-flight requests
+  const ttsAbortControllerRef = useRef(null);
+  // URLs that need revocation cleanup
+  const ttsObjectUrlsRef = useRef(new Set());
+
   const playTTS = useCallback(async (text) => {
     if (!text?.trim()) return;
-    // If a previous TTS is still playing (e.g. user sent a new message
-    // before the last response finished speaking), stop it first.
-    if (ttsAudioRef.current) {
-      try { ttsAudioRef.current.pause(); } catch { /* ignore */ }
-      ttsAudioRef.current = null;
+
+    // Clean the text for natural speech synthesis
+    const cleanText = cleanTextForTTS(text.trim());
+    if (!cleanText) return;
+
+    // Increment request ID — this one is "current"
+    const requestId = ++ttsRequestIdRef.current;
+    ttsActiveRequestRef.current = requestId;
+
+    // Cancel any in-flight TTS request before starting a new one
+    if (ttsAbortControllerRef.current) {
+      try {
+        ttsAbortControllerRef.current.abort();
+      } catch (err) {
+        console.error('[ACN TTS] abort error:', err);
+      }
     }
+
+    // Pause and clean up the previous Audio instance
+    if (ttsAudioRef.current) {
+      try {
+        ttsAudioRef.current.pause();
+        ttsAudioRef.current.onerror = null;
+        ttsAudioRef.current.onended = null;
+        ttsAudioRef.current = null;
+      } catch (err) {
+        console.error('[ACN TTS] previous audio cleanup error:', err);
+      }
+    }
+
+    // Microphone off: an ElevenLabs request is pending
     setTTSPlaying(true);
+
+    const controller = new AbortController();
+    ttsAbortControllerRef.current = controller;
+
+    // Set a ~20 second timeout on the fetch
+    const timeoutId = setTimeout(() => {
+      controller.abort();
+    }, 20000);
+
     try {
       const res = await fetch('https://elevenlabs-tts-en-483471568825.us-central1.run.app/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim() }),
+        body: JSON.stringify({ text: cleanText }),
+        signal: controller.signal,
       });
-      if (!res.ok) throw new Error(`TTS ${res.status}`);
-      const blob     = await res.blob();
+
+      clearTimeout(timeoutId);
+
+      if (!res.ok) {
+        throw new Error(`TTS HTTP ${res.status}`);
+      }
+
+      const blob = await res.blob();
       const audioUrl = URL.createObjectURL(blob);
-      const audio    = new Audio(audioUrl);
+      ttsObjectUrlsRef.current.add(audioUrl);
+
+      // Check if this response is stale (another request was started while we were fetching)
+      if (requestId !== ttsActiveRequestRef.current) {
+        console.log('[ACN TTS] ignoring stale response for request', requestId);
+        URL.revokeObjectURL(audioUrl);
+        ttsObjectUrlsRef.current.delete(audioUrl);
+        return;
+      }
+
+      const audio = new Audio(audioUrl);
       ttsAudioRef.current = audio;
+
+      // Cleanup when audio ends
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
+        ttsObjectUrlsRef.current.delete(audioUrl);
         if (ttsAudioRef.current === audio) ttsAudioRef.current = null;
         setTTSPlaying(false);
-        // Re-enable microphone ONLY when in full voice-conversation mode.
-        // Auto-speak (ttsEnabled) alone should not turn the mic on.
-        if (voiceModeRef.current) startVoiceRef.current?.();
+        
+        // Microphone on: re-enable only in full voice-conversation mode
+        // Auto-speak (ttsEnabled) alone should NOT turn the mic on
+        if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
+          startVoiceRef.current?.();
+        }
       };
+
+      // Cleanup on error
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl);
+        ttsObjectUrlsRef.current.delete(audioUrl);
+        if (ttsAudioRef.current === audio) ttsAudioRef.current = null;
+        setTTSPlaying(false);
+        
+        if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
+          startVoiceRef.current?.();
+        }
+      };
+
+      // Play the audio
       await audio.play();
     } catch (err) {
-      console.error('[ACN TTS]', err);
+      if (err.name === 'AbortError') {
+        console.log('[ACN TTS] request', requestId, 'cancelled');
+      } else {
+        console.error('[ACN TTS] error on request', requestId, ':', err);
+      }
+
       setTTSPlaying(false);
-      if (voiceModeRef.current) startVoiceRef.current?.();
+
+      // Microphone on: re-enable on error (only in voice mode)
+      if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
+        startVoiceRef.current?.();
+      }
+    } finally {
+      clearTimeout(timeoutId);
+      if (ttsAbortControllerRef.current === controller) {
+        ttsAbortControllerRef.current = null;
+      }
     }
   }, []);
   useEffect(() => { playTTSRef.current = playTTS; }, [playTTS]);
@@ -945,12 +1187,35 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       const next = !prev;
       ttsEnabledRef.current = next;
       if (!next) {
-        // Muting mid-playback: cut current audio, drop the queue, cancel any
-        // debounced flush that would otherwise fire after mute.
-        if (ttsAudioRef.current) {
-          try { ttsAudioRef.current.pause(); } catch { /* ignore */ }
-          ttsAudioRef.current = null;
+        // Muting mid-playback: abort request, stop audio, revoke URLs, clear queue
+        if (ttsAbortControllerRef.current) {
+          try {
+            ttsAbortControllerRef.current.abort();
+          } catch (err) {
+            console.error('[ACN TTS] abort on mute error:', err);
+          }
+          ttsAbortControllerRef.current = null;
         }
+        if (ttsAudioRef.current) {
+          try {
+            ttsAudioRef.current.pause();
+            ttsAudioRef.current.onerror = null;
+            ttsAudioRef.current.onended = null;
+            ttsAudioRef.current = null;
+          } catch (err) {
+            console.error('[ACN TTS] audio cleanup on mute error:', err);
+          }
+        }
+        // Revoke any orphaned object URLs
+        ttsObjectUrlsRef.current.forEach((url) => {
+          try {
+            URL.revokeObjectURL(url);
+          } catch (err) {
+            console.error('[ACN TTS] revoke URL error:', err);
+          }
+        });
+        ttsObjectUrlsRef.current.clear();
+
         if (ttsFlushTimer.current) {
           clearTimeout(ttsFlushTimer.current);
           ttsFlushTimer.current = null;
@@ -1060,6 +1325,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               <div key={msg.id} className={`cp-bot-bubble acn-msg-enter${consBot ? ' consecutive' : ''}`}>
                 <BotText text={msg.text} />
               </div>
+            );
+
+            // bot-widget: lightweight bot-side container for widget-only turns
+            if (msg.type === 'bot-widget') return (
+              <div key={msg.id} className="cp-bot-widget acn-msg-enter" aria-label="Bot response" />
             );
 
             if (msg.type === 'user') return (
