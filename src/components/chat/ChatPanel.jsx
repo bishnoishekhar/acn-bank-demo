@@ -16,6 +16,7 @@ import AcnFormWidget  from '../AcnFormWidget';
 import AccountCarousel from '../AccountCarousel';
 import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
+import CardActivationWidget from '../CardActivationWidget';
 import { CardCarousel, CardCompare } from '../CardWidgets';
 import { fetchP2PContacts } from '../../firebase';
 
@@ -157,27 +158,53 @@ const isFH = (h) => {
   );
 };
 
+// Normalize whichever runtime shape reaches us: direct widget payloads or the
+// CX envelope { summary, payload }. We unwrap once here so downstream logic
+// never treats the summary wrapper as a second payload layer.
+function normalizeWidgetPayload(raw) {
+  if (!raw || typeof raw !== 'object') return null;
+  const candidate = raw.payload && typeof raw.payload === 'object' && !Array.isArray(raw.payload)
+    ? raw.payload
+    : raw;
+  if (!candidate || typeof candidate !== 'object') return null;
+
+  const normalized = { ...candidate };
+  if (raw.summary && !normalized.summary) normalized.summary = raw.summary;
+  if (raw.name && !normalized.name) normalized.name = raw.name;
+  if (raw.type && !normalized.type) normalized.type = raw.type;
+  return normalized;
+}
+
 // Hoisted so both processOutputs and the acn-session-data handler can share them.
 function resolvePayloadName(p) {
-  if (!p || typeof p !== 'object') return null;
-  if (p.name) return p.name;
-  if (p.type === 'quick_actions') return 'quick_actions';
-  if (Array.isArray(p.actions) && p.actions.length > 0 && p.actions[0]?.utterance !== undefined)
+  const normalized = normalizeWidgetPayload(p);
+  if (!normalized || typeof normalized !== 'object') return null;
+  if (normalized.name) return normalized.name;
+  if (normalized.type === 'quick_actions') return 'quick_actions';
+  if (Array.isArray(normalized.actions) && normalized.actions.length > 0 && normalized.actions[0]?.utterance !== undefined)
     return 'quick_actions';
+  if (normalized.type === 'card_activation' || normalized.name === 'card_activation') return 'acn-card-activation';
+  if (
+    normalized.status === 'ready_for_activation' &&
+    normalized.action &&
+    (normalized.action.url || normalized.action.label || normalized.action.actionType)
+  ) return 'acn-card-activation';
+  if (normalized.cardId && normalized.action && (normalized.action.url || normalized.action.label || normalized.action.actionType))
+    return 'acn-card-activation';
   // CES card widgets: card_check (PRODUCT_COMPARISON) carries a features array
   // alongside productDetails; card_comparison (PRODUCT_CAROUSEL) does not.
-  if (Array.isArray(p.productDetails) && p.productDetails.length > 0)
-    return Array.isArray(p.features) && p.features.length > 0
+  if (Array.isArray(normalized.productDetails) && normalized.productDetails.length > 0)
+    return Array.isArray(normalized.features) && normalized.features.length > 0
       ? 'acn-card-compare'
       : 'acn-card-carousel';
-  if (p.insight_type != null || p.headline != null) return 'acn-insight-card';
-  if (Array.isArray(p.payments) || Array.isArray(p.payees)) return 'acn-payment-carousel';
-  if (Array.isArray(p.contacts)) return 'acn-contact-selector';
-  if (Array.isArray(p.fields) && p.fields.length > 0) return 'acn-form-input';
-  if (p.receipt_id != null || p.reference_number != null ||
-      p.confirmation_number != null || p.confirmation_id != null ||
-      p.transaction_id != null) return 'acn-payment-receipt';
-  if (p.min_amount != null || p.max_amount != null) return 'acn-amount-input';
+  if (normalized.insight_type != null || normalized.headline != null) return 'acn-insight-card';
+  if (Array.isArray(normalized.payments) || Array.isArray(normalized.payees)) return 'acn-payment-carousel';
+  if (Array.isArray(normalized.contacts)) return 'acn-contact-selector';
+  if (Array.isArray(normalized.fields) && normalized.fields.length > 0) return 'acn-form-input';
+  if (normalized.receipt_id != null || normalized.reference_number != null ||
+      normalized.confirmation_number != null || normalized.confirmation_id != null ||
+      normalized.transaction_id != null) return 'acn-payment-receipt';
+  if (normalized.min_amount != null || normalized.max_amount != null) return 'acn-amount-input';
   return null;
 }
 
@@ -188,7 +215,8 @@ function isKnownPayload(p) {
     n === 'acn-payment-carousel'  || n === 'acn-payee-selector'  ||
     n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
     n === 'acn-amount-input'      || n === 'acn-contact-selector' ||
-    n === 'acn-card-carousel'     || n === 'acn-card-compare'
+    n === 'acn-card-carousel'     || n === 'acn-card-compare'    ||
+    n === 'acn-card-activation'
   );
 }
 
@@ -339,7 +367,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     const lines   = display.split('\n').filter(Boolean);
     if (!pendingHeading.current) {
       pendingHeading.current  = stripMarkdownForTTS(lines[0]);   // clean title in combo
-      if (lines.length > 1) pendingSubtitle.current = lines.slice(1).join(' ');
+      if (lines.length > 1) {
+        pendingSubtitle.current = stripMarkdownForTTS(lines.slice(1).join(' '));
+      }
     }
     setMessages((prev) => [...prev, { type: 'bot', text: display, id: uid() }]);
     // Accumulate TTS text per bot turn (played when streaming quiets down).
@@ -460,9 +490,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   // ── showCombo ──────────────────────────────────────────────────────────────
   const showCombo = useCallback((rawActions, summary, forcedHeading, forcedSubtitle) => {
-    const actions    = markSignInActions(rawActions);
-    const pending    = pendingHeading.current;
-    const pendingSub = pendingSubtitle.current;
+    const actions = markSignInActions(rawActions);
+    const pending = pendingHeading.current;
     pendingHeading.current  = null;
     pendingSubtitle.current = null;
     comboCreated.current    = true;
@@ -475,40 +504,51 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
     setMessages((prev) => {
       if (forcedHeading) {
-        return [...prev, { type: 'combo', heading: forcedHeading, subtitle: forcedSubtitle, actions, id: uid(), compact: isFH(forcedHeading) }];
+        const cleanHeading = stripMarkdownForTTS(forcedHeading);
+        const cleanSubtitle = stripMarkdownForTTS(forcedSubtitle || '') || undefined;
+        return [...prev, {
+          type: 'combo',
+          heading: cleanHeading,
+          subtitle: cleanSubtitle,
+          actions,
+          id: uid(),
+          compact: isFH(cleanHeading),
+        }];
       }
-      if (!pending) {
-        const last = prev[prev.length - 1];
-        if (last?.type === 'combo') {
-          const merged = { ...last, actions: mergeActions(last.actions, actions) };
-          if (!merged.heading && summary) merged.heading = summary;
-          return [...prev.slice(0, -1), merged];
-        }
-      }
+
+      // The normal text output for this agent turn is already visible and is
+      // also the single source used by TTS. Keep it, then render only the
+      // associated action tiles. Never duplicate quick_actions.summary.
       if (pending) {
-        const li = [...prev].reverse().findIndex(
-          (m) => m.type === 'bot' && m.text.startsWith(pending),
-        );
-        if (li !== -1) {
-          const ri = prev.length - 1 - li;
+        const last = prev[prev.length - 1];
+        if (last?.type === 'combo' && !last.heading && !last.subtitle) {
           return [
-            ...prev.filter((_, i) => i !== ri),
-            { type: 'combo', heading: pending, subtitle: pendingSub, actions, id: uid(), compact: isFH(pending) },
+            ...prev.slice(0, -1),
+            { ...last, actions: mergeActions(last.actions, actions) },
           ];
         }
-        return [...prev, { type: 'combo', heading: pending, subtitle: pendingSub, actions, id: uid(), compact: isFH(pending) }];
+        return [...prev, { type: 'combo', actions, id: uid(), compact: false }];
       }
-      const li = [...prev].reverse().findIndex((m) => m.type === 'bot');
-      if (li !== -1) {
-        const ri     = prev.length - 1 - li;
-        const h      = prev[ri].text;
-        const hLines = h.split('\n').filter(Boolean);
-        return [
-          ...prev.filter((_, i) => i !== ri),
-          { type: 'combo', heading: hLines[0], subtitle: hLines.slice(1).join(' ') || undefined, actions, id: uid(), compact: isFH(hLines[0]) },
-        ];
+
+      const last = prev[prev.length - 1];
+      if (last?.type === 'combo') {
+        const merged = { ...last, actions: mergeActions(last.actions, actions) };
+        if (!merged.heading && summary) {
+          merged.heading = stripMarkdownForTTS(summary);
+        }
+        return [...prev.slice(0, -1), merged];
       }
-      return [...prev, { type: 'combo', heading: summary || undefined, actions, id: uid(), compact: false }];
+
+      // True widget-only fallback: no normal text was emitted, so show the
+      // summary once to keep the quick actions from becoming orphaned.
+      const cleanSummary = stripMarkdownForTTS(summary || '') || undefined;
+      return [...prev, {
+        type: 'combo',
+        heading: cleanSummary,
+        actions,
+        id: uid(),
+        compact: cleanSummary ? isFH(cleanSummary) : false,
+      }];
     });
   }, []);
 
@@ -592,13 +632,19 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     // Pass 2: payload widgets — wrap widget-only outputs in bot-widget containers
     let needsBotWidgetWrapper = false;
     outputs.forEach((output) => {
-      if (!output.payload) return;
-      const p     = output.payload;
+      const payloadValue = output.payload ?? output;
+      const p = normalizeWidgetPayload(payloadValue);
+      if (!p) return;
       const pname = resolvePayloadName(p);
       if (!pname) { console.warn('[ACN] unrecognized payload — add handler:', JSON.stringify(p)); return; }
 
-      // If this output has no text, we need a bot-widget wrapper
-      if (!outputsWithText.has(output) && !needsBotWidgetWrapper) {
+      // Quick actions already render their own action container. Only other
+      // widget-only payloads need the lightweight bot-widget wrapper.
+      if (
+        pname !== 'quick_actions' &&
+        !outputsWithText.has(output) &&
+        !needsBotWidgetWrapper
+      ) {
         needsBotWidgetWrapper = true;
         setMessages((prev) => [...prev, { type: 'bot-widget', id: uid() }]);
       }
@@ -636,6 +682,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           if (last && (last.payload?.productDetails ?? []).map((d) => d.productId).join('|') === sig)
             return prev;
           return [...prev, { type: kind, payload: p, id: uid() }];
+        });
+      }
+
+      if (pname === 'acn-card-activation') {
+        setMessages((prev) => {
+          const key = `${p.cardId || ''}|${p.action?.url || ''}`;
+          const last = [...prev].reverse().find((m) => m.type === 'card-activation');
+          if (last && `${last.payload?.cardId || ''}|${last.payload?.action?.url || ''}` === key) return prev;
+          return [...prev, { type: 'card-activation', payload: p, id: uid() }];
         });
       }
 
@@ -1290,6 +1345,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                   payload={msg.payload}
                   onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
                 />
+              </div>
+            );
+
+            if (msg.type === 'card-activation') return (
+              <div key={msg.id} className="acn-msg-enter acn-card-activation-message" data-combo="true">
+                <CardActivationWidget payload={msg.payload} />
               </div>
             );
 

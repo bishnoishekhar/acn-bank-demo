@@ -995,6 +995,209 @@ a      { text-decoration: none; color: inherit; }
 }
 .cw-actions-row .cw-btn { width: 100%; }
 
+/* Card activation widget — airplane-window campaign background */
+.acn-card-activation-message {
+  width: min(100%, 720px);
+  max-width: 720px;
+  align-self: flex-start;
+}
+
+.acn-card-activation {
+  position: relative;
+  width: min(100%, 720px);
+  min-height: 390px;
+  padding: 22px 24px 18px;
+  border-radius: 26px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background-color: #0d0218;
+  background-repeat: no-repeat;
+  background-position: center right;
+  background-size: auto 100%;
+  overflow: hidden;
+  color: #fff;
+  isolation: isolate;
+  box-shadow: 0 18px 40px rgba(20, 0, 36, 0.26);
+}
+.acn-card-activation::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(14, 2, 35, 0.96) 0%,
+    rgba(20, 5, 45, 0.9) 34%,
+    rgba(20, 5, 45, 0.62) 58%,
+    rgba(20, 5, 45, 0.08) 78%,
+    rgba(20, 5, 45, 0) 100%
+  );
+  z-index: 0;
+}
+.acn-card-activation-content,
+.acn-card-activation-cta-block {
+  position: relative;
+  z-index: 1;
+}
+.acn-card-activation-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 42%;
+  padding-top: 8px;
+  min-height: 240px;
+}
+.acn-card-activation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: rgba(12, 7, 24, 0.42);
+  border: 1px solid rgba(201, 176, 255, 0.28);
+  color: #f5ecff;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.acn-card-activation-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.12);
+  color: #fff;
+  font-size: 11px;
+  line-height: 1;
+}
+.acn-card-activation-title {
+  margin: 18px 0 10px;
+  color: #fff;
+  font-size: clamp(28px, 3.2vw, 38px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  font-weight: 750;
+  max-width: 340px;
+}
+.acn-card-activation-product {
+  margin: 0 0 12px;
+  color: #d4bafb;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.acn-card-activation-subtitle {
+  margin: 0;
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  line-height: 1.55;
+  max-width: 330px;
+}
+.acn-card-activation-cta-block {
+  width: calc(100% - 48px);
+  margin: 0 auto;
+  padding-top: 12px;
+}
+.acn-card-activation-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 54px;
+  padding: 14px 18px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.96);
+  border: 1px solid rgba(255,255,255,0.8);
+  color: #4c0d82;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.3;
+  box-shadow: 0 14px 26px rgba(16, 0, 26, 0.18);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+}
+.acn-card-activation-cta:hover,
+.acn-card-activation-cta:focus-visible {
+  background: #fff;
+  box-shadow: 0 16px 30px rgba(16, 0, 26, 0.22);
+  transform: translateY(-1px);
+}
+.acn-card-activation-cta:focus-visible {
+  outline: 3px solid rgba(255,255,255,0.66);
+  outline-offset: 2px;
+}
+.acn-card-activation-cta:active {
+  transform: translateY(0);
+}
+.acn-card-activation-cta--disabled {
+  background: rgba(255,255,255,0.7);
+  border-color: rgba(255,255,255,0.45);
+  color: rgba(76, 13, 130, 0.7);
+  box-shadow: none;
+  cursor: not-allowed;
+  opacity: 1;
+}
+.acn-card-activation-cta-icon {
+  font-size: 18px;
+  line-height: 1;
+}
+.acn-card-activation-footnote {
+  margin-top: 10px;
+  color: rgba(255,255,255,0.72);
+  font-size: 12px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+@media (max-width: 560px) {
+  .acn-card-activation-message {
+    width: min(100%, 360px);
+    max-width: 360px;
+  }
+  .acn-card-activation {
+    width: min(100%, 360px);
+    min-height: 330px;
+    padding: 16px 14px 14px;
+    border-radius: 22px;
+    background-position: 72% center;
+  }
+  .acn-card-activation-content {
+    max-width: 72%;
+    min-height: 190px;
+    padding-top: 6px;
+  }
+  .acn-card-activation-title {
+    font-size: clamp(24px, 8vw, 30px);
+    max-width: 220px;
+  }
+  .acn-card-activation-product {
+    font-size: 12px;
+    letter-spacing: 0.08em;
+  }
+  .acn-card-activation-subtitle {
+    max-width: 220px;
+    font-size: 13px;
+  }
+  .acn-card-activation-cta-block {
+    width: calc(100% - 10px);
+  }
+  .acn-card-activation-cta {
+    font-size: 14px;
+    min-height: 50px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .acn-card-activation-cta,
+  .acn-card-activation-cta-icon {
+    transition: none;
+  }
+}
+
 /* ── 7. Footer ───────────────────────────────────────────────────────────── */
 
 .site-footer {
