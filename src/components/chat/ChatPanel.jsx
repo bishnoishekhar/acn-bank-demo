@@ -117,6 +117,39 @@ function cleanTextForTTS(text) {
   return clean;
 }
 
+function normalizeForTTS(text) {
+  if (!text) return '';
+
+  let speech = text;
+  const amountPattern = '[0-9][0-9,]*(?:\\.[0-9]{1,2})?';
+  const toNumber = (amount) => Number(amount.replace(/,/g, ''));
+  const formatExactCad = (amount) => {
+    const value = toNumber(amount);
+    const whole = Math.trunc(value);
+    const cents = Math.round((value - whole) * 100);
+    if (!cents) return `${whole.toLocaleString('en-US')} Canadian dollars`;
+    return `${whole.toLocaleString('en-US')} dollars and ${String(cents).padStart(2, '0')} cents Canadian`;
+  };
+
+  // Ranges are estimates, so round each endpoint for speech.
+  speech = speech.replace(
+    new RegExp(`(?:\\broughly\\s+)?\\bCAD\\s+\\$?(${amountPattern})\\s*[-–—]\\s*\\$?(${amountPattern})`, 'gi'),
+    (_match, lower, upper) => `roughly ${Math.round(toNumber(lower)).toLocaleString('en-US')} to ${Math.round(toNumber(upper)).toLocaleString('en-US')} Canadian dollars`
+  );
+
+  speech = speech.replace(
+    new RegExp(`\\bCAD\\s+\\$?(${amountPattern})`, 'gi'),
+    (_match, amount) => formatExactCad(amount)
+  );
+
+  speech = speech
+    .replace(/\s*\/\s*year\b/gi, ' per year')
+    .replace(/(\d+(?:\.\d+)?)%/g, '$1 percent')
+    .replace(/\b(\d+(?:\.\d+)?)x(?=\s+[A-Za-z])/g, '$1 times');
+
+  return speech;
+}
+
 function BotText({ text }) {
   // Render **bold** segments inside a line as <strong> elements.
   function parseBold(str) {
@@ -1032,9 +1065,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const playTTS = useCallback(async (text) => {
     if (!text?.trim()) return;
 
-    // Clean the text for natural speech synthesis
+    // Preserve existing cleanup, then normalize speech-sensitive formats only
     const cleanText = cleanTextForTTS(text.trim());
-    if (!cleanText) return;
+    const speechText = normalizeForTTS(cleanText);
+    if (!speechText) return;
 
     // Increment request ID — this one is "current"
     const requestId = ++ttsRequestIdRef.current;
@@ -1076,7 +1110,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       const res = await fetch('https://elevenlabs-tts-en-483471568825.us-central1.run.app/tts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: cleanText }),
+        body: JSON.stringify({ text: speechText }),
         signal: controller.signal,
       });
 
