@@ -1658,7 +1658,7 @@ a      { text-decoration: none; color: inherit; }
 @media (max-width: 560px) {
   .cp-ai-pill {
     min-width: 0;
-    flex: 0 1 auto;
+    flex: 0 0 auto;
   }
 }
 
