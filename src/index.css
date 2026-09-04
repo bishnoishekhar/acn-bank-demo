@@ -1634,12 +1634,33 @@ a      { text-decoration: none; color: inherit; }
   font-weight: 600;
   color: #2D0050;
   cursor: pointer;
-  white-space: nowrap;
+  width: auto;
+  min-width: max-content;
+  max-width: 100%;
+  flex: 0 0 auto;
+  height: auto;
+  min-height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  word-break: normal;
+  overflow-wrap: normal;
+  line-height: 1.25;
   font-family: 'DM Sans', sans-serif;
   box-shadow: 0 1px 6px rgba(161,0,255,.08);
   transition: background .15s, transform .1s, border-color .15s;
 }
 .cp-ai-pill:hover { background: #F5EEFF; border-color: rgba(161,0,255,.40); transform: translateY(-1px); }
+
+@media (max-width: 560px) {
+  .cp-ai-pill {
+    min-width: 0;
+    flex: 0 1 auto;
+  }
+}
 
 .cp-send-btn {
   width: 34px; height: 34px;
