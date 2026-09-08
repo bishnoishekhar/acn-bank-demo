@@ -11,18 +11,18 @@ export default function AccountCarousel({ payload, onCta }) {
   const title = payload?.title || 'Your Accounts';
   const subtitle = payload?.subtitle;
 
-  const BRAND = '#A100FF';
+  const BRAND = '#0056B3';
   const isPayee = payees.length > 0 || payload?.name === 'acn-payee-selector';
   const isTxn = !isPayee && (/transaction|statement|activity/i.test(title) ||
     items.some((it) => ['debit', 'credit'].includes(String(it.status || it.type || '').toLowerCase())));
 
   const typeMeta = (id = '', name = '') => {
     const u = (id + ' ' + name).toUpperCase();
-    if (u.includes('OFFER')) return { label: 'Pre-Approved', color: '#7C3AED' };
-    if (u.includes('SCORE')) return { label: 'Credit Score', color: '#7C3AED' };
-    if (u.includes('CHQ') || u.includes('CHEQ')) return { label: 'Chequing', color: '#A100FF' };
+    if (u.includes('OFFER')) return { label: 'Pre-Approved', color: '#0056B3' };
+    if (u.includes('SCORE')) return { label: 'Credit Score', color: '#0056B3' };
+    if (u.includes('CHQ') || u.includes('CHEQ')) return { label: 'Chequing', color: '#0056B3' };
     if (u.includes('SAV')) return { label: 'Savings', color: '#059669' };
-    if (u.includes('TFSA')) return { label: 'TFSA', color: '#0284C7' };
+    if (u.includes('TFSA')) return { label: 'TFSA', color: '#0056B3' };
     if (u.includes('RRSP')) return { label: 'RRSP', color: '#D97706' };
     if (u.includes('CC') || u.includes('CREDIT') || u.includes('VISA')) return { label: 'Credit Card', color: '#DC2626' };
     return { label: 'Account', color: BRAND };
@@ -49,14 +49,14 @@ export default function AccountCarousel({ payload, onCta }) {
   const send = (v) => v && onCta && onCta(v);
 
   const wrap = {
-    background: '#fff', borderRadius: '14px', border: '1px solid #EDE5F8',
+    background: '#fff', borderRadius: '14px', border: '1px solid #E2E6EA',
     marginBottom: '4px',
     maxWidth: '86%', boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
   };
   const header = (
-    <div style={{ padding: '12px 14px 8px', borderBottom: '1px solid #F0EBF8' }}>
-      <div style={{ fontSize: '13px', fontWeight: 700, color: '#140025' }}>{title}</div>
-      <div style={{ fontSize: '11px', color: '#8A7CA8', marginTop: '2px' }}>
+    <div style={{ padding: '12px 14px 8px', borderBottom: '1px solid #E2E6EA' }}>
+      <div style={{ fontSize: '13px', fontWeight: 700, color: '#0B1F33' }}>{title}</div>
+      <div style={{ fontSize: '11px', color: '#66788A', marginTop: '2px' }}>
         {subtitle || (isPayee ? 'Choose a recipient.' : isTxn ? 'Your recent activity.' : 'Tap an account to view its transactions.')}
       </div>
     </div>
@@ -73,23 +73,23 @@ export default function AccountCarousel({ payload, onCta }) {
               onClick={() => send(p.cta_value || p.utterance || `Send to ${p.payee_id || p.payee_name}`)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '11px', width: '100%', textAlign: 'left',
-                background: '#fff', border: '1px solid #EFE8FA', borderRadius: '12px',
+                background: '#fff', border: '1px solid #E2E6EA', borderRadius: '12px',
                 padding: '10px 12px', marginBottom: i < items.length - 1 ? '6px' : 0, cursor: 'pointer',
               }}
             >
               <span style={{
-                width: '34px', height: '34px', flexShrink: 0, borderRadius: '9px', background: '#F5EEFF',
+                width: '34px', height: '34px', flexShrink: 0, borderRadius: '9px', background: '#F0F5FA',
                 color: BRAND, fontWeight: 800, fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>{String(p.payee_name || '?').replace(/[^A-Za-z]/g, '').slice(0, 1).toUpperCase() || '•'}</span>
               <span style={{ flex: 1, minWidth: 0 }}>
-                <span style={{ display: 'block', fontSize: '13.5px', fontWeight: 700, color: '#140025', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ display: 'block', fontSize: '13.5px', fontWeight: 700, color: '#0B1F33', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {p.payee_name || 'Recipient'}
                 </span>
                 {p.account_number && (
-                  <span style={{ display: 'block', fontSize: '11.5px', color: '#8A7CA8', marginTop: '1px' }}>{p.account_number}</span>
+                  <span style={{ display: 'block', fontSize: '11.5px', color: '#66788A', marginTop: '1px' }}>{p.account_number}</span>
                 )}
               </span>
-              <span style={{ fontSize: '20px', color: '#C6ABE8', flexShrink: 0 }}>›</span>
+              <span style={{ fontSize: '20px', color: '#9AAABD', flexShrink: 0 }}>›</span>
             </button>
           ))}
         </div>
@@ -112,7 +112,7 @@ export default function AccountCarousel({ payload, onCta }) {
             const logoColors = [
               { bg: '#FFF3E0', color: '#E65100' }, { bg: '#FFEBEE', color: '#C62828' },
               { bg: '#FFF8E1', color: '#F57C00' }, { bg: '#E8F5E9', color: '#2E7D32' },
-              { bg: '#E3F2FD', color: '#1565C0' }, { bg: '#F3E5F5', color: '#7B1FA2' },
+              { bg: '#E3F2FD', color: '#0056B3' }, { bg: '#E6F0FA', color: '#0056B3' },
             ];
             const lc = logoColors[i % logoColors.length];
             return (
@@ -127,10 +127,10 @@ export default function AccountCarousel({ payload, onCta }) {
                   fontSize: 11, fontWeight: 800, letterSpacing: '-0.5px',
                 }}>{initials}</div>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#140025', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#0B1F33', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     {name}
                   </div>
-                  <div style={{ fontSize: '11px', color: '#8A7CA8', marginTop: '1px' }}>{fmtDate(t.display_date)}</div>
+                  <div style={{ fontSize: '11px', color: '#66788A', marginTop: '1px' }}>{fmtDate(t.display_date)}</div>
                 </div>
                 <div style={{ fontSize: '13px', fontWeight: 700, whiteSpace: 'nowrap', color: credit ? '#059669' : '#DC2626' }}>
                   {credit ? '+' : '-'}{fmt(t.amount, t.currency || 'CAD')}
@@ -166,7 +166,7 @@ export default function AccountCarousel({ payload, onCta }) {
           return (
             <div key={i} role="button" onClick={() => send(cta)}
               style={{
-                background: '#FCFAFF', borderRadius: '12px', border: '1px solid #EFE8FA',
+                background: '#F8F9FA', borderRadius: '12px', border: '1px solid #E2E6EA',
                 borderLeft: `4px solid ${meta.color}`, padding: '11px 13px', cursor: 'pointer',
                 transition: 'box-shadow .15s, transform .12s',
               }}
@@ -175,15 +175,15 @@ export default function AccountCarousel({ payload, onCta }) {
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <span style={{ fontSize: '10.5px', fontWeight: 800, color: meta.color, background: `${meta.color}14`, padding: '2px 8px', borderRadius: '20px' }}>{meta.label}</span>
-                {acctNum && <span style={{ fontSize: '10.5px', color: '#B0A4C8', letterSpacing: '0.5px' }}>{acctNum}</span>}
+                {acctNum && <span style={{ fontSize: '10.5px', color: '#9AAABD', letterSpacing: '0.5px' }}>{acctNum}</span>}
               </div>
               {balance != null && (
-                <div style={{ fontSize: '18px', fontWeight: 800, color: '#140025', letterSpacing: '-0.4px', marginTop: '5px', whiteSpace: 'nowrap' }}>
+                <div style={{ fontSize: '18px', fontWeight: 800, color: '#0B1F33', letterSpacing: '-0.4px', marginTop: '5px', whiteSpace: 'nowrap' }}>
                   {fmt(balance, currency)}
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '7px' }}>
-                <span style={{ fontSize: '10px', fontWeight: 700, color: active ? '#1A6E3C' : isPending ? '#6D28D9' : '#8A1C1C', background: active ? '#EAFBF0' : isPending ? '#F5F3FF' : '#FFF1F1', padding: '2px 8px', borderRadius: '20px' }}>{active ? 'Active' : acct.status}</span>
+                <span style={{ fontSize: '10px', fontWeight: 700, color: active ? '#1A6E3C' : isPending ? '#0056B3' : '#8A1C1C', background: active ? '#EAFBF0' : isPending ? '#F0F5FA' : '#FFF1F1', padding: '2px 8px', borderRadius: '20px' }}>{active ? 'Active' : acct.status}</span>
                 <span style={{ fontSize: '11.5px', fontWeight: 700, color: meta.color }}>{ctaLabel}</span>
               </div>
             </div>
@@ -203,7 +203,7 @@ function footerCtas(ctas, BRAND, send) {
           onClick={() => send(cta.value || cta.cta_value || cta.utterance || cta.content)}
           style={{
             flex: 1, minWidth: '110px', padding: '9px 12px',
-            background: i === 0 ? BRAND : '#F5F1FB', color: i === 0 ? '#fff' : '#140025',
+            background: i === 0 ? BRAND : '#F0F5FA', color: i === 0 ? '#fff' : '#0B1F33',
             border: 'none', borderRadius: '10px', fontSize: '12px', fontWeight: 700, cursor: 'pointer',
           }}
         >

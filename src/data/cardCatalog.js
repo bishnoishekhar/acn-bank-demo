@@ -156,8 +156,8 @@ export const CARD_CATALOG = [
     ],
     best_for: ['Simple rewards', 'Lower income', 'No annual fee'],
     fit_score_base: 80,
-    accent: '#3b3355',
-    accent_2: '#6f5f9e',
+    accent: '#173B63',
+    accent_2: '#4778A8',
   },
   {
     card_id: 'acn-low-rate-visa',
@@ -187,8 +187,8 @@ export const CARD_CATALOG = [
     ],
     best_for: ['Carrying a balance', 'Consolidating debt', 'Lower interest'],
     fit_score_base: 84,
-    accent: '#4a2c2a',
-    accent_2: '#96574f',
+    accent: '#183B56',
+    accent_2: '#2D6F8F',
   },
   {
     card_id: 'acn-starter-visa',

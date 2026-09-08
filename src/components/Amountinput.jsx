@@ -19,7 +19,7 @@ export default function AmountInput({ payload, onSubmit }) {
     <div style={{
       background: 'rgba(255,255,255,.08)',
       border: '1px solid rgba(255,255,255,.14)',
-      borderTop: '3px solid #A100FF',
+      borderTop: '3px solid #0056B3',
       borderRadius: '4px 14px 14px 14px',
       fontSize: 13,
       maxWidth: '86%',
@@ -76,7 +76,7 @@ export default function AmountInput({ payload, onSubmit }) {
           onClick={handleSubmit}
           style={{
             width: '100%', padding: 9, borderRadius: 8,
-            background: '#A100FF', color: '#fff',
+            background: '#0056B3', color: '#fff',
             fontSize: 13, fontWeight: 600,
             fontFamily: 'inherit', border: 'none', cursor: 'pointer',
           }}
