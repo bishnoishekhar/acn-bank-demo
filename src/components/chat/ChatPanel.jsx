@@ -196,9 +196,8 @@ const isFH = (h) => {
 // never treats the summary wrapper as a second payload layer.
 function normalizeWidgetPayload(raw) {
   if (!raw || typeof raw !== 'object') return null;
-  const candidate = raw.payload && typeof raw.payload === 'object' && !Array.isArray(raw.payload)
-    ? raw.payload
-    : raw;
+  const candidate = [raw.payload, raw.customPayload, raw.data?.payload, raw.data, raw.json]
+    .find((value) => value && typeof value === 'object' && !Array.isArray(value)) || raw;
   if (!candidate || typeof candidate !== 'object') return null;
 
   const normalized = { ...candidate };
@@ -221,7 +220,10 @@ function normalizeResponseOutputs(outputs = []) {
   const seen = new Set();
   return outputs.filter((output) => {
     if (!output || typeof output !== 'object') return false;
-    if (output.turnCompleted === true || output.type === 'turnCompleted') return false;
+    const payload = normalizeWidgetPayload(output);
+    const payloadName = resolvePayloadName(payload);
+    const hasCustomerText = typeof output.text === 'string' && stripMarkdown(output.text).trim();
+    if ((output.turnCompleted === true || output.type === 'turnCompleted') && !hasCustomerText && !payloadName) return false;
 
     const turnIndex = output.turnIndex ?? output.payload?.turnIndex ?? 'unknown';
     let signature;
@@ -229,10 +231,8 @@ function normalizeResponseOutputs(outputs = []) {
       const text = stripMarkdown(String(output.text)).replace(/\s+/g, ' ').trim();
       if (!text) return false;
       signature = `${turnIndex}:text:${text}`;
-    } else if (output.payload || Object.keys(output).some((key) => key !== 'turnIndex')) {
-      const payload = output.payload ?? output;
-      const payloadName = resolvePayloadName(payload) || 'structured';
-      signature = `${turnIndex}:${payloadName}:${JSON.stringify(stableOutputValue(payload))}`;
+    } else if (payloadName || Object.keys(output).some((key) => key !== 'turnIndex')) {
+      signature = `${turnIndex}:${payloadName || 'structured'}:${JSON.stringify(stableOutputValue(payload))}`;
     } else {
       return false;
     }
@@ -254,13 +254,16 @@ function resolvePayloadName(p) {
   if (normalized.type === 'quick_actions') return 'quick_actions';
   if (Array.isArray(normalized.actions) && normalized.actions.length > 0 && normalized.actions[0]?.utterance !== undefined)
     return 'quick_actions';
-  if (normalized.type === 'card_activation' || normalized.name === 'card_activation') return 'acn-card-activation';
+  if (['card_activation', 'acn-card-activation', 'acn-activation-card', 'activation'].includes(normalized.type) ||
+      ['card_activation', 'acn-card-activation', 'acn-activation-card', 'activation'].includes(normalized.name)) return 'acn-card-activation';
   if (
     normalized.status === 'ready_for_activation' &&
     normalized.action &&
     (normalized.action.url || normalized.action.label || normalized.action.actionType)
   ) return 'acn-card-activation';
   if (normalized.cardId && normalized.action && (normalized.action.url || normalized.action.label || normalized.action.actionType))
+    return 'acn-card-activation';
+  if (normalized.web_activation_url || normalized.deep_link || normalized.activationUrl || normalized.activation_url)
     return 'acn-card-activation';
   // CES card widgets: card_check (PRODUCT_COMPARISON) carries a features array
   // alongside productDetails; card_comparison (PRODUCT_CAROUSEL) does not.
@@ -704,8 +707,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     // Pass 2: payload widgets — wrap widget-only outputs in bot-widget containers
     let needsBotWidgetWrapper = false;
     outputs.forEach((output) => {
-      if (output?.text && !output?.payload) return;
-      const payloadValue = output.payload ?? output;
+      const payloadValue = normalizeWidgetPayload(output);
+      if (output?.text && !output?.payload && !output?.customPayload && !output?.data?.payload && !resolvePayloadName(payloadValue)) return;
       const p = normalizeWidgetPayload(payloadValue);
       if (!p) return;
       const pname = resolvePayloadName(p);
