@@ -15,9 +15,9 @@ function badgeClass(s) {
 function cardTheme(p) {
   const n = (p.payee_name || '').toLowerCase();
   const id = (p.payment_id || '').toLowerCase();
-  if (n.includes('chequing') || id.includes('chq')) return 'border-left:3px solid #A100FF;background:#F5EEFF;';
-  if (n.includes('saving') || id.includes('sav')) return 'border-left:3px solid #1E9E50;background:#EAFBF0;';
-  if (n.includes('visa') || n.includes('card') || id.includes('card')) return 'border-left:3px solid #7000BB;background:#F5EEFF;';
+  if (n.includes('chequing') || id.includes('chq')) return 'border-left:3px solid #0056B3;background:#F0F5FA;';
+  if (n.includes('saving') || id.includes('sav')) return 'border-left:3px solid #008080;background:#EAFBF0;';
+  if (n.includes('visa') || n.includes('card') || id.includes('card')) return 'border-left:3px solid #002147;background:#F0F5FA;';
   if (n.includes('bill')) return 'border-left:3px solid #F0CC60;background:#FFF8E8;';
   return '';
 }
@@ -30,7 +30,7 @@ export default function Carousel({ data, onCta, onClose }) {
           <div className="acn-carousel-title">{title}</div>
           {subtitle && <div className="acn-carousel-sub">{subtitle}</div>}
         </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, color: '#6B5B8A', cursor: 'pointer' }}>
+        <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 20, color: '#66788A', cursor: 'pointer' }}>
           &times;
         </button>
       </div>

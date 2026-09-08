@@ -1,11 +1,11 @@
 const INSIGHT_CONFIG = {
-  bill_automation:     { icon: '⚙️', label: 'Bill Automation',      accent: '#C560FF', accentDim: 'rgba(197,96,255,.25)',  border: 'rgba(197,96,255,.3)' },
+  bill_automation:     { icon: '⚙️', label: 'Bill Automation',      accent: '#0056B3', accentDim: 'rgba(0,86,179,.25)',  border: 'rgba(0,86,179,.3)' },
   savings_opportunity: { icon: '💰', label: 'Savings Opportunity',  accent: '#34D399', accentDim: 'rgba(52,211,153,.2)',   border: 'rgba(52,211,153,.3)' },
   spending_spike:      { icon: '📊', label: 'Spending Spike',       accent: '#FBBF24', accentDim: 'rgba(251,191,36,.2)',   border: 'rgba(251,191,36,.3)' },
   anomaly:             { icon: '🚨', label: 'Anomaly Detected',     accent: '#F87171', accentDim: 'rgba(248,113,113,.2)',  border: 'rgba(248,113,113,.3)' },
-  credit_score:        { icon: '📊', label: 'Credit Score',         accent: '#C560FF', accentDim: 'rgba(197,96,255,.25)', border: 'rgba(197,96,255,.3)' },
-  cash_flow:           { icon: '💡', label: 'Cash Flow',            accent: '#C560FF', accentDim: 'rgba(197,96,255,.25)', border: 'rgba(197,96,255,.3)' },
-  offer:               { icon: '🎁', label: 'Pre-Approved Offer',   accent: '#A78BFA', accentDim: 'rgba(167,139,250,.2)', border: 'rgba(167,139,250,.3)' },
+  credit_score:        { icon: '📊', label: 'Credit Score',         accent: '#0056B3', accentDim: 'rgba(0,86,179,.25)', border: 'rgba(0,86,179,.3)' },
+  cash_flow:           { icon: '💡', label: 'Cash Flow',            accent: '#0056B3', accentDim: 'rgba(0,86,179,.25)', border: 'rgba(0,86,179,.3)' },
+  offer:               { icon: '🎁', label: 'Pre-Approved Offer',   accent: '#0056B3', accentDim: 'rgba(0,86,179,.2)', border: 'rgba(0,86,179,.3)' },
 };
 
 export default function InsightCard({ payload, onCta }) {
