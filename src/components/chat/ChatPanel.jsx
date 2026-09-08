@@ -208,6 +208,44 @@ function normalizeWidgetPayload(raw) {
   return normalized;
 }
 
+function stableOutputValue(value) {
+  if (Array.isArray(value)) return value.map(stableOutputValue);
+  if (!value || typeof value !== 'object') return value;
+  return Object.keys(value).sort().reduce((result, key) => {
+    result[key] = stableOutputValue(value[key]);
+    return result;
+  }, {});
+}
+
+function normalizeResponseOutputs(outputs = []) {
+  const seen = new Set();
+  return outputs.filter((output) => {
+    if (!output || typeof output !== 'object') return false;
+    if (output.turnCompleted === true || output.type === 'turnCompleted') return false;
+
+    const turnIndex = output.turnIndex ?? output.payload?.turnIndex ?? 'unknown';
+    let signature;
+    if (output.text && !output.payload) {
+      const text = stripMarkdown(String(output.text)).replace(/\s+/g, ' ').trim();
+      if (!text) return false;
+      signature = `${turnIndex}:text:${text}`;
+    } else if (output.payload || Object.keys(output).some((key) => key !== 'turnIndex')) {
+      const payload = output.payload ?? output;
+      const payloadName = resolvePayloadName(payload) || 'structured';
+      signature = `${turnIndex}:${payloadName}:${JSON.stringify(stableOutputValue(payload))}`;
+    } else {
+      return false;
+    }
+
+    if (seen.has(signature)) {
+      if (import.meta.env.DEV) console.debug('[ACN] duplicate output suppressed', { turnIndex, type: output.payload ? 'payload' : 'text' });
+      return false;
+    }
+    seen.add(signature);
+    return true;
+  });
+}
+
 // Hoisted so both processOutputs and the acn-session-data handler can share them.
 function resolvePayloadName(p) {
   const normalized = normalizeWidgetPayload(p);
@@ -594,6 +632,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     const sig = JSON.stringify(outputs);
     if (now - lastProcessed.current.time < 800 && sig === lastProcessed.current.sig) return;
     lastProcessed.current = { time: now, sig };
+    outputs = normalizeResponseOutputs(outputs);
 
     const hasVisible = outputs.some((o) => {
       if (o.payload) return true; // any payload counts — unknown ones are logged below
@@ -665,6 +704,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     // Pass 2: payload widgets — wrap widget-only outputs in bot-widget containers
     let needsBotWidgetWrapper = false;
     outputs.forEach((output) => {
+      if (output?.text && !output?.payload) return;
       const payloadValue = output.payload ?? output;
       const p = normalizeWidgetPayload(payloadValue);
       if (!p) return;
