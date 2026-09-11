@@ -6,6 +6,24 @@ const tabs = [
   { key: 'resorts', label: 'Ski resorts', values: ['resortOptions', 'resort_options'] },
 ];
 
+const fallbackImages = {
+  flights: [
+    'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1542296332-2e4473faf563?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1529070538774-1843cb3265df?auto=format&fit=crop&w=900&q=80',
+  ],
+  stays: [
+    'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?auto=format&fit=crop&w=900&q=80',
+  ],
+  resorts: [
+    'https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=900&q=80',
+    'https://images.unsplash.com/photo-1517825738774-7de9363ef735?auto=format&fit=crop&w=900&q=80',
+  ],
+};
+
 function text(value, fallback = '') {
   if (value === null || value === undefined) return fallback;
   const result = String(value).trim();
@@ -42,6 +60,10 @@ function getOptionValue(option, camel, snake) {
   return option?.[camel] ?? option?.[snake];
 }
 
+function imageFor(option, category, index) {
+  return option?.imageUrl || fallbackImages[category][index % fallbackImages[category].length];
+}
+
 function ImageWithFallback({ src, alt, className = '' }) {
   const [failed, setFailed] = useState(false);
   const safeSrc = safeImageUrl(src);
@@ -60,9 +82,9 @@ function Price({ price }) {
   return <p className="acn-trip-booking-price">{text(price.label)}{price.livePriceChecked === false && <small> Illustrative only</small>}</p>;
 }
 
-function FlightCard({ option }) {
+function FlightCard({ option, index }) {
   return <article className="acn-trip-booking-card">
-    <ImageWithFallback src={option?.imageUrl} alt="" className="acn-trip-booking-card__image" />
+    <ImageWithFallback src={imageFor(option, 'flights', index)} alt="" className="acn-trip-booking-card__image" />
     <h4>{text(option?.title, 'Flight option')}</h4>
     {option?.airline && <p className="acn-trip-booking-muted">{option.airline}</p>}
     {option?.route && <p>{text(option.route.from)} → {text(option.route.to)}</p>}
@@ -73,9 +95,9 @@ function FlightCard({ option }) {
   </article>;
 }
 
-function StayCard({ option }) {
+function StayCard({ option, index }) {
   return <article className="acn-trip-booking-card">
-    <ImageWithFallback src={option?.imageUrl} alt="" className="acn-trip-booking-card__image" />
+    <ImageWithFallback src={imageFor(option, 'stays', index)} alt="" className="acn-trip-booking-card__image" />
     <h4>{text(option?.name, 'Stay option')}</h4>
     {option?.location && <p className="acn-trip-booking-muted">{option.location}</p>}
     {option?.reason && <p>{option.reason}</p>}
@@ -85,9 +107,9 @@ function StayCard({ option }) {
   </article>;
 }
 
-function ResortCard({ option }) {
+function ResortCard({ option, index }) {
   return <article className="acn-trip-booking-card">
-    <ImageWithFallback src={option?.imageUrl} alt="" className="acn-trip-booking-card__image" />
+    <ImageWithFallback src={imageFor(option, 'resorts', index)} alt="" className="acn-trip-booking-card__image" />
     <h4>{text(option?.name, 'Ski resort')}</h4>
     {option?.location && <p className="acn-trip-booking-muted">{option.location}</p>}
     {option?.fitLabel && <p className="acn-trip-booking-eyebrow">{option.fitLabel}</p>}
@@ -136,7 +158,7 @@ export default function TripBookingRecommendationsWidget({ payload, onAction }) 
     <div className="acn-trip-booking-tabs" role="tablist" aria-label="Trip recommendations">
       {availableTabs.map((tab) => <button type="button" role="tab" aria-selected={active.key === tab.key} className={active.key === tab.key ? 'is-active' : ''} key={tab.key} onClick={() => switchTab(tab.key)}>{tab.label}</button>)}
     </div>
-    <div className="acn-trip-booking-panel" role="tabpanel"><div className="acn-trip-booking-grid">{visibleOptions.map((option, index) => active.key === 'flights' ? <FlightCard key={option.id || index} option={option} /> : active.key === 'stays' ? <StayCard key={option.id || index} option={option} /> : <ResortCard key={option.id || index} option={option} />)}</div>{options.length > visibleCount && <button type="button" className="acn-trip-booking-show-more" onClick={() => setVisibleCount((count) => count + 3)}>Show more</button>}</div>
+    <div className="acn-trip-booking-panel" role="tabpanel"><div className="acn-trip-booking-grid">{visibleOptions.map((option, index) => active.key === 'flights' ? <FlightCard key={option.id || index} option={option} index={index} /> : active.key === 'stays' ? <StayCard key={option.id || index} option={option} index={index} /> : <ResortCard key={option.id || index} option={option} index={index} />)}</div>{options.length > visibleCount && <button type="button" className="acn-trip-booking-show-more" onClick={() => setVisibleCount((count) => count + 3)}>Show more</button>}</div>
     {text(payload?.eligibleSpendNote) && <div className="acn-trip-booking-note"><span aria-hidden="true">i</span><p>{payload.eligibleSpendNote}</p></div>}
     {actions.length > 0 && <div className="acn-trip-booking-actions">{actions.map((action, index) => <WidgetAction key={`${action.label}-${index}`} action={action} onAction={onAction} />)}</div>}
     {disclosures.length > 0 && <details className="acn-trip-booking-disclosures"><summary>Important details</summary><ul>{disclosures.map((disclosure, index) => <li key={`${disclosure}-${index}`}>{disclosure}</li>)}</ul></details>}

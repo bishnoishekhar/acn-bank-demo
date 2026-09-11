@@ -28,7 +28,7 @@
 .acn-trip-booking-tabs button { flex: 0 0 auto; min-height: 36px; padding: 7px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #66788a; font: inherit; font-size: .8rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
 .acn-trip-booking-tabs button.is-active { border-bottom-color: #0056b3; color: #002147; }
 .acn-trip-booking-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.acn-trip-booking-card { min-width: 0; padding: 13px; border-radius: 16px; background: #f8f9fa; }
+.acn-trip-booking-card { display: flex; min-width: 0; flex-direction: column; padding: 13px; border-radius: 16px; background: #f8f9fa; }
 .acn-trip-booking-card__image { display: block; width: 100%; height: 86px; margin-bottom: 10px; border-radius: 10px; object-fit: cover; }
 .acn-trip-booking-image-fallback { background: #e9eef2; }
 .acn-trip-booking-card h4 { margin: 0; color: #0b1f33; font-size: .94rem; line-height: 1.3; }
@@ -39,7 +39,8 @@
 .acn-trip-booking-eyebrow { color: #008080 !important; font-size: .72rem !important; font-weight: 750; text-transform: uppercase; }
 .acn-trip-booking-price { color: #002147 !important; font-weight: 700; }
 .acn-trip-booking-price small { display: block; color: #66788a; font-size: .7rem; font-weight: 500; }
-.acn-trip-booking-link { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; margin-top: 12px; padding: 7px 10px; border-radius: 999px; background: #002147; color: #fff; font-size: .74rem; font-weight: 700; text-decoration: none; }
+.acn-trip-booking-link { display: inline-flex; align-items: center; align-self: flex-start; gap: 5px; min-height: 34px; margin-top: auto; padding: 7px 10px; border-radius: 999px; background: #002147; color: #fff; font-size: .74rem; font-weight: 700; text-decoration: none; }
+.acn-trip-booking-card .acn-trip-booking-link { color: #fff; }
 .acn-trip-booking-link:hover { background: #0056b3; }
 .acn-trip-booking-show-more { display: block; margin: 12px auto 0; border: 0; background: transparent; color: #0056b3; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
 .acn-trip-booking-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; padding: 11px 12px; border-radius: 14px; background: rgba(0, 128, 128, .08); }
