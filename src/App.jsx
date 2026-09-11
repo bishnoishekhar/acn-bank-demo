@@ -6,6 +6,7 @@ import ChatPanel            from './components/chat/ChatPanel';
 import FloatingChatWidget   from './components/chat/FloatingChatWidget';
 import SignInModal          from './components/auth/SignInModal';
 import ApplicationStatus    from './components/ApplicationStatus';
+import TravelProtectionBanner from './components/TravelProtectionBanner';
 import { bootstrapGecx, setCesVariables, clearCesVariables } from './components/gecx';
 
 /* The link in both applicant emails lands here:
@@ -75,6 +76,9 @@ function AppContent() {
   const [chatIntent,  setChatIntent]  = useState(null);
   const [resetSignal, setResetSignal] = useState(0);  // increment → soft-reset GECX without remounting
   const [signInOpen,  setSignInOpen]  = useState(false);
+  const [travelProtectionBanner, setTravelProtectionBanner] = useState(() => {
+    try { return JSON.parse(sessionStorage.getItem('acnTravelProtectionBannerV1') || 'null'); } catch { return null; }
+  });
 
   // ── Floating chat widget state ────────────────────────────────────────────
   // Mirrors the header ChatPanel's messages so the widget shows the same thread.
@@ -133,6 +137,14 @@ function AppContent() {
   const openSignInFromNav  = () => { signInOrigin.current = 'nav';  setSignInOpen(true); };
   const openSignInFromChat = () => { signInOrigin.current = 'chat'; setSignInOpen(true); };
   const closeSignIn        = () => setSignInOpen(false);
+  const handleTravelProtectionBanner = (payload) => {
+    setTravelProtectionBanner(payload);
+    try { sessionStorage.setItem('acnTravelProtectionBannerV1', JSON.stringify(payload)); } catch { /* non-fatal */ }
+  };
+  const dismissTravelProtectionBanner = () => {
+    setTravelProtectionBanner(null);
+    try { sessionStorage.removeItem('acnTravelProtectionBannerV1'); } catch { /* non-fatal */ }
+  };
 
   /* After a successful sign-in, the Chat origin needs the customer object
      directly from the login call, not from React state (which updates asynchronously).
@@ -199,6 +211,12 @@ function AppContent() {
 
       <Dashboard onOpenChat={openChat} />
 
+      <TravelProtectionBanner
+        payload={travelProtectionBanner}
+        onSendUtterance={(utterance) => { openChat(); floatSendRef.current?.(utterance); }}
+        onDismiss={dismissTravelProtectionBanner}
+      />
+
       <ChatPanel
         isOpen={chatOpen}
         onClose={closeChat}
@@ -210,6 +228,7 @@ function AppContent() {
         resetSignal={resetSignal}
         onMessagesChange={setFloatMessages}
         onExposeSend={(fn) => { floatSendRef.current = fn; }}
+        onTravelProtectionBanner={handleTravelProtectionBanner}
       />
 
       {/* Backdrop — dims page behind the drop-down panel */}
