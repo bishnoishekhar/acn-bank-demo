@@ -14,7 +14,7 @@ import { useAuth } from '../../context/AuthContext';
 import ComboCard      from '../ComboCard';
 import AcnFormWidget  from '../AcnFormWidget';
 import AccountCarousel from '../AccountCarousel';
-import InsightCard    from '../InsightCard';
+import InsightCard    from '../Insightcard';
 import AmountInput    from '../AmountInput';
 import CardActivationWidget from '../CardActivationWidget';
 import EppCarousel        from '../EppCarousel';
