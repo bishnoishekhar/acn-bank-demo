@@ -17,6 +17,12 @@ import AccountCarousel from '../AccountCarousel';
 import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
 import CardActivationWidget from '../CardActivationWidget';
+import EppCarousel        from '../EppCarousel';
+import EppPlans           from '../EppPlans';
+import MortgageCalculator from '../MortgageCalculator';
+import MortgageKyc        from '../MortgageKyc';
+import LoanPreapproval    from '../LoanPreapproval';
+import MobileHandoff      from '../MobileHandoff';
 import { CardCarousel, CardCompare } from '../CardWidgets';
 import TripBookingRecommendationsWidget from '../TripBookingRecommendationsWidget';
 import { fetchP2PContacts } from '../../firebase';
@@ -330,7 +336,10 @@ function isKnownPayload(p) {
     n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
     n === 'acn-amount-input'      || n === 'acn-contact-selector' ||
     n === 'acn-card-carousel'     || n === 'acn-card-compare'    ||
-    n === 'acn-card-activation'   || n === 'trip_booking_recommendations' || n === 'travel_protection_banner'
+    n === 'acn-card-activation'   || n === 'trip_booking_recommendations' || n === 'travel_protection_banner' ||
+    n === 'acn-epp-carousel'      || n === 'acn-epp-plans'       ||
+    n === 'acn-mortgage-calculator' || n === 'acn-mortgage-kyc'  ||
+    n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'
   );
 }
 
@@ -859,6 +868,25 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           ...prev,
           { type: 'receipt', payload: { ...p, date_or_frequency: formatFriendlyDate() }, id: uid() },
         ]);
+
+      // ── Loans (EPP + Mortgage) ────────────────────────────────────────────
+      if (pname === 'acn-epp-carousel')
+        setMessages((prev) => [...prev, { type: 'epp-carousel', payload: p, id: uid() }]);
+
+      if (pname === 'acn-epp-plans')
+        setMessages((prev) => [...prev, { type: 'epp-plans', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mortgage-calculator')
+        setMessages((prev) => [...prev, { type: 'mortgage-calculator', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mortgage-kyc')
+        setMessages((prev) => [...prev, { type: 'mortgage-kyc', payload: p, id: uid() }]);
+
+      if (pname === 'acn-loan-preapproval')
+        setMessages((prev) => [...prev, { type: 'loan-preapproval', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mobile-handoff')
+        setMessages((prev) => [...prev, { type: 'mobile-handoff', payload: p, id: uid() }]);
     });
   }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines, onTravelProtectionBanner]);
 
@@ -1538,6 +1566,74 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     gecxSend(v);
                   }}
                 />
+              </div>
+            );
+
+            // ── Loans (EPP + Mortgage) ────────────────────────────────────
+            if (msg.type === 'epp-carousel') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <EppCarousel
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'epp-plans') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <EppPlans
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mortgage-calculator') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageCalculator
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mortgage-kyc') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageKyc
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'loan-preapproval') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <LoanPreapproval
+                  payload={msg.payload}
+                  onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mobile-handoff') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MobileHandoff payload={msg.payload} />
               </div>
             );
 

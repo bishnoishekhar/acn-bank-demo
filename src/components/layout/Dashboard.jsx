@@ -20,6 +20,18 @@ const PRODUCTS = [
     desc:  'Check balances, review recent transactions, track spending patterns, and view your credit score — instantly.',
     intent: 'I want to know my finances',
   },
+  {
+    icon: '📱',
+    title: 'Lifestyle Financing',
+    desc:  'Own the phone, laptop, or gadget you actually want. Split the cost across easy monthly instalments with our Easy Payment Plan.',
+    intent: 'I want to buy something on Easy Payment Plan',
+  },
+  {
+    icon: '🏠',
+    title: 'Mortgage estimate',
+    desc:  'See what a home mortgage could look like for you — property price, down payment, tenure, and your monthly figure in seconds.',
+    intent: 'I want a mortgage pre-approval estimate',
+  },
 ];
 
 export default function Dashboard({ onOpenChat }) {
