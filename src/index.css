@@ -8,6 +8,64 @@
 
 *,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* ── Trip booking recommendations widget ─────────────────────────────────── */
+.acn-trip-booking-widget {
+  width: 100%;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid rgba(0, 33, 71, .12);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(11, 31, 51, .08);
+  color: #0b1f33;
+}
+.acn-trip-booking-widget__header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
+.acn-trip-booking-widget__header h3 { margin: 0; color: #0b1f33; font-size: 1.05rem; }
+.acn-trip-booking-widget__header p { margin: 4px 0 0; color: #66788a; font-size: .86rem; line-height: 1.45; }
+.acn-trip-booking-widget__hero { width: 72px; height: 58px; flex: 0 0 72px; border-radius: 12px; object-fit: cover; }
+.acn-trip-booking-widget__context { margin: 0 0 14px; color: #66788a; font-size: .78rem; line-height: 1.4; }
+.acn-trip-booking-tabs { display: flex; gap: 6px; max-width: 100%; margin-bottom: 14px; overflow-x: auto; border-bottom: 1px solid rgba(0, 33, 71, .12); }
+.acn-trip-booking-tabs button { flex: 0 0 auto; min-height: 36px; padding: 7px 10px; border: 0; border-bottom: 2px solid transparent; background: transparent; color: #66788a; font: inherit; font-size: .8rem; font-weight: 700; white-space: nowrap; cursor: pointer; }
+.acn-trip-booking-tabs button.is-active { border-bottom-color: #0056b3; color: #002147; }
+.acn-trip-booking-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.acn-trip-booking-card { min-width: 0; padding: 13px; border-radius: 16px; background: #f8f9fa; }
+.acn-trip-booking-card__image { display: block; width: 100%; height: 86px; margin-bottom: 10px; border-radius: 10px; object-fit: cover; }
+.acn-trip-booking-image-fallback { background: #e9eef2; }
+.acn-trip-booking-card h4 { margin: 0; color: #0b1f33; font-size: .94rem; line-height: 1.3; }
+.acn-trip-booking-card p { margin: 7px 0 0; color: #66788a; font-size: .8rem; line-height: 1.48; }
+.acn-trip-booking-card ul { margin: 8px 0 0; padding-left: 18px; color: #66788a; font-size: .78rem; line-height: 1.45; }
+.acn-trip-booking-card li + li { margin-top: 3px; }
+.acn-trip-booking-muted { color: #0056b3 !important; font-weight: 650; }
+.acn-trip-booking-eyebrow { color: #008080 !important; font-size: .72rem !important; font-weight: 750; text-transform: uppercase; }
+.acn-trip-booking-price { color: #002147 !important; font-weight: 700; }
+.acn-trip-booking-price small { display: block; color: #66788a; font-size: .7rem; font-weight: 500; }
+.acn-trip-booking-link { display: inline-flex; align-items: center; gap: 5px; min-height: 34px; margin-top: 12px; padding: 7px 10px; border-radius: 999px; background: #002147; color: #fff; font-size: .74rem; font-weight: 700; text-decoration: none; }
+.acn-trip-booking-link:hover { background: #0056b3; }
+.acn-trip-booking-show-more { display: block; margin: 12px auto 0; border: 0; background: transparent; color: #0056b3; font: inherit; font-size: .78rem; font-weight: 700; cursor: pointer; }
+.acn-trip-booking-note { display: flex; align-items: flex-start; gap: 9px; margin-top: 16px; padding: 11px 12px; border-radius: 14px; background: rgba(0, 128, 128, .08); }
+.acn-trip-booking-note > span { display: grid; place-items: center; width: 18px; height: 18px; flex: 0 0 18px; border-radius: 50%; background: #008080; color: #fff; font-size: .7rem; font-weight: 800; }
+.acn-trip-booking-note p { color: #0b1f33; font-size: .76rem; line-height: 1.45; }
+.acn-trip-booking-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.acn-trip-booking-action { display: inline-flex; align-items: center; justify-content: center; min-height: 36px; padding: 8px 12px; border: 0; border-radius: 999px; background: #002147; color: #fff; font: inherit; font-size: .78rem; font-weight: 750; text-decoration: none; cursor: pointer; }
+.acn-trip-booking-action--secondary { border: 1px solid rgba(0, 33, 71, .18); background: #fff; color: #002147; }
+.acn-trip-booking-disclosures { margin-top: 14px; color: #66788a; font-size: .76rem; line-height: 1.45; }
+.acn-trip-booking-disclosures summary { color: #002147; font-weight: 700; cursor: pointer; }
+.acn-trip-booking-disclosures ul { margin: 8px 0 0; padding-left: 18px; }
+.acn-travel-protection-banner { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 14px; width: min(1180px, calc(100% - 32px)); margin: 16px auto; padding: 14px 16px; border: 1px solid rgba(0, 86, 179, .14); border-radius: 18px; background: linear-gradient(135deg, rgba(0, 86, 179, .08), rgba(0, 128, 128, .06)); color: #0b1f33; }
+.acn-travel-protection-banner__icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 14px; background: #fff; color: #0056b3; font-weight: 800; }
+.acn-travel-protection-banner h3 { color: #0b1f33; font-size: .95rem; }
+.acn-travel-protection-banner p { margin-top: 3px; color: #66788a; font-size: .8rem; line-height: 1.48; }
+.acn-travel-protection-banner__actions { display: flex; align-items: center; gap: 8px; }
+.acn-travel-protection-banner__actions button, .acn-travel-protection-banner__cta { min-height: 38px; padding: 8px 14px; border: 0; border-radius: 999px; background: #002147; color: #fff; font: inherit; font-size: .8rem; font-weight: 750; text-decoration: none; cursor: pointer; }
+.acn-travel-protection-banner__actions button:hover, .acn-travel-protection-banner__cta:hover { background: #0056b3; }
+.acn-travel-protection-banner__dismiss { width: 34px; min-height: 34px !important; padding: 0 !important; background: transparent !important; color: #66788a !important; font-size: 1.2rem !important; }
+@media (max-width: 640px) { .acn-travel-protection-banner { grid-template-columns: auto minmax(0, 1fr); width: calc(100% - 20px); margin: 10px auto; border-radius: 16px; } .acn-travel-protection-banner__actions { grid-column: 1 / -1; justify-content: flex-end; } }
+@media (max-width: 900px) { .acn-trip-booking-grid { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+  .acn-trip-booking-widget { padding: 14px; border-radius: 17px; }
+  .acn-trip-booking-widget__hero { width: 58px; height: 50px; flex-basis: 58px; }
+}
+
 :root {
   --acn-primary:    #002147;
   --acn-secondary:  #0056B3;

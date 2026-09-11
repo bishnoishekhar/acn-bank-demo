@@ -18,6 +18,7 @@ import InsightCard    from '../InsightCard';
 import AmountInput    from '../AmountInput';
 import CardActivationWidget from '../CardActivationWidget';
 import { CardCarousel, CardCompare } from '../CardWidgets';
+import TripBookingRecommendationsWidget from '../TripBookingRecommendationsWidget';
 import { fetchP2PContacts } from '../../firebase';
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
@@ -247,13 +248,52 @@ function normalizeResponseOutputs(outputs = []) {
 }
 
 // Hoisted so both processOutputs and the acn-session-data handler can share them.
+function safeHttpsUrl(value) {
+  if (typeof value !== 'string' || !value.trim()) return '';
+  try {
+    const url = new URL(value);
+    return url.protocol === 'https:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function normalizeActionIdentity(action = {}) {
+  const actionType = String(action.actionType || action.action_type || (action.url ? 'OPEN_URL' : 'SEND_UTTERANCE')).toUpperCase();
+  if (actionType === 'OPEN_URL') {
+    const url = safeHttpsUrl(action.url);
+    return url ? `${actionType}:${url}` : '';
+  }
+  const utterance = String(action.utterance || action.value || '').trim().replace(/\s+/g, ' ').toLowerCase();
+  return utterance ? `SEND_UTTERANCE:${utterance}` : '';
+}
+
 function resolvePayloadName(p) {
   const normalized = normalizeWidgetPayload(p);
   if (!normalized || typeof normalized !== 'object') return null;
+  const explicitName = String(normalized.name || normalized.type || '').toLowerCase();
+  const aliases = {
+    trip_booking_recommendations: 'trip_booking_recommendations',
+    'trip-booking-recommendations': 'trip_booking_recommendations',
+    booking_recommendations: 'trip_booking_recommendations',
+    booking_shortlist: 'trip_booking_recommendations',
+  };
+  if (aliases[explicitName]) return aliases[explicitName];
   if (normalized.name) return normalized.name;
   if (normalized.type === 'quick_actions') return 'quick_actions';
   if (Array.isArray(normalized.actions) && normalized.actions.length > 0 && normalized.actions[0]?.utterance !== undefined)
     return 'quick_actions';
+  if (
+    normalized.displayRegion === 'dashboard_banner' && normalized.independentFromCardApplication === true &&
+    normalized.title && normalized.subtitle && normalized.action
+  ) return 'travel_protection_banner';
+  if (['travel_protection_banner', 'travel-protection-banner', 'protection_banner'].includes(explicitName))
+    return 'travel_protection_banner';
+  if (
+    Array.isArray(normalized.flightOptions) || Array.isArray(normalized.flight_options) ||
+    Array.isArray(normalized.stayOptions) || Array.isArray(normalized.stay_options) ||
+    Array.isArray(normalized.resortOptions) || Array.isArray(normalized.resort_options)
+  ) return 'trip_booking_recommendations';
   if (['card_activation', 'acn-card-activation', 'acn-activation-card', 'activation'].includes(normalized.type) ||
       ['card_activation', 'acn-card-activation', 'acn-activation-card', 'activation'].includes(normalized.name)) return 'acn-card-activation';
   if (
@@ -290,8 +330,23 @@ function isKnownPayload(p) {
     n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
     n === 'acn-amount-input'      || n === 'acn-contact-selector' ||
     n === 'acn-card-carousel'     || n === 'acn-card-compare'    ||
-    n === 'acn-card-activation'
+    n === 'acn-card-activation'   || n === 'trip_booking_recommendations' || n === 'travel_protection_banner'
   );
+}
+
+function filterDuplicateQuickActions(actions = [], widgetActions = []) {
+  const widgetIdentities = new Set(widgetActions.map(normalizeActionIdentity).filter(Boolean));
+  return actions.filter((action) => {
+    const identity = normalizeActionIdentity(action);
+    return !identity || !widgetIdentities.has(identity);
+  });
+}
+
+function tripBookingSignature(payload, turnIndex = 'unknown') {
+  const ids = (payload?.flightOptions || payload?.flight_options || []).map((option) => option?.id || '').join('|');
+  const stays = (payload?.stayOptions || payload?.stay_options || []).map((option) => option?.id || '').join('|');
+  const resorts = (payload?.resortOptions || payload?.resort_options || []).map((option) => option?.id || '').join('|');
+  return `${turnIndex}:trip_booking_recommendations:${payload?.title || ''}:${ids}:${stays}:${resorts}`;
 }
 
 // ── Static data ───────────────────────────────────────────────────────────────
@@ -341,7 +396,7 @@ const CUSTOMER_SUGGESTIONS = [
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
-export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0, onMessagesChange, onExposeSend }) {
+export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0, onMessagesChange, onExposeSend, onTravelProtectionBanner }) {
   const { customerId, isAuthenticated, customerName } = useAuth();
   const AI_SUGGESTIONS = isAuthenticated ? CUSTOMER_SUGGESTIONS : GUEST_SUGGESTIONS;
 
@@ -706,6 +761,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
     // Pass 2: payload widgets — wrap widget-only outputs in bot-widget containers
     let needsBotWidgetWrapper = false;
+    const widgetActions = outputs.flatMap((output) => {
+      const payload = normalizeWidgetPayload(output);
+      return resolvePayloadName(payload) === 'trip_booking_recommendations' && Array.isArray(payload?.actions) ? payload.actions : [];
+    });
     outputs.forEach((output) => {
       const payloadValue = normalizeWidgetPayload(output);
       if (output?.text && !output?.payload && !output?.customPayload && !output?.data?.payload && !resolvePayloadName(payloadValue)) return;
@@ -718,6 +777,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       // widget-only payloads need the lightweight bot-widget wrapper.
       if (
         pname !== 'quick_actions' &&
+        pname !== 'trip_booking_recommendations' &&
+        pname !== 'travel_protection_banner' &&
         !outputsWithText.has(output) &&
         !needsBotWidgetWrapper
       ) {
@@ -725,7 +786,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         setMessages((prev) => [...prev, { type: 'bot-widget', id: uid() }]);
       }
 
-      if (pname === 'quick_actions' && p.actions) showCombo(p.actions, p.summary);
+      if (pname === 'quick_actions' && p.actions) {
+        const unmatchedActions = filterDuplicateQuickActions(p.actions, widgetActions);
+        if (unmatchedActions.length > 0) showCombo(unmatchedActions, p.summary);
+      }
+
+      if (pname === 'trip_booking_recommendations') {
+        const turnIndex = output.turnIndex ?? p.turnIndex ?? 'unknown';
+        const signature = tripBookingSignature(p, turnIndex);
+        setMessages((prev) => {
+          if (prev.some((message) => message.type === 'trip-booking-recommendations' && message.signature === signature)) return prev;
+          return [...prev, { type: 'trip-booking-recommendations', payload: p, signature, id: uid() }];
+        });
+      }
+
+      if (pname === 'travel_protection_banner') {
+        onTravelProtectionBanner?.(p);
+        return;
+      }
 
       if (pname === 'acn-form-input' && p.fields) {
         setActiveForm({ payload: p, id: uid() });
@@ -782,7 +860,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           { type: 'receipt', payload: { ...p, date_or_frequency: formatFriendlyDate() }, id: uid() },
         ]);
     });
-  }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines]);
+  }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines, onTravelProtectionBanner]);
 
   const processOutputsRef = useRef(processOutputs);
   useEffect(() => { processOutputsRef.current = processOutputs; }, [processOutputs]);
@@ -1380,6 +1458,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             // bot-widget: lightweight bot-side container for widget-only turns
             if (msg.type === 'bot-widget') return (
               <div key={msg.id} className="cp-bot-widget acn-msg-enter" aria-label="Bot response" />
+            );
+
+            if (msg.type === 'trip-booking-recommendations') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <TripBookingRecommendationsWidget
+                  payload={msg.payload}
+                  onAction={(utterance) => { addUser(utterance); showTyping(); gecxSend(utterance); }}
+                />
+              </div>
             );
 
             if (msg.type === 'user') return (
