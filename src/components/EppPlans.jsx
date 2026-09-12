@@ -20,8 +20,16 @@ export default function EppPlans({ payload, onCta }) {
   };
 
   const chosen = plans[selectedIdx] || {};
+  const tenureStr = String(chosen.tenure_months || '');
   const confirmValue = String(payload?.confirm_cta_value || 'epp_plan_confirm')
-    .replace('{tenure}', String(chosen.tenure_months || ''));
+    .replace('{tenure}', tenureStr);
+  // Label is always dynamic — echo the currently selected chip. If the agent
+  // sent a template with {tenure}, substitute; otherwise ignore its static
+  // label so it never shows a stale tenure after the user picks a chip.
+  const rawLabel = payload?.confirm_cta_label;
+  const confirmLabel = rawLabel && rawLabel.includes('{tenure}')
+    ? rawLabel.replace('{tenure}', tenureStr)
+    : `Continue with ${tenureStr} months`;
 
   const send = (v) => v && onCta && onCta(v);
 
@@ -116,7 +124,7 @@ export default function EppPlans({ payload, onCta }) {
             background: BRAND, color: '#fff', fontSize: '13.5px', fontWeight: 700, cursor: 'pointer',
           }}
         >
-          {payload?.confirm_cta_label || `Continue with ${chosen.tenure_months || ''} months`}
+          {confirmLabel}
         </button>
       </div>
     </div>

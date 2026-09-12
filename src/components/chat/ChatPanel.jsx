@@ -1626,7 +1626,13 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
                 <LoanPreapproval
                   payload={msg.payload}
-                  onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                  onCta={(v) => {
+                    // Send the CTA value silently — do NOT addUser(v).
+                    // Machine tokens like "loan_confirm_review" or
+                    // "loan_change_plan" would otherwise show as a user bubble.
+                    showTyping();
+                    gecxSend(v);
+                  }}
                 />
               </div>
             );
