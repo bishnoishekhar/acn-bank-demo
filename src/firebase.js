@@ -23,6 +23,7 @@ import { getFirestore,
          doc,
          query,
          where,
+         orderBy,
          getDoc,
          getDocs,
          limit }                from 'firebase/firestore';
@@ -155,6 +156,10 @@ export async function authenticateCustomer(phone, pin) {
         globalStatus:      c.global_status ?? '',
         preferredLanguage: c.preferred_language ?? 'en',
         kycExpiresAt:      c.kyc_expires_at ?? '',
+        // ACN QR Pay opt-in. Default true when the field is missing so the
+        // demo works without running seedQrFields.mjs first. Set qr_enabled:
+        // false on a customer doc (or via the seed script) to hide MyQr.
+        qrEnabled:         c.qr_enabled !== false,
         spendingPersona:   financials.spending_persona ?? '',
         creditScoreValue:  financials.credit_score_value ?? '',
         creditScoreBand:   financials.credit_score_band ?? '',
@@ -325,6 +330,52 @@ export async function fetchApplicationStatus(applicationId, token) {
   } catch (err) {
     console.warn('[Firebase] fetchApplicationStatus failed:', err.message);
     return { ok: false, reason: 'error' };
+  }
+}
+
+// ── ACN QR Pay history ──────────────────────────────────────────────────────
+/**
+ * Returns the most recent transactions on this customer whose `category` is
+ * one of the QR Pay categories the Fund Transfer Agent writes. Includes both
+ * `qr_transfer` (debits sent as payer) and `qr_credit` (rare — kept for
+ * forward compatibility if the credit-side category is ever renamed).
+ *
+ * Ordered by `timestamp` desc. Falls back to unsorted-then-client-sorted if
+ * the composite index doesn't exist yet, so a missing index doesn't break
+ * the card.
+ */
+export async function fetchQrTransactions(customerId, max = 5) {
+  if (!customerId) return [];
+  try {
+    await ensureAnonAuth();
+    const col = collection(db, 'customers', customerId, 'transactions');
+    const qy = query(
+      col,
+      where('category', 'in', ['qr_transfer', 'qr_credit']),
+      orderBy('timestamp', 'desc'),
+      limit(max),
+    );
+    const snap = await getDocs(qy);
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    // Composite index not yet built — fall back to unordered filter and sort
+    // client-side. The console error tells you the exact URL to click to
+    // create the index; once created, the fast path kicks in on next load.
+    if (String(err?.message || '').includes('index')) {
+      const col = collection(db, 'customers', customerId, 'transactions');
+      const qy = query(
+        col,
+        where('category', 'in', ['qr_transfer', 'qr_credit']),
+        limit(max * 4),
+      );
+      const snap = await getDocs(qy);
+      return snap.docs
+        .map((d) => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))
+        .slice(0, max);
+    }
+    console.warn('[Firebase] fetchQrTransactions failed:', err.message);
+    return [];
   }
 }
 
