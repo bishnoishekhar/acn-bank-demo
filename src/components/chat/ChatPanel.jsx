@@ -1141,18 +1141,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     if (authResumeInFlightRef.current) return;
     authResumeInFlightRef.current = true;
 
-    const customerName = customer?.prefName || customer?.pref_name || '';
-    const name = customerName ? `, ${customerName}` : '';
-
-    setMessages((prev) => [
-      ...prev,
-      {
-        type: 'bot',
-        text: `You're signed in${name}. Picking up where we left off…`,
-        id: uid(),
-      },
-    ]);
-
     showTyping();
 
     try {
