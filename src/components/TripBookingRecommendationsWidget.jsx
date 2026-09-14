@@ -93,10 +93,12 @@ function safeHttpsUrl(value) {
   }
 }
 
-function imageFor(option, category, index) {
-  const customUrl = option?.imageUrl || option?.image_url;
-  if (customUrl) return customUrl;
+function primaryImageFor(option) {
+  return option?.imageUrl || option?.image_url || '';
+}
 
+// Resolves only the semantic/Unsplash fallback, never the backend-provided imageUrl.
+function fallbackImageFor(option, category, index) {
   const searchText = `${option?.title || ''} ${option?.name || ''} ${option?.location || ''} ${option?.airline || ''} ${option?.route?.to || ''} ${option?.fitLabel || ''}`;
   const matched = destinationImageMap.find((item) => item.pattern.test(searchText));
   if (matched && matched[category]) {
@@ -137,11 +139,14 @@ function FallbackSvg({ category }) {
   );
 }
 
-function ImageWithFallback({ src, alt, className = '', category = 'general' }) {
-  const [failed, setFailed] = useState(false);
-  const safeSrc = safeImageUrl(src);
+function ImageWithFallback({ src, fallbackSrc, alt, className = '', category = 'general' }) {
+  const safePrimary = safeImageUrl(src);
+  const safeFallback = safeImageUrl(fallbackSrc);
+  const initialSrc = safePrimary || safeFallback;
+  const [currentSrc, setCurrentSrc] = useState(initialSrc);
+  const [exhausted, setExhausted] = useState(!initialSrc);
 
-  if (!safeSrc || failed) {
+  if (!currentSrc || exhausted) {
     return (
       <div className={`${className} acn-trip-booking-image-fallback acn-trip-booking-image-fallback--${category}`} aria-hidden="true">
         <FallbackSvg category={category} />
@@ -149,16 +154,23 @@ function ImageWithFallback({ src, alt, className = '', category = 'general' }) {
     );
   }
 
+  const handleError = () => {
+    if (currentSrc === safePrimary && safeFallback && safeFallback !== safePrimary) {
+      setCurrentSrc(safeFallback);
+    } else {
+      setExhausted(true);
+    }
+  };
+
   return (
     <img
       className={className}
-      src={safeSrc}
+      src={currentSrc}
       alt={alt || ''}
       loading="lazy"
       decoding="async"
-      crossOrigin="anonymous"
       referrerPolicy="no-referrer"
-      onError={() => setFailed(true)}
+      onError={handleError}
     />
   );
 }
@@ -194,7 +206,8 @@ function FlightCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'flights', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'flights', index)}
         alt={title}
         category="flights"
         className="acn-trip-booking-card__image"
@@ -225,7 +238,8 @@ function StayCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'stays', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'stays', index)}
         alt={title}
         category="stays"
         className="acn-trip-booking-card__image"
@@ -262,7 +276,8 @@ function ResortCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'resorts', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'resorts', index)}
         alt={title}
         category="resorts"
         className="acn-trip-booking-card__image"
@@ -328,7 +343,7 @@ export default function TripBookingRecommendationsWidget({ payload, onAction }) 
   const options = list(active.values.map((key) => payload?.[key]).find((value) => Array.isArray(value)));
   const visibleOptions = options.slice(0, visibleCount);
 
-  const heroImageSrc = payload?.hero?.imageUrl || payload?.hero?.image_url || payload?.heroUrl || payload?.hero_url || fallbackHeroImage;
+  const heroImageSrc = payload?.hero?.imageUrl || payload?.hero?.image_url || payload?.heroUrl || payload?.hero_url || '';
   const disclosures = list(payload?.disclosures);
   const actions = list(payload?.actions);
 
@@ -342,6 +357,7 @@ export default function TripBookingRecommendationsWidget({ payload, onAction }) 
       <header className="acn-trip-booking-widget__header">
         <ImageWithFallback
           src={heroImageSrc}
+          fallbackSrc={fallbackHeroImage}
           alt={text(payload?.title, 'Trip overview')}
           category="hero"
           className="acn-trip-booking-widget__hero"
