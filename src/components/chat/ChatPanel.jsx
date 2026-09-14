@@ -1601,7 +1601,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <MortgageCalculator
                   payload={msg.payload}
                   onCta={(v) => {
-                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    // Keep the widget in the message list — it switches to its
+                    // own confirmed (read-only) view internally. Only send the
+                    // confirmed values upstream.
                     showTyping();
                     gecxSend(v);
                   }}
