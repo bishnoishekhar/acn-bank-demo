@@ -6,55 +6,55 @@ const tabs = [
   { key: 'resorts', label: 'Ski resorts', values: ['resortOptions', 'resort_options'] },
 ];
 
-const fallbackHeroImage = 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80';
+const fallbackHeroImage = 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=900&q=80';
 
 // Option-specific mappings for this Italy ski itinerary, checked before the broad category fallback.
 const specificImageMap = [
   {
     pattern: /val gardena|gardena|sellaronda/i,
-    stays: 'https://images.unsplash.com/photo-1517840901100-8179e982acb7?auto=format&fit=crop&w=800&q=80', // snowy alpine chalet exterior
-    resorts: 'https://images.unsplash.com/photo-1518135714426-c18f5ffb6f4d?auto=format&fit=crop&w=800&q=80', // snow-covered Dolomites village
+    stays: 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    resorts: 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
   },
   {
     pattern: /cortina/i,
-    stays: 'https://images.unsplash.com/photo-1518602164578-cd0074062767?auto=format&fit=crop&w=800&q=80', // cozy alpine wood lodge
-    resorts: 'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=800&q=80', // snowy Dolomites mountainside
+    stays: 'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    resorts: 'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
   },
   {
     pattern: /bormio/i,
-    stays: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=800&q=80', // mountain lodge deck with alpine view
-    resorts: 'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=800&q=80', // snowy alpine valley and peaks
+    stays: 'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
+    resorts: 'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   },
   {
     pattern: /venice|vce/i,
-    flights: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80', // Venice canal gondolas
+    flights: 'https://images.unsplash.com/photo-1440190243641-996d004b8c66?auto=format&fit=crop&w=800&q=80', // Venice canal gateway
   },
   {
     pattern: /bolzano|bzo|innsbruck|inn/i,
-    flights: 'https://images.unsplash.com/photo-1439066615861-d1af74d74000?auto=format&fit=crop&w=800&q=80', // South Tyrol / Innsbruck alpine valley
+    flights: 'https://images.unsplash.com/photo-1773854976224-1da9a4d525d5?auto=format&fit=crop&w=800&q=80', // Innsbruck / South Tyrol alpine gateway
   },
   {
     pattern: /milan|mxp|lin/i,
-    flights: 'https://images.unsplash.com/photo-1513581166391-887a96ddeafd?auto=format&fit=crop&w=800&q=80', // Milan city skyline / architecture
+    flights: 'https://images.unsplash.com/photo-1742148237723-5f91f6ec2725?auto=format&fit=crop&w=800&q=80', // Milan skyline
   },
 ];
 
 // Last-resort, category-level fallbacks used only when no specific mapping matches.
 const fallbackImages = {
   flights: [
-    'https://images.unsplash.com/photo-1517400508447-f8dd518b86db?auto=format&fit=crop&w=800&q=80', // aircraft wing in flight
-    'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80', // aircraft over alpine terrain
-    'https://images.unsplash.com/photo-1513581166391-887a96ddeafd?auto=format&fit=crop&w=800&q=80', // European city gateway
+    'https://images.unsplash.com/photo-1440190243641-996d004b8c66?auto=format&fit=crop&w=800&q=80', // Venice canal gateway
+    'https://images.unsplash.com/photo-1773854976224-1da9a4d525d5?auto=format&fit=crop&w=800&q=80', // Innsbruck / South Tyrol alpine gateway
+    'https://images.unsplash.com/photo-1742148237723-5f91f6ec2725?auto=format&fit=crop&w=800&q=80', // Milan skyline
   ],
   stays: [
-    'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80', // alpine hotel exterior
-    'https://images.unsplash.com/photo-1517840901100-8179e982acb7?auto=format&fit=crop&w=800&q=80', // snowy chalet
-    'https://images.unsplash.com/photo-1518602164578-cd0074062767?auto=format&fit=crop&w=800&q=80', // alpine lodge interior
+    'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   ],
   resorts: [
-    'https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=800&q=80', // snowy ski slope
-    'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=800&q=80', // snowy Dolomites mountainside
-    'https://images.unsplash.com/photo-1483347756197-71ef80e95f73?auto=format&fit=crop&w=800&q=80', // snowy alpine valley and peaks
+    'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   ],
 };
 
@@ -104,7 +104,7 @@ function primaryImageFor(option) {
 
 // Resolves only the semantic/Unsplash fallback, never the backend-provided imageUrl.
 function fallbackImageFor(option, category, index) {
-  const searchText = `${option?.title || ''} ${option?.name || ''} ${option?.location || ''} ${option?.airline || ''} ${option?.route?.to || ''} ${option?.fitLabel || ''}`;
+  const searchText = `${option?.title || ''} ${option?.name || ''} ${option?.location || ''} ${option?.airline || ''} ${option?.route?.to || ''} ${option?.bestFor || ''} ${option?.fitLabel || ''}`;
   const matched = specificImageMap.find((item) => item.pattern.test(searchText));
   if (matched && matched[category]) {
     return matched[category];
