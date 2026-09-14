@@ -1,5 +1,7 @@
 import { useAuth } from '../../context/AuthContext';
 import CardsSection from './CardsSection';
+import MyQrCard from '../MyQrCard';
+import QrHistoryCard from '../QrHistoryCard';
 
 const PRODUCTS = [
   {
@@ -141,6 +143,16 @@ export default function Dashboard({ onOpenChat }) {
           ))}
         </div>
       </section>
+
+      {/* ── My QR + QR history (receive side, ACN QR Pay) ──
+           Both components render null for guests / when qr_enabled is false,
+           so it's safe to keep them mounted. Placed above CardsSection so
+           the user's own receive-QR sits between "what you can do" and
+           "your cards", matching the Flutter Scan → My QR entry point.
+           History lives directly below the QR so a payer can immediately
+           verify their previous QR payments landed. */}
+      <MyQrCard />
+      <QrHistoryCard />
 
       {/* ── Public card catalogue (guest-browsable, scenario 1) ── */}
       <CardsSection onOpenChat={onOpenChat} />
