@@ -192,25 +192,6 @@ export default function MobileHandoff({ payload }) {
             }}>
               Secure hand-off · Opens the ACN Bank app
             </div>
-            {/* Diagnostic strip — visible small so we can see whether the
-                URL actually carries customer_id + sso=web. Remove after the
-                deep-link flow is stable in production. */}
-            <details style={{ marginTop: '8px' }}>
-              <summary style={{ fontSize: '10px', color: MUTED, cursor: 'pointer' }}>
-                Debug link
-              </summary>
-              <div style={{
-                marginTop: '4px', padding: '6px 8px', background: '#F7F9FC',
-                borderRadius: '6px', fontFamily: 'monospace', fontSize: '9.5px',
-                color: '#0B1F33', wordBreak: 'break-all', lineHeight: 1.4,
-              }}>
-                {url.href}
-                <div style={{ marginTop: '4px' }}>
-                  customer_id: <b>{url.searchParams.get('customer_id') || '(empty!)'}</b>
-                  {' · '}sso: <b>{url.searchParams.get('sso') || '(empty!)'}</b>
-                </div>
-              </div>
-            </details>
           </>
         )}
       </div>
