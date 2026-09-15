@@ -6,50 +6,55 @@ const tabs = [
   { key: 'resorts', label: 'Ski resorts', values: ['resortOptions', 'resort_options'] },
 ];
 
-const fallbackHeroImage = 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=900&q=80';
+const fallbackHeroImage = 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=900&q=80';
 
-const destinationImageMap = [
+// Option-specific mappings for this Italy ski itinerary, checked before the broad category fallback.
+const specificImageMap = [
   {
-    pattern: /venice|vce|cortina/i,
-    flights: 'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80',
-    stays: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
-    resorts: 'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=800&q=80',
+    pattern: /val gardena|gardena|sellaronda/i,
+    stays: 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    resorts: 'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
   },
   {
-    pattern: /val gardena|gardena|bolzano|bzo|innsbruck|inn|sellaronda/i,
-    flights: 'https://images.unsplash.com/photo-1502784444187-359ac186c5bb?auto=format&fit=crop&w=800&q=80',
-    stays: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    resorts: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=800&q=80',
+    pattern: /cortina/i,
+    stays: 'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    resorts: 'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
   },
   {
-    pattern: /milan|mxp|lin|bormio|lombardy/i,
-    flights: 'https://images.unsplash.com/photo-1513581166391-887a96ddeafd?auto=format&fit=crop&w=800&q=80',
-    stays: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80',
-    resorts: 'https://images.unsplash.com/photo-1517825738774-7de9363ef735?auto=format&fit=crop&w=800&q=80',
+    pattern: /bormio/i,
+    stays: 'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
+    resorts: 'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   },
   {
-    pattern: /dolomites|dolomiti|alps|tyrol/i,
-    flights: 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=800&q=80',
-    stays: 'https://images.unsplash.com/photo-1564501049412-61c2a3083791?auto=format&fit=crop&w=800&q=80',
-    resorts: 'https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=800&q=80',
+    pattern: /venice|vce/i,
+    flights: 'https://images.unsplash.com/photo-1440190243641-996d004b8c66?auto=format&fit=crop&w=800&q=80', // Venice canal gateway
+  },
+  {
+    pattern: /bolzano|bzo|innsbruck|inn/i,
+    flights: 'https://images.unsplash.com/photo-1773854976224-1da9a4d525d5?auto=format&fit=crop&w=800&q=80', // Innsbruck / South Tyrol alpine gateway
+  },
+  {
+    pattern: /milan|mxp|lin/i,
+    flights: 'https://images.unsplash.com/photo-1742148237723-5f91f6ec2725?auto=format&fit=crop&w=800&q=80', // Milan skyline
   },
 ];
 
+// Last-resort, category-level fallbacks used only when no specific mapping matches.
 const fallbackImages = {
   flights: [
-    'https://images.unsplash.com/photo-1514890547357-a9ee288728e0?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1502784444187-359ac186c5bb?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1513581166391-887a96ddeafd?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1440190243641-996d004b8c66?auto=format&fit=crop&w=800&q=80', // Venice canal gateway
+    'https://images.unsplash.com/photo-1773854976224-1da9a4d525d5?auto=format&fit=crop&w=800&q=80', // Innsbruck / South Tyrol alpine gateway
+    'https://images.unsplash.com/photo-1742148237723-5f91f6ec2725?auto=format&fit=crop&w=800&q=80', // Milan skyline
   ],
   stays: [
-    'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   ],
   resorts: [
-    'https://images.unsplash.com/photo-1551524559-8af4e6624178?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1486911278844-a81c5267e227?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1517825738774-7de9363ef735?auto=format&fit=crop&w=800&q=80',
+    'https://images.unsplash.com/photo-1612566166292-d39b2357f0bb?auto=format&fit=crop&w=800&q=80', // snowy Val Gardena landscape
+    'https://images.unsplash.com/photo-1773137175525-91a521aefe31?auto=format&fit=crop&w=800&q=80', // snowy Cortina village
+    'https://images.unsplash.com/photo-1748469735292-6922a7c170ba?auto=format&fit=crop&w=800&q=80', // Bormio alpine landscape
   ],
 };
 
@@ -93,12 +98,14 @@ function safeHttpsUrl(value) {
   }
 }
 
-function imageFor(option, category, index) {
-  const customUrl = option?.imageUrl || option?.image_url;
-  if (customUrl) return customUrl;
+function primaryImageFor(option) {
+  return option?.imageUrl || option?.image_url || '';
+}
 
-  const searchText = `${option?.title || ''} ${option?.name || ''} ${option?.location || ''} ${option?.airline || ''} ${option?.route?.to || ''} ${option?.fitLabel || ''}`;
-  const matched = destinationImageMap.find((item) => item.pattern.test(searchText));
+// Resolves only the semantic/Unsplash fallback, never the backend-provided imageUrl.
+function fallbackImageFor(option, category, index) {
+  const searchText = `${option?.title || ''} ${option?.name || ''} ${option?.location || ''} ${option?.airline || ''} ${option?.route?.to || ''} ${option?.bestFor || ''} ${option?.fitLabel || ''}`;
+  const matched = specificImageMap.find((item) => item.pattern.test(searchText));
   if (matched && matched[category]) {
     return matched[category];
   }
@@ -137,11 +144,14 @@ function FallbackSvg({ category }) {
   );
 }
 
-function ImageWithFallback({ src, alt, className = '', category = 'general' }) {
-  const [failed, setFailed] = useState(false);
-  const safeSrc = safeImageUrl(src);
+function ImageWithFallback({ src, fallbackSrc, alt, className = '', category = 'general' }) {
+  const safePrimary = safeImageUrl(src);
+  const safeFallback = safeImageUrl(fallbackSrc);
+  const initialSrc = safePrimary || safeFallback;
+  const [currentSrc, setCurrentSrc] = useState(initialSrc);
+  const [exhausted, setExhausted] = useState(!initialSrc);
 
-  if (!safeSrc || failed) {
+  if (!currentSrc || exhausted) {
     return (
       <div className={`${className} acn-trip-booking-image-fallback acn-trip-booking-image-fallback--${category}`} aria-hidden="true">
         <FallbackSvg category={category} />
@@ -149,16 +159,23 @@ function ImageWithFallback({ src, alt, className = '', category = 'general' }) {
     );
   }
 
+  const handleError = () => {
+    if (currentSrc === safePrimary && safeFallback && safeFallback !== safePrimary) {
+      setCurrentSrc(safeFallback);
+    } else {
+      setExhausted(true);
+    }
+  };
+
   return (
     <img
       className={className}
-      src={safeSrc}
+      src={currentSrc}
       alt={alt || ''}
       loading="lazy"
       decoding="async"
-      crossOrigin="anonymous"
       referrerPolicy="no-referrer"
-      onError={() => setFailed(true)}
+      onError={handleError}
     />
   );
 }
@@ -194,7 +211,8 @@ function FlightCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'flights', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'flights', index)}
         alt={title}
         category="flights"
         className="acn-trip-booking-card__image"
@@ -225,7 +243,8 @@ function StayCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'stays', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'stays', index)}
         alt={title}
         category="stays"
         className="acn-trip-booking-card__image"
@@ -262,7 +281,8 @@ function ResortCard({ option, index }) {
   return (
     <article className="acn-trip-booking-card">
       <ImageWithFallback
-        src={imageFor(option, 'resorts', index)}
+        src={primaryImageFor(option)}
+        fallbackSrc={fallbackImageFor(option, 'resorts', index)}
         alt={title}
         category="resorts"
         className="acn-trip-booking-card__image"
@@ -328,7 +348,7 @@ export default function TripBookingRecommendationsWidget({ payload, onAction }) 
   const options = list(active.values.map((key) => payload?.[key]).find((value) => Array.isArray(value)));
   const visibleOptions = options.slice(0, visibleCount);
 
-  const heroImageSrc = payload?.hero?.imageUrl || payload?.hero?.image_url || payload?.heroUrl || payload?.hero_url || fallbackHeroImage;
+  const heroImageSrc = payload?.hero?.imageUrl || payload?.hero?.image_url || payload?.heroUrl || payload?.hero_url || '';
   const disclosures = list(payload?.disclosures);
   const actions = list(payload?.actions);
 
@@ -342,6 +362,7 @@ export default function TripBookingRecommendationsWidget({ payload, onAction }) 
       <header className="acn-trip-booking-widget__header">
         <ImageWithFallback
           src={heroImageSrc}
+          fallbackSrc={fallbackHeroImage}
           alt={text(payload?.title, 'Trip overview')}
           category="hero"
           className="acn-trip-booking-widget__hero"
