@@ -10,6 +10,11 @@ export default function EppPlans({ payload, onCta }) {
     return recIdx >= 0 ? recIdx : Math.max(0, plans.length - 1);
   });
   const [detailsOpen, setDetailsOpen] = useState(false);
+  // Once the user hits Continue we lock the widget into a read-only /
+  // "chosen" state so the message stays in the log as a receipt of what
+  // they picked — but they can't accidentally re-fire the intent by
+  // tapping again. Matches the pattern used by MortgageCalculator.
+  const [submitted, setSubmitted] = useState(false);
 
   const BRAND = '#0056B3';
   const MUTED = '#66788A';
@@ -84,18 +89,22 @@ export default function EppPlans({ payload, onCta }) {
         }}>
           {plans.map((plan, i) => {
             const selected = i === selectedIdx;
+            const clickable = !submitted;
             return (
               <button
                 key={plan.tenure_months || i}
-                onClick={() => setSelectedIdx(i)}
+                onClick={clickable ? () => setSelectedIdx(i) : undefined}
+                disabled={!clickable}
                 style={{
-                  padding: '14px 6px', textAlign: 'center', cursor: 'pointer',
+                  padding: '14px 6px', textAlign: 'center',
+                  cursor: clickable ? 'pointer' : 'default',
                   background: selected ? BRAND : '#fff',
                   color: selected ? '#fff' : '#0B1F33',
                   border: `1.5px solid ${selected ? BRAND : '#E2E6EA'}`,
                   borderRadius: '12px',
                   transition: 'all 0.15s ease',
                   boxShadow: selected ? '0 2px 8px rgba(0,86,179,0.25)' : 'none',
+                  opacity: submitted && !selected ? 0.45 : 1,
                 }}
               >
                 <div style={{
@@ -140,18 +149,25 @@ export default function EppPlans({ payload, onCta }) {
         )}
       </div>
 
-      {/* Confirm CTA — taller, more presence */}
+      {/* Confirm CTA — becomes a locked "✓ Selected" chip after tap so the
+          bubble stays visible in the chat log as a receipt of the choice. */}
       <div style={{ padding: '4px 20px 20px' }}>
         <button
-          onClick={() => send(confirmValue)}
+          onClick={submitted
+            ? undefined
+            : () => { setSubmitted(true); send(confirmValue); }}
+          disabled={submitted}
           style={{
             width: '100%', padding: '15px', border: 'none', borderRadius: '12px',
-            background: BRAND, color: '#fff', fontSize: '14px', fontWeight: 700,
-            cursor: 'pointer', letterSpacing: '0.2px',
-            boxShadow: '0 2px 8px rgba(0,86,179,0.25)',
+            background: submitted ? '#E6F2F5' : BRAND,
+            color: submitted ? BRAND : '#fff',
+            fontSize: '14px', fontWeight: 700,
+            cursor: submitted ? 'default' : 'pointer',
+            letterSpacing: '0.2px',
+            boxShadow: submitted ? 'none' : '0 2px 8px rgba(0,86,179,0.25)',
           }}
         >
-          {confirmLabel}
+          {submitted ? `✓ Selected · ${tenureStr} months` : confirmLabel}
         </button>
       </div>
     </div>

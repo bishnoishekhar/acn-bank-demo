@@ -1576,7 +1576,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <EppPlans
                   payload={msg.payload}
                   onCta={(v) => {
-                    setMessages((prev) => prev.filter((m) => m.id !== msg.id));
+                    // Keep the widget in the message list — EppPlans switches
+                    // itself to a read-only "✓ Selected · N months" chip
+                    // internally so the tenure choice stays visible in the
+                    // chat log as a receipt of what the customer picked.
                     showTyping();
                     gecxSend(v);
                   }}

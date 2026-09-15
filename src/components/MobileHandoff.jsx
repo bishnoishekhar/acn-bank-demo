@@ -37,10 +37,38 @@ export default function MobileHandoff({ payload }) {
   const {
     title, body, cta_label, handoff_url,
     loan_kind, monthly_payment_cad, product_name, product_image_url,
+    principal_cad, interest_rate_pct, tenure_label, verdict,
   } = payload || {};
 
   const url = safeHandoffUrl(handoff_url);
   const disabled = !url;
+
+  // Ensure the Flutter side's deep-link snapshot has every field the review
+  // screen needs. CES currently emits handoff_url with only loan_draft +
+  // handoff_token + customer_id + sso, and its Firestore stub doc is often
+  // missing monetary fields — the Flutter review screen would then render
+  // "CAD 0.00" for both Principal and Monthly. We inject the plan values
+  // from the widget payload here so the URL always carries the full plan,
+  // regardless of what the agent's handoff_url template happens to include.
+  // Only set params the URL doesn't already carry — never overwrite what the
+  // agent explicitly encoded.
+  if (url) {
+    const inject = {
+      kind: loan_kind,
+      monthly: monthly_payment_cad,
+      principal: principal_cad,
+      rate: interest_rate_pct,
+      tenure: tenure_label,
+      product: product_name,
+      img: product_image_url,
+      verdict,
+    };
+    for (const [k, v] of Object.entries(inject)) {
+      if (v == null || v === '') continue;
+      if (url.searchParams.has(k)) continue;
+      url.searchParams.set(k, String(v));
+    }
+  }
 
   const BRAND = '#0056B3';
   const MUTED = '#66788A';
@@ -175,6 +203,14 @@ export default function MobileHandoff({ payload }) {
                   handoff_token: url.searchParams.get('handoff_token'),
                   customer_id: url.searchParams.get('customer_id'),
                   sso: url.searchParams.get('sso'),
+                  // Plan fields injected client-side from the widget payload
+                  // so the Flutter review screen doesn't fall back to CAD 0.00.
+                  kind: url.searchParams.get('kind'),
+                  monthly: url.searchParams.get('monthly'),
+                  principal: url.searchParams.get('principal'),
+                  tenure: url.searchParams.get('tenure'),
+                  rate: url.searchParams.get('rate'),
+                  product: url.searchParams.get('product'),
                 });
               }}
               style={{
