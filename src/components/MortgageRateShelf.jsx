@@ -29,11 +29,15 @@ export default function MortgageRateShelf({ payload, onCta }) {
   const illustrative = payload?.payments_illustrative === true;
   const illustrativePrincipal = Number(payload?.illustrative_principal_cad || 500000);
 
+  const heloc = payload?.heloc || null;
+  const helocAvailable = heloc && Number(heloc.rate_pct) > 0;
+
   const [selectedId, setSelectedId] = useState(() => {
     const rec = products.find((p) => p.recommended);
     return (rec || products[0] || {}).product_id || '';
   });
   const [detailsOpenId, setDetailsOpenId] = useState('');
+  const [helocOpen, setHelocOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
   const selected = products.find((p) => p.product_id === selectedId) || products[0] || {};
@@ -221,9 +225,107 @@ export default function MortgageRateShelf({ payload, onCta }) {
         })}
       </div>
 
+      {/* Also available: HELOC + Protection — the upsell section. */}
+      <div style={{ margin: '8px 14px 4px', borderTop: '1px solid #EEF1F5', paddingTop: '12px' }}>
+        <div style={{ fontSize: '10px', fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '8px' }}>
+          Also available
+        </div>
+
+        {/* HELOC */}
+        {helocAvailable && (
+          <div style={{
+            border: '1.5px solid #E2E6EA', borderRadius: '12px', marginBottom: '8px', overflow: 'hidden',
+          }}>
+            <button
+              onClick={() => setHelocOpen((o) => !o)}
+              style={{
+                width: '100%', background: 'none', border: 'none', textAlign: 'left',
+                padding: '11px 14px', cursor: 'pointer',
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}
+            >
+              <span>
+                <span style={{ fontSize: '12px', fontWeight: 700, color: INK, display: 'block' }}>
+                  {heloc.name || 'Home Equity FlexLine'}
+                </span>
+                <span style={{ fontSize: '11px', color: MUTED }}>
+                  {heloc.rate_basis || `Prime + 0.50%`} &middot; {Number(heloc.rate_pct).toFixed(2)}% today
+                </span>
+              </span>
+              <span style={{ fontSize: '11px', color: BRAND, fontWeight: 600, whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                {helocOpen ? 'Less' : 'Learn more'}
+              </span>
+            </button>
+
+            {helocOpen && (
+              <div style={{ padding: '0 14px 12px', borderTop: '1px solid #EEF1F5' }}>
+                <div style={{ fontSize: '11.5px', color: INK, lineHeight: 1.55, marginTop: '10px' }}>
+                  {heloc.notes || 'Interest-only minimum payments, no prepayment charge.'}
+                </div>
+                {Array.isArray(heloc.uses) && heloc.uses.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginTop: '8px' }}>
+                    {heloc.uses.map((u) => (
+                      <span key={u} style={{
+                        fontSize: '10px', padding: '3px 8px', borderRadius: '5px',
+                        background: '#EEF2F7', color: MUTED, fontWeight: 600,
+                      }}>{u}</span>
+                    ))}
+                  </div>
+                )}
+                {heloc.available_credit_cad > 0 && (
+                  <div style={{ marginTop: '9px', fontSize: '11.5px', color: BRAND, fontWeight: 700 }}>
+                    Est. limit: CAD {fmt2(heloc.available_credit_cad)}
+                  </div>
+                )}
+                {heloc.availability_note && (
+                  <div style={{ marginTop: '6px', fontSize: '10.5px', color: MUTED }}>
+                    {heloc.availability_note}
+                  </div>
+                )}
+                <button
+                  onClick={() => onCta && onCta('mortgage_heloc_explore')}
+                  style={{
+                    marginTop: '10px', width: '100%', padding: '9px', border: `1.5px solid ${BRAND}`,
+                    borderRadius: '10px', background: '#fff', color: BRAND,
+                    fontSize: '12.5px', fontWeight: 700, cursor: 'pointer',
+                  }}
+                >
+                  Tell me more about borrowing against my home
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Mortgage Protection */}
+        <div style={{
+          border: '1.5px solid #E2E6EA', borderRadius: '12px', padding: '11px 14px',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '10px',
+        }}>
+          <span>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: INK, display: 'block' }}>
+              Mortgage Protection
+            </span>
+            <span style={{ fontSize: '11px', color: MUTED, lineHeight: 1.45, display: 'block', marginTop: '2px' }}>
+              Covers your payments if you cannot work. Reviewed after your pre-approval.
+            </span>
+          </span>
+          <button
+            onClick={() => onCta && onCta('mortgage_protection_explore')}
+            style={{
+              flexShrink: 0, padding: '7px 12px', border: `1.5px solid ${BRAND}`,
+              borderRadius: '8px', background: '#fff', color: BRAND,
+              fontSize: '11.5px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >
+            Learn more
+          </button>
+        </div>
+      </div>
+
       {holdDays > 0 && (
         <div style={{ padding: '4px 18px 0', fontSize: '11px', color: MUTED }}>
-          🔒 With a pre-approval we can hold your rate for {holdDays} days.
+          With a pre-approval we can hold your rate for {holdDays} days.
         </div>
       )}
 
