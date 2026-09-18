@@ -26,6 +26,8 @@ export default function MortgageRateShelf({ payload, onCta }) {
   const perYear = Number(payload?.payments_per_year || 12);
   const freqLabel = payload?.payment_frequency_label || 'Monthly';
   const holdDays = Number(payload?.rate_hold_days || 0);
+  const illustrative = payload?.payments_illustrative === true;
+  const illustrativePrincipal = Number(payload?.illustrative_principal_cad || 500000);
 
   const [selectedId, setSelectedId] = useState(() => {
     const rec = products.find((p) => p.recommended);
@@ -72,7 +74,10 @@ export default function MortgageRateShelf({ payload, onCta }) {
           {payload?.title || 'Choose your rate'}
         </div>
         <div style={{ fontSize: '12px', color: MUTED, marginTop: '3px' }}>
-          {payload?.subtitle || `${freqLabel} payments. Rates are illustrative until a full review.`}
+          {payload?.subtitle || (illustrative
+            ? `Payments shown on a $${(illustrativePrincipal / 1000).toFixed(0)}k example. Illustrative until a full review.`
+            : `${freqLabel} payments. Illustrative until a full review.`
+          )}
         </div>
       </div>
 
@@ -133,6 +138,11 @@ export default function MortgageRateShelf({ payload, onCta }) {
                   <span style={{ display: 'block', fontSize: '13px', color: INK, fontWeight: 600, marginTop: '6px' }}>
                     CAD {fmt2(p.payment_per_period_cad)}
                     <span style={{ fontSize: '11px', color: MUTED, fontWeight: 400 }}>{cadence}</span>
+                    {illustrative && (
+                      <span style={{ display: 'block', fontSize: '10.5px', color: MUTED, fontWeight: 400, marginTop: '2px' }}>
+                        Based on a ${(illustrativePrincipal / 1000).toFixed(0)}k example
+                      </span>
+                    )}
                   </span>
 
                   {p.blurb && (
