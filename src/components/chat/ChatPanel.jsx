@@ -20,6 +20,9 @@ import CardActivationWidget from '../CardActivationWidget';
 import EppCarousel        from '../EppCarousel';
 import EppPlans           from '../EppPlans';
 import MortgageCalculator from '../MortgageCalculator';
+import MortgageAffordability from '../MortgageAffordability';
+import MortgageRateShelf  from '../MortgageRateShelf';
+import MortgageNudge      from '../MortgageNudge';
 import MortgageKyc        from '../MortgageKyc';
 import LoanPreapproval    from '../LoanPreapproval';
 import MobileHandoff      from '../MobileHandoff';
@@ -339,6 +342,8 @@ function isKnownPayload(p) {
     n === 'acn-card-activation'   || n === 'trip_booking_recommendations' || n === 'travel_protection_banner' ||
     n === 'acn-epp-carousel'      || n === 'acn-epp-plans'       ||
     n === 'acn-mortgage-calculator' || n === 'acn-mortgage-kyc'  ||
+    n === 'acn-mortgage-affordability' || n === 'acn-mortgage-rate-shelf' ||
+    n === 'acn-mortgage-nudge'    ||
     n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'
   );
 }
@@ -878,6 +883,25 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-mortgage-calculator')
         setMessages((prev) => [...prev, { type: 'mortgage-calculator', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mortgage-affordability')
+        setMessages((prev) => [...prev, { type: 'mortgage-affordability', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mortgage-rate-shelf')
+        setMessages((prev) => [...prev, { type: 'mortgage-rate-shelf', payload: p, id: uid() }]);
+
+      // Nudges are the one loan widget that can legitimately repeat within a
+      // journey, but never with the same suggestion set. De-dupe on the ids so
+      // a re-emitted turn does not stack two identical cards.
+      if (pname === 'acn-mortgage-nudge')
+        setMessages((prev) => {
+          const key = (p.suggestions || []).map((s) => s?.suggestion_id || '').join('|');
+          const last = [...prev].reverse().find((m) => m.type === 'mortgage-nudge');
+          if (last && (last.payload?.suggestions || []).map((s) => s?.suggestion_id || '').join('|') === key) {
+            return prev;
+          }
+          return [...prev, { type: 'mortgage-nudge', payload: p, id: uid() }];
+        });
 
       if (pname === 'acn-mortgage-kyc')
         setMessages((prev) => [...prev, { type: 'mortgage-kyc', payload: p, id: uid() }]);
@@ -1595,6 +1619,47 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     // Keep the widget in the message list — it switches to its
                     // own confirmed (read-only) view internally. Only send the
                     // confirmed values upstream.
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mortgage-affordability') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageAffordability
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    // Kept in the list — it locks into its own confirmed view,
+                    // same as the payment calculator.
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mortgage-rate-shelf') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageRateShelf
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    // Kept as a receipt of which rate was chosen.
+                    showTyping();
+                    gecxSend(v);
+                  }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'mortgage-nudge') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageNudge
+                  payload={msg.payload}
+                  onCta={(v) => {
+                    // Silent send. "mortgage_suggestion_decline:heloc" is a
+                    // machine token and must not appear as a user bubble.
                     showTyping();
                     gecxSend(v);
                   }}

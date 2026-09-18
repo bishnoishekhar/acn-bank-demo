@@ -1,7 +1,16 @@
 // Strip trailing Material Icons ligature names (e.g. "Confirm transfer graph_markup" → "Confirm transfer").
 // The GECX backend appends icon names expecting Material Icons font; our UI doesn't load it.
+//
+// Bug history: the previous regex (`/\s+[a-z][a-z_]{1,30}[a-z]$/`) matched ANY
+// trailing lowercase word, not just an icon ligature name — so "Show me your
+// rates" silently became "Show me your", "Pay now" became "Pay", "View my
+// cards" became "View my". Real Material Icons ligature names are always
+// snake_case ("graph_markup", "check_circle", "arrow_forward"), i.e. they
+// always contain an underscore. Requiring that underscore is what actually
+// distinguishes "GECX appended an icon name" from "this label just ends in an
+// ordinary English word".
 function stripMaterialIcon(s = '') {
-  return s.replace(/\s+[a-z][a-z_]{1,30}[a-z]$/, '').trim();
+  return s.replace(/\s+[a-z]+(?:_[a-z]+)+$/, '').trim();
 }
 
 // Splits a leading emoji off the label so we can render it as an icon chip.

@@ -38,6 +38,10 @@ export default function MobileHandoff({ payload }) {
     title, body, cta_label, handoff_url,
     loan_kind, monthly_payment_cad, product_name, product_image_url,
     principal_cad, interest_rate_pct, tenure_label, verdict,
+    // Mortgage-specific. The Flutter review screen reads these off the URL to
+    // render the breakdown rows; without them it falls back to an empty block.
+    property_price_cad, down_payment_cad, loan_to_value_pct, gds_pct, tds_pct,
+    rate_type, payment_frequency_label, cmhc_premium_cad,
   } = payload || {};
 
   const url = safeHandoffUrl(handoff_url);
@@ -62,6 +66,14 @@ export default function MobileHandoff({ payload }) {
       product: product_name,
       img: product_image_url,
       verdict,
+      price: property_price_cad,
+      down: down_payment_cad,
+      ltv: loan_to_value_pct,
+      gds: gds_pct,
+      tds: tds_pct,
+      ratetype: rate_type,
+      freq: payment_frequency_label,
+      cmhc: cmhc_premium_cad,
     };
     for (const [k, v] of Object.entries(inject)) {
       if (v == null || v === '') continue;
