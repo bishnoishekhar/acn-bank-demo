@@ -538,23 +538,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       ttsFlushTimer.current = null;
     }
     // Cancel any active TTS when starting a new response (user interrupted)
-    if (ttsAbortControllerRef.current) {
-      try {
-        ttsAbortControllerRef.current.abort();
-      } catch (err) {
-        console.error('[ACN TTS] abort on new response error:', err);
-      }
-      ttsAbortControllerRef.current = null;
-    }
-    if (ttsAudioRef.current) {
-      try {
-        ttsAudioRef.current.pause();
-        ttsAudioRef.current.onerror = null;
-        ttsAudioRef.current.onended = null;
-        ttsAudioRef.current = null;
-      } catch (err) {
-        console.error('[ACN TTS] audio cleanup on new response error:', err);
-      }
+    try {
+      window.speechSynthesis?.cancel();
+    } catch (err) {
+      console.error('[ACN TTS] speechSynthesis cancel on new response error:', err);
     }
     setIsResponding(true);
     setMessages((prev) => [
@@ -931,35 +918,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         console.error('[ACN] recognition stop error:', err);
       }
 
-      // Stop TTS request
-      if (ttsAbortControllerRef.current) {
-        try {
-          ttsAbortControllerRef.current.abort();
-        } catch (err) {
-          console.error('[ACN TTS] unmount abort error:', err);
-        }
+      // Stop any active TTS utterance on unmount
+      try {
+        window.speechSynthesis?.cancel();
+      } catch (err) {
+        console.error('[ACN TTS] unmount speechSynthesis cancel error:', err);
       }
-
-      // Stop audio playback
-      if (ttsAudioRef.current) {
-        try {
-          ttsAudioRef.current.pause();
-          ttsAudioRef.current.onerror = null;
-          ttsAudioRef.current.onended = null;
-        } catch (err) {
-          console.error('[ACN TTS] unmount audio cleanup error:', err);
-        }
-      }
-
-      // Revoke all object URLs
-      ttsObjectUrlsRef.current.forEach((url) => {
-        try {
-          URL.revokeObjectURL(url);
-        } catch (err) {
-          console.error('[ACN TTS] unmount revoke error:', err);
-        }
-      });
-      ttsObjectUrlsRef.current.clear();
 
       // Clear all timers
       if (respondingTimer.current) clearTimeout(respondingTimer.current);
@@ -1204,143 +1168,92 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   }, []);
   useEffect(() => { startVoiceRef.current = startVoiceRecognition; }, [startVoiceRecognition]);
 
-  // ── ElevenLabs TTS via Cloud Run proxy ────────────────────────────────────────
-  // Strict single-request / single-audio lifecycle:
-  // - One AbortController per request
-  // - ~20 second timeout
-  // - Monotonically increasing request IDs for deduplication
-  // - Only one active Audio instance (pause previous before starting new)
-  // - Revoke object URLs
-  // - Keep microphone off during request and playback
-  // - Restart STT only after playback ends (and only in voice mode)
-  
-  // TTS request tracking: monotonically increasing IDs prevent stale responses from playing
-  const ttsRequestIdRef = useRef(0);
-  // Track the active audio request so we can check if a response is stale
-  const ttsActiveRequestRef = useRef(null);
-  // Controller for aborting in-flight requests
+  // ── Browser-native TTS (Web Speech API) ──────────────────────────────────────
+  // Uses window.speechSynthesis — in Chrome/Edge this is Google's neural voices,
+  // in Safari it's Apple's. No network call, no CORS, no API key, no cost.
+  // Replaces the retired ElevenLabs Cloud Run proxy.
+  //
+  // Lifecycle:
+  // - Monotonically increasing request IDs prevent stale utterances from speaking
+  // - speechSynthesis.cancel() stops any prior utterance before a new one starts
+  // - Microphone stays off while speaking; re-enables on end/error in voice mode
+
+  const ttsRequestIdRef       = useRef(0);
+  const ttsActiveRequestRef   = useRef(null);
+  // Kept for compatibility with existing cleanup paths (mute button, unmount) —
+  // no longer populated; speechSynthesis.cancel() handles the real cleanup.
   const ttsAbortControllerRef = useRef(null);
-  // URLs that need revocation cleanup
-  const ttsObjectUrlsRef = useRef(new Set());
+  const ttsObjectUrlsRef      = useRef(new Set());
 
   const playTTS = useCallback(async (text) => {
     if (!text?.trim()) return;
 
-    // Preserve existing cleanup, then normalize speech-sensitive formats only
-    const cleanText = cleanTextForTTS(text.trim());
+    const cleanText  = cleanTextForTTS(text.trim());
     const speechText = normalizeForTTS(cleanText);
     if (!speechText) return;
 
-    // Increment request ID — this one is "current"
+    const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
+    if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') {
+      console.warn('[ACN TTS] Web Speech API not available in this browser');
+      return;
+    }
+
     const requestId = ++ttsRequestIdRef.current;
     ttsActiveRequestRef.current = requestId;
 
-    // Cancel any in-flight TTS request before starting a new one
-    if (ttsAbortControllerRef.current) {
-      try {
-        ttsAbortControllerRef.current.abort();
-      } catch (err) {
-        console.error('[ACN TTS] abort error:', err);
-      }
-    }
+    // Stop any prior utterance before starting a new one
+    try { synth.cancel(); } catch (err) { console.error('[ACN TTS] cancel error:', err); }
 
-    // Pause and clean up the previous Audio instance
-    if (ttsAudioRef.current) {
-      try {
-        ttsAudioRef.current.pause();
-        ttsAudioRef.current.onerror = null;
-        ttsAudioRef.current.onended = null;
-        ttsAudioRef.current = null;
-      } catch (err) {
-        console.error('[ACN TTS] previous audio cleanup error:', err);
-      }
-    }
-
-    // Microphone off: an ElevenLabs request is pending
     setTTSPlaying(true);
 
-    const controller = new AbortController();
-    ttsAbortControllerRef.current = controller;
+    const utter = new SpeechSynthesisUtterance(speechText);
+    utter.rate   = 1.0;
+    utter.pitch  = 1.0;
+    utter.volume = 1.0;
 
-    // Set a ~20 second timeout on the fetch
-    const timeoutId = setTimeout(() => {
-      controller.abort();
-    }, 20000);
+    // Prefer an English Google/Neural voice when one is available. Voices load
+    // asynchronously in some browsers; if the list is empty we let the browser
+    // pick its default rather than blocking.
+    const pickVoice = () => {
+      const voices = synth.getVoices() || [];
+      if (!voices.length) return null;
+      return (
+        voices.find((v) => /Google.*English/i.test(v.name)) ||
+        voices.find((v) => v.lang?.startsWith('en') && /Neural|Natural/i.test(v.name)) ||
+        voices.find((v) => v.lang?.startsWith('en-US')) ||
+        voices.find((v) => v.lang?.startsWith('en')) ||
+        null
+      );
+    };
+    const chosen = pickVoice();
+    if (chosen) utter.voice = chosen;
 
-    try {
-      const res = await fetch('https://elevenlabs-tts-en-483471568825.us-central1.run.app/tts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: speechText }),
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (!res.ok) {
-        throw new Error(`TTS HTTP ${res.status}`);
-      }
-
-      const blob = await res.blob();
-      const audioUrl = URL.createObjectURL(blob);
-      ttsObjectUrlsRef.current.add(audioUrl);
-
-      // Check if this response is stale (another request was started while we were fetching)
-      if (requestId !== ttsActiveRequestRef.current) {
-        console.log('[ACN TTS] ignoring stale response for request', requestId);
-        URL.revokeObjectURL(audioUrl);
-        ttsObjectUrlsRef.current.delete(audioUrl);
-        return;
-      }
-
-      const audio = new Audio(audioUrl);
-      ttsAudioRef.current = audio;
-
-      // Cleanup when audio ends
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-        ttsObjectUrlsRef.current.delete(audioUrl);
-        if (ttsAudioRef.current === audio) ttsAudioRef.current = null;
-        setTTSPlaying(false);
-        
-        // Microphone on: re-enable only in full voice-conversation mode
-        // Auto-speak (ttsEnabled) alone should NOT turn the mic on
-        if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
-          startVoiceRef.current?.();
-        }
-      };
-
-      // Cleanup on error
-      audio.onerror = () => {
-        URL.revokeObjectURL(audioUrl);
-        ttsObjectUrlsRef.current.delete(audioUrl);
-        if (ttsAudioRef.current === audio) ttsAudioRef.current = null;
-        setTTSPlaying(false);
-        
-        if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
-          startVoiceRef.current?.();
-        }
-      };
-
-      // Play the audio
-      await audio.play();
-    } catch (err) {
-      if (err.name === 'AbortError') {
-        console.log('[ACN TTS] request', requestId, 'cancelled');
-      } else {
-        console.error('[ACN TTS] error on request', requestId, ':', err);
-      }
-
+    utter.onend = () => {
+      if (requestId !== ttsActiveRequestRef.current) return;
       setTTSPlaying(false);
-
-      // Microphone on: re-enable on error (only in voice mode)
-      if (voiceModeRef.current && requestId === ttsActiveRequestRef.current) {
+      if (voiceModeRef.current) {
         startVoiceRef.current?.();
       }
-    } finally {
-      clearTimeout(timeoutId);
-      if (ttsAbortControllerRef.current === controller) {
-        ttsAbortControllerRef.current = null;
+    };
+
+    utter.onerror = (event) => {
+      if (event?.error !== 'interrupted') {
+        console.error('[ACN TTS] utterance error on request', requestId, ':', event?.error);
+      }
+      if (requestId !== ttsActiveRequestRef.current) return;
+      setTTSPlaying(false);
+      if (voiceModeRef.current) {
+        startVoiceRef.current?.();
+      }
+    };
+
+    try {
+      synth.speak(utter);
+    } catch (err) {
+      console.error('[ACN TTS] speak error on request', requestId, ':', err);
+      setTTSPlaying(false);
+      if (voiceModeRef.current) {
+        startVoiceRef.current?.();
       }
     }
   }, []);
@@ -1355,34 +1268,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       const next = !prev;
       ttsEnabledRef.current = next;
       if (!next) {
-        // Muting mid-playback: abort request, stop audio, revoke URLs, clear queue
-        if (ttsAbortControllerRef.current) {
-          try {
-            ttsAbortControllerRef.current.abort();
-          } catch (err) {
-            console.error('[ACN TTS] abort on mute error:', err);
-          }
-          ttsAbortControllerRef.current = null;
+        // Muting mid-playback: cancel any speaking utterance, clear queue
+        try {
+          window.speechSynthesis?.cancel();
+        } catch (err) {
+          console.error('[ACN TTS] speechSynthesis cancel on mute error:', err);
         }
-        if (ttsAudioRef.current) {
-          try {
-            ttsAudioRef.current.pause();
-            ttsAudioRef.current.onerror = null;
-            ttsAudioRef.current.onended = null;
-            ttsAudioRef.current = null;
-          } catch (err) {
-            console.error('[ACN TTS] audio cleanup on mute error:', err);
-          }
-        }
-        // Revoke any orphaned object URLs
-        ttsObjectUrlsRef.current.forEach((url) => {
-          try {
-            URL.revokeObjectURL(url);
-          } catch (err) {
-            console.error('[ACN TTS] revoke URL error:', err);
-          }
-        });
-        ttsObjectUrlsRef.current.clear();
 
         if (ttsFlushTimer.current) {
           clearTimeout(ttsFlushTimer.current);
