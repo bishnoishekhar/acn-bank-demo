@@ -52,10 +52,10 @@ export default function InsightCard({ payload, onCta }) {
           fontSize: 13, fontWeight: 600, color: 'rgba(255,255,255,.92)',
           lineHeight: 1.45, marginBottom: 5,
         }}>{payload.headline}</div>
-        {payload.detail && (
+        {(payload.detail || payload.body) && (
           <div style={{
             fontSize: 12, color: 'rgba(240,232,255,.6)', lineHeight: 1.55,
-          }}>{payload.detail}</div>
+          }}>{payload.detail || payload.body}</div>
         )}
       </div>
 

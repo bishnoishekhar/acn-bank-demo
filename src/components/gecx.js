@@ -1,4 +1,4 @@
-const DEPLOYMENT = 'projects/483471568825/locations/us/apps/27be6c70-74dc-4e50-a3e8-25b032e7c965/deployments/7cbb68f9-147f-4698-be02-e7ea5fa5d1a3';
+const DEPLOYMENT = 'projects/emvnzir-canada-song/locations/us/apps/e29e31ff-b686-46c8-8f02-f431f1422f1d/deployments/d4e902ba-1b67-47a4-8e9f-b5506c1c2bc3';
 
 const SIGN_IN_RESUME_MESSAGE =
   'I have signed in. Please continue with what I was doing.';

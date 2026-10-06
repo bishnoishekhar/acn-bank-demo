@@ -286,6 +286,18 @@ function resolvePayloadName(p) {
     'trip-booking-recommendations': 'trip_booking_recommendations',
     booking_recommendations: 'trip_booking_recommendations',
     booking_shortlist: 'trip_booking_recommendations',
+    // ACN_Bank_CES_Demo (new agent) emits snake_case widget names.
+    // Route them to the existing acn-* renderers. Field-level deltas are
+    // handled per-widget — see widget components / the CES PRD.
+    card_carousel:        'acn-card-carousel',
+    card_widget:          'acn-card-compare',
+    mortgage_rate_shelf:  'acn-mortgage-rate-shelf',
+    mortgage_calculator:  'acn-mortgage-calculator',
+    mortgage_kyc:         'acn-mortgage-kyc',
+    loan_preapproval:     'acn-loan-preapproval',
+    epp_carousel:         'acn-epp-carousel',
+    epp_plans:            'acn-epp-plans',
+    mobile_handoff:       'acn-mobile-handoff',
   };
   if (aliases[explicitName]) return aliases[explicitName];
   if (normalized.name) return normalized.name;
