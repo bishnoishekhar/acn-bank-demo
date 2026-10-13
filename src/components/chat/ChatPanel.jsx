@@ -298,6 +298,13 @@ function resolvePayloadName(p) {
     epp_carousel:         'acn-epp-carousel',
     epp_plans:            'acn-epp-plans',
     mobile_handoff:       'acn-mobile-handoff',
+    // Widgets the new agent emits under its own names. Without these three the
+    // payload falls through resolvePayloadName (which short-circuits on any
+    // present `name`) and is dropped silently.
+    mortgage_affordability:   'acn-mortgage-affordability',
+    mortgage_nudge:           'acn-mortgage-nudge',
+    'acn-nudge-card':         'acn-mortgage-nudge',
+    'acn-credit-card-widget': 'acn-card-carousel',
   };
   if (aliases[explicitName]) return aliases[explicitName];
   if (normalized.name) return normalized.name;

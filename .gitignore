@@ -4,3 +4,11 @@ ACN_Bank_Demo/
 .env
 .env.local
 .env.*.local
+ACN_Bank_Demo old/
+# CX Agent Studio (cxas-scrapi) local dev tooling — not meant for this repo's history
+.agents/
+.gemini/
+gecx-config.json
+AGENTS.md
+examples/
+.claude/
