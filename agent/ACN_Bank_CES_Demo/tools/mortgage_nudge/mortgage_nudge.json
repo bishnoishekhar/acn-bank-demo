@@ -5,10 +5,11 @@
     "name": "mortgage_nudge",
     "widgetType": "CUSTOM",
     "parameters": {
+      "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027mortgage_nudge\u0027"
+          "description": "Required. Always output the exact string: 'mortgage_nudge'"
         },
         "suggestions": {
           "type": "ARRAY",
@@ -30,7 +31,7 @@
               },
               "decline_label": {
                 "type": "STRING",
-                "description": "Defaults to \u0027Not now\u0027."
+                "description": "Defaults to 'Not now'."
               },
               "decline_value": {
                 "type": "STRING",
@@ -68,10 +69,14 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "suggestions"]
+      "required": [
+        "type",
+        "name",
+        "suggestions"
+      ]
     }
   }
 }

@@ -3,13 +3,14 @@
   "displayName": "acn-payment-carousel",
   "widgetTool": {
     "name": "acn-payment-carousel",
-    "description": "Emit a scrollable list of accounts, transactions, or payment options for the user to select from. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me pull up your accounts.\u0027 Webchat only — on voice, read options aloud.",
+    "description": "Emit a scrollable list of accounts, transactions, or payment options for the user to select from. Before calling this tool, speak a brief conversational pacing phrase: 'Let me pull up your accounts.' Webchat only — on voice, read options aloud.",
     "widgetType": "CUSTOM",
     "parameters": {
+      "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027acn-payment-carousel\u0027"
+          "description": "Required. Always output the exact string: 'acn-payment-carousel'"
         },
         "payments": {
           "type": "ARRAY",
@@ -66,10 +67,14 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "payments"]
+      "required": [
+        "type",
+        "name",
+        "payments"
+      ]
     }
   }
 }

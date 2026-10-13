@@ -3,13 +3,14 @@
   "displayName": "acn-nudge-card",
   "widgetTool": {
     "name": "acn-nudge-card",
-    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: \u0027I have something that might interest you.\u0027 Webchat only — on voice, describe the offer in plain text.",
+    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: 'I have something that might interest you.' Webchat only — on voice, describe the offer in plain text.",
     "widgetType": "CUSTOM",
     "parameters": {
+      "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027acn-nudge-card\u0027"
+          "description": "Required. Always output the exact string: 'acn-nudge-card'"
         },
         "suggestions": {
           "type": "ARRAY",
@@ -31,7 +32,7 @@
               },
               "decline_label": {
                 "type": "STRING",
-                "description": "Defaults to \u0027Not now\u0027."
+                "description": "Defaults to 'Not now'."
               },
               "decline_value": {
                 "type": "STRING",
@@ -69,10 +70,14 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "suggestions"]
+      "required": [
+        "type",
+        "name",
+        "suggestions"
+      ]
     }
   }
 }
