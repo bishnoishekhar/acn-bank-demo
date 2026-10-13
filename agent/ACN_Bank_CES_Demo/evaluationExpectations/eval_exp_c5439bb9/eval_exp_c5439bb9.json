@@ -1,0 +1,7 @@
+{
+  "name": "659adb33-d5ce-4b7e-b930-374a80643dc0",
+  "displayName": "eval_exp_c5439bb9",
+  "llmCriteria": {
+    "prompt": "The quick_actions array must contain between 2 and 5 chips."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "59011af6-eeb4-45b1-bf18-d5ddc75adf87",
+  "displayName": "eval_exp_5f107b66",
+  "llmCriteria": {
+    "prompt": "createRedemption must be called after explicit confirmation."
+  }
+}

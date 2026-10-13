@@ -1,0 +1,58 @@
+{
+  "name": "4c46b0ef-774b-457a-874e-02b5f58f0fb0",
+  "displayName": "tc_m28_006_nsf_reversal_history_check_flow",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "nsf", "ODP-04", "getNSFHistory", "createNSFReversal", "BR-ACN-053", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I got an NSF fee last week — can it be reversed?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I can see the NSF fee charged on your account last week. You are eligible for a one-time fee reversal. Would you like me to reverse it?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-1c9f5d71-c422-417a-b470-d7b617d4d0f7",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, please reverse it"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "The NSF fee has been reversed and credited to your account. Your reference is NSF-2026-001."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-6d88ff41-9500-4757-bf45-4bdc372e5378",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_9980a821", "eval_exp_46db9487", "eval_exp_c19447d1", "eval_exp_e348e8b3"]
+  },
+  "invalid": true
+}

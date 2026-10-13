@@ -1,0 +1,47 @@
+{
+  "name": "dfa470ef-4dab-4ec7-9ecb-16276dc35d90",
+  "displayName": "acn-payment-receipt",
+  "widgetTool": {
+    "name": "acn-payment-receipt",
+    "description": "Emit a payment confirmation receipt after a successful transfer or bill payment. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your receipt.\u0027 Webchat only — on voice, read out the reference number and amount.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "properties": {
+        "amount": {
+          "type": "NUMBER"
+        },
+        "currency": {
+          "type": "STRING"
+        },
+        "date_or_frequency": {
+          "type": "STRING"
+        },
+        "logo_url": {
+          "type": "STRING",
+          "description": "Branding logo URL of the payee."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027acn-payment-receipt\u0027"
+        },
+        "payee_name": {
+          "type": "STRING"
+        },
+        "receipt_id": {
+          "type": "STRING"
+        },
+        "status": {
+          "type": "STRING"
+        },
+        "title": {
+          "type": "STRING"
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "receipt_id", "payee_name", "amount", "date_or_frequency"]
+    }
+  }
+}

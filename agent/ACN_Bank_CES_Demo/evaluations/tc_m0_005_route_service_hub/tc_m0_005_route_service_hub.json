@@ -1,0 +1,25 @@
+{
+  "name": "580dfd9a-8564-426d-b1ab-0b9918d35d21",
+  "displayName": "tc_m0_005_route_service_hub",
+  "tags": ["acn_bank_ces_demo", "m0", "routing", "m4", "service-hub", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to speak to someone about a dispute"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll connect you with our service team who handles disputes and escalations."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_cdcfa44b"]
+  },
+  "invalid": true
+}

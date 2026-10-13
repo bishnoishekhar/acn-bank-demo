@@ -1,0 +1,7 @@
+{
+  "name": "1b52a097-4b7e-41ff-9973-ffe504255d70",
+  "displayName": "eval_exp_c19447d1",
+  "llmCriteria": {
+    "prompt": "nsf_reversal_eligible must be set to false after successful reversal."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "389fda9a-c6ef-4875-bef3-332878f4fbce",
+  "displayName": "send_application_email",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/send_application_email/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Template-based email notifications: application confirmation, statement links, KYC requests, approvals, appointment confirmations."
+}

@@ -1,0 +1,10 @@
+{
+  "name": "call_faq",
+  "executionType": "SYNCHRONOUS",
+  "displayName": "acn_faq_knowledge",
+  "agentTool": {
+    "name": "acn_faq_knowledge",
+    "description": "Before calling this tool, speak a brief pacing phrase: \u0027Let me look that up for you.\u0027 Calls M0.1 FAQ agent in-process for zero-auth product, policy, and process questions. Returns structured answer. Calling agent delivers the answer — FAQ agent never speaks to customer directly.",
+    "agent": "acn_faq_knowledge"
+  }
+}

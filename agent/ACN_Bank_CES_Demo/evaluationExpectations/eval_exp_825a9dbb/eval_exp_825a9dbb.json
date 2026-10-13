@@ -1,0 +1,7 @@
+{
+  "name": "0f586aeb-f83b-4eb3-b628-d8cab799469a",
+  "displayName": "eval_exp_825a9dbb",
+  "llmCriteria": {
+    "prompt": "The agent must NOT switch to English unless the customer explicitly requests it."
+  }
+}

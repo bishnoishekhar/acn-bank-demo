@@ -1,0 +1,7 @@
+{
+  "name": "fcca77a5-cb2f-4733-b670-7213bf91cdf4",
+  "displayName": "eval_exp_d549119b",
+  "llmCriteria": {
+    "prompt": "The agent must NOT omit the CDIC disclosure on first mention of a deposit product."
+  }
+}

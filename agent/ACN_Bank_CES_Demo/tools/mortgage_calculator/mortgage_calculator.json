@@ -1,0 +1,131 @@
+{
+  "name": "863e619f-ac93-4fed-967c-90e4dac5bd16",
+  "displayName": "mortgage_calculator",
+  "widgetTool": {
+    "name": "mortgage_calculator",
+    "description": "Emit an affordability and payment calculator result after calculate_affordability tool call. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your affordability breakdown.\u0027 Webchat only — on voice, read the figures aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "bounds": {
+          "type": "OBJECT",
+          "properties": {
+            "down_payment_max_pct": {
+              "type": "NUMBER"
+            },
+            "down_payment_min_pct": {
+              "type": "NUMBER"
+            },
+            "property_price_max_cad": {
+              "type": "NUMBER"
+            },
+            "property_price_min_cad": {
+              "type": "NUMBER"
+            },
+            "tenure_max_years": {
+              "type": "NUMBER"
+            },
+            "tenure_min_years": {
+              "type": "NUMBER"
+            }
+          },
+          "description": "Slider min/max bounds. Optional; the widget has sensible defaults."
+        },
+        "confirm_cta_label": {
+          "type": "STRING",
+          "description": "Primary button label, e.g. \u0027Continue with these numbers\u0027."
+        },
+        "confirm_cta_value": {
+          "type": "STRING",
+          "description": "Sent back to the agent on tap. The widget appends the current slider values, rate type, payment frequency and location as JSON."
+        },
+        "defaults": {
+          "type": "OBJECT",
+          "properties": {
+            "down_payment_cad": {
+              "type": "NUMBER"
+            },
+            "first_time_buyer": {
+              "type": "BOOLEAN",
+              "description": "Unlocks the land transfer tax rebate and a 30-year insured amortization."
+            },
+            "interest_rate_pct": {
+              "type": "NUMBER",
+              "description": "Illustrative rate only, and it must come from mortgage_rate_board rather than being invented. Labelled \u0027illustrative\u0027 in the UI."
+            },
+            "payment_frequency": {
+              "type": "STRING",
+              "description": "monthly | semi_monthly | bi_weekly | weekly | accelerated_bi_weekly | accelerated_weekly. Defaults to monthly."
+            },
+            "property_city": {
+              "type": "STRING",
+              "description": "Toronto triggers the additional municipal land transfer tax."
+            },
+            "property_price_cad": {
+              "type": "NUMBER"
+            },
+            "property_type": {
+              "type": "STRING",
+              "description": "Detached | Semi-detached | Townhouse | Condo | Duplex."
+            },
+            "province": {
+              "type": "STRING",
+              "description": "Two-letter code, e.g. ON. Drives land transfer tax and the sales tax on the insurance premium."
+            },
+            "rate_type": {
+              "type": "STRING",
+              "description": "fixed | variable. Fixed compounds semi-annually, variable monthly, which changes the payment slightly."
+            },
+            "tenure_years": {
+              "type": "NUMBER"
+            }
+          },
+          "description": "Starting values shown in the sliders. All CAD."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mortgage_calculator\u0027"
+        },
+        "rate_options": {
+          "type": "ARRAY",
+          "description": "Optional. Rate products from mortgage_rate_board, shown as a compact switcher above the sliders so the customer can feel the difference. Never invent an entry.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "name": {
+                "type": "STRING"
+              },
+              "product_id": {
+                "type": "STRING"
+              },
+              "rate_pct": {
+                "type": "NUMBER"
+              },
+              "rate_type": {
+                "type": "STRING",
+                "description": "fixed | variable."
+              },
+              "term_years": {
+                "type": "NUMBER"
+              }
+            }
+          }
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "Widget sub-header, plain and calm. Must not promise a pre-approval."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Widget header, e.g. \u0027Estimate your monthly payment\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "defaults", "confirm_cta_value"]
+    }
+  }
+}

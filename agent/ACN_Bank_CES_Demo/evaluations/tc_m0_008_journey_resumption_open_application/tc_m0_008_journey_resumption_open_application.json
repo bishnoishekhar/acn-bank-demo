@@ -1,0 +1,25 @@
+{
+  "name": "6470af3d-9e8e-4017-bd12-799f3e64e9e6",
+  "displayName": "tc_m0_008_journey_resumption_open_application",
+  "tags": ["acn_bank_ces_demo", "m0", "resume", "BR-ACN-039", "webchat", "P1", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Hi"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome back. I can see you have an Aventura Visa Infinite credit card application in progress. Would you like to continue where you left off?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_dc4b74a1"]
+  },
+  "invalid": true
+}

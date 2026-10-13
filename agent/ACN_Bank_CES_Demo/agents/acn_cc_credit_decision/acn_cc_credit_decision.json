@@ -1,0 +1,31 @@
+{
+  "name": "acn_cc_credit_decision",
+  "displayName": "acn_cc_credit_decision",
+  "instruction": "agents/acn_cc_credit_decision/instruction.txt",
+  "tools": ["end_session", "evaluate_credit_policy"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_cc_credit_decision/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_cc_credit_decision/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_cc_credit_decision/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_cc_credit_decision/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_cc_credit_decision/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "card_applications",
+    "toolIds": ["createApplication", "getApplicationStatus", "queryApplications", "updateApplication"]
+  }, {
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "send_application_email",
+    "toolIds": ["executeACNBankApplicationEmail"]
+  }]
+}

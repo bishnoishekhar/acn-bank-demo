@@ -1,0 +1,146 @@
+openapi: "3.0.3"
+info:
+  title: Disputes DB - Direct Firestore
+  version: "1.0.0"
+  description: Dispute creation, retrieval, update, and PAD dispute handling API (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes:
+    post:
+      operationId: createDispute
+      summary: Create a new transaction dispute or chargeback
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateDisputeRequest"
+      responses:
+        "200":
+          description: Dispute created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes/{disputeId}:
+    get:
+      operationId: getDispute
+      summary: Get dispute details by ID
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Dispute details
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: updateDispute
+      summary: Update an existing dispute
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: disputeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateDisputeRequest"
+      responses:
+        "200":
+          description: Dispute updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/pad_disputes:
+    post:
+      operationId: createPADDispute
+      summary: Create a Pre-Authorized Debit dispute
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreatePADDisputeRequest"
+      responses:
+        "200":
+          description: PAD dispute created
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateDisputeRequest:
+      type: object
+      required:
+        - customerId
+        - transactionId
+        - type
+        - amount
+      properties:
+        customerId:
+          type: string
+        transactionId:
+          type: string
+        type:
+          type: string
+          enum: [unauthorized, duplicate, incorrect_amount, item_not_received, cancelled_service]
+        amount:
+          type: number
+        description:
+          type: string
+        idempotencyKey:
+          type: string
+    UpdateDisputeRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        resolution:
+          type: string
+        additionalInfo:
+          type: string
+    CreatePADDisputeRequest:
+      type: object
+      required:
+        - customerId
+        - padId
+        - amount
+        - reason
+      properties:
+        customerId:
+          type: string
+        padId:
+          type: string
+        amount:
+          type: number
+        reason:
+          type: string
+        cpaRule:
+          type: string
+        idempotencyKey:
+          type: string

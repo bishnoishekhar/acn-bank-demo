@@ -1,0 +1,7 @@
+{
+  "name": "ad85641d-3cdc-4909-9701-5fedf50bb7dd",
+  "displayName": "eval_exp_b8bde2c7",
+  "llmCriteria": {
+    "prompt": "CONTAINS: Chander. [HIGH] Voice response must use preferred_name Chander rather than full name"
+  }
+}

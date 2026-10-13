@@ -1,0 +1,7 @@
+{
+  "name": "923a6991-6782-4aef-b0d9-f91ce1a8aeb2",
+  "displayName": "eval_exp_95fa7a1a",
+  "llmCriteria": {
+    "prompt": "createRecurringSchedule must NOT be called until customer confirms."
+  }
+}

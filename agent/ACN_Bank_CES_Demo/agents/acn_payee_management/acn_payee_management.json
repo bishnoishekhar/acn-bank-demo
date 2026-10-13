@@ -1,0 +1,31 @@
+{
+  "name": "acn_payee_management",
+  "displayName": "acn_payee_management",
+  "instruction": "agents/acn_payee_management/instruction.txt",
+  "tools": ["acn-form-input", "acn-payee-selector", "acn-payment-carousel", "acn_identity_security_hub", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_payee_management/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_payee_management/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_payee_management/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_payee_management/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_payee_management/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "new_transaction_api_db",
+    "toolIds": ["cancelRecurringSchedule", "createRecurringSchedule", "createTransaction", "listRecurringSchedules", "updateRecurringSchedule", "updateTransaction"]
+  }, {
+    "toolset": "update_customer_api_db",
+    "toolIds": ["addPayee", "deletePayee", "updateAccount", "updateBill", "updateCard", "updatePayee", "updateProfile"]
+  }]
+}

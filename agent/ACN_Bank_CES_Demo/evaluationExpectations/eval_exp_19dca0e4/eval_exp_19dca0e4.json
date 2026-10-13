@@ -1,0 +1,7 @@
+{
+  "name": "d5c321f5-addb-4c35-a4aa-1b50fd0867a7",
+  "displayName": "eval_exp_19dca0e4",
+  "llmCriteria": {
+    "prompt": "The agent must deliver a CSAT prompt before closing the session."
+  }
+}

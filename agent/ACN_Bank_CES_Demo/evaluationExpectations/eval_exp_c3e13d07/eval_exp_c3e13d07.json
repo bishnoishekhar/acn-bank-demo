@@ -1,0 +1,7 @@
+{
+  "name": "d7b31961-0283-43d9-bb3b-3c3235215a46",
+  "displayName": "eval_exp_c3e13d07",
+  "llmCriteria": {
+    "prompt": "cheque_stop_payment widget (W-29) must be emitted after confirmation."
+  }
+}

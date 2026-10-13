@@ -1,0 +1,35 @@
+{
+  "name": "509ce774-292b-4dda-a2c1-3d40f87e311b",
+  "displayName": "tc_m45_002_casl_consent_before_opt_in",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "casl", "PREF-03", "BR-ACN-091", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to receive marketing emails"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "ACN Bank would like to send you commercial electronic messages including offers, promotions, and product updates. You can withdraw consent at any time. Do you consent? Thank you — I\u0027ve updated your preferences."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5abf2512-0360-406b-9260-8fd3c3f0b68c",
+            "tool": "",
+            "args": {
+              "consented": true
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b576de29", "eval_exp_4dc2a2ef"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,7 @@
+{
+  "name": "113f179d-1db2-4cd5-b076-b09fbd7127df",
+  "displayName": "eval_exp_1add8425",
+  "llmCriteria": {
+    "prompt": "CONTAINS: application | resume | continue | where you left off. [HIGH] M0 must proactively offer to resume the in-progress card application"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "24a281b2-1257-455b-9572-fa8444e53ece",
+  "displayName": "loan_applications",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/loan_applications/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Loan and mortgage application lifecycle: create, update, query, mortgage details."
+}

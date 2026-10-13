@@ -1,0 +1,7 @@
+{
+  "name": "989a8b2c-9792-441e-9277-d016ed8bffa7",
+  "displayName": "eval_exp_0eecb70b",
+  "llmCriteria": {
+    "prompt": "createDispute must be called with provisional_credit\u003dtrue for eligible customers (\u003c\u003dCAD 5000, \u003c\u003d120 days, \u003c\u003d2 prior disputes)."
+  }
+}

@@ -1,0 +1,56 @@
+{
+  "name": "3debf1f1-7887-45b0-abce-c17ad9d13750",
+  "displayName": "acn-payee-selector",
+  "widgetTool": {
+    "name": "acn-payee-selector",
+    "description": "Emit a list of saved payees for the user to choose who to pay. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your saved payees.\u0027 Webchat only — on voice, read payee names aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027acn-payee-selector\u0027"
+        },
+        "payees": {
+          "type": "ARRAY",
+          "description": "An array containing the list of payees.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "account_number": {
+                "type": "STRING",
+                "description": "Account number."
+              },
+              "cta_value": {
+                "type": "STRING",
+                "description": "The command string, e.g., \u0027select_payee:PY-001\u0027."
+              },
+              "logo_url": {
+                "type": "STRING",
+                "description": "URL of the logo."
+              },
+              "payee_name": {
+                "type": "STRING",
+                "description": "Name of the payee."
+              }
+            }
+          }
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "Widget subheader text."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Widget header title."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "payees"]
+    }
+  }
+}

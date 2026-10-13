@@ -1,0 +1,34 @@
+{
+  "name": "4929592d-3726-4f97-8aa0-7c0fc42f8959",
+  "displayName": "tc_m29_002_pad_cancellation_rights_and_cancel",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.9", "pad", "cancel", "BR-ACN-096", "webchat", "P0", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Cancel the Netflix PAD"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Under the Canadian Payments Association Rule H6, you have the right to cancel any pre-authorized debit at any time. Your Netflix pre-authorized debit has been cancelled."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-88ff1cc5-892c-41a6-bd98-e662bf7174eb",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_d233b76d", "eval_exp_e6963255"]
+  },
+  "invalid": true
+}

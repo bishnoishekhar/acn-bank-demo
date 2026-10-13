@@ -1,0 +1,7 @@
+{
+  "name": "1518fc21-af81-49f5-8e2f-fae6da99be25",
+  "displayName": "eval_exp_2b59867c",
+  "llmCriteria": {
+    "prompt": "[TC-M0-007] M0 CIE fail-soft: cie_loaded\u003dfalse, session continues"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "f2bfda49-96d3-4a8b-a731-5c9b9b083e00",
+  "displayName": "tc_m25_002_add_payee_l3_step_up_warning",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.5", "payee", "PMG-02", "step-up", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Add CIBC payee account 87654321"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before adding a new payee, please be aware that fraudsters sometimes request payee additions to divert your payments. If you are being asked to do this by someone you don\u0027t know, please stop and call us. I\u0027ll need an additional security verification to proceed."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-56fc74fd-4850-4ae2-8dc0-d18a6a4b6db9",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_a80aca4a", "eval_exp_a2dfa495"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,107 @@
+openapi: "3.0.3"
+info:
+  title: ACN Bank KYC Database Write API - Direct Firestore
+  version: "1.0.0"
+  description: Write KYC verification records directly to Firestore (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_records:
+    post:
+      operationId: writeKycToDb
+      summary: Create a new KYC verification record
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WriteKycRequest"
+      responses:
+        "200":
+          description: KYC record created
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Validation error
+        "500":
+          description: Service error
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_records/{kycId}:
+    patch:
+      operationId: updateKycRecord
+      summary: Update an existing KYC record (e.g., after manual review)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: kycId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateKycRecordRequest"
+      responses:
+        "200":
+          description: KYC record updated
+        "404":
+          description: KYC record not found
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    WriteKycRequest:
+      type: object
+      required:
+        - customerId
+        - applicationId
+        - documentType
+        - verificationStatus
+        - overallConfidence
+      properties:
+        customerId:
+          type: string
+          description: Firestore customer document ID
+        applicationId:
+          type: string
+          description: Application document ID this KYC is linked to
+        documentType:
+          type: string
+          description: Document type (income, t4, noa, pay_stub, employment_letter, bank_statement, drivers_license)
+        verificationStatus:
+          type: string
+          enum: [passed, failed, manual_review_required]
+          description: KYC verification outcome
+        overallConfidence:
+          type: number
+          format: float
+          minimum: 0
+          maximum: 1
+          description: DocAI confidence score (0-1)
+        manualReviewRequired:
+          type: boolean
+          description: True when confidence < 0.80
+        extractedDataHash:
+          type: string
+          description: SHA-256 hash of extracted data (no PII values stored)
+    UpdateKycRecordRequest:
+      type: object
+      properties:
+        verificationStatus:
+          type: string
+          enum: [passed, failed, manual_review_required]
+        reviewNotes:
+          type: string
+          description: Notes from manual review (no PII)
+        reviewedBy:
+          type: string
+          description: Reviewer identifier

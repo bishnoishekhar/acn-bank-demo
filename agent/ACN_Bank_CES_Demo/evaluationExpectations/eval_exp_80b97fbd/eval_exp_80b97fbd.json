@@ -1,0 +1,7 @@
+{
+  "name": "7d23e827-08fc-42b1-aa4f-e1b6de142850",
+  "displayName": "eval_exp_80b97fbd",
+  "llmCriteria": {
+    "prompt": "[TC-M28-003] Overdraft protection toggle calls updateOverdraftProtection with correct enabled flag"
+  }
+}

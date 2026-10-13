@@ -1,0 +1,7 @@
+{
+  "name": "350d18fa-8762-4543-9af8-eccda6db81c9",
+  "displayName": "eval_exp_a621aae1",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: escalation_reason\u003dauth_locked. [NO-GO] escalation_reason must be set to auth_locked when routing AUTH_REQUIRED customer"
+  }
+}

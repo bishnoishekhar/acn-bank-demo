@@ -1,0 +1,7 @@
+{
+  "name": "00374d3f-a9c7-443e-8de4-9cfe595dff92",
+  "displayName": "eval_exp_67664a8e",
+  "llmCriteria": {
+    "prompt": "[TC-M22-004] Wire transfer triggers fintrac_precheck, wire transfer disclosure, and social engineering warning copy"
+  }
+}

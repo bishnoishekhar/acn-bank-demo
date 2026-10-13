@@ -1,0 +1,133 @@
+openapi: "3.0.3"
+info:
+  title: Account Opening DB - Direct Firestore
+  version: "1.0.0"
+  description: Account opening workflow API for ACN Bank CES Demo (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_products:
+    get:
+      operationId: getAccountProducts
+      summary: Get available account products and their eligibility criteria
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: [chequing, savings, tfsa, rrsp, fhsa, gic, all]
+        - name: eligibility
+          in: query
+          schema:
+            type: string
+          description: Filter by customer segment or eligibility flag
+      responses:
+        "200":
+          description: Available account products
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_applications:
+    post:
+      operationId: createAccountApplication
+      summary: Create a new account opening application
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAccountApplicationRequest"
+      responses:
+        "200":
+          description: Account application created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_applications/{applicationId}:
+    get:
+      operationId: getAccountApplicationStatus
+      summary: Get the status of an account opening application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Application status
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: updateAccountApplication
+      summary: Update an account opening application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountApplicationRequest"
+      responses:
+        "200":
+          description: Application updated
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateAccountApplicationRequest:
+      type: object
+      required:
+        - customerId
+        - productId
+      properties:
+        customerId:
+          type: string
+        productId:
+          type: string
+        applicationData:
+          type: object
+          properties:
+            purpose:
+              type: string
+            initialDeposit:
+              type: number
+            depositAccountId:
+              type: string
+            currency:
+              type: string
+        idempotencyKey:
+          type: string
+    UpdateAccountApplicationRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        decisionReason:
+          type: string
+        applicationData:
+          type: object

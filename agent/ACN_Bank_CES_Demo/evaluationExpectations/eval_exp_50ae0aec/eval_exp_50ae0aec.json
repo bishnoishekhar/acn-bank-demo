@@ -1,0 +1,7 @@
+{
+  "name": "f7e56c2b-331f-45bd-82d9-3d6fd866ebe8",
+  "displayName": "eval_exp_50ae0aec",
+  "llmCriteria": {
+    "prompt": "Full legal name Chander Bishnoi must NOT be used when preferred_name is set."
+  }
+}

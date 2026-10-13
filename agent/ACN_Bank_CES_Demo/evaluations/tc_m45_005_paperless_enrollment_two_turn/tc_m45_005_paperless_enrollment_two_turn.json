@@ -1,0 +1,49 @@
+{
+  "name": "bfcea589-df03-488f-8a90-03b1e57c2992",
+  "displayName": "tc_m45_005_paperless_enrollment_two_turn",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "paperless", "PREF-03", "webchat", "P1", "MEDIUM", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to switch to paperless statements"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Great choice. I\u0027d like to confirm the email address we\u0027ll use for your paperless statements. Is chander.bishnoi@example.com correct?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, confirm that email address"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "You\u0027re now enrolled in paperless statements. Your statements will be delivered to your registered email address going forward."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-94cbb964-6c79-48fa-8331-a4f2ffa496db",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_49db1c4e", "eval_exp_77816d9b"]
+  },
+  "invalid": true
+}

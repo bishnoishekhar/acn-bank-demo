@@ -1,0 +1,22 @@
+{
+  "name": "acn_lead_orchestrator",
+  "displayName": "acn_lead_orchestrator",
+  "instruction": "agents/acn_lead_orchestrator/instruction.txt",
+  "tools": ["acn-insight-card", "acn-nudge-card", "acn_customer_intelligence_engine", "acn_faq_knowledge", "acn_identity_security_hub", "business_hours_check", "end_session", "format_for_tts", "quick_actions"],
+  "childAgents": ["acn_banking_hub", "acn_products_hub", "acn_service_hub"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_lead_orchestrator/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_lead_orchestrator/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_lead_orchestrator/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_lead_orchestrator/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_lead_orchestrator/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }]
+}

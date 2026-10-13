@@ -1,0 +1,7 @@
+{
+  "name": "82233df2-ba9b-4a5f-8900-0d2207888e08",
+  "displayName": "eval_exp_87a672ae",
+  "llmCriteria": {
+    "prompt": "Every turn that contains a widget payload must also include a non-empty quick_actions chip set."
+  }
+}

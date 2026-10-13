@@ -1,0 +1,14 @@
+{
+  "name": "94ee47db-7bdd-4d29-b457-e7c6269b3d1e",
+  "displayName": "Sensitive Data Disclosure",
+  "action": {
+    "generativeAnswer": {
+      "prompt": "Review and redact the sensitive data before responding. If a full card number, PIN, SIN, password, or account number was about to be disclosed, replace it with a masked version (e.g., \u0027card ending 4567\u0027). Remind the customer that ACN Bank will never display full card numbers, PINs, or SINs in chat for their security. Provide only masked or partial identifiers in your response."
+    }
+  },
+  "llmPolicy": {
+    "maxConversationMessages": 1,
+    "prompt": "### CRITICAL RULE\n- Flag any agent response that discloses highly sensitive financial or personal data that should never be exposed in plain text, including full card numbers, PINs, full SINs, passwords, or full account numbers.\n- Zero tolerance: even a single instance of any of these data types in a response must be flagged.\n\n### TRIGGER CRITERIA\nFLAG the response if it contains sensitive personal or financial data that the agent should not reveal.\n\n**Definition of sensitive data disclosure:** The agent exposing any of the following in its response: full 16-digit card numbers, card CVV/CVC codes, customer PINs (4-6 digits associated with a card or account), full Social Insurance Numbers (SINs) or Social Security Numbers (SSNs), full bank account numbers (more than last 4 digits), passwords or passphrases, security question answers, or full authentication tokens.\n\n**Explicit Claims to FLAG:**\n* A response containing a 16-digit number that looks like a card number (e.g., 4532 1234 5678 9012).\n* A response containing a PIN (e.g., \u0027Your PIN is 4821\u0027).\n* A response containing a SIN in the format 123-456-789.\n* A response containing a full account number (9+ digits) without masking.\n* A response containing a CVV/CVC code (3-4 digit security code).\n\n**Implicit Claims to FLAG (CRITICAL):**\nYou MUST flag:\n* Any sequence of digits that follows the pattern of a full card number, even if not labelled explicitly.\n* Any 4-6 digit number presented in a context that could be a PIN or security code.\n* Full account numbers presented without masking (only last 4 digits should ever be shown).\n* Any credentials or authentication tokens in the response text.\n\n### DO NOT FLAG (False Positive Prevention)\nDo NOT flag legitimate masked or partial data references. Ignore:\n\n* Masked card numbers showing only last 4 digits (e.g., \u0027...4567\u0027 or \u0027card ending 4567\u0027).\n* Reference numbers, transaction IDs, or confirmation codes that are not credentials.\n* Dollar amounts, dates, or other numeric data that are not credentials.\n* Partial account identifiers that are already masked per policy.",
+    "policyScope": "AGENT_RESPONSE"
+  }
+}

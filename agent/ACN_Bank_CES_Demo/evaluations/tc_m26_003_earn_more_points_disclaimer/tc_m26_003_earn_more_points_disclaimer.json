@@ -1,0 +1,25 @@
+{
+  "name": "0cba7791-60b9-4b71-9f7e-0e710aacc04d",
+  "displayName": "tc_m26_003_earn_more_points_disclaimer",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.6", "disclaimer", "RWD-04", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "How can I earn more points faster?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Please note that the following information is for general purposes only and does not constitute financial advice. Here are some ways to maximize your Aventura points earning potential."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_222afbfe"]
+  },
+  "invalid": true
+}

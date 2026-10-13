@@ -1,0 +1,7 @@
+{
+  "name": "04d247cc-839e-41f3-9a27-a99638e42755",
+  "displayName": "eval_exp_cd57bbbd",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: auth_level\u003d3. [NO-GO] Session auth_level must be 3 after successful step-up completion"
+  }
+}

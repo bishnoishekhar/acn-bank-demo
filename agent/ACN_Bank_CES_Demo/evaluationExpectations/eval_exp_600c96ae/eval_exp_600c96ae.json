@@ -1,0 +1,7 @@
+{
+  "name": "55901d88-0834-48b7-b6e9-e134da534d57",
+  "displayName": "eval_exp_600c96ae",
+  "llmCriteria": {
+    "prompt": "[TC-M0-006] M0 calls M1 CIE once per authenticated session"
+  }
+}

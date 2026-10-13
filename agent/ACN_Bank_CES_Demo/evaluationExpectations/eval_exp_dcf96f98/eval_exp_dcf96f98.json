@@ -1,0 +1,7 @@
+{
+  "name": "4a312ea0-1c21-44b7-b5c7-48c2367d40aa",
+  "displayName": "eval_exp_dcf96f98",
+  "llmCriteria": {
+    "prompt": "The agent must NOT announce that it is \u0027transferring\u0027, \u0027connecting you to another agent\u0027, or \u0027routing your request\u0027."
+  }
+}

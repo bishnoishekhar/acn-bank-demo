@@ -1,0 +1,7 @@
+{
+  "name": "d3c934e5-d7bd-4b7a-86fd-4b11881ce3d7",
+  "displayName": "eval_exp_53ee3ba5",
+  "llmCriteria": {
+    "prompt": "After explaining how to send an Interac e-Transfer, M0.1 must offer to initiate the action (send one now, would you like to send, help you send, send an e-Transfer)."
+  }
+}

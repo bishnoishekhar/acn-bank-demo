@@ -1,0 +1,25 @@
+{
+  "name": "60183946-647d-4f84-b611-f5d2f1381981",
+  "displayName": "tc_m01_005_faq_no_write_tools",
+  "tags": ["acn_bank_ces_demo", "m0.1", "scope", "FA-R-1", "webchat", "P0", "NO-GO", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "How long does a cheque take to clear?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Cheques deposited at an ATM or branch typically take 4 to 5 business days to clear."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_318857be", "eval_exp_b9155e85", "eval_exp_e54b88a6", "eval_exp_fa8ca8d9"]
+  },
+  "invalid": true
+}

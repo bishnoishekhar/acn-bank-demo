@@ -1,0 +1,7 @@
+{
+  "name": "9c22220b-5613-4cce-bb59-7ab9894ec7f2",
+  "displayName": "eval_exp_c8ea57f1",
+  "llmCriteria": {
+    "prompt": "The agent\u0027s response on webchat must follow the required sequence: narration_checkpoint first, then text content, then widget payload, then quick_actions chips."
+  }
+}

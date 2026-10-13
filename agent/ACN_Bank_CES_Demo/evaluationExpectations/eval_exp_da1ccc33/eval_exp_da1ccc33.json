@@ -1,0 +1,7 @@
+{
+  "name": "e8009ebb-cb83-4a7f-b793-a8f3cee3e77a",
+  "displayName": "eval_exp_da1ccc33",
+  "llmCriteria": {
+    "prompt": "CONTAINS: order | delivery"
+  }
+}

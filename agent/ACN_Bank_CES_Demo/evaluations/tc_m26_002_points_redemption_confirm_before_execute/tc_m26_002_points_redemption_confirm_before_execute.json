@@ -1,0 +1,49 @@
+{
+  "name": "7d86a666-dcbc-4b21-9d1f-dc29cf94ae21",
+  "displayName": "tc_m26_002_points_redemption_confirm_before_execute",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.6", "redemption", "RWD-02", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Redeem 10000 points for a statement credit"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027d like to redeem 10,000 points for a statement credit. Shall I confirm this redemption?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your 10,000 Aventura points have been redeemed for a statement credit. The credit will appear on your next statement."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-4bc41f84-c363-4d2d-ab00-6772a5d8eb2a",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_bd23b5f8", "eval_exp_5f107b66"]
+  },
+  "invalid": true
+}

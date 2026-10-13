@@ -1,0 +1,25 @@
+{
+  "name": "a01c709f-57ee-4c2f-b105-c96e94e77aa3",
+  "displayName": "tc_m22_010_credit_card_payment_carousel",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "credit-card", "PAY-12", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Pay my credit card"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "How would you like to pay your credit card? You can pay the minimum payment, the statement balance, or the full balance."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_04dd345b", "eval_exp_bdc269ff"]
+  },
+  "invalid": true
+}

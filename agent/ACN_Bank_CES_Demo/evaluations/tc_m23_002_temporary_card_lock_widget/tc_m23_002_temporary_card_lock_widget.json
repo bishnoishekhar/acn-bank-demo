@@ -1,0 +1,35 @@
+{
+  "name": "13aed16c-67a1-4a86-b536-c592d781f922",
+  "displayName": "tc_m23_002_temporary_card_lock_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.3", "lock", "CRD-02", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Lock my credit card temporarily"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your credit card has been temporarily locked. No new transactions will be processed. You can unlock it at any time through the app or by calling us."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c489063a-2011-4a5b-8e15-31402b064153",
+            "tool": "",
+            "args": {
+              "action": "lock"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_1b7e1311", "eval_exp_f8a53168"]
+  },
+  "invalid": true
+}

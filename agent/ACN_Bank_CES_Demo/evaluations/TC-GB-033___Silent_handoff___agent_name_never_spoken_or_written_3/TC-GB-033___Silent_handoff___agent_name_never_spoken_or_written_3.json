@@ -1,0 +1,36 @@
+{
+  "name": "8ec74081-e00f-477c-8e2d-9aad7302a6ba",
+  "displayName": "TC-GB-033 — Silent handoff — agent name never spoken or written 3",
+  "description": "Silent handoff — agent name never spoken or written | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-33", "BR-ACN-081", "silent-handoff", "routing", "voice", "P1", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "I want a new credit card"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "I need to dispute a charge"
+        }
+      }]
+    }]
+  }
+}

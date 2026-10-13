@@ -1,0 +1,7 @@
+{
+  "name": "b7d84be1-20d9-4736-a320-2cf9eb6d4474",
+  "displayName": "eval_exp_85120e8d",
+  "llmCriteria": {
+    "prompt": "cancelPAD must NOT be called on the first turn."
+  }
+}

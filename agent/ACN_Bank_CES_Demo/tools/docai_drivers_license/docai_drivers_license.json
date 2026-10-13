@@ -1,0 +1,10 @@
+{
+  "name": "docai_drivers_license",
+  "pythonFunction": {
+    "name": "docai_drivers_license",
+    "pythonCode": "tools/docai_drivers_license/python_function/python_code.py",
+    "description": "    Calls DocAI processDriversLicense. Confidence \u003c 0.80 on any key entity → manual_review.\n    In demo/mock mode returns realistic stub with all entities at confidence 0.95.\nProcessing may take several seconds. If a pacing phrase is needed, deliver it from the agent instruction before calling this tool."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "docai_drivers_license"
+}

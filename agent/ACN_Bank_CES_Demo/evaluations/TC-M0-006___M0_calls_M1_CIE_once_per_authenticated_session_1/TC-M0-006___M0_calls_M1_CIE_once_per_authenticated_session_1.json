@@ -1,0 +1,31 @@
+{
+  "name": "ee215003-7974-4298-abd5-763f390686a4",
+  "displayName": "TC-M0-006 — M0 calls M1 CIE once per authenticated session 1",
+  "description": "M0 calls M1 CIE once per authenticated session | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "M1", "CIE", "TR-6", "webchat", "P0", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "webchat",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Now show me my transactions"
+        }
+      }]
+    }]
+  }
+}

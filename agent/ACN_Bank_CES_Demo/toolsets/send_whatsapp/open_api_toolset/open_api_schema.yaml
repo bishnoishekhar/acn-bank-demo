@@ -1,0 +1,61 @@
+openapi: 3.0.0
+info:
+  title: ACN Bank WhatsApp Send API
+  description: Send WhatsApp messages to customers via the ACN send-whatsapp-acn Cloud Run service.
+  version: "1.0"
+servers:
+  - url: $env_var
+paths:
+  /send:
+    post:
+      operationId: sendACNWhatsApp
+      summary: Send a WhatsApp message to a customer
+      description: >
+        Send a text, link, or template message to a customer's WhatsApp number.
+        Use message_type 'link' for deep links (e.g., wire transfer redirect).
+        Use message_type 'template' for regulatory/compliance messages.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - to
+                - message_type
+                - content
+              properties:
+                to:
+                  type: string
+                  description: Recipient WhatsApp number in E.164 format (e.g., +14165550123)
+                message_type:
+                  type: string
+                  enum: [text, link, template]
+                  description: Message type
+                content:
+                  type: string
+                  description: Message text or template name
+                link_target:
+                  type: string
+                  description: Deep link target ID for message_type 'link' (e.g., 'wire_transfer', 'kyc_upload')
+      responses:
+        "200":
+          description: Message sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  message_id:
+                    type: string
+                    description: WhatsApp message ID for tracking
+                  sent_at:
+                    type: string
+                    format: date-time
+        "400":
+          description: Invalid request parameters
+        "500":
+          description: Service error

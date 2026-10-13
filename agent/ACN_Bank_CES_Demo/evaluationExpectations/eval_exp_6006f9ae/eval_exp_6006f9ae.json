@@ -1,0 +1,7 @@
+{
+  "name": "5786367d-6af6-42bc-9abe-f088867fcb1a",
+  "displayName": "eval_exp_6006f9ae",
+  "llmCriteria": {
+    "prompt": "Response must include a reference number and Canadian in confirmation (FX-03)."
+  }
+}

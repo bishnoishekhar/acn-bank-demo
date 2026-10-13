@@ -1,0 +1,34 @@
+{
+  "name": "71a44acd-343d-4abc-9889-2fd5357dbbe6",
+  "displayName": "tc_m45_004_view_preferences",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "preferences", "PREF-01", "BR-ACN-026", "webchat", "P1", "MEDIUM", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Can you show me my current notification and communication preferences?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your current preferences. You have paperless statements enabled, low balance alerts set to $200, and marketing emails opted in."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-d3593763-f51b-4ec9-ae79-305b7b71cf91",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_7ba5326d", "eval_exp_4f1a5335"]
+  },
+  "invalid": true
+}

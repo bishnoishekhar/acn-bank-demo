@@ -1,0 +1,13 @@
+{
+  "name": "bf249dd2-0dde-476c-a1fa-46d5c24a40ea",
+  "displayName": "appointments_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/appointments_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Branch appointment management: available slots, booking, retrieval, update, cancellation."
+}

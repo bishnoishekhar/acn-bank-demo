@@ -1,0 +1,7 @@
+{
+  "name": "cd1288c0-882d-4f66-a89f-8ef8152975f1",
+  "displayName": "eval_exp_e5e19c67",
+  "llmCriteria": {
+    "prompt": "card_suspend_confirmation copy key must be delivered verbatim at L1 without requiring additional authentication (BR-ACN-015 NO-GO)."
+  }
+}

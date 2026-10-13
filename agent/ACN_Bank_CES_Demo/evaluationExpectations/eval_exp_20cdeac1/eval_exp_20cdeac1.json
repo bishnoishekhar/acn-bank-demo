@@ -1,0 +1,7 @@
+{
+  "name": "78a71c44-7817-4868-b449-4954dcdb1a86",
+  "displayName": "eval_exp_20cdeac1",
+  "llmCriteria": {
+    "prompt": "[TC-M210-004] FX-02 buy \u003e\u003d CAD 1,000: getExchangeRate called first, step-up required, createFXOrder called only after step-up and confirmation"
+  }
+}

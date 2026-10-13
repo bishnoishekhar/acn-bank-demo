@@ -1,0 +1,7 @@
+{
+  "name": "79558507-d1b5-45b2-be0c-eab2ae59d0a4",
+  "displayName": "eval_exp_fa8ca8d9",
+  "llmCriteria": {
+    "prompt": "createPayee must NOT be called in response to a FAQ query."
+  }
+}

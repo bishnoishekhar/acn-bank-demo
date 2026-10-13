@@ -1,0 +1,7 @@
+{
+  "name": "3e45509a-3d56-4582-94c3-61c03d340674",
+  "displayName": "eval_exp_cee855ce",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: auth_locked\u003dTrue. [NO-GO] auth_locked must be set to true after 3 consecutive OTP failures"
+  }
+}

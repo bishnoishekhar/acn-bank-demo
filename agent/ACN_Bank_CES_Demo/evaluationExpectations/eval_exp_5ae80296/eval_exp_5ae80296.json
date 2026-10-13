@@ -1,0 +1,7 @@
+{
+  "name": "bf28af28-4dae-4d42-a092-af4b889f275e",
+  "displayName": "eval_exp_5ae80296",
+  "llmCriteria": {
+    "prompt": "[NO-GO] identify_customer must be called when caller-ID signal is present"
+  }
+}

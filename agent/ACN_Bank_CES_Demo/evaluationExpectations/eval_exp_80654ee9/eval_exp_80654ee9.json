@@ -1,0 +1,7 @@
+{
+  "name": "4e753fb7-afcc-4f52-8b6c-f6ad87dc6af5",
+  "displayName": "eval_exp_80654ee9",
+  "llmCriteria": {
+    "prompt": "[TC-M1-001] M1 CIE loads customer segment into session state after L2 auth"
+  }
+}

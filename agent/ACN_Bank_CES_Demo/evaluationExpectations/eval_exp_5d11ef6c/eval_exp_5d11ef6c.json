@@ -1,0 +1,7 @@
+{
+  "name": "c3e4f998-d5ac-46cf-9aea-0bde60ed596e",
+  "displayName": "eval_exp_5d11ef6c",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: successfully | completed | done"
+  }
+}

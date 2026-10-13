@@ -1,0 +1,49 @@
+{
+  "name": "1ca600df-7fa9-4bde-abba-8dd7740c20e8",
+  "displayName": "tc_m25_004_recurring_payment_dates_before_create",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.5", "recurring", "PMG-05", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Set up $1800 rent every 1st of the month"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll set up a recurring payment of $1,800 on the 1st of each month. The next three scheduled dates will be October 1, November 1, and December 1. Shall I proceed?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, set that up"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your recurring payment of $1,800 on the 1st of each month has been set up successfully."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-d0ae4e19-6462-490c-a480-dfba8e963dbd",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_e0cb695d", "eval_exp_95fa7a1a"]
+  },
+  "invalid": true
+}

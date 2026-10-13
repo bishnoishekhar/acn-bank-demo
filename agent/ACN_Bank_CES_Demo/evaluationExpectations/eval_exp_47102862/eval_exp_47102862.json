@@ -1,0 +1,7 @@
+{
+  "name": "d05db2ad-34ee-457c-9f91-ff35655c8096",
+  "displayName": "eval_exp_47102862",
+  "llmCriteria": {
+    "prompt": "Agent must route to acn_exception_escalation for manual review — golden ends at escalation message, transfer is verified by this expectation."
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "8c649de1-f7b5-4c80-ab38-e44fa1aef9a5",
+  "displayName": "TC-M0-008 — M0 offers journey resumption when open_applications non-empty 1",
+  "description": "M0 offers journey resumption when open_applications non-empty | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST-CARDAPP-001 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "resume", "BR-ACN-039", "webchat", "P1", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "webchat",
+            "open_applications": [{
+              "application_id": "APP-20260929-001",
+              "product": "Aventura Visa Infinite",
+              "status": "in_progress",
+              "type": "credit_card_application"
+            }],
+            "persona_id": "CUST-CARDAPP-001",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Hi"
+        }
+      }]
+    }]
+  }
+}

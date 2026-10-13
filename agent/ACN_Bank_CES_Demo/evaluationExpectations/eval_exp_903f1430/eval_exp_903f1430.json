@@ -1,0 +1,7 @@
+{
+  "name": "add55ce0-ce98-43c1-8fa8-9a522dcfd44b",
+  "displayName": "eval_exp_903f1430",
+  "llmCriteria": {
+    "prompt": "[TC-M21-002] Recent transactions query calls listCustomerTransactions and surfaces recent transaction language"
+  }
+}

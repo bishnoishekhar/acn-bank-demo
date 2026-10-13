@@ -1,0 +1,7 @@
+{
+  "name": "6c9731c3-06e1-4ab7-8644-4b6d106ff8f7",
+  "displayName": "eval_exp_5f32636d",
+  "llmCriteria": {
+    "prompt": "createActivationRequest must be called to activate the card."
+  }
+}

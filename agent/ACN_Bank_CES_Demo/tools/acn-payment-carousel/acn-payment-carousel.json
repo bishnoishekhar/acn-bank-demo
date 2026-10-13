@@ -1,0 +1,75 @@
+{
+  "name": "048441e0-de73-4762-bbff-257db2f50a3f",
+  "displayName": "acn-payment-carousel",
+  "widgetTool": {
+    "name": "acn-payment-carousel",
+    "description": "Emit a scrollable list of accounts, transactions, or payment options for the user to select from. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me pull up your accounts.\u0027 Webchat only — on voice, read options aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "properties": {
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027acn-payment-carousel\u0027"
+        },
+        "payments": {
+          "type": "ARRAY",
+          "description": "Required. An ordered list of scheduled payments to display.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "amount": {
+                "type": "NUMBER",
+                "description": "Payment amount e.g. 148.92."
+              },
+              "cancellable": {
+                "type": "BOOLEAN",
+                "description": "Whether the payment can be cancelled."
+              },
+              "cta_label": {
+                "type": "STRING",
+                "description": "Button label e.g. Cancel payment or Processing."
+              },
+              "cta_value": {
+                "type": "STRING",
+                "description": "Value sent to agent on button click e.g. cancel_payment:PMT-10001."
+              },
+              "currency": {
+                "type": "STRING",
+                "description": "Currency code e.g. CAD."
+              },
+              "display_date": {
+                "type": "STRING",
+                "description": "Human-readable date e.g. June 8."
+              },
+              "payee_name": {
+                "type": "STRING",
+                "description": "Required. Name of the payee e.g. Hydro One."
+              },
+              "payment_id": {
+                "type": "STRING",
+                "description": "Unique payment identifier e.g. PMT-10001."
+              },
+              "status": {
+                "type": "STRING",
+                "description": "Payment status: scheduled, processing, or cancelled."
+              }
+            }
+          }
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "Widget subheader text."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Widget header title."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "payments"]
+    }
+  }
+}

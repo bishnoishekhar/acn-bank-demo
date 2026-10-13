@@ -1,0 +1,39 @@
+{
+  "name": "d019d9c0-b709-4485-96d0-ebdb5d5bd3fc",
+  "displayName": "quick_actions",
+  "widgetTool": {
+    "name": "quick_actions",
+    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here are your options.\u0027 Webchat only — on voice, list choices as plain text instead.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "actions": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "content": {
+                "type": "STRING"
+              },
+              "description": {
+                "type": "STRING"
+              },
+              "utterance": {
+                "type": "STRING"
+              }
+            },
+            "required": ["content", "utterance"]
+          }
+        },
+        "summary": {
+          "type": "STRING"
+        },
+        "type": {
+          "type": "STRING"
+        }
+      },
+      "required": ["type", "actions"]
+    }
+  }
+}

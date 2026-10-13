@@ -1,0 +1,25 @@
+{
+  "name": "TC-M0-001",
+  "displayName": "TC-M0-001 — M0 greeting: recording notice + PIPEDA on voice",
+  "description": "M0 greeting: recording notice + PIPEDA on voice | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["M0", "voice 2", "greeting", "recording-notice", "pipeda 2", "P0 2", "NO-GO 2"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Hello"
+        }
+      }]
+    }]
+  }
+}

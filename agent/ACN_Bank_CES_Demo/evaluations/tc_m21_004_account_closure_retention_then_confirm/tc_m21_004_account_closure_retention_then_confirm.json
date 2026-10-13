@@ -1,0 +1,49 @@
+{
+  "name": "f246e440-d057-479a-896f-6ca5c30513f3",
+  "displayName": "tc_m21_004_account_closure_retention_then_confirm",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.1", "closure", "ACC-10", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to close my savings account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "We\u0027re sorry to hear you\u0027d like to close your savings account. Before I proceed, I\u0027d like to share some information about what you might be missing and explore if there\u0027s anything we can do to address your concerns."
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "I still want to close it"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve processed the closure request for your savings account. You will receive a confirmation email. Is there anything else I can help you with?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-12c91a82-b75e-4b16-8609-d13699c1c1f1",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_85335ece", "eval_exp_c1fd4d0b"]
+  },
+  "invalid": true
+}

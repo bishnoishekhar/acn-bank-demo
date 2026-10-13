@@ -1,0 +1,25 @@
+{
+  "name": "acn_trip_lifestyle",
+  "displayName": "acn_trip_lifestyle",
+  "instruction": "agents/acn_trip_lifestyle/instruction.txt",
+  "tools": ["acn_identity_security_hub", "build_spend_plan", "build_trip_plan", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_trip_lifestyle/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_trip_lifestyle/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_trip_lifestyle/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_trip_lifestyle/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_trip_lifestyle/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "d4039fc0-100e-4f2f-b7a3-7f96941151dc",
+  "displayName": "eval_exp_04965577",
+  "llmCriteria": {
+    "prompt": "createAppointment must be called to create the booking."
+  }
+}

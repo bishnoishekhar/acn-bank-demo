@@ -1,0 +1,7 @@
+{
+  "name": "4061b01d-8a0b-49fc-b358-2e9b049e196e",
+  "displayName": "eval_exp_9bf6926a",
+  "llmCriteria": {
+    "prompt": "Agent must route to one of: acn_banking_hub|acn_accounts_insights. [HIGH] Banking intent must route to acn_banking_hub (or acn_accounts_insights after hub resolves)"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "494c6f91-84ab-4b7c-9291-f048b11bf5d8",
+  "displayName": "eval_exp_3e5ad0fb",
+  "llmCriteria": {
+    "prompt": "CONTAINS: policy | OBSI | ombudsman | complaint"
+  }
+}

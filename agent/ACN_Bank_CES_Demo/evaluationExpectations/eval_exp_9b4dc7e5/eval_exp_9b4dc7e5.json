@@ -1,0 +1,7 @@
+{
+  "name": "7b003939-0706-409d-9b4f-c3aa77050a19",
+  "displayName": "eval_exp_9b4dc7e5",
+  "llmCriteria": {
+    "prompt": "[TC-M23-002] Temporary card lock calls updateCard with action\u003dlock and emits card_lock_confirmation widget"
+  }
+}

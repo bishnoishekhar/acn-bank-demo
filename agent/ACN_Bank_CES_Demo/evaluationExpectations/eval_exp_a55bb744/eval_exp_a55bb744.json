@@ -1,0 +1,7 @@
+{
+  "name": "2f543715-0f09-4997-8dff-4487da87f9b3",
+  "displayName": "eval_exp_a55bb744",
+  "llmCriteria": {
+    "prompt": "handoff_context session variable must be populated and not null before transfer."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "c700f74a-5e6a-4105-aab9-a0cc6ff0bd41",
+  "displayName": "eval_exp_7febacd0",
+  "llmCriteria": {
+    "prompt": "verify_pin must be called when DTMF PIN entry is detected."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "3f660b01-cfb7-4de3-afab-f8b912e89630",
+  "displayName": "eval_exp_0d1980f7",
+  "llmCriteria": {
+    "prompt": "getExchangeRate must be called."
+  }
+}

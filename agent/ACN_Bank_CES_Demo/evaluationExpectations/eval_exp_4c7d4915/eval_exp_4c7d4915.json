@@ -1,0 +1,7 @@
+{
+  "name": "fbae59ed-c730-4a24-a8ec-48494bb49b34",
+  "displayName": "eval_exp_4c7d4915",
+  "llmCriteria": {
+    "prompt": "Agent must indicate the product is not available (not available, not eligible, don\u0027t have access, speak with an advisor)."
+  }
+}

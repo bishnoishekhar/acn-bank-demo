@@ -1,0 +1,24 @@
+{
+  "name": "94f8ab09-fd81-4b80-85e3-8b9d1fe886b2",
+  "displayName": "TC-GB-022 — Confirmation gate: read-back before money movement 2",
+  "description": "Confirmation gate: read-back before money movement | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-22 1", "BR-ACN-044 1", "confirmation 1", "payment 1", "money-movement 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Pay Rogers $50"
+        }
+      }]
+    }]
+  }
+}

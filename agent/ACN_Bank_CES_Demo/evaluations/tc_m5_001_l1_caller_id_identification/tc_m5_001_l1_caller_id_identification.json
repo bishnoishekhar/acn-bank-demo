@@ -1,0 +1,35 @@
+{
+  "name": "ffa31323-6aa6-456a-ad8a-1f08d688a502",
+  "displayName": "tc_m5_001_l1_caller_id_identification",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "L1", "caller-id", "voice", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003ewelcome\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome to ACN Bank. This call may be monitored or recorded for quality and security purposes. ACN Bank collects your personal information in accordance with our Privacy Policy and PIPEDA. How can I help you today?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-86601098-c80f-410d-9981-017faf56fa5f",
+            "tool": "identify_customer",
+            "args": {
+            },
+            "displayName": "identify_customer"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_62fb85d1", "eval_exp_a42d2066", "eval_exp_af9b0183", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

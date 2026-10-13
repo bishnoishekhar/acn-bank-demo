@@ -1,0 +1,7 @@
+{
+  "name": "9fc40b51-5785-401f-a8e4-d408550dabc5",
+  "displayName": "eval_exp_b2f447fe",
+  "llmCriteria": {
+    "prompt": "executeACNBankApplicationEmail must be called to send the secure message."
+  }
+}

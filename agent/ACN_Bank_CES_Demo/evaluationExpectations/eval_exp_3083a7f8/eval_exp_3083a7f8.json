@@ -1,0 +1,7 @@
+{
+  "name": "d46fa6b4-c4be-4590-a303-4c246baf1417",
+  "displayName": "eval_exp_3083a7f8",
+  "llmCriteria": {
+    "prompt": "updateAccount must be called with action\u003dfreeze."
+  }
+}

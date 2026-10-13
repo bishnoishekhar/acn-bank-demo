@@ -1,0 +1,7 @@
+{
+  "name": "aa53f783-4eb8-4808-aa1e-611b618eb297",
+  "displayName": "eval_exp_31c66b8a",
+  "llmCriteria": {
+    "prompt": "record_auth_event must NOT be called by the model — it is an internal platform callback."
+  }
+}

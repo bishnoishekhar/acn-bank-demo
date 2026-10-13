@@ -1,0 +1,7 @@
+{
+  "name": "53dd2399-86f1-41f3-adfa-86289ec30086",
+  "displayName": "eval_exp_f8e73724",
+  "llmCriteria": {
+    "prompt": "[TC-M25-003] Delete payee confirmation names the payee and warns about recurring/scheduled payments before executing deletePayee"
+  }
+}

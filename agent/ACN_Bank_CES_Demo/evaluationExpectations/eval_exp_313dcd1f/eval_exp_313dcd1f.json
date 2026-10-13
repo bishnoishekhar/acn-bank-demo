@@ -1,0 +1,7 @@
+{
+  "name": "c2029868-b3d2-4db7-9a19-89a805b8ece9",
+  "displayName": "eval_exp_313dcd1f",
+  "llmCriteria": {
+    "prompt": "Response on first turn must disclose rate, fee, and total cost before createFXOrder is called."
+  }
+}

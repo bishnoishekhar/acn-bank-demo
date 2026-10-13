@@ -1,0 +1,7 @@
+{
+  "name": "a748654a-8b3a-4409-a76d-aaf14fb3c64c",
+  "displayName": "eval_exp_bad376fd",
+  "llmCriteria": {
+    "prompt": "step_up_required must be set to true for FX purchases \u003e\u003d CAD 1,000."
+  }
+}

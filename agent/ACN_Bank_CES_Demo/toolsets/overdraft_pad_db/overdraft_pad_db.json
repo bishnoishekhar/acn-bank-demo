@@ -1,0 +1,13 @@
+{
+  "name": "a4acb0ab-3a31-4c1e-aa55-85e199a08f47",
+  "displayName": "overdraft_pad_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/overdraft_pad_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Overdraft protection management, NSF history and reversal, Pre-Authorized Debit (PAD) listing, cancellation, and disputes."
+}

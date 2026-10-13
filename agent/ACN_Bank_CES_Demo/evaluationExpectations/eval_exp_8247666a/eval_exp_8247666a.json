@@ -1,0 +1,7 @@
+{
+  "name": "c00d8798-4a65-462e-8eb7-2da8a4a2ba1f",
+  "displayName": "eval_exp_8247666a",
+  "llmCriteria": {
+    "prompt": "CONTAINS: recording_notice. [NO-GO] Recording notice must appear in the very first voice response"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "1a5fc57b-a45f-4eec-a3ca-809911148512",
+  "displayName": "eval_exp_b4c2c136",
+  "llmCriteria": {
+    "prompt": "Banking intent must route to acn_banking_hub or acn_accounts_insights — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

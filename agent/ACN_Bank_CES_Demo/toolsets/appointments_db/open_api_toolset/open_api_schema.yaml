@@ -1,0 +1,157 @@
+openapi: "3.0.3"
+info:
+  title: Appointments DB - Direct Firestore
+  version: "1.0.0"
+  description: Branch appointment management API for ACN Bank CES Demo (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointment_slots:
+    get:
+      operationId: getAvailableSlots
+      summary: Get available appointment slots at a branch
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: branchId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          schema:
+            type: string
+            format: date
+        - name: serviceType
+          in: query
+          schema:
+            type: string
+            enum: [account_opening, mortgage, investments, general, card_services, loan]
+      responses:
+        "200":
+          description: Available appointment slots
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointments:
+    post:
+      operationId: createAppointment
+      summary: Book a new branch appointment
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAppointmentRequest"
+      responses:
+        "200":
+          description: Appointment booked
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointments/{appointmentId}:
+    get:
+      operationId: getAppointment
+      summary: Get appointment details
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Appointment details
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: updateAppointment
+      summary: Update an existing appointment (reschedule, update notes)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAppointmentRequest"
+      responses:
+        "200":
+          description: Appointment updated
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      operationId: cancelAppointment
+      summary: Cancel an appointment
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: appointmentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Appointment cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateAppointmentRequest:
+      type: object
+      required:
+        - customerId
+        - branchId
+        - slotId
+        - serviceType
+      properties:
+        customerId:
+          type: string
+        branchId:
+          type: string
+        slotId:
+          type: string
+        serviceType:
+          type: string
+        notes:
+          type: string
+        sendConfirmationEmail:
+          type: boolean
+          default: true
+        idempotencyKey:
+          type: string
+    UpdateAppointmentRequest:
+      type: object
+      properties:
+        slotId:
+          type: string
+        notes:
+          type: string
+        status:
+          type: string

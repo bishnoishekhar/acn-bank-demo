@@ -1,0 +1,35 @@
+{
+  "name": "8b83bf09-2304-4203-afb2-1dc2823ba404",
+  "displayName": "tc_m22_006_payment_above_threshold_step_up",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "step-up", "threshold", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Pay my electricity bill $1200"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "For payments above $1,000, I need to verify your identity with an additional security step. I\u0027ve sent a step-up request to your registered device."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-96144068-d13f-4a86-afd6-f9e8452eaf84",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4137df42"]
+  },
+  "invalid": true
+}

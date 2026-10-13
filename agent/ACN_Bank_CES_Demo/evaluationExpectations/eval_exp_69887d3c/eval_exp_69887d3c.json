@@ -1,0 +1,7 @@
+{
+  "name": "0ae139c6-2a1c-4909-9ee5-99456dcbf5b2",
+  "displayName": "eval_exp_69887d3c",
+  "llmCriteria": {
+    "prompt": "stop_payment_id must be set in session state after stopPayment."
+  }
+}

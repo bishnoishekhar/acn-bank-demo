@@ -1,0 +1,7 @@
+{
+  "name": "8d85337e-5668-4660-a111-a65e7b1cacd7",
+  "displayName": "eval_exp_82bb3786",
+  "llmCriteria": {
+    "prompt": "executeACNBankApplicationEmail must be called to send the confirmation email."
+  }
+}

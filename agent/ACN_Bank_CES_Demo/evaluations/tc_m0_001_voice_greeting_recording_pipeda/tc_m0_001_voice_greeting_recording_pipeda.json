@@ -1,0 +1,25 @@
+{
+  "name": "d3c1625c-f492-466f-917a-c8916733402d",
+  "displayName": "tc_m0_001_voice_greeting_recording_pipeda",
+  "tags": ["acn_bank_ces_demo", "m0", "voice", "greeting", "recording-notice", "pipeda", "P0", "NO-GO", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Hello"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome to ACN Bank. This call may be monitored or recorded for quality and security purposes. ACN Bank collects your personal information in accordance with our Privacy Policy and PIPEDA. How can I help you today?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_43af982f", "eval_exp_d5978c24"]
+  },
+  "invalid": true
+}

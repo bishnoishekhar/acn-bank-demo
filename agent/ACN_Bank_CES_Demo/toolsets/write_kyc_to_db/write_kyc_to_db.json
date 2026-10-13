@@ -1,0 +1,12 @@
+{
+  "name": "8791b275-c002-4635-a724-70c4f0b9bc28",
+  "displayName": "write_kyc_to_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/write_kyc_to_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAgentIdTokenAuthConfig": {
+      }
+    }
+  },
+  "description": "Write and update KYC verification records in the customer platform database. Used after document processing to record KYC outcomes."
+}

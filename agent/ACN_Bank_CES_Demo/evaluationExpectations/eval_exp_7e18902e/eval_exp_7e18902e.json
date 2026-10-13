@@ -1,0 +1,7 @@
+{
+  "name": "d310909a-60aa-429a-b707-2723ff4878f7",
+  "displayName": "eval_exp_7e18902e",
+  "llmCriteria": {
+    "prompt": "dispute_rights_disclosure copy key must be delivered before createDispute is called (GB-09)."
+  }
+}

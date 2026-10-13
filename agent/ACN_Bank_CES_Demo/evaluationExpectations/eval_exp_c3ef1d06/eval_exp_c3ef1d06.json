@@ -1,0 +1,7 @@
+{
+  "name": "c8ab5951-d771-4599-bb04-b306c98e9f0c",
+  "displayName": "eval_exp_c3ef1d06",
+  "llmCriteria": {
+    "prompt": "M1 CIE must populate customer_segment in session state after L2 auth."
+  }
+}

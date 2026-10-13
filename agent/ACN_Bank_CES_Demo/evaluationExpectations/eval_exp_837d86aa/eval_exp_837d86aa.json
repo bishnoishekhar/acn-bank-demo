@@ -1,0 +1,7 @@
+{
+  "name": "652e2542-b89f-40d5-bad6-f2ccdebf2958",
+  "displayName": "eval_exp_837d86aa",
+  "llmCriteria": {
+    "prompt": "[NO-GO] verify_otp must be called with the provided OTP code to elevate auth_level to 2"
+  }
+}

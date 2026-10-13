@@ -1,0 +1,7 @@
+{
+  "name": "91fe31df-b932-4f09-9f4c-b1d053927c91",
+  "displayName": "eval_exp_432d2a72",
+  "llmCriteria": {
+    "prompt": "createFXOrder must NOT be called until customer confirms."
+  }
+}

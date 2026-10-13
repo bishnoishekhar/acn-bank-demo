@@ -1,0 +1,10 @@
+{
+  "name": "docai_document_processors",
+  "pythonFunction": {
+    "name": "docai_document_processors",
+    "pythonCode": "tools/docai_document_processors/python_function/python_code.py",
+    "description": "    Calls DocAI processDocument for income verification documents.\n    document_type: income | t4 | noa | pay_stub | employment_letter | bank_statement\nProcessing may take several seconds. If a pacing phrase is needed, deliver it from the agent instruction before calling this tool."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "docai_document_processors"
+}

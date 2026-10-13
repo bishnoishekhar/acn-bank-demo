@@ -1,0 +1,7 @@
+{
+  "name": "12f0c581-389e-40ef-a2ef-20fa20745919",
+  "displayName": "eval_exp_e54b88a6",
+  "llmCriteria": {
+    "prompt": "createDispute must NOT be called in response to a FAQ query."
+  }
+}

@@ -1,0 +1,504 @@
+openapi: "3.0.3"
+
+info:
+  title: Manage Customer Database (Direct Firestore)
+  version: "1.0.0"
+  description: Direct Firestore REST contract bypassing Cloud Run for ACN Bank CES Demo.
+
+servers:
+  - url: $env_var
+
+security:
+  - GoogleBearerAuth: []
+
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}:
+    get:
+      operationId: getCustomer
+      summary: Get customer profile
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/accounts:
+    get:
+      operationId: getAccounts
+      summary: Get all accounts for customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of accounts
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountsResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/cards:
+    get:
+      operationId: getCards
+      summary: Get all cards for customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of cards
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CardsResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/beneficiaries:
+    get:
+      operationId: getBeneficiaries
+      summary: Get all payees/beneficiaries for customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of beneficiaries
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BeneficiariesResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/bills:
+    get:
+      operationId: getBills
+      summary: Get bill payment payees for customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of bills
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillsResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/transactions:
+    get:
+      operationId: listCustomerTransactions
+      summary: List customer transactions with optional filters
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: accountId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          schema:
+            type: string
+        - name: endDate
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 50
+        - name: category
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of transactions
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TransactionsResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/config/{configKey}:
+    get:
+      operationId: getConfig
+      summary: Get application configuration (rates, business hours, policy)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: configKey
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [mortgage_rates, business_hours, agent_policy, branches, epp_rates]
+      responses:
+        "200":
+          description: Configuration data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ConfigResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/security:
+    get:
+      operationId: getSecurity
+      summary: Get customer security profile (non-sensitive fields only)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Security profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SecurityResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
+    post:
+      operationId: queryCustomers
+      summary: Query customers by identifier (M5 use only)
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CustomerQueryRequest"
+      responses:
+        "200":
+          description: Matching customers
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerQueryResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/financials:
+    get:
+      operationId: getFinancials
+      summary: Get customer financial profile for credit decisions
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Financial profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FinancialsResponse"
+
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/tax-documents:
+    get:
+      operationId: getTaxDocuments
+      summary: Get tax documents list (T4, T5, NOA) with secure links
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: taxYear
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tax documents
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaxDocumentsResponse"
+
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+
+  schemas:
+    CustomerResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            customerId:
+              type: string
+            firstName:
+              type: string
+            lastName:
+              type: string
+            preferredName:
+              type: string
+            email:
+              type: string
+            phone:
+              type: string
+            segment:
+              type: string
+            memberSince:
+              type: string
+            status:
+              type: string
+            vulnerabilityFlag:
+              type: boolean
+    AccountsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              accountId:
+                type: string
+              type:
+                type: string
+              balance:
+                type: number
+              availableBalance:
+                type: number
+              currency:
+                type: string
+              accountNumber:
+                type: string
+              nickname:
+                type: string
+    CardsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              cardId:
+                type: string
+              last4:
+                type: string
+              type:
+                type: string
+              status:
+                type: string
+              expiryDate:
+                type: string
+              creditLimit:
+                type: number
+              availableCredit:
+                type: number
+              linkedAccountId:
+                type: string
+    BeneficiariesResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              beneficiaryId:
+                type: string
+              name:
+                type: string
+              email:
+                type: string
+              accountNumber:
+                type: string
+              bankName:
+                type: string
+              type:
+                type: string
+    BillsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              billId:
+                type: string
+              payee:
+                type: string
+              accountNumber:
+                type: string
+              dueDate:
+                type: string
+              amountDue:
+                type: number
+    TransactionsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              txnId:
+                type: string
+              date:
+                type: string
+              amount:
+                type: number
+              merchant:
+                type: string
+              category:
+                type: string
+              type:
+                type: string
+              status:
+                type: string
+              accountId:
+                type: string
+    ConfigResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+    SecurityResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            customerId:
+              type: string
+            authMethods:
+              type: array
+              items:
+                type: string
+            lastLoginDate:
+              type: string
+            failedAttempts:
+              type: integer
+            locked:
+              type: boolean
+    CustomerQueryRequest:
+      type: object
+      properties:
+        identifierType:
+          type: string
+        identifierValue:
+          type: string
+    CustomerQueryResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              customerId:
+                type: string
+              matchedOn:
+                type: string
+    FinancialsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: object
+          properties:
+            customerId:
+              type: string
+            annualIncome:
+              type: number
+            creditScore:
+              type: integer
+            existingDebts:
+              type: number
+            employmentStatus:
+              type: string
+            housingCost:
+              type: number
+    TaxDocumentsResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              documentId:
+                type: string
+              type:
+                type: string
+              taxYear:
+                type: string
+              secureUrl:
+                type: string
+              expiresAt:
+                type: string

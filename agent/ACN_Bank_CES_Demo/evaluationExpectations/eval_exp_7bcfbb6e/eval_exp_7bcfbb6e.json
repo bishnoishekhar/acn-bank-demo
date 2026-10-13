@@ -1,0 +1,7 @@
+{
+  "name": "7722ae34-decf-47d0-b3b7-ce64390c0a32",
+  "displayName": "eval_exp_7bcfbb6e",
+  "llmCriteria": {
+    "prompt": "[TC-M0-011] voice_name_confirmation: preferred_name found → confirms before use"
+  }
+}

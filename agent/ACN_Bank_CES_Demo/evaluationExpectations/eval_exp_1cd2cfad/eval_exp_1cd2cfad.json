@@ -1,0 +1,7 @@
+{
+  "name": "63ce608d-adb0-46a1-856a-f3a4b0a57e4b",
+  "displayName": "eval_exp_1cd2cfad",
+  "llmCriteria": {
+    "prompt": "createDispute must NOT be called in the same turn as the initial dispute request without the rights disclosure first."
+  }
+}

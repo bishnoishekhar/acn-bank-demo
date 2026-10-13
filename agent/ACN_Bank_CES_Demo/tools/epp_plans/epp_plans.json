@@ -1,0 +1,75 @@
+{
+  "name": "fb44f61d-cd46-4ef2-baa3-7667f1bbefea",
+  "displayName": "epp_plans",
+  "widgetTool": {
+    "name": "epp_plans",
+    "description": "Emit instalment plan options for a selected EPP-eligible purchase. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you the instalment options.\u0027 Webchat only — on voice, read plan details aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "properties": {
+        "confirm_cta_label": {
+          "type": "STRING",
+          "description": "Label for the primary confirm button, e.g. \u0027Continue with 12 months\u0027."
+        },
+        "confirm_cta_value": {
+          "type": "STRING",
+          "description": "Sent back to the agent on confirm, e.g. \u0027epp_plan_confirm:12\u0027."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027epp_plans\u0027"
+        },
+        "plans": {
+          "type": "ARRAY",
+          "description": "Required. Tenure options. Interest rate is passed for regulatory disclosure and rendered as a small footnote line, never as a headline.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "interest_rate_pct": {
+                "type": "NUMBER",
+                "description": "Annual interest rate, e.g. 1.5. Displayed only inside the \u0027Plan details\u0027 disclosure, never in the primary chip."
+              },
+              "monthly_amount_cad": {
+                "type": "NUMBER",
+                "description": "Amount charged each month. The headline figure on the chip."
+              },
+              "recommended": {
+                "type": "BOOLEAN",
+                "description": "If true, the chip is highlighted as the default choice."
+              },
+              "tenure_months": {
+                "type": "NUMBER",
+                "description": "Number of monthly instalments."
+              },
+              "total_repayable_cad": {
+                "type": "NUMBER",
+                "description": "Sum of all monthly payments. Shown as a subtle grey figure in expanded \u0027Plan details\u0027."
+              }
+            }
+          }
+        },
+        "product_id": {
+          "type": "STRING",
+          "description": "Chosen product id from the carousel step."
+        },
+        "product_image_url": {
+          "type": "STRING",
+          "description": "Chosen product image."
+        },
+        "product_name": {
+          "type": "STRING",
+          "description": "Chosen product display name."
+        },
+        "retail_price_cad": {
+          "type": "NUMBER",
+          "description": "Retail price shown small under the product name."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "product_id", "plans", "confirm_cta_value"]
+    }
+  }
+}

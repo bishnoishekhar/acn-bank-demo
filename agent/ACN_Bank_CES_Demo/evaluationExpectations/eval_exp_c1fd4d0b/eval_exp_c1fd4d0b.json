@@ -1,0 +1,7 @@
+{
+  "name": "62532fe7-c898-4a9c-ad6b-6699f6003eb8",
+  "displayName": "eval_exp_c1fd4d0b",
+  "llmCriteria": {
+    "prompt": "createAccountClosure must NOT be called on the first request — only after second confirmation."
+  }
+}

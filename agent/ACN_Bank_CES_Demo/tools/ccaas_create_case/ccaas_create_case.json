@@ -1,0 +1,9 @@
+{
+  "name": "ccaas_create_case",
+  "pythonFunction": {
+    "name": "ccaas_create_case",
+    "pythonCode": "tools/ccaas_create_case/python_function/python_code.py",
+    "description": "Create a CCaaS complaint or escalation case.\n\nArgs:\n    customer_id: Firestore customer document ID (may be empty at L0).\n    case_type: Case type: \u0027complaint\u0027 | \u0027escalation\u0027 | \u0027fraud_report\u0027 |\n               \u0027vulnerability\u0027 | \u0027bereavement\u0027 | \u0027general\u0027.\n    description: Brief description of the issue (no PII values).\n    channel: Channel where the case originated: voice | webchat | whatsapp.\n\nReturns:\n    {case_id(str), case_reference(str), created_at(str)}"
+  },
+  "displayName": "ccaas_create_case"
+}

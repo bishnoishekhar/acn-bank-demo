@@ -1,0 +1,34 @@
+{
+  "name": "9bcad1ed-5aad-4ffb-bd8a-62eec0b4e1c1",
+  "displayName": "tc_m31_003_application_status_kyc_pending",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1", "status", "CC-05", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What\u0027s the status of my card application?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your credit card application is currently at the identity verification stage. We\u0027re waiting to complete the KYC process before we can proceed."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-414a3470-b70e-476d-bd46-6eb8448559dc",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_3979d09a", "eval_exp_1dd02db6"]
+  },
+  "invalid": true
+}

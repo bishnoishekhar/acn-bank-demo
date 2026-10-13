@@ -1,0 +1,7 @@
+{
+  "name": "e6169eb6-b883-4dc1-8168-04561f2580bb",
+  "displayName": "eval_exp_b719a22e",
+  "llmCriteria": {
+    "prompt": "[NO-GO] verify_pin must be called with the masked DTMF PIN to elevate auth_level to 2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "539f3f62-97fa-4528-836b-e34ec6244f97",
+  "displayName": "eval_exp_018073f0",
+  "llmCriteria": {
+    "prompt": "CONTAINS: replacement | new card"
+  }
+}

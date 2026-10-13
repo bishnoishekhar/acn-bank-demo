@@ -1,0 +1,7 @@
+{
+  "name": "0de894a4-8094-41c9-af1e-170ff18f0795",
+  "displayName": "eval_exp_f44dd1b8",
+  "llmCriteria": {
+    "prompt": "CONTAINS: 10000 | statement credit | confirm"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "name": "verify_otp",
+  "pythonFunction": {
+    "name": "verify_otp",
+    "pythonCode": "tools/verify_otp/python_function/python_code.py",
+    "description": "Validate OTP code.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    otp_request_id: Opaque challenge ID returned by issue_otp.\n    otp_code: The code the customer provided (6 digits).\n\nReturns:\n    {verified(bool), attempts_left(int), auth_level(int)}"
+  },
+  "displayName": "verify_otp"
+}

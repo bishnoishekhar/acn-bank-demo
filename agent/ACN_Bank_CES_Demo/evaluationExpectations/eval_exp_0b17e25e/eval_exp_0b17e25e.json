@@ -1,0 +1,7 @@
+{
+  "name": "69c46ef3-3528-41c1-9734-9eb70c3ecc0a",
+  "displayName": "eval_exp_0b17e25e",
+  "llmCriteria": {
+    "prompt": "[TC-M27-001] CHQ-01: stop payment discloses fee before confirmation; stopPayment and W-29 widget rendered only after confirm"
+  }
+}

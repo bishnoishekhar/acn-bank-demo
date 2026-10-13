@@ -1,0 +1,7 @@
+{
+  "name": "93f43736-f2da-493a-8d78-716822bb8f9d",
+  "displayName": "eval_exp_6b468cf9",
+  "llmCriteria": {
+    "prompt": "The agent must immediately recognize the lost/stolen signal and route to card management (M2.3)."
+  }
+}

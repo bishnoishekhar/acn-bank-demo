@@ -1,0 +1,25 @@
+{
+  "name": "TC-M01-004",
+  "displayName": "TC-M01-004 — M0.1 CDIC disclosure on deposit product FAQ",
+  "description": "M0.1 CDIC disclosure on deposit product FAQ | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["M0.1", "cdic 2", "FAQ-01", "webchat 2", "deposit 2", "P0 2", "HIGH 2"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "channel": "webchat",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "What is CDIC coverage?"
+        }
+      }]
+    }]
+  }
+}

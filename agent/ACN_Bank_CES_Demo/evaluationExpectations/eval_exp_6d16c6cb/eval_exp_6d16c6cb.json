@@ -1,0 +1,7 @@
+{
+  "name": "8ecf4cbe-c299-46c2-ab04-af4909e061ee",
+  "displayName": "eval_exp_6d16c6cb",
+  "llmCriteria": {
+    "prompt": "CONTAINS: reporting requirement | FINTRAC | large cash"
+  }
+}

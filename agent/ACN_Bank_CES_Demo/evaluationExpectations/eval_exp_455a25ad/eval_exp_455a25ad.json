@@ -1,0 +1,7 @@
+{
+  "name": "4d41a91c-d1f6-45e7-8875-63914b6879bc",
+  "displayName": "eval_exp_455a25ad",
+  "llmCriteria": {
+    "prompt": "The agent must detect the voice channel from the telephony signal and set channel\u003dvoice on the first turn."
+  }
+}

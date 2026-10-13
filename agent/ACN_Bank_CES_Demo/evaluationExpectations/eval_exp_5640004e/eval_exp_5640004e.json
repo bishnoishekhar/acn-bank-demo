@@ -1,0 +1,7 @@
+{
+  "name": "d4a461c7-52cb-402a-91da-f89cba0cd48e",
+  "displayName": "eval_exp_5640004e",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the complete dispute rights disclosure before submitting a dispute or calling createDispute."
+  }
+}

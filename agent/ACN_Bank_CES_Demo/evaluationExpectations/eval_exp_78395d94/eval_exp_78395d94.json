@@ -1,0 +1,7 @@
+{
+  "name": "22d65b97-904f-458a-8022-91804719f7ab",
+  "displayName": "eval_exp_78395d94",
+  "llmCriteria": {
+    "prompt": "[TC-M5-005] Auth lock after 3 OTP failures"
+  }
+}

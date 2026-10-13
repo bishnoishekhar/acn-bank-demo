@@ -1,0 +1,13 @@
+{
+  "name": "a6a32736-9ff6-47db-a525-b9f17bfc2775",
+  "displayName": "update_customer_api_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/update_customer_api_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Customer profile and account update operations: accounts, bills, cards, payees, profile, overdraft."
+}

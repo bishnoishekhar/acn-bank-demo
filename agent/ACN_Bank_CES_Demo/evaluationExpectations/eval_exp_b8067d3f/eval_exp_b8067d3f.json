@@ -1,0 +1,7 @@
+{
+  "name": "b49ab513-50a1-4b2d-92d8-5706566cb636",
+  "displayName": "eval_exp_b8067d3f",
+  "llmCriteria": {
+    "prompt": "Agent must route to acn_cc_kyc — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

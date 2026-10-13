@@ -1,0 +1,9 @@
+{
+  "name": "request_app_push_approval",
+  "pythonFunction": {
+    "name": "request_app_push_approval",
+    "pythonCode": "tools/request_app_push_approval/python_function/python_code.py",
+    "description": "Send in-app push requesting customer approval for a high-risk action.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    action_description: Human-readable description shown in the push notification.\n    action_hash: Hash of the action being authorized (for binding).\n\nReturns:\n    {push_sent(bool), approval_timeout_seconds(int), push_id(str)}"
+  },
+  "displayName": "request_app_push_approval"
+}

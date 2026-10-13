@@ -1,0 +1,13 @@
+{
+  "name": "21030847-8208-4f12-abc9-9de1e486cf15",
+  "displayName": "manageCustomerDatabase",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/manageCustomerDatabase/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Core customer data operations: read customer profile, accounts, cards, beneficiaries, bills, transactions, config, security, and financial data from the Firestore customer platform API."
+}

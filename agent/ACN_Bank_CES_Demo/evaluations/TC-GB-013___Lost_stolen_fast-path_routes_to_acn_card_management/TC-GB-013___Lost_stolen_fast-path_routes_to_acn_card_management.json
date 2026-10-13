@@ -1,0 +1,32 @@
+{
+  "name": "TC-GB-013",
+  "displayName": "TC-GB-013 — Lost/stolen fast-path routes to acn_card_management",
+  "description": "Lost/stolen fast-path routes to acn_card_management | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d1, mode\u003dcaller_id",
+  "tags": ["GB-13", "BR-ACN-015", "lost-stolen", "fast-path", "routing", "P0", "NO-GO", "voice"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 1.0,
+            "auth_mode": "caller_id",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I lost my card"
+        }
+      }, {
+        "expectation": {
+          "note": "agent transfer target must be \u0027acn_card_management\u0027 [NO-GO]",
+          "agentTransfer": {
+            "targetAgent": "acn_card_management",
+            "displayName": "acn_card_management"
+          }
+        }
+      }]
+    }]
+  }
+}

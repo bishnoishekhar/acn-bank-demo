@@ -1,0 +1,35 @@
+{
+  "name": "2a7a2ffb-1f83-459e-a06f-ea164d4111cd",
+  "displayName": "tc_m32_005_lump_sum_prepayment_step_up",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "prepayment", "MTG-07", "voice", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to put $10000 on my mortgage"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I process this prepayment, I need to let you know about your mortgage prepayment privileges and any applicable fees. I\u0027ll also need to verify your identity with an additional security step."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-22c21f04-fc0d-4ae0-803c-74bcf013f01b",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_3252ec09", "eval_exp_c42b389b"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,23 @@
+{
+  "name": "d4e69708-26b4-42b1-9d95-34d50f491e75",
+  "displayName": "TC-GB-007b — Language lock on first utterance (fr-CA) 2",
+  "description": "Language lock on first utterance (fr-CA) | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_7777 | Channel: voice | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["GB-07 1", "BR-ACN-009 1", "language 1", "fr-CA 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "persona_id": "CUST_DOC_7777"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Bonjour"
+        }
+      }]
+    }]
+  }
+}

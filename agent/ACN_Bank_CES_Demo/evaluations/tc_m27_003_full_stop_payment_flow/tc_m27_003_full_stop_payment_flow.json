@@ -1,0 +1,58 @@
+{
+  "name": "707ff56d-015b-4088-b0b0-0017018834db",
+  "displayName": "tc_m27_003_full_stop_payment_flow",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-01", "stopPayment", "BR-ACN-049", "voice", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Stop cheque 312 payable to BuildRight Supplies for twelve hundred dollars"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve checked cheque #312 for $1,200 payable to BuildRight Supplies and it has not yet cleared. Would you like me to place a stop payment on this cheque? A fee applies."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-6f034c36-e9be-484b-b220-1815cc1abe6b",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, that\u0027s correct — please stop it"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your stop payment on cheque #312 has been placed. Your reference number is SP-2026-001."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-88d2dab9-8805-4155-b202-23d47d5d7352",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_48076ab1", "eval_exp_59a0d89c", "eval_exp_ae5f7015", "eval_exp_a1db8012", "eval_exp_69887d3c"]
+  },
+  "invalid": true
+}

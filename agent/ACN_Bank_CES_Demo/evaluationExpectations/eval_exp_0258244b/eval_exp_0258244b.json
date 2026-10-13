@@ -1,0 +1,7 @@
+{
+  "name": "b23f4934-f303-42ef-bd22-339a617a41ae",
+  "displayName": "eval_exp_0258244b",
+  "llmCriteria": {
+    "prompt": "acn_customer_intelligence_engine must be called exactly once per authenticated session — called on turn 1, must NOT be called again on turn 2."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "c3444353-6c94-4ef2-979d-509baa79477b",
+  "pythonFunction": {
+    "name": "mortgage_affordability_estimate",
+    "pythonCode": "tools/mortgage_affordability_estimate/python_function/python_code.py",
+    "description": "Highest purchase price that clears GDS, TDS and the minimum down payment."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "mortgage_affordability_estimate"
+}

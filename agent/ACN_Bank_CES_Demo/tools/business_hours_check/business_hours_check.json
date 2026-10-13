@@ -1,0 +1,10 @@
+{
+  "name": "business_hours_check",
+  "pythonFunction": {
+    "name": "business_hours_check",
+    "pythonCode": "tools/business_hours_check/python_function/python_code.py",
+    "description": "Returns after_hours bool and next open time for ACN Bank contact centre.\nCalled silently at session start. Do NOT speak any pacing phrase before calling this tool."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "business_hours_check"
+}

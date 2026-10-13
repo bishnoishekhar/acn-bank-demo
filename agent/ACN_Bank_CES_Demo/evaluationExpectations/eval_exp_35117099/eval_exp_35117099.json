@@ -1,0 +1,7 @@
+{
+  "name": "ac2c5260-849e-4d59-a6f2-f5ab062ee73e",
+  "displayName": "eval_exp_35117099",
+  "llmCriteria": {
+    "prompt": "The agent must NOT allow further authentication attempts after auth is locked."
+  }
+}

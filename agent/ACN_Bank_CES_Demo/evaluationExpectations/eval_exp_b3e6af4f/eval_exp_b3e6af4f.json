@@ -1,0 +1,7 @@
+{
+  "name": "b5c4211f-19ff-4395-95f6-387cc2e7544c",
+  "displayName": "eval_exp_b3e6af4f",
+  "llmCriteria": {
+    "prompt": "[TC-M22-002] Own-account transfer calls createTransaction with type transfer"
+  }
+}

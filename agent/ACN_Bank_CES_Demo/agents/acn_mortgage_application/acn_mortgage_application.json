@@ -1,0 +1,34 @@
+{
+  "name": "acn_mortgage_application",
+  "displayName": "acn_mortgage_application",
+  "instruction": "agents/acn_mortgage_application/instruction.txt",
+  "tools": ["acn-amount-input", "acn-form-input", "acn_identity_security_hub", "calculate_affordability", "calculate_mortgage_payment", "docai_document_processors", "end_session", "loan_preapproval", "mobile_handoff", "mortgage_affordability", "mortgage_affordability_estimate", "mortgage_calculator", "mortgage_kyc", "mortgage_next_best_action", "mortgage_nudge", "mortgage_payment_estimate", "mortgage_preapproval_check", "mortgage_rate_board", "mortgage_rate_shelf", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_mortgage_application/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_mortgage_application/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_mortgage_application/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_mortgage_application/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_mortgage_application/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "kyc_request_tracking",
+    "toolIds": ["createKycRequest", "getKycStatus", "writeKycRecord"]
+  }, {
+    "toolset": "loan_applications",
+    "toolIds": ["createLoanApplication", "getMortgageDetails", "queryLoanApplications", "updateLoanApplication"]
+  }, {
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "send_application_email",
+    "toolIds": ["executeACNBankApplicationEmail"]
+  }]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "5ea437a8-e187-45cb-a56e-49bca0670ee0",
+  "displayName": "eval_exp_635d5a36",
+  "llmCriteria": {
+    "prompt": "updateCard must be called with action\u003dsuspend at auth_level\u003d1."
+  }
+}

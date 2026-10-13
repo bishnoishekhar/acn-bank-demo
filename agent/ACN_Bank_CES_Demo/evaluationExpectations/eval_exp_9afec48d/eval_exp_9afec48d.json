@@ -1,0 +1,7 @@
+{
+  "name": "cd4c4785-a0ee-400a-ac62-4107eeaea229",
+  "displayName": "eval_exp_9afec48d",
+  "llmCriteria": {
+    "prompt": "[TC-M29-001] View PADs calls listPADs and emits pad_list widget W-28"
+  }
+}

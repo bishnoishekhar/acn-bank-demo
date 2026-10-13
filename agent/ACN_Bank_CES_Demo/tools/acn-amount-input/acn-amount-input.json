@@ -1,0 +1,39 @@
+{
+  "name": "231183ec-f854-4749-9d94-fc55b3995330",
+  "displayName": "acn-amount-input",
+  "widgetTool": {
+    "name": "acn-amount-input",
+    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: \u0027How much would you like to send?\u0027 Webchat only — on voice, collect the amount conversationally.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "currency": {
+          "type": "STRING"
+        },
+        "max_amount": {
+          "type": "NUMBER"
+        },
+        "min_amount": {
+          "type": "NUMBER"
+        },
+        "name": {
+          "type": "STRING"
+        },
+        "preset_amounts": {
+          "type": "ARRAY",
+          "items": {
+            "type": "NUMBER"
+          }
+        },
+        "submit_utterance": {
+          "type": "STRING"
+        },
+        "title": {
+          "type": "STRING"
+        }
+      },
+      "required": ["name", "title", "min_amount", "max_amount"]
+    }
+  }
+}

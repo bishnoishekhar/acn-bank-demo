@@ -1,0 +1,7 @@
+{
+  "name": "8eb331a2-2502-42de-b721-6ed7480a280e",
+  "displayName": "eval_exp_465c1f22",
+  "llmCriteria": {
+    "prompt": "WIDGET: opening_greeting. [HIGH] opening_greeting widget (W-01) must be emitted on webchat session open"
+  }
+}

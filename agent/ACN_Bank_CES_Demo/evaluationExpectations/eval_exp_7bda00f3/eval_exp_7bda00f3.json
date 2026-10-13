@@ -1,0 +1,7 @@
+{
+  "name": "f2fa349e-4fb9-4f74-9da2-a1efee6fa86d",
+  "displayName": "eval_exp_7bda00f3",
+  "llmCriteria": {
+    "prompt": "Agent must route to acn_branch_appointments — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

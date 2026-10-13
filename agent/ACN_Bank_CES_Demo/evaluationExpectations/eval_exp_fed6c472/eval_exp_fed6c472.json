@@ -1,0 +1,7 @@
+{
+  "name": "ba959edc-de32-49f6-8ff1-fcea03260aa1",
+  "displayName": "eval_exp_fed6c472",
+  "llmCriteria": {
+    "prompt": "Closing response must reference the Rogers $50 bill payment completed earlier in the session."
+  }
+}

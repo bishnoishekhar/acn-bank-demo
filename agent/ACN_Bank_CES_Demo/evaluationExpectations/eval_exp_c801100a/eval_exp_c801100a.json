@@ -1,0 +1,7 @@
+{
+  "name": "9a148c5a-383b-45d7-b0c9-7188507a9e5b",
+  "displayName": "eval_exp_c801100a",
+  "llmCriteria": {
+    "prompt": "[TC-M21-004] Account closure triggers retention copy on first request; createAccountClosure called only after second confirmation"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "75cde353-546e-4808-8801-70790ac13e60",
+  "displayName": "eval_exp_574b143d",
+  "llmCriteria": {
+    "prompt": "acn_faq must be silent — its internal name and handoff language (acn_faq, FAQ agent, knowledge agent, transferring, connecting you) must NEVER appear in the response."
+  }
+}

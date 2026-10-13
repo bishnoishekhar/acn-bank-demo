@@ -1,0 +1,7 @@
+{
+  "name": "c469ac6a-3f59-4262-9a11-27e2f9d569ff",
+  "displayName": "eval_exp_162b6ff6",
+  "llmCriteria": {
+    "prompt": "The agent must NOT add the payee without first delivering this warning."
+  }
+}

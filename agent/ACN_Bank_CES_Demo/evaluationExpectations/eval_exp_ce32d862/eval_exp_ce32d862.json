@@ -1,0 +1,7 @@
+{
+  "name": "546a60cb-cdb4-4884-943c-bc621017e35c",
+  "displayName": "eval_exp_ce32d862",
+  "llmCriteria": {
+    "prompt": "appointment_type must remain investment_advisor — agent must NOT re-ask for appointment type."
+  }
+}

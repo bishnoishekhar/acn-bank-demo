@@ -1,0 +1,7 @@
+{
+  "name": "a5169dbd-d647-40a0-b952-9fe866332a62",
+  "displayName": "eval_exp_9206108f",
+  "llmCriteria": {
+    "prompt": "[TC-M26-001] Rewards balance query calls getRewardsBalance and emits rewards_balance widget W-21"
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "name": "effaa9a1-46e7-4e6d-8bc4-4e2fe72a41f7",
+  "displayName": "mortgage_rate_shelf",
+  "widgetTool": {
+    "name": "mortgage_rate_shelf",
+    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you our current mortgage rates.\u0027 Webchat only — on voice, read rates aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "properties": {
+        "break_even": {
+          "type": "OBJECT",
+          "properties": {
+            "break_even_month": {
+              "type": "NUMBER",
+              "description": "Month at which cumulative projected variable interest passes the best fixed. 0 means it never does within the horizon."
+            },
+            "crosses_within_horizon": {
+              "type": "BOOLEAN"
+            },
+            "horizon_months": {
+              "type": "NUMBER"
+            },
+            "summary": {
+              "type": "STRING",
+              "description": "One plain sentence from mortgage_rate_board. Render verbatim; never rewrite it."
+            },
+            "variable_advantage_over_horizon_cad": {
+              "type": "NUMBER",
+              "description": "Positive means variable is ahead across the term, negative means behind."
+            }
+          },
+          "description": "Shown only inside the variable product\u0027s expanded detail. Copy straight from mortgage_rate_board."
+        },
+        "confirm_cta_label": {
+          "type": "STRING",
+          "description": "Primary button label. Use the {product} placeholder to echo the selected product name."
+        },
+        "confirm_cta_value": {
+          "type": "STRING",
+          "description": "Sent back to the agent on tap. The widget appends the selected product as JSON."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mortgage_rate_shelf\u0027"
+        },
+        "payment_frequency_label": {
+          "type": "STRING",
+          "description": "e.g. \u0027Monthly\u0027 or \u0027Accelerated bi-weekly\u0027."
+        },
+        "payments_per_year": {
+          "type": "NUMBER",
+          "description": "So the widget can label each payment figure with the right cadence."
+        },
+        "prime_rate_pct": {
+          "type": "NUMBER",
+          "description": "Shown as the basis for every variable product."
+        },
+        "products": {
+          "type": "ARRAY",
+          "description": "Required. The rate shelf from mortgage_rate_board, in the order returned. Never reorder, never invent a rate.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "badge": {
+                "type": "STRING",
+                "description": "Pipe-separated badges, e.g. \u0027Lowest today | Payment locked\u0027."
+              },
+              "blurb": {
+                "type": "STRING",
+                "description": "One short line on who the product suits."
+              },
+              "monthly_equivalent_cad": {
+                "type": "NUMBER",
+                "description": "Used to compare products on a like-for-like monthly basis."
+              },
+              "name": {
+                "type": "STRING"
+              },
+              "payment_per_period_cad": {
+                "type": "NUMBER",
+                "description": "The headline figure on the row, at the customer\u0027s chosen frequency."
+              },
+              "product_id": {
+                "type": "STRING"
+              },
+              "rate_basis": {
+                "type": "STRING",
+                "description": "How the rate is built, e.g. \u0027Prime 4.45% minus 1.1%\u0027. Shown small under the rate."
+              },
+              "rate_pct": {
+                "type": "NUMBER"
+              },
+              "rate_type": {
+                "type": "STRING",
+                "description": "fixed | variable. Selecting a variable product reveals the projection."
+              },
+              "recommended": {
+                "type": "BOOLEAN",
+                "description": "Pre-selects the row. Never described to the customer as advice."
+              },
+              "term_years": {
+                "type": "NUMBER"
+              }
+            }
+          }
+        },
+        "rate_hold_days": {
+          "type": "NUMBER",
+          "description": "Shown as a footnote, e.g. 120. Omit or set 0 to hide."
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "Widget sub-header, plain and calm."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Widget header, e.g. \u0027Choose your rate\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        },
+        "variable_projection": {
+          "type": "ARRAY",
+          "description": "Projected variable rate path, plotted as a sparkline inside the variable product\u0027s detail. Must always be labelled a projection, never a promise.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "label": {
+                "type": "STRING"
+              },
+              "month": {
+                "type": "NUMBER"
+              },
+              "rate_pct": {
+                "type": "NUMBER"
+              }
+            }
+          }
+        },
+        "variable_projection_disclaimer": {
+          "type": "STRING",
+          "description": "Required whenever variable_projection is supplied. Rendered verbatim beneath the chart."
+        }
+      },
+      "required": ["type", "name", "products", "confirm_cta_value"]
+    }
+  }
+}

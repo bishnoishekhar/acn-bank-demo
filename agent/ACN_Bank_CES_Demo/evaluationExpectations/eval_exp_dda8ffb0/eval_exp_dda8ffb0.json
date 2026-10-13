@@ -1,0 +1,7 @@
+{
+  "name": "37fcb23f-ed17-4a3a-a0d6-527d3990537d",
+  "displayName": "eval_exp_dda8ffb0",
+  "llmCriteria": {
+    "prompt": "Response after confirmation must reference order and delivery (CHQ-02, BR-ACN-050)."
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "8515d655-cae3-4cb0-b13c-169d9878661b",
+  "displayName": "tc_m32_004_resume_mortgage_document_collection",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "resume", "MTG-RESUME", "CUST-MORTGAGE-001", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Continue my mortgage application"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I can see your mortgage application APP-MTG-SHA-001 is currently in the document collection stage. Please upload the required documents to proceed."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-a5cf8cd5-798a-46b8-be5e-e2b17035225a",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_34e8dbe5", "eval_exp_1dae2023", "eval_exp_be4e3b43"]
+  },
+  "invalid": true
+}

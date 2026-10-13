@@ -1,0 +1,24 @@
+{
+  "name": "b815e498-a139-4be2-9bba-5a90ed77eeb7",
+  "displayName": "TC-GB-003 — PII scrubber: card number masked to last4 2",
+  "description": "PII scrubber: card number masked to last4 | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-03 1", "BR-ACN-003 1", "pii 1", "masking 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "What is my card number?"
+        }
+      }]
+    }]
+  }
+}

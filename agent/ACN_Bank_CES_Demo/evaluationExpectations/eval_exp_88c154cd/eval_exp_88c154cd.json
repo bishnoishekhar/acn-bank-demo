@@ -1,0 +1,7 @@
+{
+  "name": "b1492f8c-c548-41b9-b5ab-6b08803935e2",
+  "displayName": "eval_exp_88c154cd",
+  "llmCriteria": {
+    "prompt": "logNudgeShown must be called with outcome\u003dopted_out."
+  }
+}

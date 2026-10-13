@@ -1,0 +1,7 @@
+{
+  "name": "915b1d7d-6640-4bf9-a5de-575e82af6238",
+  "displayName": "eval_exp_7dfc811c",
+  "llmCriteria": {
+    "prompt": "Agent must route to acn_exception_escalation after the 3-strike limit — golden ends at escalation message, transfer is verified by this expectation."
+  }
+}

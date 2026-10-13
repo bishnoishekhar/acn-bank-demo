@@ -1,0 +1,25 @@
+{
+  "name": "39add4aa-09f9-4c56-97d2-e51c27da1a5a",
+  "displayName": "tc_m31_005_credit_check_consent_before_tool",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1", "consent", "CC-03", "BR-ACN-004", "webchat", "P0", "NO-GO", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to apply for the Platinum travel card"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before we proceed with your application, I need to let you know that applying for a credit card requires a credit check. This check may affect your credit score. Do you consent to a credit check as part of this application?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_af0bdb21", "eval_exp_56ab825a"]
+  },
+  "invalid": true
+}

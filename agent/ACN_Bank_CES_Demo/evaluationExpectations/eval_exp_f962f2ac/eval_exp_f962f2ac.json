@@ -1,0 +1,7 @@
+{
+  "name": "ad9a9ef4-a9bd-41a3-951d-7745e2ecadab",
+  "displayName": "eval_exp_f962f2ac",
+  "llmCriteria": {
+    "prompt": "[TC-M5-008] CIE not called until L2 auth achieved"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "name": "d6dfafa1-b439-45bc-947f-4c52bfbb1ed3",
+  "displayName": "mobile_handoff",
+  "widgetTool": {
+    "name": "mobile_handoff",
+    "description": "Emit a deep-link card to continue the flow in the ACN Bank mobile app (e.g. Apple Pay setup, document upload). Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me give you a link to continue in the app.\u0027 Webchat only — on voice, direct the customer to open the app manually.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "actionType": {
+          "type": "STRING",
+          "description": "Required. Always the exact string \u0027OPEN_URL\u0027. Matches the guard in CardActivationWidget so the same trusted-URL path is reused verbatim."
+        },
+        "body": {
+          "type": "STRING",
+          "description": "One short sentence explaining why the handoff is worth taking, e.g. \u0027Review, sign, and enable auto-pay in your app.\u0027"
+        },
+        "cta_label": {
+          "type": "STRING",
+          "description": "Button label, e.g. \u0027Continue in the app\u0027."
+        },
+        "handoff_url": {
+          "type": "STRING",
+          "description": "Required. The exact URL to open. Must be https on the trusted host (emvnzir-canada-song.web.app) and must carry loan_draft, customer_id, and sso\u003dweb query params."
+        },
+        "loan_kind": {
+          "type": "STRING",
+          "description": "epp | mortgage. Rendered as a small pill."
+        },
+        "monthly_payment_cad": {
+          "type": "NUMBER",
+          "description": "Repeated on the card so the customer sees what they are handing off."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mobile_handoff\u0027"
+        },
+        "product_image_url": {
+          "type": "STRING"
+        },
+        "product_name": {
+          "type": "STRING"
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Card header, e.g. \u0027Finish in the ACN Bank app\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "handoff_url", "cta_label", "actionType"]
+    }
+  }
+}

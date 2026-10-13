@@ -1,0 +1,24 @@
+{
+  "name": "947aa5b6-e965-4a10-ad1d-a2b2fcdd6d87",
+  "displayName": "TC-GB-021 — quick_actions present on every widget turn 2",
+  "description": "quick_actions present on every widget turn | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-21 1", "BR-ACN-024 1", "widget 1", "quick_actions 1", "webchat 1", "P1 1", "HIGH 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }]
+  }
+}

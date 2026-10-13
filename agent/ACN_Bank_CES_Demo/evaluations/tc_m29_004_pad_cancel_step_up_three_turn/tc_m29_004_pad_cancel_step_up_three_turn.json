@@ -1,0 +1,74 @@
+{
+  "name": "a2205a35-8ff0-4bc4-aee1-0b670ee2a4ea",
+  "displayName": "tc_m29_004_pad_cancel_step_up_three_turn",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.9", "pad", "PAD-02", "cancel", "step-up", "webchat", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to cancel the Rogers pre-authorized debit"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To cancel the Rogers pre-authorized debit, I need to verify your identity with an additional security step. I\u0027ve sent a step-up request to your device. Please also note that any outstanding or scheduled Rogers payments may be affected."
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003estep_up_complete\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your additional verification has been approved. Shall I go ahead and cancel the Rogers pre-authorized debit?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-60134b24-2c11-4eab-8e6b-d33b008d8e5d",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, I want to go ahead with the cancellation"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "The Rogers pre-authorized debit has been cancelled. Your cancellation reference is PAD-2026-001."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-39dacf12-16bb-4e7d-98d6-3081757588d1",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_85120e8d", "eval_exp_62123f56", "eval_exp_1e1af515", "eval_exp_fd5a19e0", "eval_exp_a50e1457", "eval_exp_ca0950a9"]
+  },
+  "invalid": true
+}

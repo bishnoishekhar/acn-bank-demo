@@ -1,0 +1,7 @@
+{
+  "name": "7df17360-8c99-4f4e-ad18-2bfbc8a8c06f",
+  "displayName": "eval_exp_46db9487",
+  "llmCriteria": {
+    "prompt": "createNSFReversal must NOT be called on the first turn."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "6db11541-664b-4eb0-b38a-3de15bf8d63c",
+  "displayName": "eval_exp_af0bdb21",
+  "llmCriteria": {
+    "prompt": "credit_check_consent copy key must be delivered before any credit check tool call (BR-ACN-004)."
+  }
+}

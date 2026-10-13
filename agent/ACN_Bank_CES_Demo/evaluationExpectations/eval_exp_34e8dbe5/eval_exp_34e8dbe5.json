@@ -1,0 +1,7 @@
+{
+  "name": "f3a8f21f-01c8-4352-9322-4e93888999c7",
+  "displayName": "eval_exp_34e8dbe5",
+  "llmCriteria": {
+    "prompt": "queryLoanApplications must be called to retrieve application status."
+  }
+}

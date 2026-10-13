@@ -1,0 +1,7 @@
+{
+  "name": "ef441322-abbe-4dc7-843d-e21d43d84d59",
+  "displayName": "eval_exp_43b6b062",
+  "llmCriteria": {
+    "prompt": "Agent must offer callback, call you back, secure message, or reference business hours (GB-15)."
+  }
+}

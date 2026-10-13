@@ -1,0 +1,7 @@
+{
+  "name": "fc7d47dd-3208-4086-b5bb-ddc7f0d56aa4",
+  "displayName": "eval_exp_e8101ea6",
+  "llmCriteria": {
+    "prompt": "CONTAINS: reference | Canadian"
+  }
+}

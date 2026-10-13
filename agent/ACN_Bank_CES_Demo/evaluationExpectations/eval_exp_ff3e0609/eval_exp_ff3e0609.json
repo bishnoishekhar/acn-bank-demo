@@ -1,0 +1,7 @@
+{
+  "name": "4a7803b1-3f01-4936-936d-0844929f2401",
+  "displayName": "eval_exp_ff3e0609",
+  "llmCriteria": {
+    "prompt": "[TC-M22-009] Pending Interac e-Transfer cancellation calls cancelInteracTransfer and emits interac_etransfer_status widget W-27"
+  }
+}

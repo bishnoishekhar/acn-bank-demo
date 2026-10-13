@@ -1,0 +1,7 @@
+{
+  "name": "44e58358-a53a-47e1-aeb7-87cf71d19dd7",
+  "displayName": "eval_exp_0a84ad35",
+  "llmCriteria": {
+    "prompt": "Response must reference FINTRAC reporting requirement, FINTRAC, or large cash transaction language."
+  }
+}

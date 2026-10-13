@@ -1,0 +1,7 @@
+{
+  "name": "71ad9bc8-4821-458c-9cf5-1a849c031725",
+  "displayName": "eval_exp_e48a0a13",
+  "llmCriteria": {
+    "prompt": "escalation_reason must be set to auth_locked when routing this customer."
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "702b711e-c5c7-484e-9b13-fb42ea3ad1ba",
+  "displayName": "tc_m28_003_overdraft_protection_toggle",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "overdraft", "OVD-01", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Turn on overdraft protection"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your overdraft protection has been enabled. This will help prevent declined transactions when your account balance is insufficient."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-20317dfd-9575-4412-a3ae-ecc4a890aa29",
+            "tool": "",
+            "args": {
+              "enabled": true
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_8212b105"]
+  },
+  "invalid": true
+}

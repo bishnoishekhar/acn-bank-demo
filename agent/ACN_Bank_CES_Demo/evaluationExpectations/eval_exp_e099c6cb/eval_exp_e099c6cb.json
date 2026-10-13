@@ -1,0 +1,7 @@
+{
+  "name": "4d43ae64-31b3-4df5-80e0-0ac57ac323a7",
+  "displayName": "eval_exp_e099c6cb",
+  "llmCriteria": {
+    "prompt": "The agent must read back all payment details — payee, amount, and source account — before executing any money movement."
+  }
+}

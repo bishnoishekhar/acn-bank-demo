@@ -1,0 +1,7 @@
+{
+  "name": "4e64484c-fd6d-49d9-818a-823de0329fe2",
+  "displayName": "eval_exp_b19853fb",
+  "llmCriteria": {
+    "prompt": "escalate must be called with escalation_reason\u003dbereavement."
+  }
+}

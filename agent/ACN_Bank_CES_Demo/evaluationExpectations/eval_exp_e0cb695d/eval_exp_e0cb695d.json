@@ -1,0 +1,7 @@
+{
+  "name": "afdc0d2f-0e38-4226-8906-7dfeae45373b",
+  "displayName": "eval_exp_e0cb695d",
+  "llmCriteria": {
+    "prompt": "Response must reference October 1, November 1, and December 1 as the next scheduled payment dates."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "1963326f-183a-4efb-a752-9c9676af1baa",
+  "displayName": "TC-M01-003 — M0.1 FAQ-to-action handoff offered after applicable answer 1",
+  "description": "M0.1 FAQ-to-action handoff offered after applicable answer | Priority: P1 | Severity: MEDIUM | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0.1", "faq-action", "GB-36", "webchat", "P1", "MEDIUM"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "webchat",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "How do I send an Interac e-Transfer?"
+        }
+      }]
+    }]
+  }
+}

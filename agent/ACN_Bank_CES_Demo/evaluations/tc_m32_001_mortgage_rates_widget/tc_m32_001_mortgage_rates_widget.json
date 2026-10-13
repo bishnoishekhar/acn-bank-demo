@@ -1,0 +1,35 @@
+{
+  "name": "5c1cb0ab-b4ae-4f2f-a42b-efa00fa85853",
+  "displayName": "tc_m32_001_mortgage_rates_widget",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "rates", "MTG-01", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What are your mortgage rates?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are our current mortgage rates. Please note that under OSFI Guideline B-20, you must qualify at the higher of the contract rate plus 2% or 5.25%, whichever is greater."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-097583af-eb79-468f-b738-cb0d2c1a1828",
+            "tool": "",
+            "args": {
+              "key": "mortgage_rates"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ab01e54b", "eval_exp_3fe369f5", "eval_exp_97c69a35"]
+  },
+  "invalid": true
+}

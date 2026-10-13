@@ -1,0 +1,7 @@
+{
+  "name": "2d9ae213-6f76-4d24-a832-acec806d6673",
+  "displayName": "eval_exp_69c8a16c",
+  "llmCriteria": {
+    "prompt": "Response after confirmation must reference a reference number and pickup."
+  }
+}

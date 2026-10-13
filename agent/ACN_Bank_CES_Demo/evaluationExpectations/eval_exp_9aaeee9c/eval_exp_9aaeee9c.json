@@ -1,0 +1,7 @@
+{
+  "name": "6a51d926-45c2-40e7-af6b-2c2928f7c49b",
+  "displayName": "eval_exp_9aaeee9c",
+  "llmCriteria": {
+    "prompt": "The agent must NOT say it will \u0027try\u0027 or \u0027attempt\u0027 to connect — the transfer must be immediate and certain."
+  }
+}

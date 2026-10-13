@@ -1,0 +1,7 @@
+{
+  "name": "eeec7e0e-aa6f-4913-a938-61c6c7433f92",
+  "displayName": "eval_exp_86d9280a",
+  "llmCriteria": {
+    "prompt": "The agent response must be empathetic and action-oriented, not interrogative."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "acn_offers_nudge",
+  "displayName": "acn_offers_nudge",
+  "instruction": "agents/acn_offers_nudge/instruction.txt",
+  "tools": ["acn-nudge-card", "acn_identity_security_hub", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_offers_nudge/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_offers_nudge/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_offers_nudge/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_offers_nudge/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_offers_nudge/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "customer_intelligence_db",
+    "toolIds": ["getCustomerSegment", "getNextBestActions", "logNudgeShown"]
+  }]
+}

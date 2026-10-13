@@ -1,0 +1,7 @@
+{
+  "name": "e2aeec2a-9831-449d-952a-60df6f144de4",
+  "displayName": "eval_exp_afedbeaf",
+  "llmCriteria": {
+    "prompt": "CONTAINS: rate | fee | cost"
+  }
+}

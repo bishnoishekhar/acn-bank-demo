@@ -1,0 +1,7 @@
+{
+  "name": "c1a6550d-2e45-40c1-a490-9b1ee8ad2bae",
+  "displayName": "eval_exp_2af145d3",
+  "llmCriteria": {
+    "prompt": "Response on first turn must reference Rogers and warn about recurring or scheduled or upcoming payments."
+  }
+}

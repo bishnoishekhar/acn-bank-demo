@@ -1,0 +1,13 @@
+{
+  "name": "57b28ceb-f82e-4b19-be7e-1c48a8d230b4",
+  "displayName": "customer_intelligence_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/customer_intelligence_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Customer Intelligence Engine data: segment, next-best-actions, nudge logging. Used by M1 (CIE) and M2.4 (Offers)."
+}

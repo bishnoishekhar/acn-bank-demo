@@ -1,0 +1,7 @@
+{
+  "name": "8ad3f89b-ad73-465c-b426-f57d3f99f60b",
+  "displayName": "eval_exp_51550f27",
+  "llmCriteria": {
+    "prompt": "quick_actions must appear as the final component of the response."
+  }
+}

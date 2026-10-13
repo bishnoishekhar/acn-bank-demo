@@ -1,0 +1,7 @@
+{
+  "name": "a1e920b4-3a6e-4348-b3ba-b5d69b763c9d",
+  "displayName": "eval_exp_0e017940",
+  "llmCriteria": {
+    "prompt": "cie_loaded must be set to false when CIE returns SERVICE_UNAVAILABLE (503)."
+  }
+}

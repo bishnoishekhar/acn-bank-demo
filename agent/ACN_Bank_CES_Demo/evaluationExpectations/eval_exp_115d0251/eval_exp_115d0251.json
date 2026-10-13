@@ -1,0 +1,7 @@
+{
+  "name": "23071997-2d28-4f09-b951-b3b33e54581b",
+  "displayName": "eval_exp_115d0251",
+  "llmCriteria": {
+    "prompt": "[TC-M27-003] CHQ-01 full flow: getChequeStatus fetched before stopPayment; stopPayment called only after explicit confirmation; stop_payment_id set"
+  }
+}

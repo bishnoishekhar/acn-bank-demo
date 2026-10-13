@@ -1,0 +1,49 @@
+{
+  "name": "f4585ee3-ac05-4eb9-a9f5-370bf44dea78",
+  "displayName": "tc_m27_004_cheque_book_order_confirm_address",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-02", "createChequeBookOrder", "BR-ACN-050", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I need a new cheque book"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027d be happy to order a new cheque book for you. I\u0027ll send it to the address we have on file. Please confirm the delivery address is correct."
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, use the address on file"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your cheque book order has been placed. It will be delivered to your address on file within 7 to 10 business days."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c3a8f19e-4e2f-416d-b534-61a1a30eba0b",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_e04d0aae", "eval_exp_dda8ffb0"]
+  },
+  "invalid": true
+}

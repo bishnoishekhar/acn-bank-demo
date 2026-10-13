@@ -1,0 +1,7 @@
+{
+  "name": "47dbd3a7-343f-417a-b511-c346e032aa0b",
+  "displayName": "eval_exp_1dae2023",
+  "llmCriteria": {
+    "prompt": "application_id must be set to APP-MTG-SHA-001 in session state."
+  }
+}

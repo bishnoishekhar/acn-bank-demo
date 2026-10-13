@@ -1,0 +1,7 @@
+{
+  "name": "aac29b3a-6ad1-4eaf-acc5-0fa4bfe1a2d9",
+  "displayName": "eval_exp_1a4438e5",
+  "llmCriteria": {
+    "prompt": "The agent must respond with plain spoken text only on the voice channel."
+  }
+}

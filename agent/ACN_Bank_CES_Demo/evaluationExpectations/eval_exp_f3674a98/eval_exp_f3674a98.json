@@ -1,0 +1,7 @@
+{
+  "name": "960f0129-fe41-4122-9dea-9fe48d314524",
+  "displayName": "eval_exp_f3674a98",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must NOT be called for FX sales below CAD 1,000."
+  }
+}

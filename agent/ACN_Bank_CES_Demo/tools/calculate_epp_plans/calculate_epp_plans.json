@@ -1,0 +1,10 @@
+{
+  "name": "calculate_epp_plans",
+  "pythonFunction": {
+    "name": "calculate_epp_plans",
+    "pythonCode": "tools/calculate_epp_plans/python_function/python_code.py",
+    "description": "Computes EPP monthly payment, APR, and total cost for each tenure.\nReturns EPP plan options silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "calculate_epp_plans"
+}

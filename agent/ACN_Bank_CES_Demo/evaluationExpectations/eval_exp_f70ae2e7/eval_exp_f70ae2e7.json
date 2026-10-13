@@ -1,0 +1,7 @@
+{
+  "name": "702bd91e-91b7-4d56-83a1-8d7a1354570e",
+  "displayName": "eval_exp_f70ae2e7",
+  "llmCriteria": {
+    "prompt": "Once locked, the language must not change unless the customer explicitly requests a switch."
+  }
+}

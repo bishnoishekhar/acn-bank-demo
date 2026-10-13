@@ -1,0 +1,34 @@
+{
+  "name": "acn_payments",
+  "displayName": "acn_payments",
+  "instruction": "agents/acn_payments/instruction.txt",
+  "tools": ["acn-amount-input", "acn-credit-card-widget", "acn-form-input", "acn-payee-selector", "acn-payment-carousel", "acn-payment-receipt", "acn_identity_security_hub", "end_session", "fintrac_precheck", "qr_decode_payment", "qr_generate_request", "qr_widget", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_payments/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_payments/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_payments/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_payments/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_payments/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "new_transaction_api_db",
+    "toolIds": ["cancelRecurringSchedule", "createRecurringSchedule", "createTransaction", "listRecurringSchedules", "updateRecurringSchedule", "updateTransaction"]
+  }, {
+    "toolset": "send_application_email",
+    "toolIds": ["executeACNBankApplicationEmail"]
+  }, {
+    "toolset": "update_customer_api_db",
+    "toolIds": ["addPayee", "deletePayee", "updateAccount", "updateBill", "updateCard", "updatePayee", "updateProfile"]
+  }]
+}

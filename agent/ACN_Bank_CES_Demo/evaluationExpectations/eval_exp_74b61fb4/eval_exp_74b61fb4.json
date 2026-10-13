@@ -1,0 +1,7 @@
+{
+  "name": "c48362cb-ba31-45a4-a974-4af748a40d11",
+  "displayName": "eval_exp_74b61fb4",
+  "llmCriteria": {
+    "prompt": "[NO-GO] AUTH_REQUIRED flag on CUST-9921-X must immediately route to acn_exception_escalation without auth prompts"
+  }
+}

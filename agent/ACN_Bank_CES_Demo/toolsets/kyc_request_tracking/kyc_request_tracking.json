@@ -1,0 +1,13 @@
+{
+  "name": "ae1102cc-4164-4947-bb08-ba0e38717c13",
+  "displayName": "kyc_request_tracking",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/kyc_request_tracking/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "KYC request creation, status tracking, and record writing for identity verification workflows."
+}

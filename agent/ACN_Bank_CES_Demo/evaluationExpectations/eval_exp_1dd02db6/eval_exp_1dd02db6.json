@@ -1,0 +1,7 @@
+{
+  "name": "e7709270-dba7-4813-b8e7-939f171891c7",
+  "displayName": "eval_exp_1dd02db6",
+  "llmCriteria": {
+    "prompt": "Response must reference the kyc or identity verification pending stage."
+  }
+}

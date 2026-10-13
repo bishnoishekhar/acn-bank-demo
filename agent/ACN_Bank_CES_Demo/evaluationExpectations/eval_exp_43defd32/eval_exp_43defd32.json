@@ -1,0 +1,7 @@
+{
+  "name": "d2409ba2-6a14-4f84-859b-dc947a13aa0f",
+  "displayName": "eval_exp_43defd32",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the financial advice disclaimer before describing or recommending any product."
+  }
+}

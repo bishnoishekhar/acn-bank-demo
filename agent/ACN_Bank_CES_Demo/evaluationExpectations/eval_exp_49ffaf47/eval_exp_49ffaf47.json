@@ -1,0 +1,7 @@
+{
+  "name": "d7e070f7-3ce2-495f-b727-e2441aefbdab",
+  "displayName": "eval_exp_49ffaf47",
+  "llmCriteria": {
+    "prompt": "getRewardsBalance must be called."
+  }
+}

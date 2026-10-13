@@ -1,0 +1,43 @@
+{
+  "name": "51807b3b-8a7e-45f6-ab17-a6dc88f9d72f",
+  "displayName": "tc_m35_002_tfsa_balance_contribution_room",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.5", "tfsa", "INV-02", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What\u0027s my TFSA balance?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your TFSA balance is $45,200. Your available contribution room for this year is $6,500."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-3911146d-8a52-4615-94b1-96af0e355b1b",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-573afc74-da64-42e6-9ed7-1310c497df09",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_3d7ad31b", "eval_exp_16aa49c1", "eval_exp_54b6c4d4"]
+  },
+  "invalid": true
+}

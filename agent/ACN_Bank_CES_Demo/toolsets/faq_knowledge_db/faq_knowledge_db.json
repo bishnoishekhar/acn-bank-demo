@@ -1,0 +1,13 @@
+{
+  "name": "9caa8cfd-443a-42d9-a7ae-5a6e738b28ba",
+  "displayName": "faq_knowledge_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/faq_knowledge_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "FAQ and knowledge base search: search FAQs by query, retrieve specific FAQ, list categories. Read-only, zero-auth."
+}

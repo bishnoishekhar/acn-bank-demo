@@ -1,0 +1,7 @@
+{
+  "name": "b01b9e45-65ba-41f6-9308-eac0912ffccd",
+  "displayName": "eval_exp_4b2f756b",
+  "llmCriteria": {
+    "prompt": "createTransaction must NOT be called in the same turn as the initial wire request without the disclosure and FINTRAC check completing first."
+  }
+}

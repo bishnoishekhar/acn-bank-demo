@@ -1,0 +1,7 @@
+{
+  "name": "7964e10a-30c9-4fd8-b72e-b0203a7cdff8",
+  "displayName": "eval_exp_36f5d97b",
+  "llmCriteria": {
+    "prompt": "At auth_level\u003d0 the agent must gate all personalized account content and CIE lookups behind identity verification."
+  }
+}

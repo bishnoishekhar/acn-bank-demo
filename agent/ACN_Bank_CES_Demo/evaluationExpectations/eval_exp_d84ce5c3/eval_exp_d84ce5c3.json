@@ -1,0 +1,7 @@
+{
+  "name": "442b21ee-30f4-48b4-b511-c20507221a8d",
+  "displayName": "eval_exp_d84ce5c3",
+  "llmCriteria": {
+    "prompt": "[TC-M26-002] Points redemption reads back for confirmation; createRedemption called only after customer confirms"
+  }
+}

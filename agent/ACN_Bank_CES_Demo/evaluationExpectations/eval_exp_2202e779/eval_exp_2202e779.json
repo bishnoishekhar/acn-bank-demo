@@ -1,0 +1,7 @@
+{
+  "name": "66c15dee-8f55-4273-9a46-923491c7ad27",
+  "displayName": "eval_exp_2202e779",
+  "llmCriteria": {
+    "prompt": "handoff_context must contain all required keys: customer, session, reason, intents_handled, journey_context, notes_for_agent (BR-ACN-094, GB-41)."
+  }
+}

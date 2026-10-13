@@ -1,0 +1,43 @@
+{
+  "name": "9c1e68da-df45-44bb-8d66-0b486f2f36d8",
+  "displayName": "tc_m44_002_appointment_booking_scheduler",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.4", "appointment", "BRN-02", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Book a mortgage appointment downtown"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are the available appointment times at our downtown branch for a mortgage consultation. Your appointment has been booked."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-ff25a2cc-2f2c-4733-a35f-53d0bc08182a",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-aa5badfd-3a5d-416b-9eb4-20e709bb0740",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4e108299", "eval_exp_43ae5adf", "eval_exp_f32bc323"]
+  },
+  "invalid": true
+}

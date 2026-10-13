@@ -1,0 +1,7 @@
+{
+  "name": "f7f22c86-d736-4b57-86a0-f4a71fa57640",
+  "displayName": "eval_exp_bd810995",
+  "llmCriteria": {
+    "prompt": "[TC-M27-006] CHQ-04 certified cheque: amount/payee/account collected, createCertifiedCheque called only after confirmation, no step-up required"
+  }
+}

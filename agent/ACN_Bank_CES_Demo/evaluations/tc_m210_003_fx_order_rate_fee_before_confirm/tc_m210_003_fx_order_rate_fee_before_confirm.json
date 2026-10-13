@@ -1,0 +1,49 @@
+{
+  "name": "4efea9c5-13a8-4e0f-b1fe-4d2aaf2b2307",
+  "displayName": "tc_m210_003_fx_order_rate_fee_before_confirm",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.10", "fx-order", "FX-03", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Order 500 euros in cash"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "500 Euros at the current rate of 1 EUR \u003d 1.47 CAD will cost $735 CAD plus a $15 fee. Total cost is $750 CAD. Would you like to proceed?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your order for 500 Euros has been placed. Your reference number is FX-2026-002."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-d3794908-0890-4abc-b756-9b70df892cc1",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_313dcd1f", "eval_exp_432d2a72"]
+  },
+  "invalid": true
+}

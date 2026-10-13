@@ -1,0 +1,25 @@
+{
+  "name": "acn_accounts_insights",
+  "displayName": "acn_accounts_insights",
+  "instruction": "agents/acn_accounts_insights/instruction.txt",
+  "tools": ["acn-credit-card-widget", "acn-insight-card", "acn-payment-carousel", "acn_identity_security_hub", "compute_spending_insights", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_accounts_insights/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_accounts_insights/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_accounts_insights/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_accounts_insights/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_accounts_insights/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }]
+}

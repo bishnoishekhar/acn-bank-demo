@@ -1,0 +1,7 @@
+{
+  "name": "a9ef8575-1c24-45a7-9a84-8e289f55bf53",
+  "displayName": "eval_exp_c3074933",
+  "llmCriteria": {
+    "prompt": "After three consecutive turns where the agent cannot resolve the customer\u0027s request, the agent must escalate to the exception and escalation agent (M4.3)."
+  }
+}

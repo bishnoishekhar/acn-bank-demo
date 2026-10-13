@@ -1,0 +1,7 @@
+{
+  "name": "f493bf1a-cd94-43f8-9364-d2957be636a0",
+  "displayName": "eval_exp_7ac78d55",
+  "llmCriteria": {
+    "prompt": "Agent must route to acn_disputes — golden ends at fraud response, transfer is verified by this expectation."
+  }
+}

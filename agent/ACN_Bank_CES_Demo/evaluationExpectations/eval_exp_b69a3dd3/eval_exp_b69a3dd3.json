@@ -1,0 +1,7 @@
+{
+  "name": "3c549585-01b6-4bd9-8c0b-8bab459b40cd",
+  "displayName": "eval_exp_b69a3dd3",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: acn_faq | FAQ agent | knowledge agent | transferring | connecting you. [HIGH] acn_faq must be silent — its internal name and handoff language must never surface"
+  }
+}

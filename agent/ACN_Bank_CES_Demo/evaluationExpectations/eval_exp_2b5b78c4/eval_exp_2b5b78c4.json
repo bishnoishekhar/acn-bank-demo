@@ -1,0 +1,7 @@
+{
+  "name": "f4bcd892-7080-466d-b1fb-32fb4a0ccba1",
+  "displayName": "eval_exp_2b5b78c4",
+  "llmCriteria": {
+    "prompt": "Response must NOT contain I recommend, I suggest, you should invest, or you should put language (BR-ACN-076 NO-GO)."
+  }
+}

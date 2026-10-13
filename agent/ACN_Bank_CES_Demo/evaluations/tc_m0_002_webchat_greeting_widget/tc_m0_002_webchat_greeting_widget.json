@@ -1,0 +1,25 @@
+{
+  "name": "e2b9f931-27f9-4227-aa17-6853d30908ff",
+  "displayName": "tc_m0_002_webchat_greeting_widget",
+  "tags": ["acn_bank_ces_demo", "m0", "webchat", "greeting", "widget", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Hi"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome to ACN Bank. How can I help you today?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4a270986"]
+  },
+  "invalid": true
+}

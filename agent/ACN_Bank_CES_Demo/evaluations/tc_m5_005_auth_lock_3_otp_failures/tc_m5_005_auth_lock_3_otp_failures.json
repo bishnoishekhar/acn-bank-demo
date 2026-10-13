@@ -1,0 +1,110 @@
+{
+  "name": "384af96c-1887-4b4e-bb68-e64725a5f0e9",
+  "displayName": "tc_m5_005_auth_lock_3_otp_failures",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "lock", "otp", "webchat", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to access my account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To verify your identity I\u0027ve sent a one-time passcode to your registered mobile number. Please enter the 6-digit code."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-101e9d14-1a7e-484c-b887-cd736af57646",
+            "tool": "issue_otp",
+            "args": {
+            },
+            "displayName": "issue_otp"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "000000"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "That code doesn\u0027t match. Please try again. You have 2 more attempts remaining."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-e4ae2004-ef84-4b84-8243-4bdd9aa2c7bb",
+            "tool": "verify_otp",
+            "args": {
+            },
+            "displayName": "verify_otp"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "111111"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "That code is incorrect. Please try again. This is your last attempt."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-628d2395-0085-412c-9351-c1ab79f1f171",
+            "tool": "verify_otp",
+            "args": {
+            },
+            "displayName": "verify_otp"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "222222"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry, your account has been locked due to too many failed verification attempts. For your security, I\u0027m connecting you with a specialist who can assist you."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-3cf55853-a512-4738-9693-01ae2d7b7387",
+            "tool": "verify_otp",
+            "args": {
+            },
+            "displayName": "verify_otp"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_5fa28c26", "eval_exp_091f5e7e", "eval_exp_8aaeef17", "eval_exp_376bc650", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

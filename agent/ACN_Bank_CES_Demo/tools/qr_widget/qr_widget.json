@@ -1,0 +1,39 @@
+{
+  "name": "7ceb773d-9f54-4f94-9bcd-2ebf69d72ad7",
+  "displayName": "qr_widget",
+  "widgetTool": {
+    "name": "qr_widget",
+    "description": "Emit a QR code for a payment request. The payer scans it with their banking app. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here is your QR code for the payment.\u0027 Webchat only — on voice, provide the payment link instead.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "amount": {
+          "type": "NUMBER"
+        },
+        "currency": {
+          "type": "STRING"
+        },
+        "expires_at": {
+          "type": "STRING"
+        },
+        "instructions": {
+          "type": "STRING"
+        },
+        "name": {
+          "type": "STRING"
+        },
+        "payee_name": {
+          "type": "STRING"
+        },
+        "qr_code_url": {
+          "type": "STRING"
+        },
+        "reference": {
+          "type": "STRING"
+        }
+      },
+      "required": ["name", "qr_code_url", "amount", "currency", "reference"]
+    }
+  }
+}

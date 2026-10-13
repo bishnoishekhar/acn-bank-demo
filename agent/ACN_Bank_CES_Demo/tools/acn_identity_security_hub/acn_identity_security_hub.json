@@ -1,0 +1,10 @@
+{
+  "name": "call_identity_hub",
+  "executionType": "SYNCHRONOUS",
+  "displayName": "acn_identity_security_hub",
+  "agentTool": {
+    "name": "acn_identity_security_hub",
+    "description": "Calls M5 in-process for identification and authentication. Returns auth_level, customer_id, auth_mode, auth_error. Never transfers — caller retains full conversation control. Speak a brief pacing phrase BEFORE calling — match the phrase to what is actually happening: identification → \u0027One moment while I pull up your account.\u0027; OTP issuance → \u0027I\u0027ll send a code to your mobile now.\u0027; OTP verification → \u0027Verifying your code now.\u0027; step-up → \u0027One more security step — just a moment.\u0027. Never say \u0027verify your identity\u0027 if the customer is already identified.",
+    "agent": "acn_identity_security_hub"
+  }
+}

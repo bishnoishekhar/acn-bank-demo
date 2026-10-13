@@ -1,0 +1,34 @@
+{
+  "name": "f5cb47c2-3f6f-4152-8206-fdc8d5efa373",
+  "displayName": "tc_m41_001_dispute_rights_before_create_dispute",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.1", "dispute", "rights", "GB-09", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to dispute the $89 charge from Amazon"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I file this dispute, I want to let you know about your rights as a cardholder. Under Visa/Mastercard dispute rules, you have the right to dispute unauthorized or incorrect charges. I\u0027ll now open a dispute for the $89 Amazon charge."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-000d4fea-7d66-471b-a200-f065cc4874da",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_7e18902e"]
+  },
+  "invalid": true
+}

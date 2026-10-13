@@ -1,0 +1,10 @@
+{
+  "name": "call_cie",
+  "executionType": "SYNCHRONOUS",
+  "displayName": "acn_customer_intelligence_engine",
+  "agentTool": {
+    "name": "acn_customer_intelligence_engine",
+    "description": "Before calling this tool, speak a brief pacing phrase: \u0027One moment while I pull up your profile.\u0027 Calls M1 CIE silently after auth to profile the customer. Writes next_best_action[], customer_segment, life_stage_signal, open_applications[] to session state. Silent — customer does not see CIE output.",
+    "agent": "acn_customer_intelligence_engine"
+  }
+}

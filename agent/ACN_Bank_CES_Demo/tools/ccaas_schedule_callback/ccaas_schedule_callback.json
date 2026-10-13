@@ -1,0 +1,9 @@
+{
+  "name": "ccaas_schedule_callback",
+  "pythonFunction": {
+    "name": "ccaas_schedule_callback",
+    "pythonCode": "tools/ccaas_schedule_callback/python_function/python_code.py",
+    "description": "Book a callback slot for the customer.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    phone_number: Phone number to call (E.164 format or display format).\n    preferred_time: Preferred callback time (ISO datetime or natural language\n                    like \u0027tomorrow morning\u0027, \u00272026-10-02T10:00:00\u0027).\n    reason: Brief reason for callback to brief the agent.\n\nReturns:\n    {scheduled(bool), callback_id(str), confirmed_time(str)}"
+  },
+  "displayName": "ccaas_schedule_callback"
+}

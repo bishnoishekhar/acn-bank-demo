@@ -1,0 +1,7 @@
+{
+  "name": "33fb7984-4685-45f6-92fa-2d981d00b642",
+  "displayName": "eval_exp_16aa49c1",
+  "llmCriteria": {
+    "prompt": "getInvestmentAccounts must be called to retrieve the TFSA balance."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "301bdee8-4383-410c-95c1-a280aed58211",
+  "displayName": "tc_m45_006_casl_verbatim_consent_text",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "casl", "verbatim", "PREF-04", "BR-ACN-027", "BR-ACN-091", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to receive promotional offers from ACN Bank"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "ACN Bank would like to send you commercial electronic messages including offers, promotions, and product updates. You may withdraw consent at any time. Do you consent?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_17d3261a", "eval_exp_5230f042", "eval_exp_7e0dd26d", "eval_exp_11f845c4", "eval_exp_4e3ed954", "eval_exp_876414a9"]
+  },
+  "invalid": true
+}

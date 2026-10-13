@@ -1,0 +1,35 @@
+{
+  "name": "7f03479b-c84e-4fb9-9a5f-9becf010c91a",
+  "displayName": "tc_m1_001_cie_segment_load",
+  "tags": ["acn_bank_ces_demo", "m1", "CIE", "segment", "session-state", "TR-6", "webchat", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What accounts do I have?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "You have a chequing account and a savings account. Would you like me to show the balances for both?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c89266ff-42cf-4f43-a590-32f1c71c083f",
+            "tool": "acn_customer_intelligence_engine",
+            "args": {
+            },
+            "displayName": "acn_customer_intelligence_engine"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_c3ef1d06", "eval_exp_98895c81"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,7 @@
+{
+  "name": "d42d7478-2d86-44dc-8725-c8891dec4068",
+  "displayName": "eval_exp_90d34342",
+  "llmCriteria": {
+    "prompt": "[TC-M28-004] ODP-01 view: getOverdraftDetails called and overdraft limit/status presented with BR-ACN-052 disclosure"
+  }
+}

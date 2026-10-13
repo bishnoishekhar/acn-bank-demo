@@ -1,0 +1,7 @@
+{
+  "name": "55837c5c-1e5c-4ab2-9d2b-6737c0de2c81",
+  "displayName": "eval_exp_83e95030",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: auth_level\u003d2. [NO-GO] Successful OTP validation must elevate session to auth_level\u003d2"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "1939bf61-a6e4-46b9-833b-11aec5fe16c2",
+  "displayName": "eval_exp_95d0c388",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must be called for LOC drawdowns at or above CAD 1,000."
+  }
+}

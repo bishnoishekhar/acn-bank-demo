@@ -1,0 +1,7 @@
+{
+  "name": "9b07d563-204d-4426-bb24-6bd5a0978b8c",
+  "displayName": "eval_exp_f0942f98",
+  "llmCriteria": {
+    "prompt": "[TC-M0-005] M0 routes service intent to acn_service_hub"
+  }
+}

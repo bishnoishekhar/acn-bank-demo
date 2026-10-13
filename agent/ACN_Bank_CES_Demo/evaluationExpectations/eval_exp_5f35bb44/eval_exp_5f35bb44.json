@@ -1,0 +1,7 @@
+{
+  "name": "7171bdfa-b37f-4556-ba58-7a317fd261f9",
+  "displayName": "eval_exp_5f35bb44",
+  "llmCriteria": {
+    "prompt": "Response must reference immediate protective action (fraud line, fraud specialist, suspend, freeze) (BR-ACN-014)."
+  }
+}

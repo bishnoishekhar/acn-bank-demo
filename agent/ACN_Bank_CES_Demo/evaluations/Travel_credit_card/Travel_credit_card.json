@@ -1,0 +1,12 @@
+{
+  "name": "6e410f81-abde-49f5-8867-5100d46a5df2",
+  "displayName": "Travel credit card",
+  "scenario": {
+    "task": "Guide user for travel card, complete application process and provide confirmation number",
+    "maxTurns": 10,
+    "variableOverrides": {
+    },
+    "taskCompletionBehavior": "TASK_SATISFIED",
+    "userGoalBehavior": "USER_GOAL_SATISFIED"
+  }
+}

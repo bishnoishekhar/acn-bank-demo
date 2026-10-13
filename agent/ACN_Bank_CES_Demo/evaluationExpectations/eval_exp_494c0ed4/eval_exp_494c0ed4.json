@@ -1,0 +1,7 @@
+{
+  "name": "396b3ec5-05b8-4f82-9030-6f9938713431",
+  "displayName": "eval_exp_494c0ed4",
+  "llmCriteria": {
+    "prompt": "fintrac_precheck must be called for all wire transfers."
+  }
+}

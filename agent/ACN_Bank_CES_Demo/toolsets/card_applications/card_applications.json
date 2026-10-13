@@ -1,0 +1,13 @@
+{
+  "name": "5e527c72-1d80-483f-8af5-abdfd3a36a7d",
+  "displayName": "card_applications",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/card_applications/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Credit card application lifecycle: query, create, update, status, persist approved card."
+}

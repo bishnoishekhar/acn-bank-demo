@@ -1,0 +1,7 @@
+{
+  "name": "c3145450-c1d1-4e10-84ed-940f27f1b8f1",
+  "displayName": "eval_exp_2396b9d7",
+  "llmCriteria": {
+    "prompt": "updateCard must be called with action\u003dtravel_notice and destination\u003dJapan."
+  }
+}

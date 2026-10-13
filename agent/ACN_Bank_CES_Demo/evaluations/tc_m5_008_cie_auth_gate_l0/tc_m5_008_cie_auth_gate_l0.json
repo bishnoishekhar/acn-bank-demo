@@ -1,0 +1,40 @@
+{
+  "name": "eb864ce8-fe8f-422e-8bf8-95447c738608",
+  "displayName": "tc_m5_008_cie_auth_gate_l0",
+  "tags": ["acn_bank_ces_demo", "m0", "m1", "m5", "CIE", "auth-gate", "webchat", "P0", "HIGH", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003ewelcome\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome to ACN Bank. ACN Bank collects your personal information in accordance with our Privacy Policy and PIPEDA. How can I help you today?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To access your account information I need to verify your identity first. Could I please get your one-time passcode or have you enter your phone banking PIN to continue?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_40b129b2", "eval_exp_36f5d97b", "eval_exp_7cdda18e"]
+  },
+  "invalid": true
+}

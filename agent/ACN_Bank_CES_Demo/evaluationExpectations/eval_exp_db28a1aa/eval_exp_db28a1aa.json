@@ -1,0 +1,7 @@
+{
+  "name": "0d38f321-896a-45c4-a89f-41431f737849",
+  "displayName": "eval_exp_db28a1aa",
+  "llmCriteria": {
+    "prompt": "Response must reference the cheque status clearly."
+  }
+}

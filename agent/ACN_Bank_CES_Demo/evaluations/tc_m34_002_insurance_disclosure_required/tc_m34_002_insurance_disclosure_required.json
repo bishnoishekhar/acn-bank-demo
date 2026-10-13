@@ -1,0 +1,25 @@
+{
+  "name": "a5db861a-704d-45dd-ac6e-148c11dc9bef",
+  "displayName": "tc_m34_002_insurance_disclosure_required",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.4", "insurance", "TRP-disclosure", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Tell me about travel insurance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Travel insurance products offered through ACN Bank are underwritten by a third-party insurer. Coverage is subject to policy terms, conditions, and exclusions. This information is for general purposes only and does not constitute advice."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b95e17a1"]
+  },
+  "invalid": true
+}

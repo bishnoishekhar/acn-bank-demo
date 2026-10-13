@@ -1,0 +1,7 @@
+{
+  "name": "1864909a-c282-4123-b1b0-00d30102ca4a",
+  "displayName": "eval_exp_1cee76a4",
+  "llmCriteria": {
+    "prompt": "[TC-M22-006] Payment above CAD 1,000 demo step-up threshold requires authorize_step_up before execution"
+  }
+}

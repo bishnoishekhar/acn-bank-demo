@@ -1,0 +1,7 @@
+{
+  "name": "462c20e5-db1f-4056-8e2c-d149455d862d",
+  "displayName": "eval_exp_4f9cc128",
+  "llmCriteria": {
+    "prompt": "The rights disclosure must be delivered in the same turn as the cancellation confirmation."
+  }
+}

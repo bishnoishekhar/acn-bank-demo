@@ -1,0 +1,35 @@
+{
+  "name": "7a63d85b-d150-4288-a7b7-c949ba871da1",
+  "displayName": "tc_m41_003_account_freeze_verbatim_before_tool",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.1", "freeze", "DSP-04", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Freeze my account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m freezing your account immediately to prevent any further transactions. Your account has been frozen. You can unfreeze it at any time by contacting us."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-2a4334b8-b558-4db5-baa0-cddeb3f93093",
+            "tool": "",
+            "args": {
+              "action": "freeze"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_91a14a3c", "eval_exp_3083a7f8"]
+  },
+  "invalid": true
+}

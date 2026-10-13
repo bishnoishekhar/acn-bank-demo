@@ -1,0 +1,7 @@
+{
+  "name": "d6b51e06-acea-4a68-8466-5a5bee6c9021",
+  "displayName": "eval_exp_bbb99340",
+  "llmCriteria": {
+    "prompt": "FAQ answers on webchat must be delivered via faq_card widget W-26."
+  }
+}

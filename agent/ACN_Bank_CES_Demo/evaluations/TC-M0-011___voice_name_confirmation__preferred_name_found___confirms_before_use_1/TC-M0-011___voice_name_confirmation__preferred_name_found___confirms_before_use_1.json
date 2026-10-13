@@ -1,0 +1,26 @@
+{
+  "name": "1d614ef1-cd31-461f-9f02-5bb0fdf92f10",
+  "displayName": "TC-M0-011 — voice_name_confirmation: preferred_name found → confirms before use 1",
+  "description": "voice_name_confirmation: preferred_name found → confirms before use | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "voice", "preferred_name", "name-confirmation", "P1", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA",
+            "preferred_name": "Chander"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }]
+  }
+}

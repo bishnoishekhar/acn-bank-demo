@@ -1,0 +1,7 @@
+{
+  "name": "be071809-82ef-4832-a46d-a964ba8d3442",
+  "displayName": "eval_exp_ac640eef",
+  "llmCriteria": {
+    "prompt": "getAccounts must be called to retrieve account balance."
+  }
+}

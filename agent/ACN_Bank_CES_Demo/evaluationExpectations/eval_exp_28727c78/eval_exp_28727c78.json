@@ -1,0 +1,7 @@
+{
+  "name": "ed7c528b-aa55-4337-8e28-55b646c6b9e1",
+  "displayName": "eval_exp_28727c78",
+  "llmCriteria": {
+    "prompt": "[TC-M0-012] voice_name_confirmation: no preferred_name → asks customer"
+  }
+}

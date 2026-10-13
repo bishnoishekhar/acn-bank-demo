@@ -1,0 +1,34 @@
+{
+  "name": "42914d9e-187a-46ad-8a4e-7c45e0a4ebb2",
+  "displayName": "tc_m21_005_tax_documents_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.1", "tax", "TAX-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Where is my T5 for last year?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your available tax documents for last year."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-392e635f-9aef-4b86-bab0-b2aae85201e1",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_394132ec", "eval_exp_61ed5833"]
+  },
+  "invalid": true
+}

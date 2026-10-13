@@ -1,0 +1,35 @@
+{
+  "name": "b4049ebb-0471-4d03-9ebb-be6481be0434",
+  "displayName": "tc_m41_002_provisional_credit_eligible",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.1", "provisional-credit", "CUST-FRAUD-001", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to dispute the $89 charge from Amazon"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve filed your dispute for the $89 Amazon charge. As a courtesy, I\u0027ve applied a provisional credit of $89 to your account while we investigate. The investigation typically takes 5 to 10 business days."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-adb21078-fd29-435d-9df6-3ffcda03f728",
+            "tool": "",
+            "args": {
+              "provisional_credit": true
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_107a97fc", "eval_exp_0eecb70b"]
+  },
+  "invalid": true
+}

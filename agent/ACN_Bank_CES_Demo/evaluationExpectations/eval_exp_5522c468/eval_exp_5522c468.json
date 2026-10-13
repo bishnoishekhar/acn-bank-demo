@@ -1,0 +1,7 @@
+{
+  "name": "607fad60-f261-4396-9885-d13fbe64ec65",
+  "displayName": "eval_exp_5522c468",
+  "llmCriteria": {
+    "prompt": "The agent must NOT use any customer_id value provided in the conversation text."
+  }
+}

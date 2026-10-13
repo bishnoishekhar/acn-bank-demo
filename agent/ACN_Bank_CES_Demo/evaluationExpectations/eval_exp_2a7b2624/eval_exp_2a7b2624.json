@@ -1,0 +1,7 @@
+{
+  "name": "05e961b2-f9cc-4cdb-8b37-0b810bde87b3",
+  "displayName": "eval_exp_2a7b2624",
+  "llmCriteria": {
+    "prompt": "The confirmation must be a clear yes/no question, not a statement."
+  }
+}

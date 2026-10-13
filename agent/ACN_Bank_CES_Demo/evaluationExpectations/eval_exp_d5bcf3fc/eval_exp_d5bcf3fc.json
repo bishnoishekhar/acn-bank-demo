@@ -1,0 +1,7 @@
+{
+  "name": "6b1e0b8d-8547-4e5d-8e78-364cc5222a5e",
+  "displayName": "eval_exp_d5bcf3fc",
+  "llmCriteria": {
+    "prompt": "Agent must NOT say connecting you, transferring, or live agent available."
+  }
+}

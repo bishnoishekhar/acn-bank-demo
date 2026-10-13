@@ -1,0 +1,7 @@
+{
+  "name": "1cdcc25a-e404-49ac-aadc-087753e8e3ed",
+  "displayName": "eval_exp_82ca61af",
+  "llmCriteria": {
+    "prompt": "CONTAINS: payment_failed_notice"
+  }
+}

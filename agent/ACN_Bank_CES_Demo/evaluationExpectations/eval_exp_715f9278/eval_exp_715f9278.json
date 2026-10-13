@@ -1,0 +1,7 @@
+{
+  "name": "63c4193c-21bd-44ff-8bc3-7f9b76300183",
+  "displayName": "eval_exp_715f9278",
+  "llmCriteria": {
+    "prompt": "CONTAINS: minimum | statement | full"
+  }
+}

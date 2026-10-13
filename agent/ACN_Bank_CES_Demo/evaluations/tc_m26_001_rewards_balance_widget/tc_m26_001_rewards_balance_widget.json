@@ -1,0 +1,34 @@
+{
+  "name": "66c81c18-8b4b-4147-a1bf-b6d7702a21e0",
+  "displayName": "tc_m26_001_rewards_balance_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.6", "rewards", "RWD-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "How many points do I have?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "You have 45,250 Aventura points in your rewards account."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-1a8f9f06-9d1b-44c3-a8af-2b8c23601396",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_49ffaf47", "eval_exp_e54661d7"]
+  },
+  "invalid": true
+}

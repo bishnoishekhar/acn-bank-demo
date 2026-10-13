@@ -1,0 +1,35 @@
+{
+  "name": "26c91c3c-05fa-4e30-9e1d-bab919d4853b",
+  "displayName": "tc_m36_003_new_customer_kyc_before_account_creation",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.6", "kyc", "new-customer", "OPN-new-customer", "webchat", "P0", "NO-GO", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027m a new customer and I\u0027d like to open an account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Welcome to ACN Bank. To open a new account, I\u0027ll need to verify your identity first. Please have your government-issued photo ID ready."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-99866f70-dbc4-4b27-9e76-8e8f1f71008e",
+            "tool": "identify_customer",
+            "args": {
+            },
+            "displayName": "identify_customer"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_bfca461f", "eval_exp_0cd59a40", "eval_exp_273fe12e"]
+  },
+  "invalid": true
+}

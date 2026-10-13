@@ -1,0 +1,40 @@
+{
+  "name": "7d437b1e-19d4-4f53-8681-1282f9c563ad",
+  "displayName": "tc_m5_006_idle_timeout_auth_expiry",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "expiry", "idle-timeout", "voice", "P0", "HIGH", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What\u0027s my current balance?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your chequing account balance is four thousand eight hundred twenty-three dollars and seventeen cents, and your savings account balance is twelve thousand five hundred dollars. Is there anything else I can help you with?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003eidle_timeout\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I notice there\u0027s been a period of inactivity on this call. For your security, your authentication has been reset. Please re-verify your identity to continue."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2fac28d9", "eval_exp_27a37336", "eval_exp_870cd458"]
+  },
+  "invalid": true
+}

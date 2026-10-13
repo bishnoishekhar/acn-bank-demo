@@ -1,0 +1,7 @@
+{
+  "name": "f8104bc1-76b6-452a-87a9-77363f515b78",
+  "displayName": "eval_exp_13be44ff",
+  "llmCriteria": {
+    "prompt": "Response must NOT contain what type or purpose of questions (BR-ACN-083, GB-35)."
+  }
+}

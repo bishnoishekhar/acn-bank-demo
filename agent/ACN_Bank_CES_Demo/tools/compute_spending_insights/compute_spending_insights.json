@@ -1,0 +1,10 @@
+{
+  "name": "compute_spending_insights",
+  "pythonFunction": {
+    "name": "compute_spending_insights",
+    "pythonCode": "tools/compute_spending_insights/python_function/python_code.py",
+    "description": "    Aggregates transactions by category and computes month-over-month comparison.\n    Returns spending breakdown for the requested period and the previous period.\nAggregates spending data silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "compute_spending_insights"
+}

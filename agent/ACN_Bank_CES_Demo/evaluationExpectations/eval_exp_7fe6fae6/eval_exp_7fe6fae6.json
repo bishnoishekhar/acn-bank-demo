@@ -1,0 +1,7 @@
+{
+  "name": "4ccab583-c6fc-4bd2-ba0f-c948ce2fda35",
+  "displayName": "eval_exp_7fe6fae6",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: upgrade | exclusive offer | limited time | you may qualify | pre-approved. [HIGH] No marketing language in responses for opted-out customers"
+  }
+}

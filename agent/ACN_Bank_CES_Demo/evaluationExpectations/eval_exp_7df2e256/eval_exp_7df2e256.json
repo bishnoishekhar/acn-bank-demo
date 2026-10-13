@@ -1,0 +1,7 @@
+{
+  "name": "c98e5286-0ff9-44fe-8b09-31ad49bfe102",
+  "displayName": "eval_exp_7df2e256",
+  "llmCriteria": {
+    "prompt": "The agent must inform the customer about the duplicate and reference the previous confirmation number."
+  }
+}

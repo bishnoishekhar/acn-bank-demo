@@ -1,0 +1,7 @@
+{
+  "name": "788c8bd4-4122-4ddd-8c5a-ebe6eb5d2c15",
+  "displayName": "eval_exp_e90fbfdb",
+  "llmCriteria": {
+    "prompt": "CONTAINS: reference"
+  }
+}

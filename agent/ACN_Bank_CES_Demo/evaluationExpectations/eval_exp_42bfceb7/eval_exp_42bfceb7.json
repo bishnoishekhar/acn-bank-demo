@@ -1,0 +1,7 @@
+{
+  "name": "4cc4dce6-cdca-43ba-893f-29c228bcd02c",
+  "displayName": "eval_exp_42bfceb7",
+  "llmCriteria": {
+    "prompt": "The narration_checkpoint must appear before any text or widget in the response payload."
+  }
+}

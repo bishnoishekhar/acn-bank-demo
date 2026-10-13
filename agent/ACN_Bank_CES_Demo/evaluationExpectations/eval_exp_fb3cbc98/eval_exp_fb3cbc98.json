@@ -1,0 +1,7 @@
+{
+  "name": "61ef6911-0e97-4f88-a1e2-e8d51fdf2dd6",
+  "displayName": "eval_exp_fb3cbc98",
+  "llmCriteria": {
+    "prompt": "CONTAINS: fee | charge"
+  }
+}

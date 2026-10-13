@@ -1,0 +1,7 @@
+{
+  "name": "c02b67f3-9753-4db0-bb51-c38cfd33cc91",
+  "displayName": "eval_exp_99bd1475",
+  "llmCriteria": {
+    "prompt": "[TC-M23-003] Travel notice creation calls updateCard with action\u003dtravel_notice and the correct destination"
+  }
+}

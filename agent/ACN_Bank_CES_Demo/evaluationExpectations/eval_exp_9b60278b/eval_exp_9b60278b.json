@@ -1,0 +1,7 @@
+{
+  "name": "48e9cc80-2b72-4f9b-9d7c-2ffb3edbc5ad",
+  "displayName": "eval_exp_9b60278b",
+  "llmCriteria": {
+    "prompt": "cancelInteracTransfer must be called."
+  }
+}

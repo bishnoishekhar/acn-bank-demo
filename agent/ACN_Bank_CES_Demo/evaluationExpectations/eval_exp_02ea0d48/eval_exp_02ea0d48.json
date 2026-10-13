@@ -1,0 +1,7 @@
+{
+  "name": "31b0aa85-7fcb-457f-ab63-a8f3403d759e",
+  "displayName": "eval_exp_02ea0d48",
+  "llmCriteria": {
+    "prompt": "CONTAINS: Rogers | $50 | payment | completed. [HIGH] Closing response must reference the bill payment completed earlier in session"
+  }
+}

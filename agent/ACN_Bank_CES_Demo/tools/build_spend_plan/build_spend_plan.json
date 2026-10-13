@@ -1,0 +1,9 @@
+{
+  "name": "build_spend_plan",
+  "pythonFunction": {
+    "name": "build_spend_plan",
+    "pythonCode": "tools/build_spend_plan/python_function/python_code.py",
+    "description": "Generate a budget allocation plan for a trip.\n\nArgs:\n    destination: Travel destination (city or country).\n    duration_days: Number of days for the trip.\n    travel_style: Budget tier — \u0027budget\u0027 | \u0027standard\u0027 (default) | \u0027premium\u0027.\n\nReturns:\n    {daily_budget_cad, categories(list), total_estimated_cad}"
+  },
+  "displayName": "build_spend_plan"
+}

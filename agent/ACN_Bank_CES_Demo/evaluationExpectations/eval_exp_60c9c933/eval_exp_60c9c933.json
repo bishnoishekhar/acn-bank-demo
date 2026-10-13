@@ -1,0 +1,7 @@
+{
+  "name": "4f37a642-c5ba-4905-863a-4c22acd28208",
+  "displayName": "eval_exp_60c9c933",
+  "llmCriteria": {
+    "prompt": "createTransaction must be called with type\u003dtransfer for own-account transfers."
+  }
+}

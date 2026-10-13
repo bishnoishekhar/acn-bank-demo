@@ -1,0 +1,35 @@
+{
+  "name": "853427d4-418f-4a77-9a6e-3c61574d442b",
+  "displayName": "tc_m22_003_interac_new_recipient_step_up",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "interac", "step-up", "PAY-04", "webchat", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Send $200 to sarah@email.com via Interac"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "For Interac e-Transfers to a new recipient, I need to verify your identity with an additional security step. I\u0027ve sent a step-up request to your registered device. Please approve it to continue."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-da3ac88a-726e-43cc-9255-3098a6fd25c4",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0cd83420", "eval_exp_8c79444c"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,7 @@
+{
+  "name": "416ba635-f643-48ca-a888-edc9e7570267",
+  "displayName": "eval_exp_091f5e7e",
+  "llmCriteria": {
+    "prompt": "auth_locked must be set to true after 3 consecutive OTP failures."
+  }
+}

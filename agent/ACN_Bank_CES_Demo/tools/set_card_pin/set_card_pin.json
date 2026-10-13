@@ -1,0 +1,9 @@
+{
+  "name": "set_card_pin",
+  "pythonFunction": {
+    "name": "set_card_pin",
+    "pythonCode": "tools/set_card_pin/python_function/python_code.py",
+    "description": "Set new card PIN via DTMF. Always step-up L3 required.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    card_id: Card document ID (e.g., CRD001).\n    new_pin_dtmf: DTMF-captured new PIN. Never echoed or logged.\n\nReturns:\n    {success(bool), card_last4(str), changed_at(str)}"
+  },
+  "displayName": "set_card_pin"
+}

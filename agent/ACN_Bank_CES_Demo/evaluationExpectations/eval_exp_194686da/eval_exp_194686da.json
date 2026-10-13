@@ -1,0 +1,7 @@
+{
+  "name": "5ae7ec15-f28e-4874-8d5a-6586e8a1ac40",
+  "displayName": "eval_exp_194686da",
+  "llmCriteria": {
+    "prompt": "The agent must immediately recognize the fraud signal and route to the disputes agent (M4.1) without first challenging the customer for authentication."
+  }
+}

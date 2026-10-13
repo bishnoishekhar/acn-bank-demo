@@ -1,0 +1,34 @@
+{
+  "name": "32820f1b-6a92-49c6-a3eb-a568438b7ee2",
+  "displayName": "tc_m45_001_notification_preferences_low_balance",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "preferences", "PREF-01", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Set up a low balance alert under $200"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your low balance alert has been set up. You will receive a notification when your chequing account balance falls below $200."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-07b277e4-1579-4c93-94d7-093f6fce985e",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_5845d175", "eval_exp_9a9a587b"]
+  },
+  "invalid": true
+}

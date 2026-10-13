@@ -1,0 +1,42 @@
+{
+  "name": "TC-BR-ACN-046",
+  "displayName": "TC-BR-ACN-046 — Idempotency key prevents double-posting",
+  "description": "Idempotency key prevents double-posting | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["BR-ACN-046", "idempotency", "payment", "voice", "P0", "NO-GO"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Pay Rogers $50"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, confirm"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Pay Rogers $50 again"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, confirm"
+        }
+      }]
+    }]
+  }
+}

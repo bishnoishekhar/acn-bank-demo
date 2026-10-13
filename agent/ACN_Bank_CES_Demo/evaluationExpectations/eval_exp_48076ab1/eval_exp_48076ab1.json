@@ -1,0 +1,7 @@
+{
+  "name": "bd0c432e-19b0-489d-9db0-feafb7571316",
+  "displayName": "eval_exp_48076ab1",
+  "llmCriteria": {
+    "prompt": "getChequeStatus must be called before stopPayment."
+  }
+}

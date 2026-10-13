@@ -1,0 +1,32 @@
+{
+  "name": "761c2f0b-2ab5-4087-9ea5-55730e49a1d4",
+  "displayName": "TC-GB-016 — Live agent request honoured immediately 1",
+  "description": "Live agent request honoured immediately | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-16", "BR-ACN-018", "escalation", "live-agent", "P0", "HIGH", "voice"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I want to speak to a person"
+        }
+      }, {
+        "expectation": {
+          "note": "agent transfer target must be \u0027acn_exception_escalation\u0027 [HIGH]",
+          "agentTransfer": {
+            "targetAgent": "acn_exception_escalation",
+            "displayName": "acn_exception_escalation"
+          }
+        }
+      }]
+    }]
+  }
+}

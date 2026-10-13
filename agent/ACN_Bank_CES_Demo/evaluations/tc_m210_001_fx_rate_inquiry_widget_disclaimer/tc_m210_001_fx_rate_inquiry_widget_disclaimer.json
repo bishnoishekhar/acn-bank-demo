@@ -1,0 +1,34 @@
+{
+  "name": "4b5884f8-a3fd-496e-8c59-51a9b54c06bb",
+  "displayName": "tc_m210_001_fx_rate_inquiry_widget_disclaimer",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.10", "fx", "FX-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What\u0027s the US dollar rate today?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "The current indicative exchange rate for USD/CAD is 1 USD \u003d 1.36 CAD. Please note this rate is indicative and may differ at time of transaction."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-ec4f4943-9557-44c9-8cd8-e6b7528bed6f",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0d1980f7", "eval_exp_e6604ee1", "eval_exp_b1128ff6"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,7 @@
+{
+  "name": "1bbd2c10-d583-4342-a5f4-5e1808b6a226",
+  "displayName": "eval_exp_40b129b2",
+  "llmCriteria": {
+    "prompt": "acn_customer_intelligence_engine must NOT be called before auth_level reaches 2."
+  }
+}

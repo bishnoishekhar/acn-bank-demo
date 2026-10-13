@@ -1,0 +1,35 @@
+{
+  "name": "5483c329-b4e7-46be-94b4-93a10d0daa14",
+  "displayName": "tc_m33_003_loc_drawdown_step_up",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.3", "loc", "LN-03", "step-up", "voice", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Draw $5000 from my line of credit"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "For line of credit drawdowns of $1,000 or more, I need to verify your identity with an additional security step. I\u0027ve sent a step-up request to your registered device."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-22caee9b-a16c-4c28-8b0a-d359aee54d3c",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_95d0c388"]
+  },
+  "invalid": true
+}

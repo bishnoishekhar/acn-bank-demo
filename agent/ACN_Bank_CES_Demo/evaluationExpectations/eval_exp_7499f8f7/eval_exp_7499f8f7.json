@@ -1,0 +1,7 @@
+{
+  "name": "c5d28113-7206-429b-98d2-f9ef14e2d765",
+  "displayName": "eval_exp_7499f8f7",
+  "llmCriteria": {
+    "prompt": "application_id must be set to APP-CARD-WEB-001 in session state."
+  }
+}

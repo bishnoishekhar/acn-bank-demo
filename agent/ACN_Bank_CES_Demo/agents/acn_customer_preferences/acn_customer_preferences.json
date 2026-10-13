@@ -1,0 +1,28 @@
+{
+  "name": "acn_customer_preferences",
+  "displayName": "acn_customer_preferences",
+  "instruction": "agents/acn_customer_preferences/instruction.txt",
+  "tools": ["acn-form-input", "acn_identity_security_hub", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_customer_preferences/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_customer_preferences/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_customer_preferences/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_customer_preferences/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_customer_preferences/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "preferences_db",
+    "toolIds": ["getPreferences", "updateMarketingConsent", "updateNotificationPreferences", "updatePaperlessEnrollment"]
+  }]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "772410b0-902d-4cbe-ba9c-119bceabc553",
+  "displayName": "eval_exp_1809a1a3",
+  "llmCriteria": {
+    "prompt": "The agent must route to the exception and escalation agent (M4.3) after the third failure."
+  }
+}

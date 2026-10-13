@@ -1,0 +1,7 @@
+{
+  "name": "055a00d4-368e-4882-abd9-0acac5e9186e",
+  "displayName": "eval_exp_13df368f",
+  "llmCriteria": {
+    "prompt": "Currency amounts must be spoken out in words, not formatted as symbols."
+  }
+}

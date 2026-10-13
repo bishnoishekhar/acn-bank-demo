@@ -1,0 +1,7 @@
+{
+  "name": "bb45a8eb-42cf-4edd-b8a2-bf852d5405a5",
+  "displayName": "eval_exp_9de904d0",
+  "llmCriteria": {
+    "prompt": "getOverdraftDetails must be called before updateOverdraftProtection."
+  }
+}

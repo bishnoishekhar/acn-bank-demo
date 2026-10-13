@@ -1,0 +1,7 @@
+{
+  "name": "78068e40-9185-4c65-96ca-49f7b54a5201",
+  "displayName": "eval_exp_b134afd5",
+  "llmCriteria": {
+    "prompt": "[TC-M24-002] Offer opt-out logs opted_out outcome via logNudgeShown and sets marketing_opt_out session variable"
+  }
+}

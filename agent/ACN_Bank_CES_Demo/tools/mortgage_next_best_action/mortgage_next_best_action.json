@@ -1,0 +1,10 @@
+{
+  "name": "90069c9c-9f98-4974-a656-f757daad4f91",
+  "pythonFunction": {
+    "name": "mortgage_next_best_action",
+    "pythonCode": "tools/mortgage_next_best_action/python_function/python_code.py",
+    "description": "Return at most max_suggestions suggestions, most relevant first."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "mortgage_next_best_action"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "8a121a6d-a6c8-408a-94ee-b9360bd7af96",
+  "displayName": "eval_exp_19b0d8d9",
+  "llmCriteria": {
+    "prompt": "marketing_opt_out session variable must be set to true."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "effc1724-b1d5-49f2-a113-4b7c5a52c69b",
+  "displayName": "eval_exp_9f7a95b2",
+  "llmCriteria": {
+    "prompt": "identify_customer must be called on session start."
+  }
+}

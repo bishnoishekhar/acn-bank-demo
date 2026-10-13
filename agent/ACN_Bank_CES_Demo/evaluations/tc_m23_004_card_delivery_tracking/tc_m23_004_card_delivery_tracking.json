@@ -1,0 +1,34 @@
+{
+  "name": "c1ecd204-769d-43ac-97cc-84b5bd6abdcb",
+  "displayName": "tc_m23_004_card_delivery_tracking",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.3", "delivery", "CRD-09", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "When will my replacement card arrive?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your replacement card has been dispatched and is expected to arrive within 3 business days."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-641b2014-0ffd-4c79-ba65-319f3ff6de73",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0e0f8de1", "eval_exp_ad905b19"]
+  },
+  "invalid": true
+}

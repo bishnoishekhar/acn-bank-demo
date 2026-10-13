@@ -1,0 +1,7 @@
+{
+  "name": "c9fa59d7-2d42-47df-982e-509691841408",
+  "displayName": "eval_exp_1ff7175a",
+  "llmCriteria": {
+    "prompt": "[count\u003d1] [HIGH] CIE must be called exactly once after L2 auth is achieved — not on every turn"
+  }
+}

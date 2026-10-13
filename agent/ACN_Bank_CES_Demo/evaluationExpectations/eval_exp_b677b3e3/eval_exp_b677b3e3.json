@@ -1,0 +1,7 @@
+{
+  "name": "c28126d7-90ab-4574-961c-1525812cb002",
+  "displayName": "eval_exp_b677b3e3",
+  "llmCriteria": {
+    "prompt": "CONTAINS: most recent | last 3 | recent transaction"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "8699b3a7-729b-4240-a83b-3a864ccc6e9a",
+  "displayName": "eval_exp_a0439fcb",
+  "llmCriteria": {
+    "prompt": "The agent must NOT close out the interaction without delivering the rights notice."
+  }
+}

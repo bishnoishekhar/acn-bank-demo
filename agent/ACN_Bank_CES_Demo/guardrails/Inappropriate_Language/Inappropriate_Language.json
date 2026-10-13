@@ -1,0 +1,14 @@
+{
+  "name": "03759361-9678-44ef-8be3-8ceba62c2746",
+  "displayName": "Inappropriate Language",
+  "action": {
+    "generativeAnswer": {
+      "prompt": "Respond calmly and professionally, acknowledging that you understand the customer may be frustrated. Explain that ACN Assist is committed to providing respectful assistance and that abusive or threatening language makes it difficult to help effectively. Offer to continue helping if the customer is willing to communicate respectfully, or offer to connect them to a live agent. If threats are serious, mention that ACN Bank may need to end the session."
+    }
+  },
+  "llmPolicy": {
+    "maxConversationMessages": 2,
+    "prompt": "### CRITICAL RULE\n- Flag messages containing abusive, threatening, harassing, discriminatory, or sexually explicit language directed at the agent or bank staff.\n- Even a single instance of severe language (direct threats, slurs) should be flagged.\n\n### TRIGGER CRITERIA\nFLAG the message if the user uses inappropriate language in their interaction with ACN Assist.\n\n**Definition of inappropriate language:** Language that is threatening, abusive, harassing, discriminatory, or sexually explicit — including profanity directed at the agent or staff, racial or ethnic slurs, death threats, or explicit sexual content.\n\n**Explicit Claims to FLAG:**\n* Direct threats of physical harm: \u0027I will find you and hurt you.\u0027\n* Severe profanity combined with aggression: \u0027[expletive] this bank, I will destroy you.\u0027\n* Discriminatory slurs targeting any group.\n* Sexually explicit or harassing statements directed at the agent.\n\n**Implicit Claims to FLAG (CRITICAL):**\nYou MUST flag:\n* Escalating aggressive language suggesting the user is becoming threatening.\n* Veiled threats (\u0027You better fix this or else...\u0027 combined with angry, violent imagery).\n* Repeated use of slurs or hateful language even if not explicitly threatening.\n\n### DO NOT FLAG (False Positive Prevention)\nDo NOT flag general expressions of frustration or strong language in a non-threatening context. Ignore:\n\n* Customers venting frustration about a service issue without personal threats (\u0027This is ridiculous!\u0027).\n* Mild or colloquial profanity in casual context that is not directed aggressively at the agent.\n* Customers who are clearly distressed (e.g., bereavement, financial hardship) expressing emotional distress.",
+    "policyScope": "USER_QUERY"
+  }
+}

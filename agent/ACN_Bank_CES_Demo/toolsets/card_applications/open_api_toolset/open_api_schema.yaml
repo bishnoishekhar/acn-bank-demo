@@ -1,0 +1,172 @@
+openapi: "3.0.3"
+info:
+  title: Card Applications - Direct Firestore
+  version: "1.0.0"
+  description: Credit card application lifecycle API for ACN Bank CES Demo (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications:runQuery:
+    post:
+      operationId: queryApplications
+      summary: Query credit card applications by customer or status
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QueryApplicationsRequest"
+      responses:
+        "200":
+          description: List of card applications
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications:
+    post:
+      operationId: createApplication
+      summary: Create a new credit card application
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApplicationRequest"
+      responses:
+        "200":
+          description: Application created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}:
+    get:
+      operationId: getApplicationStatus
+      summary: Get the status of a specific card application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Application status
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: updateApplication
+      summary: Update an existing card application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateApplicationRequest"
+      responses:
+        "200":
+          description: Application updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}/persist_approved:
+    post:
+      operationId: persistApprovedCreditCardApplication
+      summary: Persist an approved card application and activate the card record
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersistApprovedRequest"
+      responses:
+        "200":
+          description: Approved application persisted
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    QueryApplicationsRequest:
+      type: object
+      properties:
+        customerId:
+          type: string
+        status:
+          type: string
+          enum: [pending, in_review, approved, declined, cancelled]
+    CreateApplicationRequest:
+      type: object
+      required:
+        - customerId
+        - cardType
+      properties:
+        customerId:
+          type: string
+        cardType:
+          type: string
+        applicationData:
+          type: object
+          properties:
+            requestedCreditLimit:
+              type: number
+            employmentStatus:
+              type: string
+            annualIncome:
+              type: number
+            idempotencyKey:
+              type: string
+    UpdateApplicationRequest:
+      type: object
+      properties:
+        status:
+          type: string
+        applicationData:
+          type: object
+        decisionReason:
+          type: string
+        approvedCreditLimit:
+          type: number
+    PersistApprovedRequest:
+      type: object
+      properties:
+        approvedCreditLimit:
+          type: number
+        cardType:
+          type: string
+        cardNumber:
+          type: string
+        expiryDate:
+          type: string

@@ -1,0 +1,10 @@
+{
+  "name": "460c50d2-63e6-41bb-969c-1c67b07f43f3",
+  "pythonFunction": {
+    "name": "mortgage_rate_board",
+    "pythonCode": "tools/mortgage_rate_board/python_function/python_code.py",
+    "description": "The rate shelf priced for this customer, plus the variable projection."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "mortgage_rate_board"
+}

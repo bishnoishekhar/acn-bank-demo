@@ -1,0 +1,34 @@
+{
+  "name": "2c804bdd-4dd2-4626-bb99-3077c2b8ab9f",
+  "displayName": "tc_m42_001_card_activation",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.2", "activation", "ACT-01", "CUST_DOC_7777", "voice", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to activate my new card"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your card has been activated successfully and is ready to use. Is there anything else I can help you with today?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-575a0e6b-9004-4046-953d-81f1232a019a",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_5f32636d", "eval_exp_cb25d682"]
+  },
+  "invalid": true
+}

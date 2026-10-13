@@ -1,0 +1,7 @@
+{
+  "name": "e6c158c4-bc83-4903-b2e1-ea3419d63572",
+  "displayName": "eval_exp_f8791d9d",
+  "llmCriteria": {
+    "prompt": "[TC-M22-010] Credit card payment emits payment_carousel widget and presents minimum, statement, and full balance options"
+  }
+}

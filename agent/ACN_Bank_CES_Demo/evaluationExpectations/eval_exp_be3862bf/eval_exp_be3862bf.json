@@ -1,0 +1,7 @@
+{
+  "name": "213df753-32d1-48aa-ba9b-4ffd43d28e63",
+  "displayName": "eval_exp_be3862bf",
+  "llmCriteria": {
+    "prompt": "[TC-M29-002] PAD cancellation must deliver pad_cancellation_rights copy (CPA H6) and call cancelPAD"
+  }
+}

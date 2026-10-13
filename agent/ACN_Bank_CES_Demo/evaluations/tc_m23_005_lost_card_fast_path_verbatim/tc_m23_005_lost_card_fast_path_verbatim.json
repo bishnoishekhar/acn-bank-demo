@@ -1,0 +1,35 @@
+{
+  "name": "dabf8862-3ee4-485a-8bc1-de91c421ce2f",
+  "displayName": "tc_m23_005_lost_card_fast_path_verbatim",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.3", "verbatim", "BR-ACN-015", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "My card is lost or stolen, suspend it now"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your card has been suspended immediately. No further transactions will be authorized on this card."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-091d2eea-b62c-41e0-a1a1-894158fcb1bc",
+            "tool": "",
+            "args": {
+              "action": "suspend"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_e5e19c67"]
+  },
+  "invalid": true
+}

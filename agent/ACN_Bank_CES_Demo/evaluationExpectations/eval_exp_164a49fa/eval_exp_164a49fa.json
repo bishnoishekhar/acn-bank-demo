@@ -1,0 +1,7 @@
+{
+  "name": "74be60ce-b017-460b-9120-1a92b3861f31",
+  "displayName": "eval_exp_164a49fa",
+  "llmCriteria": {
+    "prompt": "The CSAT prompt must be delivered exactly once per session (csat_offered must be set to true after delivery)."
+  }
+}

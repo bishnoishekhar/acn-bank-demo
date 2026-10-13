@@ -1,0 +1,7 @@
+{
+  "name": "7b9d3c3e-459a-4893-b3d5-caca47e3ba00",
+  "displayName": "eval_exp_0c7671f2",
+  "llmCriteria": {
+    "prompt": "[TC-M27-002] CHQ-01 negative: getChequeStatus shows cheque already cleared; stopPayment NOT called; agent informs customer it cannot be stopped"
+  }
+}

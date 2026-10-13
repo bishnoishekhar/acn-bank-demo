@@ -1,0 +1,7 @@
+{
+  "name": "37f3067b-61c7-4279-a8c5-75f9d9640997",
+  "displayName": "eval_exp_85911380",
+  "llmCriteria": {
+    "prompt": "The agent must honour a live agent request immediately, without asking clarifying questions or attempting to resolve the issue itself."
+  }
+}

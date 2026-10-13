@@ -1,0 +1,13 @@
+{
+  "name": "1ba134ae-3d55-4d17-8020-82911a39c1dd",
+  "displayName": "new_transaction_api_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/new_transaction_api_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Money movement: create transactions, update status, manage recurring payment schedules."
+}

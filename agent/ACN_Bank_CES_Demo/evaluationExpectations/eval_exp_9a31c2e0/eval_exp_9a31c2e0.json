@@ -1,0 +1,7 @@
+{
+  "name": "d705ee8e-4773-4d25-963c-44d46122d594",
+  "displayName": "eval_exp_9a31c2e0",
+  "llmCriteria": {
+    "prompt": "CONTAINS: send one now | would you like to send | help you send | send an e-Transfer. [MEDIUM] After explaining how to send an e-Transfer, M0.1 must offer to initiate one"
+  }
+}

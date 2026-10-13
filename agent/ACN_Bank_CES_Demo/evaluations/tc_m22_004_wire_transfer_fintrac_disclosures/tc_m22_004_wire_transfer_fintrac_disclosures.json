@@ -1,0 +1,35 @@
+{
+  "name": "e091a9ab-e607-400c-81fc-5a48f09668ef",
+  "displayName": "tc_m22_004_wire_transfer_fintrac_disclosures",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "wire", "PAY-10", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Wire $5000 to my account in India"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I process this wire transfer, I need to complete a regulatory pre-check. I\u0027m also required to inform you about wire transfer procedures and to warn you that unsolicited requests to send money can be a sign of fraud. Are you initiating this transfer of your own free will?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-ef190c5e-aed5-47a7-b7e0-3a04869a69f6",
+            "tool": "fintrac_precheck",
+            "args": {
+            },
+            "displayName": "fintrac_precheck"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_494c0ed4", "eval_exp_dc143da6", "eval_exp_63caf0c9"]
+  },
+  "invalid": true
+}

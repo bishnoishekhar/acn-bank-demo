@@ -1,0 +1,7 @@
+{
+  "name": "f67cbc43-e065-4ec6-984a-4da196f32013",
+  "displayName": "eval_exp_ba942baf",
+  "llmCriteria": {
+    "prompt": "After nba_shown_this_session is set to true on the first nudge, subsequent turns must NOT include any additional nudge or proactive offer."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "f5fdfc49-445b-4794-a185-b86055dcd91a",
+  "displayName": "eval_exp_9225ce64",
+  "llmCriteria": {
+    "prompt": "Response must reference 90 days, 90-day, or ninety day reclaim window (PAD-03)."
+  }
+}

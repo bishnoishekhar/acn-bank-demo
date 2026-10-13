@@ -1,0 +1,7 @@
+{
+  "name": "f3efdcdd-d075-4d76-a73a-cfc427105bd3",
+  "displayName": "eval_exp_876414a9",
+  "llmCriteria": {
+    "prompt": "updateMarketingConsent must NOT be called until explicit consent is given (BR-ACN-027, BR-ACN-091)."
+  }
+}

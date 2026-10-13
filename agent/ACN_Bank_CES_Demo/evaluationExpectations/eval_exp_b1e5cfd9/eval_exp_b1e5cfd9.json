@@ -1,0 +1,7 @@
+{
+  "name": "ffe231e6-f93c-49b6-84f9-23b610ed2d33",
+  "displayName": "eval_exp_b1e5cfd9",
+  "llmCriteria": {
+    "prompt": "CONTAINS: indicative | may differ | approximate"
+  }
+}

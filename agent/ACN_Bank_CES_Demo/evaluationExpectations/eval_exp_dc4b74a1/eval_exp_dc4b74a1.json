@@ -1,0 +1,7 @@
+{
+  "name": "5b262446-d6c1-4ccc-9299-59f54d0bb766",
+  "displayName": "eval_exp_dc4b74a1",
+  "llmCriteria": {
+    "prompt": "M0 must proactively offer to resume the in-progress credit card application when open_applications is non-empty."
+  }
+}

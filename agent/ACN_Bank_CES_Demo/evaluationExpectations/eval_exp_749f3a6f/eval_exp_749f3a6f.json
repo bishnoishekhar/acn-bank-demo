@@ -1,0 +1,7 @@
+{
+  "name": "a62c0279-0dc8-4f02-962a-9bc0f8ca5d4f",
+  "displayName": "eval_exp_749f3a6f",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: Chander Bishnoi. [HIGH] Full legal name must not be used when preferred_name is set"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "d0a00bfb-2516-46c7-ba61-28d5548d1a1d",
+  "displayName": "eval_exp_3d9aeb00",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the PAD cancellation rights disclosure after the cancelPAD tool call succeeds."
+  }
+}

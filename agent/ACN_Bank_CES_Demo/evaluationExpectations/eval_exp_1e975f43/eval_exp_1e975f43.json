@@ -1,0 +1,7 @@
+{
+  "name": "3f175ea4-ea37-46e7-8ae3-70f083c772d1",
+  "displayName": "eval_exp_1e975f43",
+  "llmCriteria": {
+    "prompt": "CONTAINS: cdic_explanation. [HIGH] CDIC explanation verbatim copy must be delivered when a deposit FAQ is answered"
+  }
+}

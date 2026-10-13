@@ -1,0 +1,43 @@
+{
+  "name": "12135899-459c-4821-abb2-4c94339e307b",
+  "displayName": "tc_m44_004_confirmation_email_after_booking",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.4", "email", "BRN-02", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Book the 10am slot on Thursday"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your appointment has been booked for Thursday at 10am. A confirmation email has been sent to your registered email address."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5bdc7a00-66a5-49ee-a1ad-017e6fecbe99",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-74bed2b2-f6fc-4a6a-9b22-1b3f5ee6ea87",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_04965577", "eval_exp_82bb3786"]
+  },
+  "invalid": true
+}

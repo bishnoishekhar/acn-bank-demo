@@ -1,0 +1,33 @@
+{
+  "name": "bb59da83-74d5-4887-83ce-b38806be501d",
+  "displayName": "TC-M0-005 — M0 routes service intent to acn_service_hub 2",
+  "description": "M0 routes service intent to acn_service_hub | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "routing", "M4", "service-hub", "P0", "HIGH", "voice"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I want to speak to someone about a dispute"
+        }
+      }, {
+        "expectation": {
+          "note": "[HIGH]",
+          "agentTransfer": {
+            "targetAgent": "acn_service_hub",
+            "displayName": "acn_service_hub"
+          }
+        }
+      }]
+    }]
+  }
+}

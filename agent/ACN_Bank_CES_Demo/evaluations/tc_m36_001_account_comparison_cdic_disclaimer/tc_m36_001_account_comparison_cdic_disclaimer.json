@@ -1,0 +1,25 @@
+{
+  "name": "e007e025-bf45-44d5-be74-42d13bb55c8b",
+  "displayName": "tc_m36_001_account_comparison_cdic_disclaimer",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.6", "account-opening", "OPN-01", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What savings accounts do you offer?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "ACN Bank offers several savings account options. All eligible deposits are protected by CDIC up to $100,000 per category. Please note this is for general information only and does not constitute financial advice."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_84de8b3c", "eval_exp_857df454", "eval_exp_be0a4914"]
+  },
+  "invalid": true
+}

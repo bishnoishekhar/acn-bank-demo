@@ -1,0 +1,9 @@
+{
+  "name": "a6cd531f-67e9-4ea1-aea7-f5552675c030",
+  "pythonFunction": {
+    "name": "epp_plan_calculator",
+    "pythonCode": "tools/epp_plan_calculator/python_function/python_code.py"
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "epp_plan_calculator"
+}

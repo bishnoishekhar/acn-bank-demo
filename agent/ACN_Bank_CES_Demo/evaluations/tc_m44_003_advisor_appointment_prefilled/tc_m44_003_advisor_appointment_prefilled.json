@@ -1,0 +1,25 @@
+{
+  "name": "d52f380e-d1e7-44ee-ba1f-453660ec3886",
+  "displayName": "tc_m44_003_advisor_appointment_prefilled",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.4", "advisor", "BR-ACN-083", "GB-35", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Yes, I\u0027d like to book that"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll book you an appointment with an investment advisor. Let me find the available times for you."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ce32d862", "eval_exp_13be44ff"]
+  },
+  "invalid": true
+}

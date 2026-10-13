@@ -1,0 +1,7 @@
+{
+  "name": "4523d243-ff84-43de-b706-9daa97d7a9f7",
+  "displayName": "eval_exp_c6b52970",
+  "llmCriteria": {
+    "prompt": "The second turn must respond to the GIC question without appending another nudge."
+  }
+}

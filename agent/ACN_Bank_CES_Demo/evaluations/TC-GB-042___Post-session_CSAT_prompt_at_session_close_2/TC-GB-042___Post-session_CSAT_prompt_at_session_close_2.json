@@ -1,0 +1,24 @@
+{
+  "name": "cde8f5c8-6f72-4ae6-8cf1-7d0e3a931295",
+  "displayName": "TC-GB-042 — Post-session CSAT prompt at session close 2",
+  "description": "Post-session CSAT prompt at session close | Priority: P2 | Severity: LOW | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-42 1", "BR-ACN-095 1", "csat 1", "webchat 1", "closing 1", "P2 1", "LOW 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "That\u0027s all, goodbye"
+        }
+      }]
+    }]
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "name": "ab307cb9-a81c-4db4-bd01-d69f4a2a9a6c",
+  "displayName": "TC-GB-012 — Fraud fast-path bypasses auth, routes to acn_disputes 2",
+  "description": "Fraud fast-path bypasses auth, routes to acn_disputes | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST-FRAUD-001 | Channel: voice | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["GB-12 1", "BR-ACN-014 1", "fraud 1", "fast-path 1", "routing 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "persona_id": "CUST-FRAUD-001",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Someone stole my identity and made charges"
+        }
+      }, {
+        "expectation": {
+          "note": "agent transfer target must be \u0027acn_disputes\u0027 [NO-GO]",
+          "agentTransfer": {
+            "targetAgent": "acn_disputes",
+            "displayName": "acn_disputes"
+          }
+        }
+      }]
+    }]
+  }
+}

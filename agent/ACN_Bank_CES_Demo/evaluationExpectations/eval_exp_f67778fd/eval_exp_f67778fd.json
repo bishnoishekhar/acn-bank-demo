@@ -1,0 +1,7 @@
+{
+  "name": "78f22487-68f2-4304-b817-7486ea06779c",
+  "displayName": "eval_exp_f67778fd",
+  "llmCriteria": {
+    "prompt": "The agent must generate an idempotency key on the first confirmed payment."
+  }
+}

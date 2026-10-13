@@ -1,0 +1,7 @@
+{
+  "name": "002e832d-763b-40ad-8bbf-d20ec8a67967",
+  "displayName": "eval_exp_f3771390",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the wire transfer disclosure before executing the wire."
+  }
+}

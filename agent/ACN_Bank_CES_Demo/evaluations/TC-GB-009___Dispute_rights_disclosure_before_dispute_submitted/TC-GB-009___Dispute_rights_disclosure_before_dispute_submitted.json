@@ -1,0 +1,24 @@
+{
+  "name": "TC-GB-009",
+  "displayName": "TC-GB-009 — Dispute rights disclosure before dispute submitted",
+  "description": "Dispute rights disclosure before dispute submitted | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST-FRAUD-001 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-09", "BR-ACN-011", "dispute", "rights", "disclosure", "webchat", "P0", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST-FRAUD-001",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I want to dispute a charge"
+        }
+      }]
+    }]
+  }
+}

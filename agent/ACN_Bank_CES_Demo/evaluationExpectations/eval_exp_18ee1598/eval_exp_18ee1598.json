@@ -1,0 +1,7 @@
+{
+  "name": "ece4f528-632e-418c-b9e4-177c508d7b19",
+  "displayName": "eval_exp_18ee1598",
+  "llmCriteria": {
+    "prompt": "The response must be prompt and reassuring, not a redirect to a menu."
+  }
+}

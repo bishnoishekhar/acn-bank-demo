@@ -1,0 +1,7 @@
+{
+  "name": "e1fc006c-b5f0-4f20-8d8c-c58077269cf9",
+  "displayName": "eval_exp_9880f846",
+  "llmCriteria": {
+    "prompt": "card_carousel widget must contain at most 3 cards (cards.length \u003c\u003d 3)."
+  }
+}

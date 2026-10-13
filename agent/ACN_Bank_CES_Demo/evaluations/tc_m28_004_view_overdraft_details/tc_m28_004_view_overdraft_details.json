@@ -1,0 +1,34 @@
+{
+  "name": "2885b699-91e6-4408-9eb2-618d3b367196",
+  "displayName": "tc_m28_004_view_overdraft_details",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "overdraft", "ODP-01", "getOverdraftDetails", "BR-ACN-052", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Can you show me my overdraft protection status?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your overdraft protection is currently enabled with a limit of $500. Your current overdraft balance is $0."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-10e7a9df-1416-4342-8ef3-b90d5d8f30d4",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_af26788d", "eval_exp_7a83779f", "eval_exp_a6eadba3"]
+  },
+  "invalid": true
+}

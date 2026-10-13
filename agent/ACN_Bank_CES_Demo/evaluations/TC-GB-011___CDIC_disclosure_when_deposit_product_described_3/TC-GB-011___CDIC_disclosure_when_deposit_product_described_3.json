@@ -1,0 +1,24 @@
+{
+  "name": "6b29127a-4d03-4620-a4dd-ada9daa78694",
+  "displayName": "TC-GB-011 — CDIC disclosure when deposit product described 3",
+  "description": "CDIC disclosure when deposit product described | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-11", "BR-ACN-013", "cdic", "deposit", "disclosure", "webchat", "P0", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Tell me about GIC rates"
+        }
+      }]
+    }]
+  }
+}

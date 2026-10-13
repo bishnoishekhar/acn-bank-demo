@@ -1,0 +1,7 @@
+{
+  "name": "053eb041-310e-4bae-813e-8f4636932637",
+  "displayName": "eval_exp_b4dd207a",
+  "llmCriteria": {
+    "prompt": "[TC-M5-006] Idle timeout drops auth from L2 to L1"
+  }
+}

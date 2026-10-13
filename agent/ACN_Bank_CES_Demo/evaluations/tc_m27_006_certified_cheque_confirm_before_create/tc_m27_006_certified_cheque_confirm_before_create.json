@@ -1,0 +1,49 @@
+{
+  "name": "0973edfd-eea3-4b88-895b-cd9bf61fff35",
+  "displayName": "tc_m27_006_certified_cheque_confirm_before_create",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-04", "createCertifiedCheque", "webchat", "P2", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I need a certified cheque for fifty thousand dollars payable to Westside Properties"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I can prepare a certified cheque for $50,000 payable to Westside Properties. Which account would you like to draw from, and can you confirm the details are correct?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "From my chequing account — yes, confirm"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your certified cheque for $50,000 payable to Westside Properties has been ordered. Your reference number is CC-2026-001. The cheque will be ready for pickup at your branch."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-d32614ee-4342-4aaa-94cc-62f6f0234730",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_cfd22b37", "eval_exp_d5e09608", "eval_exp_69c8a16c"]
+  },
+  "invalid": true
+}

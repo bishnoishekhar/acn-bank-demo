@@ -1,0 +1,25 @@
+{
+  "name": "99c5b630-ca5b-4d9a-9510-d8b05cdf8d70",
+  "displayName": "tc_m0_010_closing_summary_completed_actions",
+  "tags": ["acn_bank_ces_demo", "m0", "closing", "BR-ACN-077", "voice", "P1", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "That\u0027s all"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Thank you for calling ACN Bank. To recap today\u0027s session: I processed a payment of $50 to Rogers on your behalf. Is there anything else before we wrap up?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_fed6c472"]
+  },
+  "invalid": true
+}

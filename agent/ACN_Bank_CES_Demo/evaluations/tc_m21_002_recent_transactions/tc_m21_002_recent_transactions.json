@@ -1,0 +1,34 @@
+{
+  "name": "56e52363-108a-404d-9076-42a639a4f631",
+  "displayName": "tc_m21_002_recent_transactions",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.1", "transactions", "ACC-02", "voice", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Show me my recent transactions"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your most recent transactions. Your last 3 transactions were: Tim Hortons $4.50, Rogers $85.00, and Grocery Store $67.23."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-9a953c39-ee98-4b7c-a0d2-59c8a8a66635",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_d85af045", "eval_exp_5c67c873"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,60 @@
+{
+  "name": "a45e0d8c-83b0-4c36-af40-21b63aa5b228",
+  "displayName": "tc_m5_002_l2_otp_authentication_webchat",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "L2", "otp", "webchat", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027d like to see my account balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To access your account details I need to verify your identity. I\u0027ve sent a one-time passcode to your registered mobile number. Please enter the 6-digit code when you receive it."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-1c268bb7-49aa-44ae-b240-a3d482864614",
+            "tool": "issue_otp",
+            "args": {
+            },
+            "displayName": "issue_otp"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "123456"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Thank you, your identity has been verified. I can now access your account. What would you like to know about your balance?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-b0feb219-60eb-4001-8a3a-488c088aaa33",
+            "tool": "verify_otp",
+            "args": {
+            },
+            "displayName": "verify_otp"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_58385185", "eval_exp_a4d48590", "eval_exp_00bff5b9", "eval_exp_6d496cd0", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

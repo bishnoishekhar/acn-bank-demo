@@ -1,0 +1,10 @@
+{
+  "name": "authorize_step_up",
+  "pythonFunction": {
+    "name": "authorize_step_up",
+    "pythonCode": "tools/authorize_step_up/python_function/python_code.py",
+    "description": "    M5 step-up: L2 → L3.\n    action_type: new_payee | threshold | wire | limit_increase | contact_change | unfreeze | pin_change | payee_edit\n    Returns step_up_valid_until and step_up_action_hash (120s single-action validity).\nCalled silently during step-up authorization. Do NOT speak any pacing phrase before calling this tool."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "authorize_step_up"
+}

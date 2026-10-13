@@ -1,0 +1,36 @@
+{
+  "name": "acaba0b8-0738-47ff-ac1d-9452d04c0d66",
+  "displayName": "tc_m23_003_travel_notice_destination",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.3", "travel", "CRD-05", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027m travelling to Japan next week, set up a travel notice"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your travel notice for Japan has been set up. Your card will be enabled for use in Japan for the next 30 days."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-1db429d7-5c65-44f4-bacf-9abcc470e862",
+            "tool": "",
+            "args": {
+              "action": "travel_notice",
+              "destination": "Japan"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2396b9d7"]
+  },
+  "invalid": true
+}

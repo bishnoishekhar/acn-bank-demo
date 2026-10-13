@@ -1,0 +1,25 @@
+{
+  "name": "9a7670e3-ac16-466b-8093-1ec722a9ffc5",
+  "displayName": "tc_m31_008_docai_processor_error_3_strikes",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1a", "kyc", "docai", "processor-error", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "[document upload triggered during KYC stage]"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry, we\u0027re experiencing a technical issue with document verification. I\u0027ll connect you with a specialist who can assist you with your application."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4eea4729", "eval_exp_7dfc811c"]
+  },
+  "invalid": true
+}

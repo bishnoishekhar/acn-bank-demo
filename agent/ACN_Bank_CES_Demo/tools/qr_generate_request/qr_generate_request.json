@@ -1,0 +1,10 @@
+{
+  "name": "qr_generate_request",
+  "pythonFunction": {
+    "name": "qr_generate_request",
+    "pythonCode": "tools/qr_generate_request/python_function/python_code.py",
+    "description": "Generates a QR code payment request for receiving funds.\nGenerates a QR payment request silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "qr_generate_request"
+}

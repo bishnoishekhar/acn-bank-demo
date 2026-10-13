@@ -1,0 +1,7 @@
+{
+  "name": "87ddf64d-93b6-40eb-895a-f1ffad504214",
+  "displayName": "eval_exp_f96c6a5a",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: marketing_opt_out\u003dTrue. [HIGH] CIE must set marketing_opt_out\u003dtrue in session when customer profile has opt-out"
+  }
+}

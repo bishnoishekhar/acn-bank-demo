@@ -1,0 +1,7 @@
+{
+  "name": "158c2755-7a76-4322-8ce0-1da1a2aea055",
+  "displayName": "eval_exp_224ea9d3",
+  "llmCriteria": {
+    "prompt": "sin_optional_notice copy key must be delivered before the SIN field is requested (BR-ACN-004)."
+  }
+}

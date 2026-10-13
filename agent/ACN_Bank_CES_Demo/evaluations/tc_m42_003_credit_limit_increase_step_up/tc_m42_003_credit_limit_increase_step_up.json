@@ -1,0 +1,35 @@
+{
+  "name": "e3859517-81df-4e1f-9973-c16eeabbea49",
+  "displayName": "tc_m42_003_credit_limit_increase_step_up",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.2", "limit", "ACT-05", "step-up", "voice", "P0", "NO-GO", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Increase my credit limit"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I process a credit limit increase, please be aware that requests to increase credit limits may sometimes be prompted by fraudulent third parties. If anyone has asked you to increase your limit and send money, please let us know immediately. I\u0027ll need to verify this with an additional security step."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-8f8b425e-10ca-4020-9a83-20de12fec0f4",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0c363309", "eval_exp_2077f1a9"]
+  },
+  "invalid": true
+}

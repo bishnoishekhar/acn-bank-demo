@@ -1,0 +1,7 @@
+{
+  "name": "fa09a287-5ffe-48bb-9665-689c5e96ed85",
+  "displayName": "eval_exp_7dd10f34",
+  "llmCriteria": {
+    "prompt": "The agent must NOT emit a widget without accompanying quick_actions."
+  }
+}

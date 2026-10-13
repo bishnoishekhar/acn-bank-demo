@@ -1,0 +1,7 @@
+{
+  "name": "17e628c5-ded6-4591-acbf-ca28a4d15be0",
+  "displayName": "eval_exp_a1db8012",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must NOT be called for cheque stop payments (BR-ACN-049)."
+  }
+}

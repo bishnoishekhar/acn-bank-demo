@@ -1,0 +1,10 @@
+{
+  "name": "calculate_mortgage_payment",
+  "pythonFunction": {
+    "name": "calculate_mortgage_payment",
+    "pythonCode": "tools/calculate_mortgage_payment/python_function/python_code.py",
+    "description": "Calculates monthly mortgage payment, GDS/TDS ratios, and CMHC premium.\nReturns mortgage payment calculations silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "calculate_mortgage_payment"
+}

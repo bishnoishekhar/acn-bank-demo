@@ -1,0 +1,25 @@
+{
+  "name": "bda769b8-34e9-4ccc-a114-d5a7829a08fb",
+  "displayName": "tc_m0_004_route_products_hub",
+  "tags": ["acn_bank_ces_demo", "m0", "routing", "m3", "products-hub", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want a new credit card"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll connect you with our products team who can help you explore our credit card options."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b20abb67"]
+  },
+  "invalid": true
+}

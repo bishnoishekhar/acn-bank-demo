@@ -1,0 +1,7 @@
+{
+  "name": "30dfc104-ced3-40ea-9dc1-92c3b4426927",
+  "displayName": "eval_exp_ea63add2",
+  "llmCriteria": {
+    "prompt": "[TC-M24-001] Explicit offer request routes to acn_offers_nudge and response contains offer/promotion language"
+  }
+}

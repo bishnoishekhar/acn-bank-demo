@@ -1,0 +1,7 @@
+{
+  "name": "f939b796-4fec-4d48-80e2-a571d811dc35",
+  "displayName": "eval_exp_288c657d",
+  "llmCriteria": {
+    "prompt": "After three consecutive failed authentication attempts, the agent must lock auth_locked\u003dtrue."
+  }
+}

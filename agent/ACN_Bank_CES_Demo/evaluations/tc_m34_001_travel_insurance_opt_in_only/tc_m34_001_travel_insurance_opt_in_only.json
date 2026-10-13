@@ -1,0 +1,25 @@
+{
+  "name": "db7f6654-52f6-4c45-af94-5900cc23aa48",
+  "displayName": "tc_m34_001_travel_insurance_opt_in_only",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.4", "insurance", "TRP-04", "BR-ACN-058", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027m planning a trip to Europe next month, what protection do you offer?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "ACN Bank offers travel insurance coverage through our partner. Please note that travel insurance products are underwritten by a third-party insurer and are subject to policy terms and conditions. This is not financial advice. Would you like to add travel protection to your trip?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_875a779f", "eval_exp_49ec5e14"]
+  },
+  "invalid": true
+}

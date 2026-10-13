@@ -1,0 +1,88 @@
+openapi: "3.0.3"
+info:
+  title: Send Application Email - Direct Firestore
+  version: "1.0.0"
+  description: Template-based email notification API for ACN Bank CES Demo (Direct Firestore email queue)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/email_queue:
+    post:
+      operationId: executeACNBankApplicationEmail
+      summary: Send a template-based email notification to a customer
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SendEmailRequest"
+      responses:
+        "200":
+          description: Email sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    SendEmailRequest:
+      type: object
+      required:
+        - customerId
+        - templateId
+        - recipientEmail
+      properties:
+        customerId:
+          type: string
+        templateId:
+          type: string
+          enum:
+            - application_confirmation
+            - application_approved
+            - application_declined
+            - kyc_request
+            - statement_link
+            - appointment_confirmation
+            - appointment_reminder
+            - transfer_confirmation
+            - password_reset
+            - card_activation
+        recipientEmail:
+          type: string
+          format: email
+        templateData:
+          type: object
+          description: Template-specific variables to populate the email
+          additionalProperties: true
+          properties:
+            customerName:
+              type: string
+            applicationId:
+              type: string
+            applicationDate:
+              type: string
+            productName:
+              type: string
+            appointmentDate:
+              type: string
+            appointmentTime:
+              type: string
+            branchName:
+              type: string
+            amount:
+              type: number
+            currency:
+              type: string
+            statementUrl:
+              type: string
+            kycUrl:
+              type: string
+        idempotencyKey:
+          type: string

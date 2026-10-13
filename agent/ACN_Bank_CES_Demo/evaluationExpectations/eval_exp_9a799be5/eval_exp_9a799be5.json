@@ -1,0 +1,7 @@
+{
+  "name": "f77c8f2f-185f-49b1-ab3b-a21d9dde71c8",
+  "displayName": "eval_exp_9a799be5",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: preferred_language\u003dfr-CA. [HIGH] Session language must be updated to fr-CA on explicit language switch request"
+  }
+}

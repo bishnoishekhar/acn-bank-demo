@@ -1,0 +1,34 @@
+{
+  "name": "41830a05-2b3a-4f1c-a3d4-283563433507",
+  "displayName": "tc_m27_002_already_cleared_cheque_no_stop",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-01", "negative-flow", "cleared", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Stop cheque number 291 for $800 to BuildRight"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I checked the status of cheque #291 and it has already cleared. Unfortunately, this cheque cannot be stopped as it has already been processed."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-642f1970-0541-4482-81a2-47b20ace2662",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_1a94c780", "eval_exp_ef02d464", "eval_exp_18906f4b"]
+  },
+  "invalid": true
+}

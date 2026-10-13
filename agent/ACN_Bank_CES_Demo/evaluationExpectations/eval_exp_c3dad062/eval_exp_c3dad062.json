@@ -1,0 +1,7 @@
+{
+  "name": "0aef4c50-9592-42f0-beb8-4917cb868865",
+  "displayName": "eval_exp_c3dad062",
+  "llmCriteria": {
+    "prompt": "The agent must NOT continue attempting to serve the customer after 3 failed turns."
+  }
+}

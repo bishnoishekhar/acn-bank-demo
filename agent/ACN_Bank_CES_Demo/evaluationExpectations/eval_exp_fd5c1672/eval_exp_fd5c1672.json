@@ -1,0 +1,7 @@
+{
+  "name": "3dfd87a3-45eb-40c2-8044-1ec661899556",
+  "displayName": "eval_exp_fd5c1672",
+  "llmCriteria": {
+    "prompt": "[TC-M21-001] Account balance query returns balance for the named account via getAccounts tool"
+  }
+}

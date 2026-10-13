@@ -1,0 +1,7 @@
+{
+  "name": "8e64e752-39d3-43e0-9722-8f69917e3164",
+  "displayName": "eval_exp_0cd83420",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must be called before createTransaction for Interac e-Transfer to a new recipient (PAY-04 NO-GO)."
+  }
+}

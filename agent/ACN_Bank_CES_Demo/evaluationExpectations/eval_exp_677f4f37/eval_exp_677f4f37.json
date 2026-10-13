@@ -1,0 +1,7 @@
+{
+  "name": "5d2677f7-e306-41c9-8668-0a63c12395b8",
+  "displayName": "eval_exp_677f4f37",
+  "llmCriteria": {
+    "prompt": "[TC-M28-001] Eligible NSF reversal calls createNSFReversal and delivers nsf_reversal_confirmation verbatim copy"
+  }
+}

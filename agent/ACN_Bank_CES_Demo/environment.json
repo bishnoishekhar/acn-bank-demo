@@ -1,0 +1,214 @@
+{
+  "toolsets": {
+    "account_opening_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "appointments_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "card_applications": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "cheque_services_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "customer_intelligence_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "digital_activation_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "disputes_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "faq_knowledge_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "fx_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "investments_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "kyc_request_tracking": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "loan_applications": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "manageCustomerDatabase": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "new_transaction_api_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "overdraft_pad_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "persist_approved_credit_card": {
+      "openApiToolset": {
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "preferences_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "rewards_loyalty_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "send_application_email": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "send_kyc_sms": {
+      "openApiToolset": {
+        "url": "https://send-kyc-sms-atdx7g5daa-uc.a.run.app"
+      }
+    },
+    "send_whatsapp": {
+      "openApiToolset": {
+        "url": "https://send-whatsapp-acn-atdx7g5daa-uc.a.run.app"
+      }
+    },
+    "update_customer_api_db": {
+      "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
+        "url": "https://firestore.googleapis.com"
+      }
+    },
+    "write_kyc_to_db": {
+      "openApiToolset": {
+        "url": "https://firestore.googleapis.com"
+      }
+    }
+  }
+}

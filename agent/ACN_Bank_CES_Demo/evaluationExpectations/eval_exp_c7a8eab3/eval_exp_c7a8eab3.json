@@ -1,0 +1,7 @@
+{
+  "name": "13bf4837-35f6-42be-b9a9-21ae4fbd6582",
+  "displayName": "eval_exp_c7a8eab3",
+  "llmCriteria": {
+    "prompt": "The channel must be locked to webchat for the entire session and must not revert to voice."
+  }
+}

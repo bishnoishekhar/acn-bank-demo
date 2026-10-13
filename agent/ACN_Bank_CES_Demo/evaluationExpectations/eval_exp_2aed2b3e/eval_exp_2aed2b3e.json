@@ -1,0 +1,7 @@
+{
+  "name": "53dcd981-6112-45bf-8ae3-a8cc07e5459d",
+  "displayName": "eval_exp_2aed2b3e",
+  "llmCriteria": {
+    "prompt": "The agent must NOT close the session without offering the CSAT rating."
+  }
+}

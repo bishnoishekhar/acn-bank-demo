@@ -1,0 +1,7 @@
+{
+  "name": "91731591-0d39-4dc0-bd51-2f217f2f4273",
+  "displayName": "eval_exp_ab01e54b",
+  "llmCriteria": {
+    "prompt": "getConfig must be called with key\u003dmortgage_rates."
+  }
+}

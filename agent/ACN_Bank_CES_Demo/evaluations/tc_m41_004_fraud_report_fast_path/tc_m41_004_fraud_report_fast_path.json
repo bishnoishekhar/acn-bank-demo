@@ -1,0 +1,25 @@
+{
+  "name": "c4c860b6-c079-4e33-9cea-a87902ab38e6",
+  "displayName": "tc_m41_004_fraud_report_fast_path",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.1", "fraud", "DSP-03", "BR-ACN-014", "voice", "P0", "NO-GO", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "My account has been hacked and someone is stealing my money"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m so sorry to hear that — this must be very distressing. I\u0027m taking immediate action to protect your account. I\u0027m suspending your card right now and connecting you with our fraud specialists who can help secure your account and investigate."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ea86adaf", "eval_exp_7ac78d55", "eval_exp_5f35bb44"]
+  },
+  "invalid": true
+}

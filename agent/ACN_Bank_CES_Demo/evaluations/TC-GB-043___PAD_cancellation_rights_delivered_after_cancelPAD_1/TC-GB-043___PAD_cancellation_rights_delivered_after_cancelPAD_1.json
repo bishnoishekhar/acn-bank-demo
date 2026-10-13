@@ -1,0 +1,30 @@
+{
+  "name": "49cc9483-8572-4568-8d1e-6c287cd47969",
+  "displayName": "TC-GB-043 — PAD cancellation rights delivered after cancelPAD 1",
+  "description": "PAD cancellation rights delivered after cancelPAD | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-43", "BR-ACN-096", "pad", "cancellation", "rights", "webchat", "P0", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I want to cancel my pre-authorized debit for Rogers"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, cancel it"
+        }
+      }]
+    }]
+  }
+}

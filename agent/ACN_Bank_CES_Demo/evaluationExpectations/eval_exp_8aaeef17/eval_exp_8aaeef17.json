@@ -1,0 +1,7 @@
+{
+  "name": "52e3cc4c-438f-467f-a633-2532fb268102",
+  "displayName": "eval_exp_8aaeef17",
+  "llmCriteria": {
+    "prompt": "After the third failure the agent must route to acn_exception_escalation — golden ends at the lock message, transfer is verified by this expectation."
+  }
+}

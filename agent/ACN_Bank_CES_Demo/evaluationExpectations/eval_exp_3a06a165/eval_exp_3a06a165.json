@@ -1,0 +1,7 @@
+{
+  "name": "ddf41b7a-22ea-4e62-be6c-4d500a891afa",
+  "displayName": "eval_exp_3a06a165",
+  "llmCriteria": {
+    "prompt": "The agent must deliver at most one proactive nudge per session."
+  }
+}

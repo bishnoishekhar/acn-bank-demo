@@ -1,0 +1,7 @@
+{
+  "name": "cb0a7bce-189b-4e01-b6f2-73bc08adc887",
+  "displayName": "eval_exp_6913efd3",
+  "llmCriteria": {
+    "prompt": "CONTAINS: dispatched | arrive | delivery | expected"
+  }
+}

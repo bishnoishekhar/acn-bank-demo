@@ -1,0 +1,7 @@
+{
+  "name": "b07fa9a8-22a7-447f-8226-9dfb6ac45119",
+  "displayName": "eval_exp_747102be",
+  "llmCriteria": {
+    "prompt": "Response must include a reference number after successful FX order (FX-02)."
+  }
+}

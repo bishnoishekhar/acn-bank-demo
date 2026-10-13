@@ -1,0 +1,7 @@
+{
+  "name": "b297dc19-88a1-4381-87c9-d1b6a70a0da0",
+  "displayName": "eval_exp_b56d8140",
+  "llmCriteria": {
+    "prompt": "The agent may emit widget payloads on webchat."
+  }
+}

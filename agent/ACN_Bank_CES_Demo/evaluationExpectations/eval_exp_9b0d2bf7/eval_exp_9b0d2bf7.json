@@ -1,0 +1,7 @@
+{
+  "name": "d92c069a-4a82-48f6-a386-ce95308cad0b",
+  "displayName": "eval_exp_9b0d2bf7",
+  "llmCriteria": {
+    "prompt": "[TC-M21-005] Tax document retrieval calls getTaxDocuments and renders tax_document_list widget W-32"
+  }
+}

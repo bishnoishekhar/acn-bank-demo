@@ -1,0 +1,44 @@
+{
+  "name": "4923dfca-9672-4a6e-ad2c-e6bf87daf290",
+  "displayName": "TC-GB-014 — 3-strike escalation triggers acn_exception_escalation 2",
+  "description": "3-strike escalation triggers acn_exception_escalation | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-14 1", "BR-ACN-016 1", "escalation 1", "3-strike 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "zzz gibberish one"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "zzz gibberish two"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "zzz gibberish three"
+        }
+      }, {
+        "expectation": {
+          "note": "agent transfer target must be \u0027acn_exception_escalation\u0027 [NO-GO]",
+          "agentTransfer": {
+            "targetAgent": "acn_exception_escalation",
+            "displayName": "acn_exception_escalation"
+          }
+        }
+      }]
+    }]
+  }
+}

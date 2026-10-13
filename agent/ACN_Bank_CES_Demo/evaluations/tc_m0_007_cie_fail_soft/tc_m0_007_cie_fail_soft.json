@@ -1,0 +1,35 @@
+{
+  "name": "14713ddf-97c9-4013-a5d1-504907eca29e",
+  "displayName": "tc_m0_007_cie_fail_soft",
+  "tags": ["acn_bank_ces_demo", "m0", "m1", "fail-soft", "CIE", "voice", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your chequing account balance is $4,823.17. How can I assist you today?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-b764ec42-4e7d-4f41-ad74-6cc2e9acded3",
+            "tool": "acn_customer_intelligence_engine",
+            "args": {
+            },
+            "displayName": "acn_customer_intelligence_engine"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0e017940", "eval_exp_184ce8d4", "eval_exp_f73a85e4"]
+  },
+  "invalid": true
+}

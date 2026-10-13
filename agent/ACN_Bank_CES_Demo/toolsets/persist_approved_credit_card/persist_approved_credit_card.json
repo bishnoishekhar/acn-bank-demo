@@ -1,0 +1,12 @@
+{
+  "name": "7431a119-e50c-4b6a-ace6-d2de3542afed",
+  "displayName": "persist_approved_credit_card",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/persist_approved_credit_card/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAgentIdTokenAuthConfig": {
+      }
+    }
+  },
+  "description": "Persist an approved credit card application to the customer platform. Supports create, read, and update operations on credit card application records."
+}

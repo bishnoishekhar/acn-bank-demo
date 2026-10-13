@@ -1,0 +1,7 @@
+{
+  "name": "03f396f0-abb2-4a89-9d84-22331fc373d1",
+  "displayName": "eval_exp_edd1ab5a",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: auth_level\u003d1. [HIGH] auth_level must drop from 2 to 1 after idle timeout threshold is exceeded"
+  }
+}

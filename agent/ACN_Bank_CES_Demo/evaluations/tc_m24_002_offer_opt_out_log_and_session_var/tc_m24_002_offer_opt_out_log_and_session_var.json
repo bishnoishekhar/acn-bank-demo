@@ -1,0 +1,35 @@
+{
+  "name": "1d909694-8110-465b-95a8-136ac830d868",
+  "displayName": "tc_m24_002_offer_opt_out_log_and_session_var",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.4", "opt-out", "OFR-03", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I don\u0027t want to receive offers"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve updated your preferences. You will no longer receive promotional offers."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-fbbcb6b1-efaf-4ad4-b73f-ee16f13b2955",
+            "tool": "",
+            "args": {
+              "outcome": "opted_out"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_88c154cd", "eval_exp_19b0d8d9"]
+  },
+  "invalid": true
+}

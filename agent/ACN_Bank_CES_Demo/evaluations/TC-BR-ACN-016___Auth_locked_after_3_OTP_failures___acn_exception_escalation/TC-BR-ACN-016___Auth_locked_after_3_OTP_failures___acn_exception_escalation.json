@@ -1,0 +1,44 @@
+{
+  "name": "TC-BR-ACN-016",
+  "displayName": "TC-BR-ACN-016 — Auth locked after 3 OTP failures → acn_exception_escalation",
+  "description": "Auth locked after 3 OTP failures → acn_exception_escalation | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d1, mode\u003dotp",
+  "tags": ["BR-ACN-016", "auth", "lock", "otp", "webchat", "P0", "NO-GO"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 1.0,
+            "auth_mode": "otp",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "000000"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "111111"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "222222"
+        }
+      }, {
+        "expectation": {
+          "note": "agent transfer target must be \u0027acn_exception_escalation\u0027 [NO-GO]",
+          "agentTransfer": {
+            "targetAgent": "acn_exception_escalation",
+            "displayName": "acn_exception_escalation"
+          }
+        }
+      }]
+    }]
+  }
+}

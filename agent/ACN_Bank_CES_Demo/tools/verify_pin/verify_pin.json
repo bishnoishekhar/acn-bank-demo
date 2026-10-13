@@ -1,0 +1,9 @@
+{
+  "name": "verify_pin",
+  "pythonFunction": {
+    "name": "verify_pin",
+    "pythonCode": "tools/verify_pin/python_function/python_code.py",
+    "description": "Validate telephone banking PIN via masked DTMF input.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    pin_masked: DTMF-captured PIN, masked (e.g., \u0027*****\u0027).\n\nReturns:\n    {verified(bool), attempts_left(int), auth_level(int)}"
+  },
+  "displayName": "verify_pin"
+}

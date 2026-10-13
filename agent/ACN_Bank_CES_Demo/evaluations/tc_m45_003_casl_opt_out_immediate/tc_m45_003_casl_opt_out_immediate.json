@@ -1,0 +1,36 @@
+{
+  "name": "fac0071c-bef1-46fb-b1db-c3f7c648138e",
+  "displayName": "tc_m45_003_casl_opt_out_immediate",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.5", "casl", "opt-out", "PREF-03", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Stop sending me marketing emails"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve updated your preferences. You will no longer receive marketing emails from ACN Bank. This change takes effect immediately."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-2f492dbc-8434-4bfc-9808-4c90c711ec58",
+            "tool": "",
+            "args": {
+              "channel": "email",
+              "consented": false
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_54835b42", "eval_exp_d7469171"]
+  },
+  "invalid": true
+}

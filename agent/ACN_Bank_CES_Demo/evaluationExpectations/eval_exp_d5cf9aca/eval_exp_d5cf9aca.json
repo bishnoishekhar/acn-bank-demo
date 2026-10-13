@@ -1,0 +1,7 @@
+{
+  "name": "c6ba46d7-a996-4c69-85b7-dc7df9ace328",
+  "displayName": "eval_exp_d5cf9aca",
+  "llmCriteria": {
+    "prompt": "CONTAINS: address | delivery | confirm"
+  }
+}

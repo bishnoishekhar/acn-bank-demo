@@ -1,0 +1,7 @@
+{
+  "name": "50827adf-4120-49f0-816b-5f51b0120ff5",
+  "displayName": "eval_exp_834b8623",
+  "llmCriteria": {
+    "prompt": "step_up_required must be false for FX below CAD 1,000."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "ea3fd583-cb89-4842-9809-d3b14ff3f5fc",
+  "displayName": "tc_m31_007_docai_partial_fail_manual_review",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1a", "kyc", "docai", "manual_review", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "[document upload triggered during KYC stage]"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I wasn\u0027t able to fully verify your document automatically. Your application will need to be reviewed by our team. We\u0027ll be in touch within 2 business days."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_c1d268bb", "eval_exp_47102862"]
+  },
+  "invalid": true
+}

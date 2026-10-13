@@ -1,0 +1,10 @@
+{
+  "name": "format_for_tts",
+  "pythonFunction": {
+    "name": "format_for_tts",
+    "pythonCode": "tools/format_for_tts/python_function/python_code.py",
+    "description": "Expands currency, dates, numbers for natural TTS speech.\nInternal text-formatting utility — called silently. Do NOT speak any pacing phrase; the tool output IS what the agent speaks."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "format_for_tts"
+}

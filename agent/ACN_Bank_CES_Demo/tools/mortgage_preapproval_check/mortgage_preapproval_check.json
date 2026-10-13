@@ -1,0 +1,9 @@
+{
+  "name": "f953331e-6dc5-4e60-90e4-41ad491c75a5",
+  "pythonFunction": {
+    "name": "mortgage_preapproval_check",
+    "pythonCode": "tools/mortgage_preapproval_check/python_function/python_code.py"
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "mortgage_preapproval_check"
+}

@@ -1,0 +1,7 @@
+{
+  "name": "1feec130-b7c7-4309-91b9-e50f0a52ba57",
+  "displayName": "eval_exp_d5e09608",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must NOT be called for certified cheques (CHQ-04)."
+  }
+}

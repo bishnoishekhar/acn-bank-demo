@@ -1,0 +1,7 @@
+{
+  "name": "84fbe287-fd7d-4b9e-982c-054b5355c755",
+  "displayName": "eval_exp_02059bab",
+  "llmCriteria": {
+    "prompt": "The agent must respond in French for all subsequent turns."
+  }
+}

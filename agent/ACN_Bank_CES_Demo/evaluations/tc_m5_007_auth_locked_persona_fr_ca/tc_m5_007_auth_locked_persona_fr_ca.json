@@ -1,0 +1,35 @@
+{
+  "name": "6197339f-4cce-4b0b-baba-f028613edc1e",
+  "displayName": "tc_m5_007_auth_locked_persona_fr_ca",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "lock", "fr-CA", "AUTH_REQUIRED", "Quebec", "voice", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003ewelcome\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Bonjour, merci d\u0027appeler ACN Banque. Pour des raisons de sécurité liées à votre compte, je dois vous transférer à un spécialiste de notre équipe. Veuillez patienter un instant."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-f10fa0df-06fc-43d8-824b-77b2dbe1f549",
+            "tool": "identify_customer",
+            "args": {
+            },
+            "displayName": "identify_customer"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_9f7a95b2", "eval_exp_4766beb2", "eval_exp_e48a0a13", "eval_exp_bb49cb4d", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

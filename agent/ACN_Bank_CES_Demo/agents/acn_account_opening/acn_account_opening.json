@@ -1,0 +1,34 @@
+{
+  "name": "acn_account_opening",
+  "displayName": "acn_account_opening",
+  "instruction": "agents/acn_account_opening/instruction.txt",
+  "tools": ["acn-form-input", "acn_identity_security_hub", "docai_document_processors", "docai_drivers_license", "end_session", "mobile_handoff", "mortgage_kyc", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_account_opening/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_account_opening/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_account_opening/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_account_opening/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_account_opening/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "account_opening_db",
+    "toolIds": ["createAccountApplication", "getAccountApplicationStatus", "getAccountProducts"]
+  }, {
+    "toolset": "kyc_request_tracking",
+    "toolIds": ["createKycRequest", "getKycStatus", "writeKycRecord"]
+  }, {
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "send_application_email",
+    "toolIds": ["executeACNBankApplicationEmail"]
+  }]
+}

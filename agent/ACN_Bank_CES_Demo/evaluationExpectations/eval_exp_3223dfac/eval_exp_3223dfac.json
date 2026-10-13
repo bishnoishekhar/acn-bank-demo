@@ -1,0 +1,7 @@
+{
+  "name": "ff3559af-d9ca-4703-9c69-4dd98d3dfa24",
+  "displayName": "eval_exp_3223dfac",
+  "llmCriteria": {
+    "prompt": "Agent must NOT discuss margin account or borrow against portfolio language for this ineligible customer."
+  }
+}

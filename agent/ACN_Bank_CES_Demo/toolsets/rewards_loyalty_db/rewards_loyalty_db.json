@@ -1,0 +1,13 @@
+{
+  "name": "5c15bb3c-ef6a-4899-a4ff-f350db548d6e",
+  "displayName": "rewards_loyalty_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/rewards_loyalty_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Rewards and loyalty: balance inquiry, history, redemption creation and status."
+}

@@ -1,0 +1,143 @@
+openapi: "3.0.3"
+info:
+  title: FX DB - Direct Firestore
+  version: "1.0.0"
+  description: Foreign exchange rates and order execution API for ACN Bank CES Demo (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_rates:
+    get:
+      operationId: getExchangeRate
+      summary: Get indicative foreign exchange rate
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: fromCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: toCurrency
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: amount
+          in: query
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Exchange rate data
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_orders:
+    post:
+      operationId: createFXOrder
+      summary: Execute a foreign exchange conversion order
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFXOrderRequest"
+      responses:
+        "200":
+          description: FX order created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_drafts:
+    post:
+      operationId: createFXDraft
+      summary: Create a draft FX order for customer confirmation (rate held temporarily)
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFXDraftRequest"
+      responses:
+        "200":
+          description: FX draft created with held rate
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_orders/{orderId}:
+    get:
+      operationId: getFXOrderStatus
+      summary: Get the status of an FX order
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: FX order status
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateFXOrderRequest:
+      type: object
+      required:
+        - customerId
+        - fromCurrency
+        - toCurrency
+        - amount
+        - idempotencyKey
+      properties:
+        customerId:
+          type: string
+        fromAccountId:
+          type: string
+        toAccountId:
+          type: string
+        fromCurrency:
+          type: string
+        toCurrency:
+          type: string
+        amount:
+          type: number
+        draftId:
+          type: string
+        idempotencyKey:
+          type: string
+    CreateFXDraftRequest:
+      type: object
+      required:
+        - customerId
+        - fromCurrency
+        - toCurrency
+        - amount
+      properties:
+        customerId:
+          type: string
+        fromCurrency:
+          type: string
+        toCurrency:
+          type: string
+        amount:
+          type: number
+        purpose:
+          type: string

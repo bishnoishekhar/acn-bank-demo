@@ -1,0 +1,24 @@
+{
+  "name": "5c347785-0ac4-4a7e-8d02-d6850c265764",
+  "displayName": "TC-GB-020 — Webchat widget sequence: checkpoint → text → widget → quick_actions 2",
+  "description": "Webchat widget sequence: checkpoint → text → widget → quick_actions | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-20 1", "BR-ACN-023 1", "widget 1", "webchat 1", "sequence 1", "P0 1", "HIGH 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }]
+  }
+}

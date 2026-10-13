@@ -1,0 +1,446 @@
+{
+  "name": "e29e31ff-b686-46c8-8f02-f431f1422f1d",
+  "displayName": "ACN Bank CES Demo",
+  "description": "ACN Bank conversational AI agent - voice primary, webchat, WhatsApp. 31-agent GECX hierarchy covering banking, products, and service journeys. PRD v2.4.",
+  "rootAgent": "acn_lead_orchestrator",
+  "audioProcessingConfig": {
+    "synthesizeSpeechConfigs": {
+      "en-CA": {
+        "voice": "Iapetus",
+        "speakingRate": 1.1,
+        "instruction": "# Audio Profile\nVoice: Iapetus. Rate: 1.1x. Channel: telephony (PSTN/VoIP), webchat TTS, WhatsApp TTS. Locale: Canadian English (en-CA).\n\n# Director\u0027s note\nSpeak with a warm, calm, and professional tone appropriate for Canadian personal banking. Use a measured pace with natural pausing. Convey empathy and confidence. Avoid rushing, excessive enthusiasm, or stiff formality. For error situations, soften your tone slightly and be reassuring. During authentication flows, adopt a steady, unhurried pace that reduces caller anxiety.\n\n## Transcript:"
+      },
+      "fr-CA": {
+        "voice": "Iapetus",
+        "speakingRate": 1.1,
+        "instruction": "# Audio Profile\nVoix: Iapetus. Cadence: 1.1x. Canal: tÃ©lÃ©phonie (PSTN/VoIP), clavardage web TTS, WhatsApp TTS. ParamÃ¨tres rÃ©gionaux: franÃ§ais canadien (fr-CA).\n\n# Director\u0027s note\nParlez avec un ton chaleureux, calme et professionnel adaptÃ© aux services bancaires personnels au Canada. Adoptez un rythme mesurÃ© avec des pauses naturelles. Faites preuve d\u0027empathie et de confiance. Ã‰vitez de vous prÃ©cipiter, l\u0027enthousiasme excessif ou la formalitÃ© rigide. En cas d\u0027erreur, adoucissez lÃ©gÃ¨rement votre ton et soyez rassurant.\n\n## Transcript:"
+      }
+    }
+  },
+  "loggingSettings": {
+    "conversationLoggingSettings": {
+      "retentionWindow": "31536000s"
+    },
+    "evaluationAudioRecordingConfig": {
+    }
+  },
+  "guardrails": ["Phishing \u0026 Social Engineering", "Smishing Detection", "Inappropriate Language", "Personal Data Extraction Attempt", "Prompt Injection Attack", "Sensitive Data Disclosure"],
+  "modelSettings": {
+    "model": "gemini-composite-v1",
+    "temperature": 1.0
+  },
+  "variableDeclarations": [{
+    "name": "active_intent",
+    "description": "Current classified intent code (e.g., ACC-01, PAY-05) being handled.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "after_hours",
+    "description": "True if current time is outside business hours.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "appointment_id",
+    "description": "Branch appointment ID. Set by AT STATE_MAP from createAppointment response.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "auth_methods",
+    "description": "Auth method tracking object. Fields: l1_method, l2_method, step_up_otp_id. Set by M5 during auth flows.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "auth_state",
+    "description": "Authentication state. Fields: level (0-3), mode, locked, expires_at, last_activity, step_up_required, step_up_reason, step_up_action_hash, step_up_valid_until, otp_request_id, otp_attempts, pin_attempts. Set by AT STATE_MAP and BA/BT callbacks.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "card_id",
+    "description": "Card document ID in context for card management operations. Set by M2.3 / M4.2.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "card_last4",
+    "description": "Last 4 digits of the card in context. Set by M2.3 / M4.2 for display.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "cdic_disclosed",
+    "description": "True once CDIC disclosure has been delivered this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "false"
+    }
+  }, {
+    "name": "channel",
+    "description": "Detected channel: voice | webchat | whatsapp. Locked after turn 1.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "channel_locked",
+    "description": "True after channel detection on turn 1. Guards BA-1 re-run.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "cie_context",
+    "description": "Customer Intelligence Engine context. Fields: loaded, loaded_at, life_stage, next_best_action, nba_shown, nba_suppressed, open_applications, credit_profile_band, spending_top_categories, product_holdings. Set by AT STATE_MAP from getCustomerSegment / getNextBestActions.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "completed_actions",
+    "description": "JSON-serialized list of successfully completed actions this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "csat",
+    "description": "CSAT tracking object. Fields: offered (bool), rating (0-5). Set by M0 at session end.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "current_agent",
+    "description": "Resource name of the agent currently in control. Updated by callback on every transfer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "current_hub",
+    "description": "Currently active hub agent: M2 | M3 | M4 | empty. Set by callback on transfer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_display_name",
+    "description": "Customer preferred display name. Set by BA-5 passive lookup or M5 after getCustomer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_id",
+    "description": "Trusted Firestore customer document ID. Empty at L0. Set exclusively by M5.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_profile",
+    "description": "Customer identity and profile. Fields: id (kept flat), display_name, first_name, last_name, email_masked, phone_masked, segment, since_year, marketing_opt_out, vulnerable_flag, preferred_language, inject_preferred_name, identified_by. Set by AT STATE_MAP from getCustomer / identify_customer.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "degraded_toolsets",
+    "description": "JSON list of toolsets currently in degraded/read-only mode. Set by AT-7 on repeated system_error.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "device_type",
+    "description": "Device type from frontend: desktop | mobile_web | ios_app | android_app | phone.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "disclosures_delivered",
+    "description": "JSON-serialized list of verbatim copy keys delivered this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "dispute_rights_disclosed",
+    "description": "True once dispute rights disclosure has been delivered.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "dtmf_enabled",
+    "description": "True during PIN/OTP/SIN collection on voice.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "escalation_reason",
+    "description": "Reason for deterministic escalation routing to M4.3.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "financial_advice_disclaimer_shown",
+    "description": "True once financial advice disclaimer has been shown this session.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "fraud_suspected",
+    "description": "True when fraud fast-path is active. Set by callback BM-3. Never override.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "identified_by",
+    "description": "Method used to identify the customer: caller_id | wa_id | phone | account_number | card_last4 | webchat_sso.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "inject_preferred_name",
+    "description": "Flag: true when model should greet customer by preferred name on this turn.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "intent_confidence",
+    "description": "Intent classification confidence score (0.0 to 1.0). Set by callback after classification.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "journey_context",
+    "description": "JSON-serialized current journey state for active workflow.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "journey_id",
+    "description": "Active journey identifier string. Set by specialist agent at journey start.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "journey_resume_offered",
+    "description": "True once journey resumption prompt has been delivered this session.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "journey_step",
+    "description": "Named step within the active journey (e.g., kyc_pending, verification, decision). Set by specialist.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "last_quick_actions",
+    "description": "JSON-serialized last quick_actions chips shown (webchat).",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "last_widget_type",
+    "description": "Type of last widget emitted in webchat channel (for sequence enforcement).",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "live_agent_requested",
+    "description": "True if customer has explicitly requested a live agent.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "mock_mode",
+    "description": "True enables deterministic mock fixture responses instead of live API calls.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "nsf_reversal_eligible",
+    "description": "Computed from NSF history (max 1 reversal/12 months); NEVER override. Writer: M2.9",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "nudge_allowed",
+    "description": "True when NBA nudge may be surfaced this turn. Set by acn_callbacks before_model.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "overdraft_enabled",
+    "description": "Current overdraft protection state. Writer: M2.9",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "pad_cancel_id",
+    "description": "PAD authorization reference ID set after cancelPAD succeeds. Read in AT-PAD-rights callback.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "pending_intent_queue",
+    "description": "JSON-serialized list of queued intents for multi-intent handling. Max 5.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "pipeda_disclosed",
+    "description": "True once PIPEDA disclosure copy delivered.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "previous_agent",
+    "description": "Resource name of the prior agent, for return-after-subtask flows.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "provisional_credit_eligible",
+    "description": "True if dispute meets provisional credit policy (\u003c\u003dCAD5000, within 120 days, \u003c\u003d2 disputes in 12 months).",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "rewards_balance_points",
+    "description": "Rewards points balance. Set by AT STATE_MAP from getRewardsBalance response.",
+    "schema": {
+      "type": "STRING",
+      "default": "0"
+    }
+  }, {
+    "name": "routing_reason",
+    "description": "Reason for current routing decision: classified | fast_path_fraud | fast_path_lost_stolen | resume | nudge_accept | escalation.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "session_counters",
+    "description": "Session behaviour counters. Fields: turns, no_match, no_input, small_talk, retry_strikes, tool_errors, validation_errors, injection_attempts, disambiguation. Incremented by BA/BM/AM/AT callbacks.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "session_language_locked",
+    "description": "True once language is locked on first utterance.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "stop_payment_id",
+    "description": "Set on successful stop-payment; used in confirmation receipt. Writer: M2.7",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "telephony-caller-id",
+    "description": "Caller phone number injected by the telephony platform at call start (dashes). Read-only in callbacks â€” use telephony_caller_id (bridged) for application logic.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "telephony_caller_id",
+    "description": "Caller ID from telephony platform. Presence signals voice channel.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "transaction_context",
+    "description": "Active transaction state. Fields: awaiting_confirmation, idempotency_key, wire_disclosure_ack, fintrac_check_status, status, transaction_id, confirmation_payload_hash, fx_currency_pair, fx_rate_quoted. Set by BT/AT callbacks during money-movement flows.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "wa_id_linked",
+    "description": "True when a first-time WhatsApp user was identified this session and wa_id was linked to their profile.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "whatsapp_wa_id",
+    "description": "WhatsApp account ID (wa_id) set by WhatsApp connector. Presence signals WhatsApp channel.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "widgets_enabled",
+    "description": "True only for webchat channel.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }],
+  "globalInstruction": "global_instruction.txt",
+  "languageSettings": {
+    "defaultLanguageCode": "en-CA",
+    "supportedLanguageCodes": ["fr-CA"]
+  },
+  "evaluationMetricsThresholds": {
+    "goldenEvaluationMetricsThresholds": {
+      "turnLevelMetricsThresholds": {
+        "semanticSimilaritySuccessThreshold": 3,
+        "overallToolInvocationCorrectnessThreshold": 1.0
+      },
+      "toolMatchingSettings": {
+        "extraToolCallBehavior": "ALLOW"
+      }
+    },
+    "goldenHallucinationMetricBehavior": "DISABLED"
+  },
+  "timeZoneSettings": {
+    "timeZone": "America/Toronto"
+  },
+  "toolExecutionMode": "PARALLEL"
+}

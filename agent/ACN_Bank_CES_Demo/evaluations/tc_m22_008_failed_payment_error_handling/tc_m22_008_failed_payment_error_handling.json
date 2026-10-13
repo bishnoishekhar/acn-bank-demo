@@ -1,0 +1,34 @@
+{
+  "name": "ed5b6957-ceec-4c66-b7d6-a6808cbbf8a6",
+  "displayName": "tc_m22_008_failed_payment_error_handling",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "error", "BR-ACN-078", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Pay my electricity bill $80"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry, your payment could not be processed at this time due to a technical issue. Please try again later or contact us for assistance."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-f3663bba-6c3a-415d-bbbf-deec4f14688b",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_cbf722cf", "eval_exp_25021184"]
+  },
+  "invalid": true
+}

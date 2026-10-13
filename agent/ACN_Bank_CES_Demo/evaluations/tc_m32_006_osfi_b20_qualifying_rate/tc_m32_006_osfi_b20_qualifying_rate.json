@@ -1,0 +1,25 @@
+{
+  "name": "62456010-8789-4878-bded-23210fdba898",
+  "displayName": "tc_m32_006_osfi_b20_qualifying_rate",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "osfi", "OSFI-B20", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What rate would I qualify for on a $450,000 mortgage?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "For a $450,000 mortgage, you would need to qualify at the stress test rate under OSFI Guideline B-20, which is the higher of your contract rate plus 2% or 5.25%."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_c9cc3d32"]
+  },
+  "invalid": true
+}

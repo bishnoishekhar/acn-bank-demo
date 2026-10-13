@@ -1,0 +1,7 @@
+{
+  "name": "56df21d0-c078-4356-9b97-cadbd78fc555",
+  "displayName": "eval_exp_11f845c4",
+  "llmCriteria": {
+    "prompt": "Response must contain verbatim: Do you consent?"
+  }
+}

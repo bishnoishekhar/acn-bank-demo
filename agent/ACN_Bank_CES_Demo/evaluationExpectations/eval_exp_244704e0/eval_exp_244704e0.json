@@ -1,0 +1,7 @@
+{
+  "name": "234350d8-bd09-41e2-bcda-14e34233eb25",
+  "displayName": "eval_exp_244704e0",
+  "llmCriteria": {
+    "prompt": "CONTAINS: wire_transfer_disclosure"
+  }
+}

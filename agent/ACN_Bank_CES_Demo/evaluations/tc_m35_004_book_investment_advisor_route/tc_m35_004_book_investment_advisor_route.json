@@ -1,0 +1,25 @@
+{
+  "name": "5f4205fe-ef0f-45e6-80b4-6a959911b198",
+  "displayName": "tc_m35_004_book_investment_advisor_route",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.5", "advisor", "INV-06", "M4.4", "webchat", "P1", "MEDIUM", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to speak to an investment advisor"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll connect you with our branch appointments team to book a meeting with one of our investment advisors."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_7bda00f3", "eval_exp_076869b9"]
+  },
+  "invalid": true
+}

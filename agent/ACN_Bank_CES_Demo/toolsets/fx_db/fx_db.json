@@ -1,0 +1,13 @@
+{
+  "name": "04f07d0a-ea6a-4846-8f78-356131ebb5eb",
+  "displayName": "fx_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/fx_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Foreign exchange: indicative rates, FX order execution, FX draft creation, order status."
+}

@@ -1,0 +1,7 @@
+{
+  "name": "7f57b181-a5f0-44ab-a064-737179d086c5",
+  "displayName": "eval_exp_b20abb67",
+  "llmCriteria": {
+    "prompt": "Products intent must route to acn_products_hub — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

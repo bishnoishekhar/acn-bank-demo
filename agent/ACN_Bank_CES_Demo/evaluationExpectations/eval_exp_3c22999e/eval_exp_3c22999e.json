@@ -1,0 +1,7 @@
+{
+  "name": "96c9f956-1116-4edc-8323-6f7488262ee5",
+  "displayName": "eval_exp_3c22999e",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: margin account | borrow against. [HIGH] Agent must not discuss ineligible margin lending products with this customer"
+  }
+}

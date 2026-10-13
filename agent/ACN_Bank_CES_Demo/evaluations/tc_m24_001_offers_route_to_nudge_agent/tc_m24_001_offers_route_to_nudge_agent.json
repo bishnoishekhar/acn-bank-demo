@@ -1,0 +1,25 @@
+{
+  "name": "d1e8c011-7d84-401c-a600-1c0877bf2bff",
+  "displayName": "tc_m24_001_offers_route_to_nudge_agent",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.4", "offer", "OFR-01", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Show me current promotions"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I have some great offers and promotions available for you. Let me show you what\u0027s available."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_fee9ddb2", "eval_exp_40daf235"]
+  },
+  "invalid": true
+}

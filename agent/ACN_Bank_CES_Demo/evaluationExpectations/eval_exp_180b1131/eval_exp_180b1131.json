@@ -1,0 +1,7 @@
+{
+  "name": "45d2b2e0-026e-4dd6-9494-1131ec22e1aa",
+  "displayName": "eval_exp_180b1131",
+  "llmCriteria": {
+    "prompt": "Response must reference policy, OBSI, ombudsman, or complaint escalation path."
+  }
+}

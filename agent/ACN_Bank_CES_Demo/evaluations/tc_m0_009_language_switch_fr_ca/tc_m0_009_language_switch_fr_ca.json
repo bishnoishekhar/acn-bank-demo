@@ -1,0 +1,25 @@
+{
+  "name": "61a3e285-4d7d-4116-9542-6163d8cea140",
+  "displayName": "tc_m0_009_language_switch_fr_ca",
+  "tags": ["acn_bank_ces_demo", "language", "fr-CA", "GEN-05", "voice", "P1", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Je voudrais parler en français"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Bien sûr, je peux vous aider en français. Comment puis-je vous aider aujourd\u0027hui?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0caeec6e"]
+  },
+  "invalid": true
+}

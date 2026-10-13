@@ -1,0 +1,7 @@
+{
+  "name": "f59f9d67-2c65-4690-9df4-82af8ce1cb0c",
+  "displayName": "eval_exp_7a0c1024",
+  "llmCriteria": {
+    "prompt": "[TC-M210-005] FX-03 sell \u003c CAD 1,000: getExchangeRate called, no step-up required, createFXOrder called after confirmation"
+  }
+}

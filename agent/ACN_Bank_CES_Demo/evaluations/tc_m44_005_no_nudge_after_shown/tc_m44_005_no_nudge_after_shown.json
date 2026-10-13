@@ -1,0 +1,25 @@
+{
+  "name": "5e154833-8d9b-4923-a972-acf47b1e15a0",
+  "displayName": "tc_m44_005_no_nudge_after_shown",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.4", "nudge", "GB-23", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Find a branch open on Saturday"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are ACN Bank branches with Saturday hours in your area."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2936e794"]
+  },
+  "invalid": true
+}

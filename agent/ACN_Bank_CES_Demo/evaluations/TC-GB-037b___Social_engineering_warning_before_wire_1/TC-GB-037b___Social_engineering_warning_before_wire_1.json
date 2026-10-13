@@ -1,0 +1,24 @@
+{
+  "name": "1fcba456-0e7a-47db-8bdc-6547d7994d93",
+  "displayName": "TC-GB-037b — Social engineering warning before wire 1",
+  "description": "Social engineering warning before wire | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d3, mode\u003dstep_up",
+  "tags": ["GB-37", "BR-ACN-090", "social-engineering", "wire", "voice", "P0", "NO-GO"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 3.0,
+            "auth_mode": "step_up",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Wire $5000 to India"
+        }
+      }]
+    }]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "73510f49-c7b6-41e5-bc05-b838a264a903",
+  "displayName": "tc_m36_002_sin_optional_notice_before_request",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.6", "sin", "OPN-03", "BR-ACN-004", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027d like to open a high-interest savings account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027d be happy to help you open a high-interest savings account. Please note that providing your Social Insurance Number is optional, though it may be required for tax reporting purposes. Would you like to provide your SIN?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_224ea9d3"]
+  },
+  "invalid": true
+}

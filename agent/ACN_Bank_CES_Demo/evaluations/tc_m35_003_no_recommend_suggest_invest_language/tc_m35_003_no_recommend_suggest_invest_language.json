@@ -1,0 +1,25 @@
+{
+  "name": "f958c6e6-02de-4547-b3f6-eb4c90b69ea9",
+  "displayName": "tc_m35_003_no_recommend_suggest_invest_language",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.5", "investment-advice", "BR-ACN-076", "webchat", "P0", "NO-GO", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Should I put money in a GIC?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "GICs offer a guaranteed return for a fixed term and may be suitable depending on your financial goals and risk tolerance. We have options ranging from 30-day to 5-year terms. Would you like more information about our GIC options?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2b5b78c4"]
+  },
+  "invalid": true
+}

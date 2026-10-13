@@ -1,0 +1,7 @@
+{
+  "name": "65ac34c4-e9f7-4a75-998f-5d15f6047477",
+  "displayName": "eval_exp_85bbb075",
+  "llmCriteria": {
+    "prompt": "Response must include a reference or confirmation number and 2 business days timeframe."
+  }
+}

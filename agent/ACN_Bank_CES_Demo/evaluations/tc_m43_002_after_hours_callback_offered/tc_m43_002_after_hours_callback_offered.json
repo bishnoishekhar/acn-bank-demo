@@ -1,0 +1,25 @@
+{
+  "name": "e487c4c3-7cb3-4cac-bdf5-d46793b800c3",
+  "displayName": "tc_m43_002_after_hours_callback_offered",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.3", "after-hours", "GB-15", "voice", "P1", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want a live agent"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Our contact centre is currently closed. I can schedule a callback for you during business hours, or you can send us a secure message and we\u0027ll respond within 2 business days. Which would you prefer?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0fb76e1c", "eval_exp_d5bcf3fc", "eval_exp_43b6b062"]
+  },
+  "invalid": true
+}

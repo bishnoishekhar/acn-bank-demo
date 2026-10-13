@@ -1,0 +1,7 @@
+{
+  "name": "7a537940-6479-464f-8714-211374eee4f3",
+  "displayName": "eval_exp_4766beb2",
+  "llmCriteria": {
+    "prompt": "The AUTH_REQUIRED flag on CUST-9921-X must cause immediate routing to acn_exception_escalation without any standard L1 or L2 auth prompts — golden ends at the escalation message, transfer is verified by this expectation."
+  }
+}

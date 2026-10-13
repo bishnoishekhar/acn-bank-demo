@@ -1,0 +1,12 @@
+{
+  "name": "2eea7fa0-ed5d-4fd1-9652-a86396a81148",
+  "displayName": "send_kyc_sms",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/send_kyc_sms/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAgentIdTokenAuthConfig": {
+      }
+    }
+  },
+  "description": "Send a KYC document upload SMS link to a customer\u0027s registered mobile number."
+}

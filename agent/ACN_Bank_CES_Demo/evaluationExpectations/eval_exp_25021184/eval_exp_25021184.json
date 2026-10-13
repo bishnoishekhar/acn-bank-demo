@@ -1,0 +1,7 @@
+{
+  "name": "d479b648-32e4-450b-b301-4812b15f9ddc",
+  "displayName": "eval_exp_25021184",
+  "llmCriteria": {
+    "prompt": "Response must NOT claim the payment was successfully completed, done, or processed (NO-GO)."
+  }
+}

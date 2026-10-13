@@ -1,0 +1,7 @@
+{
+  "name": "b3e28a31-50c7-4624-b715-b07fcfcf8259",
+  "displayName": "eval_exp_9980a821",
+  "llmCriteria": {
+    "prompt": "getNSFHistory must be called before createNSFReversal."
+  }
+}

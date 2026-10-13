@@ -1,0 +1,7 @@
+{
+  "name": "0aedb487-a4a3-4816-b271-1d879a318c7c",
+  "displayName": "eval_exp_6ed76579",
+  "llmCriteria": {
+    "prompt": "[TC-M210-002] FX-02 buy below CAD 1,000 threshold: getExchangeRate called, step-up NOT required, createFXOrder executed only after confirmation"
+  }
+}

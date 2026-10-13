@@ -1,0 +1,7 @@
+{
+  "name": "37e1a6f7-9598-4588-9d31-ff97a0879c53",
+  "displayName": "eval_exp_c859dff7",
+  "llmCriteria": {
+    "prompt": "createTransaction must NOT be called until customer confirms — agent must read back and confirm before executing."
+  }
+}

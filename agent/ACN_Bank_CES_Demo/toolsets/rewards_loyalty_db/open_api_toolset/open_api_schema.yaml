@@ -1,0 +1,134 @@
+openapi: "3.0.3"
+info:
+  title: Rewards Loyalty DB - Direct Firestore
+  version: "1.0.0"
+  description: Rewards and loyalty program API for ACN Bank CES Demo (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/rewards/balance:
+    get:
+      operationId: getRewardsBalance
+      summary: Get current rewards points balance for a customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Rewards balance
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/rewards_history:
+    get:
+      operationId: getRewardsHistory
+      summary: Get rewards earning and redemption history
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 20
+            maximum: 100
+        - name: startDate
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Rewards transaction history
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/redemptions:
+    post:
+      operationId: createRedemption
+      summary: Create a rewards redemption request
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateRedemptionRequest"
+      responses:
+        "200":
+          description: Redemption created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/redemptions/{redemptionId}:
+    get:
+      operationId: getRedemptionStatus
+      summary: Get the status of a specific redemption request
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: redemptionId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Redemption status
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateRedemptionRequest:
+      type: object
+      required:
+        - points
+        - redemptionType
+      properties:
+        points:
+          type: integer
+        redemptionType:
+          type: string
+          enum: [statement_credit, gift_card, travel, merchandise, cash]
+        destination:
+          type: object
+          properties:
+            accountId:
+              type: string
+            giftCardBrand:
+              type: string
+            travelBookingRef:
+              type: string
+        idempotencyKey:
+          type: string

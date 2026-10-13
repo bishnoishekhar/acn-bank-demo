@@ -1,0 +1,40 @@
+{
+  "name": "1fdb1ea2-c177-4199-86b9-19809ec1a60a",
+  "displayName": "tc_m1_002_cie_marketing_opt_out",
+  "tags": ["acn_bank_ces_demo", "m1", "CIE", "marketing-opt-out", "BR-ACN-091", "voice", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your chequing account balance is $3,200.45. Is there anything else I can help you with?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "What products do you recommend?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m happy to tell you about our available services. We offer chequing accounts, savings accounts, and a range of credit options. Would you like details on any of these?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_c530887c", "eval_exp_451ec9bd"]
+  },
+  "invalid": true
+}

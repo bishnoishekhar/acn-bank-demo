@@ -1,0 +1,112 @@
+openapi: "3.0.3"
+info:
+  title: Digital Activation DB - Direct Firestore
+  version: "1.0.0"
+  description: Card activation, digital wallet, and online banking activation tracking API (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/activation_requests:
+    post:
+      operationId: createActivationRequest
+      summary: Create a new activation request for card, digital wallet, or online banking
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateActivationRequest"
+      responses:
+        "200":
+          description: Activation request created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/activation_requests/{requestId}:
+    get:
+      operationId: getActivationStatus
+      summary: Get the status of an activation request
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Activation request status
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: updateActivationRequest
+      summary: Update an activation request (e.g. mark completed or failed)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateActivationRequest"
+      responses:
+        "200":
+          description: Activation request updated
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateActivationRequest:
+      type: object
+      required:
+        - customerId
+        - activationType
+      properties:
+        customerId:
+          type: string
+        activationType:
+          type: string
+          enum: [card_activation, apple_pay, google_pay, online_banking, password_reset, pin_reset]
+        cardId:
+          type: string
+        channel:
+          type: string
+          enum: [chat, phone, branch, app]
+        deviceInfo:
+          type: object
+          properties:
+            deviceType:
+              type: string
+            deviceId:
+              type: string
+        idempotencyKey:
+          type: string
+    UpdateActivationRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [completed, failed, cancelled]
+        failureReason:
+          type: string
+        completionData:
+          type: object

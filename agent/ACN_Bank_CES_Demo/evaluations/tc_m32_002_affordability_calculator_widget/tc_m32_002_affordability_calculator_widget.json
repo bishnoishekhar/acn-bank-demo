@@ -1,0 +1,35 @@
+{
+  "name": "44f2bad7-3a18-447a-9986-d1434820e5f8",
+  "displayName": "tc_m32_002_affordability_calculator_widget",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "calculator", "MTG-02", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Can I afford a $600,000 home?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Based on typical income and qualification criteria, here is an affordability estimate for a $600,000 home. Please keep in mind that this is an indicative calculation only."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-cfc69d77-8728-4661-bf9c-eeb5d4df9c7d",
+            "tool": "calculate_affordability",
+            "args": {
+            },
+            "displayName": "calculate_affordability"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_1349c111", "eval_exp_b5d28200"]
+  },
+  "invalid": true
+}

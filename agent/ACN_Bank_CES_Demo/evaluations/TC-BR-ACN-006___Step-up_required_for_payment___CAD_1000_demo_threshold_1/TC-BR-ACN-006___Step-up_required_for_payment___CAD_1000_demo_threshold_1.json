@@ -1,0 +1,24 @@
+{
+  "name": "18e131c6-75c8-4d14-9cba-723ea850c487",
+  "displayName": "TC-BR-ACN-006 — Step-up required for payment ≥ CAD 1000 demo threshold 1",
+  "description": "Step-up required for payment ≥ CAD 1000 demo threshold | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["BR-ACN-006", "step-up", "payment", "threshold", "P0", "NO-GO", "voice"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Pay Rogers $1500"
+        }
+      }]
+    }]
+  }
+}

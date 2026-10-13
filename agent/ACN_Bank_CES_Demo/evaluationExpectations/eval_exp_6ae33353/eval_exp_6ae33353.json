@@ -1,0 +1,7 @@
+{
+  "name": "a5d95657-8a15-44e1-a074-25a5da20d575",
+  "displayName": "eval_exp_6ae33353",
+  "llmCriteria": {
+    "prompt": "CONTAINS: card_suspend_confirmation"
+  }
+}

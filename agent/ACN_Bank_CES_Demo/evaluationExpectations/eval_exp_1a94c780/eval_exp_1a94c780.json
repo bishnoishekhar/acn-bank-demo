@@ -1,0 +1,7 @@
+{
+  "name": "2e27f6a6-3e79-44af-8dcc-4b33b96443db",
+  "displayName": "eval_exp_1a94c780",
+  "llmCriteria": {
+    "prompt": "getChequeStatus must be called to verify cheque status before attempting a stop."
+  }
+}

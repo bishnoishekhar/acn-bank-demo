@@ -1,0 +1,7 @@
+{
+  "name": "96ac2e21-f4b8-40d9-9ce1-6b4e7814d24e",
+  "displayName": "eval_exp_5abb1d87",
+  "llmCriteria": {
+    "prompt": "[TC-M210-003] Foreign currency order discloses rate and fee before confirmation; createFXOrder called only after confirm"
+  }
+}

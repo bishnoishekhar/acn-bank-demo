@@ -1,0 +1,7 @@
+{
+  "name": "80bcf633-4fbb-4b5c-a111-7980a05f23ac",
+  "displayName": "eval_exp_4e108299",
+  "llmCriteria": {
+    "prompt": "getAvailableSlots must be called to retrieve available times."
+  }
+}

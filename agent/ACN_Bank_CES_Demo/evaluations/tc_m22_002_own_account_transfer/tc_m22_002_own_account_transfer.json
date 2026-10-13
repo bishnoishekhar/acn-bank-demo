@@ -1,0 +1,35 @@
+{
+  "name": "edc8807b-5b25-4d4e-973a-d73016fe59ba",
+  "displayName": "tc_m22_002_own_account_transfer",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "transfer", "PAY-01", "voice", "P0", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Move $500 from my chequing to savings"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve transferred $500 from your chequing account to your savings account. Your savings balance is now $13,000."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-a3a094d7-c93b-4369-b87d-4b5d9a843117",
+            "tool": "",
+            "args": {
+              "type": "transfer"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_60c9c933"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,24 @@
+{
+  "name": "05983515-b683-4e04-8c84-238d0f11c733",
+  "displayName": "TC-GB-019 — No widget emitted on voice channel 1",
+  "description": "No widget emitted on voice channel | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-19", "BR-ACN-021", "widget", "voice", "P0", "NO-GO"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "What is my account balance?"
+        }
+      }]
+    }]
+  }
+}

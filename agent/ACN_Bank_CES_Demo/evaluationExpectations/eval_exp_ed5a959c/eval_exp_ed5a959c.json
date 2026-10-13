@@ -1,0 +1,7 @@
+{
+  "name": "5d0763dd-a3f3-402b-b1d2-fe1e489f64fc",
+  "displayName": "eval_exp_ed5a959c",
+  "llmCriteria": {
+    "prompt": "calculate_epp_plans must be called."
+  }
+}

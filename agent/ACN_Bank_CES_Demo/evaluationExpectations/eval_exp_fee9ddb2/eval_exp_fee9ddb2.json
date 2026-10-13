@@ -1,0 +1,7 @@
+{
+  "name": "fb9408ad-b670-42c3-a290-52dab5d5ad50",
+  "displayName": "eval_exp_fee9ddb2",
+  "llmCriteria": {
+    "prompt": "Agent must route to or operate within acn_offers_nudge — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

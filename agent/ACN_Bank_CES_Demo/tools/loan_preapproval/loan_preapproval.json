@@ -1,0 +1,92 @@
+{
+  "name": "56467ca6-fe81-4b17-93ba-613f768dbf64",
+  "displayName": "loan_preapproval",
+  "widgetTool": {
+    "name": "loan_preapproval",
+    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your pre-approval result.\u0027 Webchat only — on voice, read the result aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "breakdown": {
+          "type": "ARRAY",
+          "description": "Optional key/value rows shown below the fold: total repayable, first payment date, protection add-ons.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "label": {
+                "type": "STRING"
+              },
+              "value": {
+                "type": "STRING"
+              }
+            }
+          }
+        },
+        "headline": {
+          "type": "STRING",
+          "description": "One short line the customer reads first, e.g. \u0027You are pre-approved.\u0027"
+        },
+        "interest_rate_pct": {
+          "type": "NUMBER",
+          "description": "Rate used in the estimate. Rendered as a small footnote."
+        },
+        "is_provisional": {
+          "type": "BOOLEAN",
+          "description": "Required to be true when income was declared but not verified. UI shows a \u0027Provisional estimate\u0027 pill."
+        },
+        "loan_kind": {
+          "type": "STRING",
+          "description": "epp | mortgage."
+        },
+        "monthly_payment_cad": {
+          "type": "NUMBER",
+          "description": "The single number the card leads with, in CAD."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027loan_preapproval\u0027"
+        },
+        "primary_cta_label": {
+          "type": "STRING",
+          "description": "Label for the primary action, e.g. \u0027Review in the app\u0027."
+        },
+        "primary_cta_value": {
+          "type": "STRING",
+          "description": "Sent to the agent on tap, e.g. \u0027loan_confirm_review\u0027."
+        },
+        "principal_cad": {
+          "type": "NUMBER",
+          "description": "Principal / financed amount."
+        },
+        "product_image_url": {
+          "type": "STRING",
+          "description": "For EPP: the gadget image. For mortgage: leave empty."
+        },
+        "product_name": {
+          "type": "STRING",
+          "description": "For EPP: the gadget name. For mortgage: property address or \u0027Home mortgage estimate\u0027."
+        },
+        "secondary_cta_label": {
+          "type": "STRING"
+        },
+        "secondary_cta_value": {
+          "type": "STRING"
+        },
+        "tenure_label": {
+          "type": "STRING",
+          "description": "Human-readable tenure, e.g. \u002725 years\u0027 or \u002712 months\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        },
+        "verdict": {
+          "type": "STRING",
+          "description": "pre_approved | needs_review | not_eligible. Never overridden by tone."
+        }
+      },
+      "required": ["type", "name", "loan_kind", "verdict", "monthly_payment_cad", "primary_cta_value"]
+    }
+  }
+}

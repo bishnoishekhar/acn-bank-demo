@@ -1,0 +1,34 @@
+{
+  "name": "9428233a-5674-4455-a15d-40450ba73011",
+  "displayName": "tc_m28_001_nsf_reversal_eligible",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "nsf", "OVD-02", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I got an NSF fee, can you waive it?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve reversed the NSF fee on your account. The fee has been credited back. This is a one-time courtesy reversal."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-37dfdce3-c890-4280-a1f7-04b9a46037b0",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4b7146bb", "eval_exp_2eaaac02"]
+  },
+  "invalid": true
+}

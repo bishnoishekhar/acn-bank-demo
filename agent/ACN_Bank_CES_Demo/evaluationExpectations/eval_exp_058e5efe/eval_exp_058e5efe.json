@@ -1,0 +1,7 @@
+{
+  "name": "792f23ec-2dd0-4edf-b96e-4875c5dbdaa6",
+  "displayName": "eval_exp_058e5efe",
+  "llmCriteria": {
+    "prompt": "[TC-M27-004] CHQ-02 cheque book order: delivery address confirmed, createChequeBookOrder called only after confirmation"
+  }
+}

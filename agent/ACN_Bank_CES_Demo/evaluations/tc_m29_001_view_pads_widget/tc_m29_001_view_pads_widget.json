@@ -1,0 +1,34 @@
+{
+  "name": "3ea3f511-625e-4049-8af4-6e3ca0442c1d",
+  "displayName": "tc_m29_001_view_pads_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.9", "pad", "PAD-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Show me who charges my account automatically"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your pre-authorized debits on file: Netflix $18.99 monthly, Rogers $85.00 monthly, Hydro $120 monthly."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c77d7ae0-f4ec-4a14-9f60-8706ed29cdb2",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_36ce64fe", "eval_exp_f92a5a75"]
+  },
+  "invalid": true
+}

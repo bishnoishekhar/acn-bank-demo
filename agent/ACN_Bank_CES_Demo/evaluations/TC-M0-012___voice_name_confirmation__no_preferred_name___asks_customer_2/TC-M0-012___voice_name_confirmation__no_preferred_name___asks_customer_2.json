@@ -1,0 +1,26 @@
+{
+  "name": "ddba88db-cd32-4457-ac81-278c8042a118",
+  "displayName": "TC-M0-012 — voice_name_confirmation: no preferred_name → asks customer 2",
+  "description": "voice_name_confirmation: no preferred_name → asks customer | Priority: P1 | Severity: MEDIUM | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "voice", "preferred_name", "name-confirmation", "P1", "MEDIUM"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA",
+            "preferred_name": null
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }]
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "name": "80c4a642-5e44-4919-8618-0303f70ac362",
+  "displayName": "tc_m210_005_fx_sell_below_threshold_no_step_up",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.10", "fx", "FX-03", "no-stepup", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to sell five hundred US dollars back to Canadian dollars"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "The current rate is 1 USD \u003d 1.36 CAD. You will receive approximately $680 Canadian dollars for $500 USD. Shall I proceed?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-b499c112-30d9-4335-a9b0-9c710421a519",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, proceed with the sale"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your foreign exchange sale has been processed. You sold $500 USD and received $680 CAD. Your reference number is FX-2026-004."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-fca63bd1-15ea-421d-be38-bef178833e95",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_fc0fd32f", "eval_exp_f3674a98", "eval_exp_432d2a72", "eval_exp_6006f9ae"]
+  },
+  "invalid": true
+}

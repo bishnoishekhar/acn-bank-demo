@@ -1,0 +1,25 @@
+{
+  "name": "c20676e9-c399-4c0b-b2d2-824b6cc1a6b3",
+  "displayName": "tc_m0_011_voice_name_preferred_name_present",
+  "tags": ["acn_bank_ces_demo", "m0", "voice", "preferred_name", "name-confirmation", "P1", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Of course, Chander. Let me pull up your account details right away."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_46c8bc70", "eval_exp_50ae0aec"]
+  },
+  "invalid": true
+}

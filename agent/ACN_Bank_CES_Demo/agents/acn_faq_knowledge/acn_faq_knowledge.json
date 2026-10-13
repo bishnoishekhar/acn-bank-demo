@@ -1,0 +1,25 @@
+{
+  "name": "acn_faq_knowledge",
+  "displayName": "acn_faq_knowledge",
+  "instruction": "agents/acn_faq_knowledge/instruction.txt",
+  "tools": ["end_session"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_faq_knowledge/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_faq_knowledge/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_faq_knowledge/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_faq_knowledge/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_faq_knowledge/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "faq_knowledge_db",
+    "toolIds": ["searchFAQs"]
+  }]
+}

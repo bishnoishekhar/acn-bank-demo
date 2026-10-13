@@ -1,0 +1,7 @@
+{
+  "name": "72e23106-5f52-4c06-82c8-1e3f02d9a6e4",
+  "displayName": "eval_exp_2aa1ed09",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must be invoked for any wire transfer at or above the CAD 1,000 step-up threshold."
+  }
+}

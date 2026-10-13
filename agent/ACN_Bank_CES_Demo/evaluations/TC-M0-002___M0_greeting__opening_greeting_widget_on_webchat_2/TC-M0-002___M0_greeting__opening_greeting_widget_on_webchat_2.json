@@ -1,0 +1,25 @@
+{
+  "name": "ee54d01b-dd46-4788-b665-49cc31831a08",
+  "displayName": "TC-M0-002 — M0 greeting: opening_greeting widget on webchat 2",
+  "description": "M0 greeting: opening_greeting widget on webchat | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["M0", "webchat", "greeting", "widget", "P0", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "channel": "webchat",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Hi"
+        }
+      }]
+    }]
+  }
+}

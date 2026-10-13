@@ -1,0 +1,25 @@
+{
+  "name": "TC-M01-002",
+  "displayName": "TC-M01-002 — M0.1 FAQ never announces itself (silent per TR-12)",
+  "description": "M0.1 FAQ never announces itself (silent per TR-12) | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d0, mode\u003dcaller_id",
+  "tags": ["M0.1", "silent", "BR-ACN-081 2", "voice 2", "TR-12", "P1 2", "HIGH 2"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 0.0,
+            "auth_mode": "caller_id",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "How long does a cheque take to clear?"
+        }
+      }]
+    }]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "8a9a2c8d-aa7c-4ce5-81fb-45971fcfea23",
+  "displayName": "eval_exp_b400ab46",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the social engineering warning for wire transfers before executing or collecting final confirmation."
+  }
+}

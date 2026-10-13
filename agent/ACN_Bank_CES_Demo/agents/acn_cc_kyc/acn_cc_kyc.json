@@ -1,0 +1,28 @@
+{
+  "name": "acn_cc_kyc",
+  "displayName": "acn_cc_kyc",
+  "instruction": "agents/acn_cc_kyc/instruction.txt",
+  "tools": ["docai_document_processors", "docai_drivers_license", "end_session", "mobile_handoff", "mortgage_kyc"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_cc_kyc/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_cc_kyc/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_cc_kyc/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_cc_kyc/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_cc_kyc/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "kyc_request_tracking",
+    "toolIds": ["createKycRequest", "getKycStatus", "writeKycRecord"]
+  }, {
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }]
+}

@@ -1,0 +1,7 @@
+{
+  "name": "63969daa-bad9-4422-98f2-e5068a482169",
+  "displayName": "eval_exp_be815207",
+  "llmCriteria": {
+    "prompt": "[TC-M22-007] Adding a new payee (PAY-03) requires step-up authorisation and social engineering warning copy"
+  }
+}

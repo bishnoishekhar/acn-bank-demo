@@ -1,0 +1,7 @@
+{
+  "name": "daff21d3-1b14-48b3-8e0e-9775006e4f3b",
+  "displayName": "eval_exp_bc595329",
+  "llmCriteria": {
+    "prompt": "[TC-M22-008] Failed createTransaction (500) surfaces payment_failed_notice copy and must not claim success"
+  }
+}

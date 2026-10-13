@@ -1,0 +1,7 @@
+{
+  "name": "7df64c7a-9c29-4fc8-a982-67d074ca6822",
+  "displayName": "eval_exp_95718817",
+  "llmCriteria": {
+    "prompt": "CONTAINS: social_engineering_warning_wire"
+  }
+}

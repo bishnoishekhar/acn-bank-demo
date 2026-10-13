@@ -1,0 +1,7 @@
+{
+  "name": "e1cd5717-b346-4ddb-909b-95ce83ebceaf",
+  "displayName": "eval_exp_376bc650",
+  "llmCriteria": {
+    "prompt": "The agent must inform the customer their account is locked before transferring."
+  }
+}

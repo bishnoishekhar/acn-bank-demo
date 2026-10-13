@@ -1,0 +1,25 @@
+{
+  "name": "acn_identity_security_hub",
+  "displayName": "acn_identity_security_hub",
+  "instruction": "agents/acn_identity_security_hub/instruction.txt",
+  "tools": ["authorize_step_up", "end_session", "identify_customer", "issue_otp", "record_auth_event", "request_app_push_approval", "set_card_pin", "verify_otp", "verify_pin"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_identity_security_hub/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_identity_security_hub/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_identity_security_hub/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_identity_security_hub/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_identity_security_hub/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }]
+}

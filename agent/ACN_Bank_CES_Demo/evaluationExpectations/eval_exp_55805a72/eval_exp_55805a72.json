@@ -1,0 +1,7 @@
+{
+  "name": "3cd0ec19-4898-417d-942b-23d1006de484",
+  "displayName": "eval_exp_55805a72",
+  "llmCriteria": {
+    "prompt": "getChequeStatus must be called with the cheque number."
+  }
+}

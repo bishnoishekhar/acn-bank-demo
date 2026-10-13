@@ -1,0 +1,7 @@
+{
+  "name": "9ec5d42d-3de0-489e-bb50-e9de6648b00d",
+  "displayName": "eval_exp_4e3ed954",
+  "llmCriteria": {
+    "prompt": "All four verbatim phrases must appear before updateMarketingConsent is called."
+  }
+}

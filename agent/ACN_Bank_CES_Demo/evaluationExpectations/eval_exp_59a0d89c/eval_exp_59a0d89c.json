@@ -1,0 +1,7 @@
+{
+  "name": "d8cb12b7-362e-49a3-aa02-a87bb20f1f31",
+  "displayName": "eval_exp_59a0d89c",
+  "llmCriteria": {
+    "prompt": "stopPayment must NOT be called on the first turn."
+  }
+}

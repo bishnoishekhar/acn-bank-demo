@@ -1,0 +1,7 @@
+{
+  "name": "662cdb47-21f7-4612-9cc1-22498dba827d",
+  "displayName": "eval_exp_7566a96a",
+  "llmCriteria": {
+    "prompt": "Agent must NOT attempt to resolve disputes within acn_accounts_insights."
+  }
+}

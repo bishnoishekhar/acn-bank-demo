@@ -1,0 +1,7 @@
+{
+  "name": "750e119c-f620-44a7-9cb0-15ed2bf50346",
+  "displayName": "eval_exp_8ac7f100",
+  "llmCriteria": {
+    "prompt": "The agent must NOT emit any widget payloads or structured JSON on a voice channel response."
+  }
+}

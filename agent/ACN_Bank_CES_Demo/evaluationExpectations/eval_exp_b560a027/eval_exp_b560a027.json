@@ -1,0 +1,7 @@
+{
+  "name": "599e6c1d-5a59-49a4-aa85-2df9b7382c47",
+  "displayName": "eval_exp_b560a027",
+  "llmCriteria": {
+    "prompt": "The agent must trigger the step-up authorization flow before adding a new payee."
+  }
+}

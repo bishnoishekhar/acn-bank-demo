@@ -1,0 +1,7 @@
+{
+  "name": "90ed133c-44e4-4543-a253-0b29077bd380",
+  "displayName": "eval_exp_f47e0bc1",
+  "llmCriteria": {
+    "prompt": "Agent must respond with appropriate empathy before routing (GB-39)."
+  }
+}

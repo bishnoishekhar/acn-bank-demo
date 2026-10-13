@@ -1,0 +1,167 @@
+openapi: "3.0.3"
+info:
+  title: Preferences DB - Direct Firestore
+  version: "1.0.0"
+  description: Customer communication preferences and consent management API (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/profile:
+    get:
+      operationId: getPreferences
+      summary: Get all communication preferences for a customer
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Customer preferences
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/notifications:
+    patch:
+      operationId: updateNotificationPreferences
+      summary: Update notification alert preferences (push, email, SMS)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateNotificationPreferencesRequest"
+      responses:
+        "200":
+          description: Notification preferences updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/paperless:
+    patch:
+      operationId: updatePaperlessEnrollment
+      summary: Enroll or unenroll customer in paperless statements
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePaperlessRequest"
+      responses:
+        "200":
+          description: Paperless enrollment updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/marketing_consent:
+    patch:
+      operationId: updateMarketingConsent
+      summary: Update marketing and promotional communications consent
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMarketingConsentRequest"
+      responses:
+        "200":
+          description: Marketing consent updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/casl_consent:
+    get:
+      operationId: getCASLConsent
+      summary: Get CASL (Canadian Anti-Spam Law) consent status and history
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: CASL consent details
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    UpdateNotificationPreferencesRequest:
+      type: object
+      properties:
+        emailEnabled:
+          type: boolean
+        smsEnabled:
+          type: boolean
+        pushEnabled:
+          type: boolean
+        lowBalanceAlert:
+          type: boolean
+        transactionAlert:
+          type: boolean
+        securityAlert:
+          type: boolean
+        lowBalanceThreshold:
+          type: number
+    UpdatePaperlessRequest:
+      type: object
+      properties:
+        statementsEnabled:
+          type: boolean
+        taxDocumentsEnabled:
+          type: boolean
+        noticesEnabled:
+          type: boolean
+    UpdateMarketingConsentRequest:
+      type: object
+      required:
+        - email
+      properties:
+        email:
+          type: boolean
+        phone:
+          type: boolean
+        mail:
+          type: boolean
+        consentSource:
+          type: string

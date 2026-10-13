@@ -1,0 +1,25 @@
+{
+  "name": "89edf6ca-36ad-4018-a189-97498b3fc326",
+  "displayName": "tc_m31_004_resume_application_kyc_route",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1", "resume", "CC-06", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Resume my application"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll take you back to where you left off in your card application — the identity verification step."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b8067d3f", "eval_exp_7499f8f7"]
+  },
+  "invalid": true
+}

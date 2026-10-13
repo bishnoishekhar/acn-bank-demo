@@ -1,0 +1,7 @@
+{
+  "name": "28777814-00f1-4ccf-a540-89c37ad2a761",
+  "displayName": "eval_exp_fc0fd32f",
+  "llmCriteria": {
+    "prompt": "getExchangeRate must be called on the first turn."
+  }
+}

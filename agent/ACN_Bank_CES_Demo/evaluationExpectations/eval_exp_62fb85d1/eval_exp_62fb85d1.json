@@ -1,0 +1,7 @@
+{
+  "name": "798b8d38-47b8-45c4-b779-f86a2dbf54a4",
+  "displayName": "eval_exp_62fb85d1",
+  "llmCriteria": {
+    "prompt": "identify_customer must be called on session start when a caller-ID signal is present."
+  }
+}

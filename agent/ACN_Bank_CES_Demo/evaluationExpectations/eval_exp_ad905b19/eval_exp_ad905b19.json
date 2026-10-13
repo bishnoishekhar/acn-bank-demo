@@ -1,0 +1,7 @@
+{
+  "name": "dedf40e2-f514-4249-94d4-2f8d0f4a1e68",
+  "displayName": "eval_exp_ad905b19",
+  "llmCriteria": {
+    "prompt": "Response must reference dispatched, arrive, delivery, or expected delivery language."
+  }
+}

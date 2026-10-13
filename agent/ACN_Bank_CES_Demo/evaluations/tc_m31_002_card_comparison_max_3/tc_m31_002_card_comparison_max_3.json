@@ -1,0 +1,25 @@
+{
+  "name": "986bf049-448f-4661-a9b0-2e4bf668264d",
+  "displayName": "tc_m31_002_card_comparison_max_3",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1", "comparison", "CC-02", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Compare your top travel cards"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are our top travel credit cards to help you compare. Each offers great travel rewards and benefits."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_d2e6ca9b", "eval_exp_9880f846"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,35 @@
+{
+  "name": "e4a1b8a1-45b7-46c4-958a-26176b9e2c4b",
+  "displayName": "tc_m22_007_new_payee_step_up_warning",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "payee", "step-up", "security", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Add TD Bank payee account 12345678"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before adding a new payee, I want to warn you that fraudsters sometimes trick people into adding new payees to intercept payments. If anyone has asked you to add this payee, please be cautious. I\u0027ll need additional verification to proceed."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-ff112e92-73d9-46a2-9032-b0baa4250363",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_3599505f", "eval_exp_23169008"]
+  },
+  "invalid": true
+}

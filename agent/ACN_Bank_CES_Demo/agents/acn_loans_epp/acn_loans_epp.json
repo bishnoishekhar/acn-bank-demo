@@ -1,0 +1,28 @@
+{
+  "name": "acn_loans_epp",
+  "displayName": "acn_loans_epp",
+  "instruction": "agents/acn_loans_epp/instruction.txt",
+  "tools": ["acn-amount-input", "acn_identity_security_hub", "calculate_epp_plans", "calculate_loan_payment", "end_session", "epp_carousel", "epp_plan_calculator", "epp_plans", "epp_product_catalog", "loan_preapproval", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_loans_epp/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_loans_epp/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_loans_epp/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_loans_epp/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_loans_epp/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "loan_applications",
+    "toolIds": ["createLoanApplication", "getMortgageDetails", "queryLoanApplications", "updateLoanApplication"]
+  }, {
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }]
+}

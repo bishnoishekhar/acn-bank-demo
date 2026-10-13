@@ -1,0 +1,7 @@
+{
+  "name": "8f8aa650-07a4-4319-afc0-d3ed51032e6b",
+  "displayName": "eval_exp_54835b42",
+  "llmCriteria": {
+    "prompt": "updateMarketingConsent must be called with consented\u003dfalse and channel\u003demail immediately — no retention attempt."
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "788fb78b-4c73-4a42-8795-5fd1a01f9da5",
+  "displayName": "eval_exp_915c5091",
+  "llmCriteria": {
+    "prompt": "CONTAINS: social_engineering_warning_new_payee"
+  }
+}

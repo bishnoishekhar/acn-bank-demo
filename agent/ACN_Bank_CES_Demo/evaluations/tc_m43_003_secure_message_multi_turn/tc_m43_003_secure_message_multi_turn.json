@@ -1,0 +1,64 @@
+{
+  "name": "d44be2d9-a22d-4403-bd1e-8cfc5b7f1e6f",
+  "displayName": "tc_m43_003_secure_message_multi_turn",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.3", "secure-message", "MSG-01", "webchat", "P1", "MEDIUM", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to send a message about my account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027d be happy to help you send a secure message to our team. What is the subject of your message?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Subject: Fee reversal request"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Got it. Please go ahead with your message."
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "I was charged an NSF fee in error — please review and reverse."
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your secure message has been sent. Your reference number is MSG-2026-001. Our team will respond within 2 business days."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-754ef0c7-fa4b-4197-bc3f-0ec2d895217a",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b2f447fe", "eval_exp_85bbb075"]
+  },
+  "invalid": true
+}

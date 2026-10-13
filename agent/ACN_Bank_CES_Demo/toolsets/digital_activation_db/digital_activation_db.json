@@ -1,0 +1,13 @@
+{
+  "name": "673e7579-15df-4a3c-ac60-fc046d8a27ef",
+  "displayName": "digital_activation_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/digital_activation_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Card activation, Apple/Google Pay, online banking activation, password reset request tracking."
+}

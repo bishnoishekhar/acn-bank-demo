@@ -1,0 +1,7 @@
+{
+  "name": "52eaee2c-66f8-4b13-99e6-c5edbb4d2f95",
+  "displayName": "eval_exp_3d7ad31b",
+  "llmCriteria": {
+    "prompt": "getContributionRoom must be called to retrieve available contribution room."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "923f9b79-6151-496d-b6f3-8db6ceb74156",
+  "displayName": "tc_m43_004_complaint_fcac_reference",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.3", "complaint", "ESC-02", "BR-ACN-067", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to make a formal complaint"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry to hear you have a complaint. ACN Bank has a formal complaint process. You may also escalate to the Financial Consumer Agency of Canada (FCAC) or the Ombudsman for Banking Services and Investments (OBSI) if your complaint is not resolved to your satisfaction."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4a9d58cc"]
+  },
+  "invalid": true
+}

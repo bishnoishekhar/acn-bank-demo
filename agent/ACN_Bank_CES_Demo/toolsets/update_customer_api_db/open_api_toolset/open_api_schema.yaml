@@ -1,0 +1,287 @@
+openapi: "3.0.3"
+info:
+  title: Update Customer API DB - Direct Firestore
+  version: "1.0.0"
+  description: Customer profile and account update operations API (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/accounts/{accountId}:
+    patch:
+      operationId: updateAccount
+      summary: Update account details (nickname, alerts, settings)
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateAccountRequest"
+      responses:
+        "200":
+          description: Account updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/bills/{billId}:
+    patch:
+      operationId: updateBill
+      summary: Update a bill payee record
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: billId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateBillRequest"
+      responses:
+        "200":
+          description: Bill updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/cards/{cardId}:
+    patch:
+      operationId: updateCard
+      summary: Update card status, travel notice, or spending controls
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: cardId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCardRequest"
+      responses:
+        "200":
+          description: Card updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/beneficiaries:
+    post:
+      operationId: addPayee
+      summary: Add a new beneficiary/payee for a customer
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddPayeeRequest"
+      responses:
+        "200":
+          description: Payee added
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/beneficiaries/{beneficiaryId}:
+    patch:
+      operationId: updatePayee
+      summary: Update an existing beneficiary/payee
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: beneficiaryId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePayeeRequest"
+      responses:
+        "200":
+          description: Payee updated
+          content:
+            application/json:
+              schema:
+                type: object
+    delete:
+      operationId: deletePayee
+      summary: Delete a beneficiary/payee
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: beneficiaryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payee deleted
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}:
+    patch:
+      operationId: updateProfile
+      summary: Update customer contact or personal profile information
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProfileRequest"
+      responses:
+        "200":
+          description: Profile updated
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/accounts/{accountId}/overdraft_protection/settings:
+    patch:
+      operationId: updateOverdraftProtection
+      summary: Enable, disable, or update overdraft protection settings for an account
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateOverdraftProtectionRequest"
+      responses:
+        "200":
+          description: Overdraft protection updated
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    UpdateAccountRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+        alertsEnabled:
+          type: boolean
+        lowBalanceThreshold:
+          type: number
+    UpdateBillRequest:
+      type: object
+      properties:
+        nickname:
+          type: string
+        accountNumber:
+          type: string
+        defaultAmount:
+          type: number
+    UpdateCardRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [active, frozen, cancelled]
+        travelNotice:
+          type: object
+        controls:
+          type: object
+    AddPayeeRequest:
+      type: object
+      required:
+        - customerId
+        - name
+        - type
+      properties:
+        customerId:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        accountNumber:
+          type: string
+        bankName:
+          type: string
+        institutionNumber:
+          type: string
+        transitNumber:
+          type: string
+        type:
+          type: string
+          enum: [interac, eft, wire]
+        idempotencyKey:
+          type: string
+    UpdatePayeeRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        accountNumber:
+          type: string
+    UpdateProfileRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        phone:
+          type: string
+        preferredName:
+          type: string
+        address:
+          type: object
+    UpdateOverdraftProtectionRequest:
+      type: object
+      required:
+        - enabled
+      properties:
+        enabled:
+          type: boolean
+        linkedAccountId:
+          type: string
+        overdraftLimit:
+          type: number

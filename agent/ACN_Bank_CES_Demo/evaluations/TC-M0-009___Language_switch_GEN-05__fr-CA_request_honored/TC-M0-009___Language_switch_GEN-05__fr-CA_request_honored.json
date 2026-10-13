@@ -1,0 +1,25 @@
+{
+  "name": "TC-M0-009",
+  "displayName": "TC-M0-009 — Language switch GEN-05: fr-CA request honored",
+  "description": "Language switch GEN-05: fr-CA request honored | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["language 2", "fr-CA 2", "GEN-05", "voice 2", "P1 2", "HIGH 2"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Je voudrais parler en français"
+        }
+      }]
+    }]
+  }
+}

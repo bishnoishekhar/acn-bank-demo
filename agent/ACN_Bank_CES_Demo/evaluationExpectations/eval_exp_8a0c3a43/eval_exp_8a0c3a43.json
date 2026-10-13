@@ -1,0 +1,7 @@
+{
+  "name": "87e5a5ee-2854-42f8-b7bf-ad9333575e56",
+  "displayName": "eval_exp_8a0c3a43",
+  "llmCriteria": {
+    "prompt": "[TC-M25-004] Recurring payment setup reads back next 3 scheduled dates before calling createRecurringSchedule"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "3858a540-da8b-489d-84f8-e048260c60f6",
+  "displayName": "tc_m32_003_stress_test_notice_verbatim",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.2", "stress-test", "BR-ACN-055", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What are your mortgage rates?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are our current mortgage rates. Per OSFI Guideline B-20, the stress test qualifying rate applies to all insured and uninsured mortgages."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-b0772ed6-186f-4fd2-a85e-8a7ff571928e",
+            "tool": "",
+            "args": {
+              "key": "mortgage_rates"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_6d33f3aa"]
+  },
+  "invalid": true
+}

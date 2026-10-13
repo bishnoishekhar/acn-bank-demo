@@ -1,0 +1,10 @@
+{
+  "name": "fintrac_precheck",
+  "pythonFunction": {
+    "name": "fintrac_precheck",
+    "pythonCode": "tools/fintrac_precheck/python_function/python_code.py",
+    "description": "    FINTRAC pre-check for wire/international transfers.\n    Returns status: not_required | passed | review_required | blocked\nRuns FINTRAC compliance check silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "fintrac_precheck"
+}

@@ -1,0 +1,121 @@
+openapi: "3.0.3"
+info:
+  title: ACN Bank Credit Card Application Persistence API - Direct Firestore
+  version: "1.0.0"
+  description: Persist approved credit card applications directly to Firestore (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}:
+    get:
+      operationId: getCreditCardApplication
+      summary: Get the current state of a credit card application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Card application document ID
+      responses:
+        "200":
+          description: Application record
+          content:
+            application/json:
+              schema:
+                type: object
+        "404":
+          description: Application not found
+    patch:
+      operationId: patchCreditCardApplication
+      summary: Update fields on an existing credit card application
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchCreditCardApplicationRequest"
+      responses:
+        "200":
+          description: Application updated
+        "404":
+          description: Application not found
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}/persist_approved:
+    post:
+      operationId: persistApprovedCreditCardApplication
+      summary: Persist an approved credit card application to the core banking system
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: applicationId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Card application document ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PersistApprovedRequest"
+      responses:
+        "200":
+          description: Application persisted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        "400":
+          description: Validation error
+        "409":
+          description: Application already persisted (idempotency)
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    PersistApprovedRequest:
+      type: object
+      required:
+        - customerId
+        - approvedCreditLimit
+        - interestRate
+        - productType
+      properties:
+        customerId:
+          type: string
+          description: Firestore customer document ID
+        approvedCreditLimit:
+          type: number
+          format: float
+          description: Approved credit limit in CAD
+        interestRate:
+          type: number
+          format: float
+          description: Approved interest rate (percentage)
+        productType:
+          type: string
+          description: Credit card product type code
+        idempotencyKey:
+          type: string
+          description: Idempotency key to prevent double-posting
+    PatchCreditCardApplicationRequest:
+      type: object
+      properties:
+        applicationStatus:
+          type: string
+        notes:
+          type: string

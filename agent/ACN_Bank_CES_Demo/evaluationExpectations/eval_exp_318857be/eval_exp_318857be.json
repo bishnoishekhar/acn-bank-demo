@@ -1,0 +1,7 @@
+{
+  "name": "21a8859a-92e1-4103-8560-c3b187b0a207",
+  "displayName": "eval_exp_318857be",
+  "llmCriteria": {
+    "prompt": "createTransaction must NOT be called in response to a FAQ query."
+  }
+}

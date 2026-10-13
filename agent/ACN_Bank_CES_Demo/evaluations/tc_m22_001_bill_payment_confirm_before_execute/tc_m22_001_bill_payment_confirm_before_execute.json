@@ -1,0 +1,49 @@
+{
+  "name": "66d003fb-bce4-4a3d-90a5-93a263759f8f",
+  "displayName": "tc_m22_001_bill_payment_confirm_before_execute",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "bill", "PAY-05", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Pay Rogers $85"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027d like to make a payment of $85 to Rogers from your chequing account. Shall I proceed?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes confirm"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your payment of $85 to Rogers has been processed. Your reference number is PAY-2026-001."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-107ef216-b160-48d7-a35f-6c911657cfd7",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_c859dff7", "eval_exp_09f60d80"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,84 @@
+{
+  "name": "bf071188-e8ee-490f-af29-4131f9670807",
+  "displayName": "tc_m28_005_enable_overdraft_protection_step_up",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "overdraft", "ODP-02", "step-up", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to enable overdraft protection on my account"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To enable overdraft protection I need to perform an additional security verification. I\u0027ve sent a step-up request to your registered device."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-0282cd31-fba8-4ec6-9617-c2665468fefb",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003estep_up_complete\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your additional verification has been approved. Shall I go ahead and enable overdraft protection on your account?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-e1753aac-0241-4fb9-b795-72888d7f5da9",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, please enable it"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Overdraft protection has been enabled on your account."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-95ab048a-99a2-47bf-80dd-450f25e627b6",
+            "tool": "",
+            "args": {
+              "enabled": true
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_9de904d0", "eval_exp_62123f56", "eval_exp_1e1af515", "eval_exp_86a7ff79", "eval_exp_1f793ddc"]
+  },
+  "invalid": true
+}

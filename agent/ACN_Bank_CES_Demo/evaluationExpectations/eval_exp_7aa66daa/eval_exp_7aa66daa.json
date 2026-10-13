@@ -1,0 +1,7 @@
+{
+  "name": "1a2a5535-801e-4eea-9efe-dbfd5422536d",
+  "displayName": "eval_exp_7aa66daa",
+  "llmCriteria": {
+    "prompt": "When preferred_name is null, M0 must ask the customer what to call them (What would you like me to call you / What should I call you / how would you like to be addressed)."
+  }
+}

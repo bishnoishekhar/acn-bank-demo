@@ -1,0 +1,25 @@
+{
+  "name": "abf10857-fc01-4934-bf73-25982302e604",
+  "displayName": "tc_m31_001_card_discovery_disclaimer_and_carousel",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1", "discovery", "CC-01", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What credit cards do you have?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "ACN Bank offers a range of credit cards to suit different needs. Please note that this information is for general purposes only and does not constitute financial advice. Here are some of our top cards for your consideration."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_8797a88b", "eval_exp_0db05e86"]
+  },
+  "invalid": true
+}

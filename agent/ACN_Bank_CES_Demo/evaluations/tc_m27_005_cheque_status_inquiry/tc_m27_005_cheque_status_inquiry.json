@@ -1,0 +1,34 @@
+{
+  "name": "483193a5-8364-4090-a78e-1ffb831309fb",
+  "displayName": "tc_m27_005_cheque_status_inquiry",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-03", "getChequeStatus", "webchat", "P1", "MEDIUM", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What is the status of cheque number 198?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Cheque #198 has cleared. It was processed on October 1, 2026."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-a4a3c0d1-28ef-459b-b0ab-20a9d1d6b396",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_55805a72", "eval_exp_db28a1aa"]
+  },
+  "invalid": true
+}

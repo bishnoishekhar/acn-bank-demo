@@ -1,0 +1,7 @@
+{
+  "name": "a35f8d58-c297-4b89-a150-25d8f64f3ef6",
+  "displayName": "eval_exp_09f60d80",
+  "llmCriteria": {
+    "prompt": "createTransaction must be called after explicit confirmation."
+  }
+}

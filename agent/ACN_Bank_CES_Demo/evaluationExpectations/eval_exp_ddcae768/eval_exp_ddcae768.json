@@ -1,0 +1,7 @@
+{
+  "name": "af875f38-f2d3-46c6-8cbd-8ef6e6cc47f5",
+  "displayName": "eval_exp_ddcae768",
+  "llmCriteria": {
+    "prompt": "[NO-GO] Step-up must be invoked for wire above threshold"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "89aec952-d469-4e2b-bd72-169b386236f7",
+  "displayName": "eval_exp_7f85f620",
+  "llmCriteria": {
+    "prompt": "The agent must trigger the step-up authorization flow before processing any payment at or above CAD 1,000 (demo threshold)."
+  }
+}

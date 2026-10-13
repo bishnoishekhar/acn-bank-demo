@@ -1,0 +1,7 @@
+{
+  "name": "a1659d40-e89b-467f-94d3-1cee4aba059b",
+  "displayName": "eval_exp_9c8c671d",
+  "llmCriteria": {
+    "prompt": "stopPayment must NOT be called until customer confirms."
+  }
+}

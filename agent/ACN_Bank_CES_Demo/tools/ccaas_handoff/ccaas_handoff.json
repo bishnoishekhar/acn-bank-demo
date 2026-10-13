@@ -1,0 +1,9 @@
+{
+  "name": "ccaas_handoff",
+  "pythonFunction": {
+    "name": "ccaas_handoff",
+    "pythonCode": "tools/ccaas_handoff/python_function/python_code.py",
+    "description": "Initiate CCaaS live agent transfer.\n\nArgs:\n    queue_name: Target queue (e.g., \u0027general\u0027, \u0027fraud\u0027, \u0027mortgage\u0027,\n                \u0027disputes\u0027, \u0027premium\u0027, \u0027complaints\u0027).\n    reason: Transfer reason for agent briefing (displayed to agent).\n    customer_id: Customer document ID for warm handoff (optional at L0).\n    context_json: JSON string with journey context snapshot for agent.\n\nReturns:\n    {transferred(bool), wait_estimate_minutes(int), case_reference(str)}"
+  },
+  "displayName": "ccaas_handoff"
+}

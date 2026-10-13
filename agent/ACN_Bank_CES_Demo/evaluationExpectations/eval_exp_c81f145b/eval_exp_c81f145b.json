@@ -1,0 +1,7 @@
+{
+  "name": "04b01709-e8e8-4daa-a894-832f27631abe",
+  "displayName": "eval_exp_c81f145b",
+  "llmCriteria": {
+    "prompt": "The warning must appear before createTransaction is called for the wire."
+  }
+}

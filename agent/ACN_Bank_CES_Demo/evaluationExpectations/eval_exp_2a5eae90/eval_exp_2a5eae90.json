@@ -1,0 +1,7 @@
+{
+  "name": "d9356868-f2fa-4139-8d69-c4c2e0a7ac18",
+  "displayName": "eval_exp_2a5eae90",
+  "llmCriteria": {
+    "prompt": "The agent must detect the webchat channel and set channel\u003dwebchat on the first turn."
+  }
+}

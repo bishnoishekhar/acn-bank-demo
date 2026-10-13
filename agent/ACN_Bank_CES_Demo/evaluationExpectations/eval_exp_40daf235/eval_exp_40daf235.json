@@ -1,0 +1,7 @@
+{
+  "name": "b58793c6-087f-4ec0-8866-7a91ceb338cd",
+  "displayName": "eval_exp_40daf235",
+  "llmCriteria": {
+    "prompt": "Response must contain offer or promotion language."
+  }
+}

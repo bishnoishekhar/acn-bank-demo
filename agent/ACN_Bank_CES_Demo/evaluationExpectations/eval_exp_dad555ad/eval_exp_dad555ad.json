@@ -1,0 +1,7 @@
+{
+  "name": "39f2d4f2-0b11-4c98-be32-0086dafc642e",
+  "displayName": "eval_exp_dad555ad",
+  "llmCriteria": {
+    "prompt": "Successful PIN validation must elevate the session to auth_level\u003d2."
+  }
+}

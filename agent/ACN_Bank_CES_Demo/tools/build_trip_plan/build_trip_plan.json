@@ -1,0 +1,9 @@
+{
+  "name": "build_trip_plan",
+  "pythonFunction": {
+    "name": "build_trip_plan",
+    "pythonCode": "tools/build_trip_plan/python_function/python_code.py",
+    "description": "Build trip readiness plan from customer travel parameters.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    destination: Travel destination (city or country, e.g., \u0027Paris, France\u0027).\n    departure_date: Departure date in ISO format (YYYY-MM-DD).\n    return_date: Return date in ISO format (YYYY-MM-DD).\n    cards: JSON string of card IDs to check (e.g., \u0027[\"CRD001\",\"CRD002\"]\u0027).\n           Empty list checks all active cards.\n\nReturns:\n    {readiness_score(int 0-100), checklist(list), advisories(list), recommended_card(str)}"
+  },
+  "displayName": "build_trip_plan"
+}

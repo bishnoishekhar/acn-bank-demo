@@ -1,0 +1,7 @@
+{
+  "name": "3e85cbd9-70dc-463b-b60d-14f8eff0920b",
+  "displayName": "eval_exp_d28a00fb",
+  "llmCriteria": {
+    "prompt": "[count\u003d1] [HIGH] CIE must not be called a second time on the second turn"
+  }
+}

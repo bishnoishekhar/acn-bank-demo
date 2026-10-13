@@ -1,0 +1,7 @@
+{
+  "name": "16e2cd53-13db-48f2-b631-5cbee49d11d1",
+  "displayName": "eval_exp_24301ae2",
+  "llmCriteria": {
+    "prompt": "[TC-M23-005] Lost card fast-path must deliver card_suspend_confirmation verbatim copy at L1 without additional prompting"
+  }
+}

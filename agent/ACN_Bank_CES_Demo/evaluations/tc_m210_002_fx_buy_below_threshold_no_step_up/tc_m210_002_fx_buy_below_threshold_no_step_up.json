@@ -1,0 +1,58 @@
+{
+  "name": "e3d3785b-3631-453b-9462-7924b01d2c12",
+  "displayName": "tc_m210_002_fx_buy_below_threshold_no_step_up",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.10", "fx", "FX-02", "no-stepup", "below-threshold", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027d like to buy two hundred US dollars"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "The current rate is 1 USD \u003d 1.36 CAD. Two hundred US dollars will cost approximately $272 CAD. Shall I proceed with this FX order?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-e2f09943-617a-4a9e-bc56-2b659eaada18",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, go ahead"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your foreign exchange order has been processed. You purchased $200 USD for $272 CAD. Your reference number is FX-2026-001."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-bb08b074-0595-49aa-8900-97fd28c820c0",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_fc0fd32f", "eval_exp_834b8623", "eval_exp_e76f2a76", "eval_exp_432d2a72", "eval_exp_0e525cfa", "eval_exp_577410ac"]
+  },
+  "invalid": true
+}

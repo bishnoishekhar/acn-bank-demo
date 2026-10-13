@@ -1,0 +1,7 @@
+{
+  "name": "b8a4acf5-12dc-4385-aa44-4b5225cdb76b",
+  "displayName": "eval_exp_caf61239",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR_SET: channel_eligibility_loaded. [HIGH] CIE must set channel_eligibility_loaded after loading eligibility data"
+  }
+}

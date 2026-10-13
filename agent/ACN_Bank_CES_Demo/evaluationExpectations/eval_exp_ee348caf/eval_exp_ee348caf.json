@@ -1,0 +1,7 @@
+{
+  "name": "08693d3c-9837-4ad9-aefa-635b06dbb6f7",
+  "displayName": "eval_exp_ee348caf",
+  "llmCriteria": {
+    "prompt": "CIE must set channel_eligibility_loaded after loading customer eligibility data."
+  }
+}

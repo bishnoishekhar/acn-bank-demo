@@ -1,0 +1,7 @@
+{
+  "name": "fd045446-4eb8-47c2-99f4-388ba95579b3",
+  "displayName": "eval_exp_ef02d464",
+  "llmCriteria": {
+    "prompt": "stopPayment must NOT be called when cheque is already cleared."
+  }
+}

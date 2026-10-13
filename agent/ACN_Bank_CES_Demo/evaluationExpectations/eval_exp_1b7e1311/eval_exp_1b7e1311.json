@@ -1,0 +1,7 @@
+{
+  "name": "79f80578-e4d1-4816-b126-f627acbd8a7e",
+  "displayName": "eval_exp_1b7e1311",
+  "llmCriteria": {
+    "prompt": "updateCard must be called with action\u003dlock."
+  }
+}

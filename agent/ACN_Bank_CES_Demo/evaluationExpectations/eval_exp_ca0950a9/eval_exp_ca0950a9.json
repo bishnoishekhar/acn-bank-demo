@@ -1,0 +1,7 @@
+{
+  "name": "b4d67d3c-cf4a-470f-80a1-39687dc69ffd",
+  "displayName": "eval_exp_ca0950a9",
+  "llmCriteria": {
+    "prompt": "pad_cancel_id must be set in session state after successful cancellation (PAD-02 NO-GO)."
+  }
+}

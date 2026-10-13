@@ -1,0 +1,7 @@
+{
+  "name": "ee1ca517-93f3-4a1c-8cb6-6450639bf5a8",
+  "displayName": "eval_exp_58b561e4",
+  "llmCriteria": {
+    "prompt": "CONTAINS: recurring | scheduled | upcoming payments"
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "name": "e6db9a3e-13a3-4d25-b73b-fe6d840fc473",
+  "displayName": "acn-credit-card-widget",
+  "widgetTool": {
+    "name": "acn-credit-card-widget",
+    "description": "Emit the customer\u0027s existing credit card(s) with balance, limit, and payment details. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me pull up your card details.\u0027 Webchat only — on voice, read card details aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "productDetails": {
+          "type": "ARRAY",
+          "description": "Required. An ordered list of products to be displayed.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "imageUris": {
+                "type": "ARRAY",
+                "description": "A list of direct URLs to images displaying the product.",
+                "items": {
+                  "type": "STRING"
+                }
+              },
+              "price": {
+                "type": "STRING",
+                "description": "The current selling price of the product."
+              },
+              "productId": {
+                "type": "STRING",
+                "description": "The unique identifier for this specific product."
+              },
+              "subtitle": {
+                "type": "STRING",
+                "description": "A longer, secondary line of text for additional context."
+              },
+              "title": {
+                "type": "STRING",
+                "description": "Required. The primary name of the product as listed."
+              },
+              "uri": {
+                "type": "STRING",
+                "description": "The URL directing users to the full product detail page."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "8b71b3be-7bd9-402e-b69f-6d3e6bb1ec27",
+  "displayName": "eval_exp_ee27714b",
+  "llmCriteria": {
+    "prompt": "CONTAINS: reference | pickup"
+  }
+}

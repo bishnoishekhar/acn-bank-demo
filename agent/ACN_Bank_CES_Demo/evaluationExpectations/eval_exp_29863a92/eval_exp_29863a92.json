@@ -1,0 +1,7 @@
+{
+  "name": "1bf6af88-02cf-48ee-bede-81ab8dbeea34",
+  "displayName": "eval_exp_29863a92",
+  "llmCriteria": {
+    "prompt": "[TC-M27-005] CHQ-03 cheque status: getChequeStatus called with cheque number and status presented clearly"
+  }
+}

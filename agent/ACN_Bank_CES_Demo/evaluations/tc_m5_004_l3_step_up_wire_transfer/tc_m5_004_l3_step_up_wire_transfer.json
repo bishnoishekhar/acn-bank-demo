@@ -1,0 +1,50 @@
+{
+  "name": "b529cb59-aafe-4e64-8f27-ca85b33fff9b",
+  "displayName": "tc_m5_004_l3_step_up_wire_transfer",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "L3", "step-up", "wire", "voice", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027d like to wire five thousand dollars to India please"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "For transfers of one thousand dollars or more I need to perform an additional security verification. I\u0027ve sent a step-up authentication request to your registered device. Please approve it to continue."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c18a6646-e7b1-48c4-b594-87a632b04a90",
+            "tool": "authorize_step_up",
+            "args": {
+            },
+            "displayName": "authorize_step_up"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003estep_up_complete\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your additional verification has been approved. Your session is now authorized for this transfer. Shall I go ahead and process the five thousand dollar wire to India?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2aa1ed09", "eval_exp_049e63cd", "eval_exp_324718c4", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

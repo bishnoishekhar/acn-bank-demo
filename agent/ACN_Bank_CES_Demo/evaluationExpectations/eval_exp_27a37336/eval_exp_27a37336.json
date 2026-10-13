@@ -1,0 +1,7 @@
+{
+  "name": "85095bfa-fd13-4d84-b558-f062ad0f6387",
+  "displayName": "eval_exp_27a37336",
+  "llmCriteria": {
+    "prompt": "The agent must notify the customer that their authentication has been reset due to inactivity."
+  }
+}

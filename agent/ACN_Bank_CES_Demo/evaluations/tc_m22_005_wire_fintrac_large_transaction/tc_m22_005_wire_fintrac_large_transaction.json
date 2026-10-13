@@ -1,0 +1,36 @@
+{
+  "name": "1b9f1c40-8273-4f06-90e7-8c8a0cd7d923",
+  "displayName": "tc_m22_005_wire_fintrac_large_transaction",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "fintrac", "wire", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Wire $15000 to Toronto Dominion"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I need to let you know that transactions of $10,000 or more are subject to FINTRAC reporting requirements under the Proceeds of Crime and Terrorist Financing Act. This large cash transaction will be reported to the Financial Transactions and Reports Analysis Centre of Canada."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-40de8bc7-a496-440f-b358-f5fab03e3ae9",
+            "tool": "fintrac_precheck",
+            "args": {
+              "amount_cad": 15000.0
+            },
+            "displayName": "fintrac_precheck"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_4a9b5a2a", "eval_exp_0a84ad35"]
+  },
+  "invalid": true
+}

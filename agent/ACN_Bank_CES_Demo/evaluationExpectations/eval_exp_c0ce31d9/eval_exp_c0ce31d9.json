@@ -1,0 +1,7 @@
+{
+  "name": "bcf11ff7-26ce-45d2-9187-ad0c57f6a55f",
+  "displayName": "eval_exp_c0ce31d9",
+  "llmCriteria": {
+    "prompt": "CONTAINS: pipeda_disclosure. [NO-GO] PIPEDA disclosure must accompany the opening greeting on voice"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "4d565175-c7d2-4793-b93e-fc3a6e60d496",
+  "displayName": "tc_m25_001_view_payees_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.5", "payee", "PMG-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Show me my payees"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your registered payees."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-1ed74700-f003-4be4-a329-dbfe53ff8f9e",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_704c3fca", "eval_exp_aa97761a"]
+  },
+  "invalid": true
+}

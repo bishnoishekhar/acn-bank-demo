@@ -1,0 +1,7 @@
+{
+  "name": "845035f2-bbde-496b-90dc-010ce59864db",
+  "displayName": "eval_exp_cdcfa44b",
+  "llmCriteria": {
+    "prompt": "Dispute/service intent must route to acn_service_hub — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

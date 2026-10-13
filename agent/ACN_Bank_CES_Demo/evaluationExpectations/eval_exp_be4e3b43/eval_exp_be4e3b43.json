@@ -1,0 +1,7 @@
+{
+  "name": "07a248ed-b379-4bbd-8f4d-ca255fd3016f",
+  "displayName": "eval_exp_be4e3b43",
+  "llmCriteria": {
+    "prompt": "Response must reference document upload or collection stage."
+  }
+}

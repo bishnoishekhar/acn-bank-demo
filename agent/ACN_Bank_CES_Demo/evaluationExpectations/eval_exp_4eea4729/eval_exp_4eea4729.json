@@ -1,0 +1,7 @@
+{
+  "name": "c9f48e80-eaf4-4569-a0c1-e761bacde488",
+  "displayName": "eval_exp_4eea4729",
+  "llmCriteria": {
+    "prompt": "retry_strike_count must be set to 3 after three consecutive DocAI processor errors."
+  }
+}

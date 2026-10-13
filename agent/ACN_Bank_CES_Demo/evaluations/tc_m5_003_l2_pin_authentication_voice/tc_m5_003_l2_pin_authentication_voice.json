@@ -1,0 +1,50 @@
+{
+  "name": "0e1567ed-74eb-46f8-8e17-36ae6d32d268",
+  "displayName": "tc_m5_003_l2_pin_authentication_voice",
+  "tags": ["acn_bank_ces_demo", "m5", "auth", "L2", "pin", "voice", "dtmf", "P0", "NO-GO", "phase-gate-1", "golden_m5_auth"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to check my account balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To access your account I need to verify your identity. Please enter your 4-digit phone banking PIN using your keypad."
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "\u003cevent\u003edtmf_pin_entered\u003c/event\u003e"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Thank you, your PIN has been verified. How can I help you with your account today?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5da21024-1e90-44af-90f6-925d3151c3c7",
+            "tool": "verify_pin",
+            "args": {
+            },
+            "displayName": "verify_pin"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_7febacd0", "eval_exp_dad555ad", "eval_exp_78a931e6", "eval_exp_31c66b8a"]
+  },
+  "invalid": true
+}

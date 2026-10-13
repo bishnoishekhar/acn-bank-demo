@@ -1,0 +1,7 @@
+{
+  "name": "3a985aac-4140-4f2a-ab42-b3f52e31f988",
+  "displayName": "eval_exp_77816d9b",
+  "llmCriteria": {
+    "prompt": "Response must confirm paperless, email, enrolled, or confirmation."
+  }
+}

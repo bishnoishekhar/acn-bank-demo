@@ -1,0 +1,25 @@
+{
+  "name": "c168c00a-18e2-4fb3-aeb0-bfe31da10e80",
+  "displayName": "tc_m01_003_faq_to_action_handoff",
+  "tags": ["acn_bank_ces_demo", "m0.1", "faq-action", "GB-36", "webchat", "P1", "MEDIUM", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "How do I send an Interac e-Transfer?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "To send an Interac e-Transfer, go to Transfers, select Send Money, enter the recipient\u0027s email or mobile and the amount, then confirm. Would you like me to help you send one now?"
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_53ee3ba5"]
+  },
+  "invalid": true
+}

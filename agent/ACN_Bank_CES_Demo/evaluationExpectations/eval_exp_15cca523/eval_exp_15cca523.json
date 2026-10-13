@@ -1,0 +1,7 @@
+{
+  "name": "a374461d-7529-4eff-9313-db0f96bc3e5b",
+  "displayName": "eval_exp_15cca523",
+  "llmCriteria": {
+    "prompt": "The agent must detect French from the customer\u0027s first utterance and lock preferred_language to fr-CA."
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "name": "a7efeee3-74c9-4146-9a8b-64289d1133f5",
+  "displayName": "investments_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/investments_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Investment account information: GIC rates, TFSA/RRSP/FHSA balances, contribution room, holdings."
+}

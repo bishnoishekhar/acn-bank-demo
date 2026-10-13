@@ -1,0 +1,7 @@
+{
+  "name": "8825b28a-6383-4b1e-b659-115d6a9fecff",
+  "displayName": "eval_exp_b9155e85",
+  "llmCriteria": {
+    "prompt": "updateCustomerProfile must NOT be called in response to a FAQ query."
+  }
+}

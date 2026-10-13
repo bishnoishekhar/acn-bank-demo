@@ -1,0 +1,25 @@
+{
+  "name": "fe38b008-9376-41f1-a715-e128ce78775f",
+  "displayName": "tc_m31_006_docai_all_pass_kyc_proceeds",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.1a", "kyc", "docai", "confidence-pass", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "[document upload triggered during KYC stage]"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your identity document has been verified successfully. I\u0027ll now proceed to the next stage of your application."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_f229f818"]
+  },
+  "invalid": true
+}

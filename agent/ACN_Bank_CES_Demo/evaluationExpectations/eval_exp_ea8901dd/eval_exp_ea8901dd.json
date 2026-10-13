@@ -1,0 +1,7 @@
+{
+  "name": "c86d7199-52ac-4ad3-8855-4e994874c4ac",
+  "displayName": "eval_exp_ea8901dd",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR_SET: cie_loaded. [HIGH] cie_loaded session flag must be true after CIE completes"
+  }
+}

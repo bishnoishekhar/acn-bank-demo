@@ -1,0 +1,7 @@
+{
+  "name": "8841a7e7-2d1e-44bd-9144-9c75c4270d1e",
+  "displayName": "eval_exp_6708dd20",
+  "llmCriteria": {
+    "prompt": "The warning must include a check confirming the customer initiated the transfer voluntarily."
+  }
+}

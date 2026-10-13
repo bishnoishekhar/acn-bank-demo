@@ -1,0 +1,7 @@
+{
+  "name": "5845e751-f562-4115-ba64-43490054bb53",
+  "displayName": "eval_exp_da4f34bc",
+  "llmCriteria": {
+    "prompt": "[TC-M01-002] M0.1 FAQ never announces itself (silent per TR-12)"
+  }
+}

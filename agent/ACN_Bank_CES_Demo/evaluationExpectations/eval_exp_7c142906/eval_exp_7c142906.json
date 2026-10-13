@@ -1,0 +1,7 @@
+{
+  "name": "9b114df1-f153-427e-8ff3-690b73bb033a",
+  "displayName": "eval_exp_7c142906",
+  "llmCriteria": {
+    "prompt": "CONTAINS: overdraft | limit | status"
+  }
+}

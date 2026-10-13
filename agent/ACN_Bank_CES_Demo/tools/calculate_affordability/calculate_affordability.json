@@ -1,0 +1,10 @@
+{
+  "name": "calculate_affordability",
+  "pythonFunction": {
+    "name": "calculate_affordability",
+    "pythonCode": "tools/calculate_affordability/python_function/python_code.py",
+    "description": "Calculates maximum purchase price using GDS/TDS ratios and OSFI stress test.\nReturns affordability calculations silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "calculate_affordability"
+}

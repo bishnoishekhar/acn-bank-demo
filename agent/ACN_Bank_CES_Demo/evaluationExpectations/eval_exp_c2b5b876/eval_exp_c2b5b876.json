@@ -1,0 +1,7 @@
+{
+  "name": "e1643c22-c787-4758-8347-ecaa6ab03faf",
+  "displayName": "eval_exp_c2b5b876",
+  "llmCriteria": {
+    "prompt": "[TC-M25-001] View payee list calls getPayees and emits payee_list widget W-20"
+  }
+}

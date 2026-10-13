@@ -1,0 +1,7 @@
+{
+  "name": "c9b74651-7408-4462-a086-624be9889c24",
+  "displayName": "eval_exp_076869b9",
+  "llmCriteria": {
+    "prompt": "appointment_type must be set to investment_advisor in session state."
+  }
+}

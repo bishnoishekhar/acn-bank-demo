@@ -1,0 +1,84 @@
+{
+  "name": "b2d0b47d-dd19-494d-8b6e-b261571f61b2",
+  "displayName": "mortgage_kyc",
+  "widgetTool": {
+    "name": "mortgage_kyc",
+    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: \u0027I will need you to upload a document.\u0027 Webchat only — on voice, guide the customer to the mobile app.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "fields": {
+          "type": "ARRAY",
+          "description": "Required. Ordered list of KYC fields to collect. Prefill values may be passed from session state when known.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "field_id": {
+                "type": "STRING",
+                "description": "One of: gross_annual_income_cad | employment_status | employer_name | years_employed | monthly_debt_obligations_cad | property_type | property_city | province."
+              },
+              "help_text": {
+                "type": "STRING",
+                "description": "Optional one-line clarifier under the input."
+              },
+              "input_kind": {
+                "type": "STRING",
+                "description": "text | number | currency_cad | select | picker."
+              },
+              "label": {
+                "type": "STRING",
+                "description": "Human-facing label."
+              },
+              "max": {
+                "type": "NUMBER"
+              },
+              "min": {
+                "type": "NUMBER"
+              },
+              "options": {
+                "type": "ARRAY",
+                "description": "For input_kind\u003dselect. Each item is a plain string.",
+                "items": {
+                  "type": "STRING"
+                }
+              },
+              "prefill_value": {
+                "type": "STRING",
+                "description": "Optional. Stringified initial value."
+              },
+              "required": {
+                "type": "BOOLEAN"
+              }
+            }
+          }
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mortgage_kyc\u0027"
+        },
+        "submit_cta_label": {
+          "type": "STRING",
+          "description": "Primary button label, e.g. \u0027See my pre-approval\u0027."
+        },
+        "submit_cta_value": {
+          "type": "STRING",
+          "description": "Sent to the agent on submit. The widget appends the collected values as a JSON object."
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "One calm sentence explaining why we need this to give a pre-approval estimate."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Form header, e.g. \u0027A few last details\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "fields", "submit_cta_value"]
+    }
+  }
+}

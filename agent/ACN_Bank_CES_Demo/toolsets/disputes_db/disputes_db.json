@@ -1,0 +1,13 @@
+{
+  "name": "5efedab5-b5c4-4b1b-87fb-aaa92abb63f8",
+  "displayName": "disputes_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/disputes_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Dispute creation, retrieval, update, and PAD dispute handling for unauthorized transactions and chargebacks."
+}

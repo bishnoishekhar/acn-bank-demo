@@ -1,0 +1,34 @@
+{
+  "name": "b96ddaad-5ce4-4c33-a615-2bcbdb18f9e8",
+  "displayName": "tc_m29_003_pad_dispute_90_day_window",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.9", "pad", "dispute", "PAD-03", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Netflix charged me $50 more than they should have last week"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve filed a dispute for the unauthorized PAD amount. Under CPA Rule H6, you have up to 90 days from the date of the unauthorized debit to request a reclaim."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5fcd4b98-b42f-4a35-9443-1b3be4fe4113",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0e5d9aec", "eval_exp_9225ce64"]
+  },
+  "invalid": true
+}

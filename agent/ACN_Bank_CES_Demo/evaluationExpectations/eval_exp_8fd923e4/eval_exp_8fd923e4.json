@@ -1,0 +1,7 @@
+{
+  "name": "0b431f86-1d42-4089-abed-58b60e4e1b81",
+  "displayName": "eval_exp_8fd923e4",
+  "llmCriteria": {
+    "prompt": "[TC-M23-004] Card delivery tracking calls getCardDeliveryStatus and responds with delivery status language"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "ff60ee36-986f-45bd-b3f5-211dc22fbf16",
+  "displayName": "eval_exp_0fb76e1c",
+  "llmCriteria": {
+    "prompt": "Agent must NOT attempt to connect to a live agent outside business hours."
+  }
+}

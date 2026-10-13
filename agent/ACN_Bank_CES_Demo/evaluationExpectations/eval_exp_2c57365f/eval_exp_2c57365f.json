@@ -1,0 +1,7 @@
+{
+  "name": "8bd80fb4-e6ec-46c0-a6ac-f8f1b593cca2",
+  "displayName": "eval_exp_2c57365f",
+  "llmCriteria": {
+    "prompt": "CONTAINS: account_closure_retention"
+  }
+}

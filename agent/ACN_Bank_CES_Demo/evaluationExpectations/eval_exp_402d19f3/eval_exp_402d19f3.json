@@ -1,0 +1,7 @@
+{
+  "name": "fe70680d-3745-44b1-8cc3-2b1829aa37cd",
+  "displayName": "eval_exp_402d19f3",
+  "llmCriteria": {
+    "prompt": "[TC-M210-001] FX rate inquiry calls getExchangeRate, emits fx_rate_card widget W-30, and includes indicative rate disclaimer"
+  }
+}

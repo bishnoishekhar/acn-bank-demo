@@ -1,0 +1,7 @@
+{
+  "name": "ddce47cb-5fc1-42c2-b139-15ae2ab49a53",
+  "displayName": "eval_exp_40742679",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: cie_loaded\u003dFalse. [HIGH]"
+  }
+}

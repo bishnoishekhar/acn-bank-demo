@@ -1,0 +1,7 @@
+{
+  "name": "6ad389d1-f2e2-4ccc-8f2a-f032d4210798",
+  "displayName": "eval_exp_5a21be80",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: error | unavailable | try again later. [HIGH] CIE failure must be silently absorbed — session must continue normally"
+  }
+}

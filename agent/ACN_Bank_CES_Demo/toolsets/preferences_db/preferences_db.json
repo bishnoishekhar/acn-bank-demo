@@ -1,0 +1,13 @@
+{
+  "name": "7738fae4-02f5-40bf-b0d9-6e8483041ac3",
+  "displayName": "preferences_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/preferences_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Customer communication preferences: notification alerts, paperless enrollment, CASL consent management."
+}

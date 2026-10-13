@@ -1,0 +1,7 @@
+{
+  "name": "2d0abf02-af2e-4eb7-a3ab-a712b4d641f8",
+  "displayName": "eval_exp_863761bd",
+  "llmCriteria": {
+    "prompt": "The agent must NOT omit the disclaimer on the first product recommendation turn."
+  }
+}

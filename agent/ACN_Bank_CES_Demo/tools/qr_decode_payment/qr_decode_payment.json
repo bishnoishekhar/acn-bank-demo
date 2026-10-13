@@ -1,0 +1,10 @@
+{
+  "name": "qr_decode_payment",
+  "pythonFunction": {
+    "name": "qr_decode_payment",
+    "pythonCode": "tools/qr_decode_payment/python_function/python_code.py",
+    "description": "    Decodes QR payment payload and validates merchant.\n    qr_payload: base64-encoded or URL-formatted QR string.\nDecodes a QR payment code silently. No pacing phrase required."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "qr_decode_payment"
+}

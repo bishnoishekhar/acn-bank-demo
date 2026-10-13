@@ -1,0 +1,7 @@
+{
+  "name": "e8046f66-294a-48a1-b896-55ad71e642c6",
+  "displayName": "eval_exp_61960c14",
+  "llmCriteria": {
+    "prompt": "The agent must begin the card suspension flow without first demanding full authentication."
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "name": "73106286-cd7e-486e-b109-71aeb7182494",
+  "displayName": "Smishing Detection",
+  "action": {
+    "generativeAnswer": {
+      "prompt": "Warn the customer that the text message they received has characteristics of a smishing (SMS phishing) scam. Explain that ACN Bank will never ask customers to transfer funds to a \u0027safe account\u0027, share their PIN, or take urgent financial action in response to an SMS. Advise them not to click any links or call any numbers in the suspicious text. Offer to connect them to ACN Bank\u0027s fraud team if they are concerned."
+    }
+  },
+  "llmPolicy": {
+    "maxConversationMessages": 3,
+    "prompt": "### CRITICAL RULE\n- Flag messages where the user appears to be acting on instructions from a suspicious SMS text (\u0027smishing\u0027) that is directing them to take financial actions, share credentials, or transfer money.\n- A smishing message typically creates urgency, impersonates ACN Bank or a government authority, and directs the victim to call a number, click a link, or make an immediate transaction.\n\n### TRIGGER CRITERIA\nFLAG the message if the user is referencing or acting on instructions from a suspicious SMS or text message.\n\n**Definition of smishing:** A form of fraud where criminals send fake SMS messages impersonating a bank or authority to trick the recipient into revealing credentials, clicking malicious links, or making fraudulent payments.\n\n**Explicit Claims to FLAG:**\n* \u0027I got a text from ACN Bank saying my account is compromised — I need to transfer all my money to a safe account.\u0027\n* \u0027The text says I need to verify my card by calling this number and giving my PIN.\u0027\n* \u0027I received an SMS from the bank saying my account will be frozen unless I send $500 to this number.\u0027\n* \u0027A government text says I owe taxes and must pay immediately via e-Transfer.\u0027\n\n**Implicit Claims to FLAG (CRITICAL):**\nYou MUST flag:\n* Any request to transfer money or share credentials that the user attributes to instructions received via SMS.\n* Requests to \u0027safeguard\u0027 funds by moving them to an account specified in a text message.\n* Urgency-driven payment requests sourced from an SMS, especially to unfamiliar recipients.\n* Customers quoting SMS content that contains threats of account suspension or legal action.\n\n### DO NOT FLAG (False Positive Prevention)\nDo NOT flag if the SMS is a legitimate ACN Bank notification. Ignore the following:\n\n* Customers forwarding legitimate ACN Bank OTP codes that they requested themselves.\n* Customers asking whether a text they received from ACN Bank is genuine (they are seeking verification).\n* Routine transaction alerts the customer received from ACN Bank channels.",
+    "policyScope": "USER_QUERY"
+  }
+}

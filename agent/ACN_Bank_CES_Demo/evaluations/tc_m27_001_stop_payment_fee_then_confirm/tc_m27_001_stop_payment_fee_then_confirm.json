@@ -1,0 +1,49 @@
+{
+  "name": "e3bc7bd1-cd3c-4bff-9bb1-234c99dd1da2",
+  "displayName": "tc_m27_001_stop_payment_fee_then_confirm",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.7", "cheque", "CHQ-01", "stopPayment", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Stop cheque number 245 for $1500 to Ravi Contractors"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "A stop payment fee applies for this request. The fee for stopping cheque #245 for $1,500 payable to Ravi Contractors will be charged to your account. Would you like to proceed?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your stop payment request for cheque #245 has been processed successfully."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-c851b95c-13bc-4d1c-8cd4-97c1df1851f2",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_38e260ba", "eval_exp_9c8c671d", "eval_exp_c3e13d07"]
+  },
+  "invalid": true
+}

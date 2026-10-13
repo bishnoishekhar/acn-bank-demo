@@ -1,0 +1,25 @@
+{
+  "name": "2a0a9f7f-d284-44ab-800d-06282a4ecdcb",
+  "displayName": "tc_m0_003_route_banking_hub",
+  "tags": ["acn_bank_ces_demo", "m0", "routing", "m2", "banking-hub", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll connect you with our banking team to check your account balance right away."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_b4c2c136"]
+  },
+  "invalid": true
+}

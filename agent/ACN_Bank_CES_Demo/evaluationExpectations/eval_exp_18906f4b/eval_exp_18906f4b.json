@@ -1,0 +1,7 @@
+{
+  "name": "a3794bc4-3660-451c-8b57-b64daa6f70fb",
+  "displayName": "eval_exp_18906f4b",
+  "llmCriteria": {
+    "prompt": "Response must reference cleared and cannot stop language."
+  }
+}

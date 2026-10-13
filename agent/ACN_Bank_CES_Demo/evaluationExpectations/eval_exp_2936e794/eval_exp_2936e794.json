@@ -1,0 +1,7 @@
+{
+  "name": "0f39ecef-4d58-40a2-91f7-1051411f6c86",
+  "displayName": "eval_exp_2936e794",
+  "llmCriteria": {
+    "prompt": "Response must NOT contain offer, promotion, have you considered, or upgrade language when nudge_shown\u003dtrue (GB-23)."
+  }
+}

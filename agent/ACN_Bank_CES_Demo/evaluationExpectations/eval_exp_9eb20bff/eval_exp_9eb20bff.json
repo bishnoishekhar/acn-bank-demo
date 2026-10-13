@@ -1,0 +1,7 @@
+{
+  "name": "d0e48ff2-899f-4e07-b2c0-09231336e50e",
+  "displayName": "eval_exp_9eb20bff",
+  "llmCriteria": {
+    "prompt": "[TC-M0-003] M0 routes banking intent to acn_banking_hub"
+  }
+}

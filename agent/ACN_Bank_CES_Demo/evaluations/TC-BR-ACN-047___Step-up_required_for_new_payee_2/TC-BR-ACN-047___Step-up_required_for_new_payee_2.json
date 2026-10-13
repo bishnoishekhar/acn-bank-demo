@@ -1,0 +1,24 @@
+{
+  "name": "474f7910-b75e-4d4e-94a0-39f8067e37b1",
+  "displayName": "TC-BR-ACN-047 — Step-up required for new payee 2",
+  "description": "Step-up required for new payee | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["BR-ACN-047 1", "step-up 1", "payee 1", "voice 1", "P0 1", "NO-GO 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Add John Smith at TD Bank as a payee"
+        }
+      }]
+    }]
+  }
+}

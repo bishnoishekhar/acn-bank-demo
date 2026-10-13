@@ -1,0 +1,7 @@
+{
+  "name": "6ef33e5b-af6c-40f9-88ff-a491457dc81d",
+  "displayName": "eval_exp_f229f818",
+  "llmCriteria": {
+    "prompt": "When all DocAI fields have confidence \u003e\u003d 0.80, KYC must pass and agent must route to acn_cc_verification — golden ends at routing message, transfer is verified by this expectation."
+  }
+}

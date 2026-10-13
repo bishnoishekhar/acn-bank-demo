@@ -1,0 +1,7 @@
+{
+  "name": "9912411e-11d6-42ce-853d-e7bbca5e1583",
+  "displayName": "eval_exp_184ce8d4",
+  "llmCriteria": {
+    "prompt": "CIE failure must be silently absorbed — agent must NOT surface error language (error, unavailable, try again later) to the customer."
+  }
+}

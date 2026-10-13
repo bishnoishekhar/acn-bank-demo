@@ -1,0 +1,7 @@
+{
+  "name": "dc77cb7c-b1f8-4fdf-a4d5-639fbef6ccbf",
+  "displayName": "eval_exp_f93c2990",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the social engineering warning for new payees before creating or confirming the payee."
+  }
+}

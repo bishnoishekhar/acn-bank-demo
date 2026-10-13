@@ -1,0 +1,7 @@
+{
+  "name": "4e0eb586-338c-4b05-a74e-fffaa53cce41",
+  "displayName": "eval_exp_492df5ac",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR_SET: customer_segment. [HIGH] M1 CIE must populate customer_segment in session state after auth"
+  }
+}

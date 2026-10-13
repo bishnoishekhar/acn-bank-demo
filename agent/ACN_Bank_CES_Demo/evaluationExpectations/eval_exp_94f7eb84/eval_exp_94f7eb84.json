@@ -1,0 +1,7 @@
+{
+  "name": "ff58815b-e860-4d19-b807-26cb67c94f3f",
+  "displayName": "eval_exp_94f7eb84",
+  "llmCriteria": {
+    "prompt": "The agent must NOT paraphrase or abbreviate the required CDIC disclosure."
+  }
+}

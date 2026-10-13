@@ -1,0 +1,77 @@
+{
+  "name": "40ef2568-7e5b-448f-85bc-52f99498e61b",
+  "displayName": "mortgage_nudge",
+  "widgetTool": {
+    "name": "mortgage_nudge",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "properties": {
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mortgage_nudge\u0027"
+        },
+        "suggestions": {
+          "type": "ARRAY",
+          "description": "Required. Copy verbatim from mortgage_next_best_action. That tool is authoritative for this copy: never rewrite a title or body, never add a suggestion it did not return, and never restate a number it did not produce. One suggestion per turn is the norm; two is the maximum.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "body": {
+                "type": "STRING",
+                "description": "The suggestion itself, 60 words or fewer, ending in one question. Rendered verbatim."
+              },
+              "cta_label": {
+                "type": "STRING",
+                "description": "The accept button, styled as a quiet outline rather than a primary action."
+              },
+              "cta_value": {
+                "type": "STRING",
+                "description": "Sent to the agent if the customer wants to explore it."
+              },
+              "decline_label": {
+                "type": "STRING",
+                "description": "Defaults to \u0027Not now\u0027."
+              },
+              "decline_value": {
+                "type": "STRING",
+                "description": "Sent to the agent on decline. The agent must record it and never offer this suggestion_id again."
+              },
+              "evidence": {
+                "type": "ARRAY",
+                "description": "The numbers behind the suggestion, shown as small chips. A suggestion without evidence should not be rendered.",
+                "items": {
+                  "type": "OBJECT",
+                  "properties": {
+                    "label": {
+                      "type": "STRING"
+                    },
+                    "value": {
+                      "type": "STRING"
+                    }
+                  }
+                }
+              },
+              "kind": {
+                "type": "STRING",
+                "description": "down_payment | closing_costs | rate_choice | rate_hold | structure | prepayment | heloc | refinance | protection | recovery. Picks the icon only."
+              },
+              "suggestion_id": {
+                "type": "STRING",
+                "description": "Stable id used to suppress a declined suggestion on later turns."
+              },
+              "title": {
+                "type": "STRING",
+                "description": "One short line. Rendered verbatim."
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "suggestions"]
+    }
+  }
+}

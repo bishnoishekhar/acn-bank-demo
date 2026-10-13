@@ -1,0 +1,35 @@
+{
+  "name": "e05da06d-b9fa-42ea-a021-49af92e3c8f1",
+  "displayName": "tc_m44_001_branch_locator_widget",
+  "tags": ["acn_bank_ces_demo", "m4", "m4.4", "branch", "BRN-01", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m4_service"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Find an ACN Bank branch near me"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are ACN Bank branches near your location."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-4bc29005-b546-487a-8612-9b8ff3ceb624",
+            "tool": "",
+            "args": {
+              "key": "branches"
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_6b3e8dac", "eval_exp_862f44ce"]
+  },
+  "invalid": true
+}

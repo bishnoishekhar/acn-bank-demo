@@ -1,0 +1,7 @@
+{
+  "name": "6d8bfc53-67a4-4649-8f50-2cfb1f7f03c2",
+  "displayName": "eval_exp_324718c4",
+  "llmCriteria": {
+    "prompt": "Session auth_level must reach 3 after successful step-up completion."
+  }
+}

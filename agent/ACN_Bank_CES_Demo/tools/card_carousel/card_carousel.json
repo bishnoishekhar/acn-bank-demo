@@ -1,0 +1,69 @@
+{
+  "name": "af1fa089-d8cc-444f-95d8-d1e3df70f0b1",
+  "displayName": "card_carousel",
+  "widgetTool": {
+    "name": "card_carousel",
+    "description": "Emit a credit card product carousel for card discovery and comparison. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you our credit card options.\u0027 Webchat only — on voice, describe each card aloud.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "cards": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "annual_fee": {
+                "type": "NUMBER"
+              },
+              "benefits": {
+                "type": "ARRAY",
+                "items": {
+                  "type": "STRING"
+                }
+              },
+              "card_id": {
+                "type": "STRING"
+              },
+              "card_name": {
+                "type": "STRING"
+              },
+              "min_credit_score": {
+                "type": "NUMBER"
+              },
+              "min_income": {
+                "type": "NUMBER"
+              },
+              "network": {
+                "type": "STRING"
+              },
+              "purchase_rate": {
+                "type": "NUMBER"
+              },
+              "rewards": {
+                "type": "ARRAY",
+                "items": {
+                  "type": "STRING"
+                }
+              },
+              "welcome_bonus_points": {
+                "type": "NUMBER"
+              },
+              "welcome_bonus_value": {
+                "type": "NUMBER"
+              }
+            },
+            "required": ["card_id", "card_name", "annual_fee"]
+          }
+        },
+        "name": {
+          "type": "STRING"
+        },
+        "title": {
+          "type": "STRING"
+        }
+      },
+      "required": ["name", "cards"]
+    }
+  }
+}

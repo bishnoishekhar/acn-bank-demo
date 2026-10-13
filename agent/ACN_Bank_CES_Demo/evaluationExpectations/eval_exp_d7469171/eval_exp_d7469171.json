@@ -1,0 +1,7 @@
+{
+  "name": "9c97ac3c-7ac8-4705-950d-d05cfe824407",
+  "displayName": "eval_exp_d7469171",
+  "llmCriteria": {
+    "prompt": "Response must NOT contain are you sure, reconsider, or one more offer language (BR-ACN-091)."
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "name": "e2c666f5-0516-4de3-bc61-8568d1c9333e",
+  "displayName": "mortgage_affordability",
+  "widgetTool": {
+    "name": "mortgage_affordability",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "bounds": {
+          "type": "OBJECT",
+          "properties": {
+            "down_payment_max_cad": {
+              "type": "NUMBER"
+            },
+            "down_payment_min_cad": {
+              "type": "NUMBER"
+            },
+            "income_max_cad": {
+              "type": "NUMBER"
+            },
+            "income_min_cad": {
+              "type": "NUMBER"
+            },
+            "monthly_debt_max_cad": {
+              "type": "NUMBER"
+            }
+          },
+          "description": "Slider min/max bounds. Optional; the widget has sensible Canadian defaults."
+        },
+        "defaults": {
+          "type": "OBJECT",
+          "properties": {
+            "amortization_years": {
+              "type": "NUMBER",
+              "description": "Defaults to 25. Only first-time buyers and new builds may use 30 on an insured mortgage."
+            },
+            "down_payment_cad": {
+              "type": "NUMBER",
+              "description": "What the customer has saved, in CAD."
+            },
+            "first_time_buyer": {
+              "type": "BOOLEAN",
+              "description": "Unlocks the FHSA and Home Buyers Plan booster and the land transfer tax rebate."
+            },
+            "gross_annual_income_cad": {
+              "type": "NUMBER",
+              "description": "Household income before tax, including a co-buyer."
+            },
+            "interest_rate_pct": {
+              "type": "NUMBER",
+              "description": "Contract rate from mortgage_rate_board. The widget stress-tests it internally."
+            },
+            "monthly_debt_obligations_cad": {
+              "type": "NUMBER",
+              "description": "Cards, loans, leases, child support. Not rent."
+            },
+            "property_city": {
+              "type": "STRING"
+            },
+            "property_type": {
+              "type": "STRING",
+              "description": "Detached | Semi-detached | Townhouse | Condo | Duplex. Condos carry fees that count toward debt service."
+            },
+            "province": {
+              "type": "STRING",
+              "description": "Two-letter code, e.g. ON. Drives land transfer tax and the first-time buyer rebate."
+            }
+          },
+          "description": "Starting values. All CAD. Prefill anything already known about the customer."
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027mortgage_affordability\u0027"
+        },
+        "submit_cta_label": {
+          "type": "STRING",
+          "description": "Primary button label, e.g. \u0027Continue with this budget\u0027."
+        },
+        "submit_cta_value": {
+          "type": "STRING",
+          "description": "Sent back to the agent on tap. The widget appends the current inputs and the computed max price as JSON."
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "Widget sub-header, plain and calm. Must not promise a pre-approval."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Widget header, e.g. \u0027What could you afford?\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+        }
+      },
+      "required": ["type", "name", "defaults", "submit_cta_value"]
+    }
+  }
+}

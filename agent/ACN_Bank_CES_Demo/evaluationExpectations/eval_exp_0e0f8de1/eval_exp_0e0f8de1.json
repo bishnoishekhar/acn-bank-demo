@@ -1,0 +1,7 @@
+{
+  "name": "ce565adc-7c08-43b5-a9d7-8469755cc8eb",
+  "displayName": "eval_exp_0e0f8de1",
+  "llmCriteria": {
+    "prompt": "getCardDeliveryStatus must be called."
+  }
+}

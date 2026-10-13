@@ -1,0 +1,13 @@
+{
+  "name": "c02adb30-8ad4-4502-8757-2fa4bbf0231b",
+  "displayName": "account_opening_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/account_opening_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Account opening workflow: product discovery, application creation, status, update."
+}

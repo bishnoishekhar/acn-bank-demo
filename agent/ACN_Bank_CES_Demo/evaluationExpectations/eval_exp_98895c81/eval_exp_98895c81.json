@@ -1,0 +1,7 @@
+{
+  "name": "6e43bce4-b043-457f-8c83-475bb8e22582",
+  "displayName": "eval_exp_98895c81",
+  "llmCriteria": {
+    "prompt": "cie_loaded must be set to true after CIE completes successfully."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "942dfc24-8780-4b65-8842-48399f65bcf8",
+  "displayName": "TC-GB-017 — Verbatim copy verified and delivered 3",
+  "description": "Verbatim copy verified and delivered | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-17", "BR-ACN-019", "copy", "cdic", "verbatim", "P0", "NO-GO", "voice"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Tell me about CDIC"
+        }
+      }]
+    }]
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "6a596d62-bf24-4498-aa92-4f53b2e9d232",
+  "displayName": "eval_exp_4a9b5a2a",
+  "llmCriteria": {
+    "prompt": "fintrac_precheck must be called with amount_cad\u003d15000."
+  }
+}

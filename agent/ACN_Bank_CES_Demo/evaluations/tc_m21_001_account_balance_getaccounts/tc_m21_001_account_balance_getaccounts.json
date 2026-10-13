@@ -1,0 +1,34 @@
+{
+  "name": "0a1fa786-ec18-4949-9692-9c982f370f5a",
+  "displayName": "tc_m21_001_account_balance_getaccounts",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.1", "balance", "ACC-01", "voice", "P0", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What\u0027s my chequing account balance?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your chequing account balance is $4,823.17 as of today."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-ede83651-c185-4449-9e62-76f49b7c4ebc",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ac640eef", "eval_exp_fd1a7f3c"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,58 @@
+openapi: 3.0.0
+info:
+  title: ACN Bank KYC SMS API
+  description: Send KYC document upload links via SMS to customers during identity verification flows.
+  version: "1.0"
+servers:
+  - url: $env_var
+paths:
+  /send:
+    post:
+      operationId: sendKycSmsLink
+      summary: Send a KYC document upload link via SMS
+      description: >
+        Sends a time-limited secure link to the customer's registered mobile
+        number for uploading KYC documents (government ID, proof of income, etc.)
+        Used during credit card applications, mortgage origination, and dispute resolution.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - to
+                - kyc_link
+                - customer_name
+              properties:
+                to:
+                  type: string
+                  description: Recipient mobile number in E.164 format
+                kyc_link:
+                  type: string
+                  description: Secure KYC upload URL (time-limited, one-time use)
+                customer_name:
+                  type: string
+                  description: Customer first name for SMS personalisation
+      responses:
+        "200":
+          description: SMS sent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  sms_id:
+                    type: string
+                    description: SMS delivery tracking ID
+                  expires_at:
+                    type: string
+                    format: date-time
+                    description: Link expiry timestamp
+        "400":
+          description: Invalid request
+        "500":
+          description: Service error

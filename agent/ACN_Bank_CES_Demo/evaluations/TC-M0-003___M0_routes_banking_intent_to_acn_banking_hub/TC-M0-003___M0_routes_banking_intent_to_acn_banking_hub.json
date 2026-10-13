@@ -1,0 +1,25 @@
+{
+  "name": "TC-M0-003",
+  "displayName": "TC-M0-003 — M0 routes banking intent to acn_banking_hub",
+  "description": "M0 routes banking intent to acn_banking_hub | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "routing 2", "M2", "banking-hub", "P0 2", "HIGH 2", "voice 2"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "voice",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }]
+  }
+}

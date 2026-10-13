@@ -1,0 +1,34 @@
+{
+  "name": "63a464cb-efbf-49d7-bb67-2cc1619ee429",
+  "displayName": "tc_m22_009_cancel_etransfer_widget",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.2", "interac", "cancel", "PAY-13", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Cancel the e-Transfer I just sent"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your Interac e-Transfer has been cancelled successfully. The funds will be returned to your account."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-83c5701a-f9c5-49e4-adda-0ea033b3a49e",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_9b60278b", "eval_exp_b7800f7d"]
+  },
+  "invalid": true
+}

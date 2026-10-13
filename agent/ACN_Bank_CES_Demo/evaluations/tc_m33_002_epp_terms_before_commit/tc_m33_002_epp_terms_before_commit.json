@@ -1,0 +1,34 @@
+{
+  "name": "550ee8f6-64a0-4551-87e7-6fb1b6de86ed",
+  "displayName": "tc_m33_002_epp_terms_before_commit",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.3", "epp", "EPP-terms", "verbatim", "webchat", "P0", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I\u0027ll take the 6-month EPP plan"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I set up your Equal Payment Plan, please review the following terms and conditions. By proceeding you agree to these terms."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-4277a188-4c9f-426b-b312-5f1739caa22d",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2a827db8"]
+  },
+  "invalid": true
+}

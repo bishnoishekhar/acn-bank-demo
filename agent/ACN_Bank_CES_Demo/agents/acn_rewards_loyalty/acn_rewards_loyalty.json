@@ -1,0 +1,28 @@
+{
+  "name": "acn_rewards_loyalty",
+  "displayName": "acn_rewards_loyalty",
+  "instruction": "agents/acn_rewards_loyalty/instruction.txt",
+  "tools": ["acn_identity_security_hub", "end_session", "quick_actions"],
+  "beforeAgentCallbacks": [{
+    "pythonCode": "agents/acn_rewards_loyalty/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
+  }],
+  "beforeModelCallbacks": [{
+    "pythonCode": "agents/acn_rewards_loyalty/before_model_callbacks/before_model_callbacks_01/python_code.py"
+  }],
+  "afterModelCallbacks": [{
+    "pythonCode": "agents/acn_rewards_loyalty/after_model_callbacks/after_model_callbacks_01/python_code.py"
+  }],
+  "beforeToolCallbacks": [{
+    "pythonCode": "agents/acn_rewards_loyalty/before_tool_callbacks/before_tool_callbacks_01/python_code.py"
+  }],
+  "afterToolCallbacks": [{
+    "pythonCode": "agents/acn_rewards_loyalty/after_tool_callbacks/after_tool_callbacks_01/python_code.py"
+  }],
+  "toolsets": [{
+    "toolset": "manageCustomerDatabase",
+    "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
+  }, {
+    "toolset": "rewards_loyalty_db",
+    "toolIds": ["createRedemption", "getRedemptionStatus", "getRewardsBalance", "getRewardsHistory"]
+  }]
+}

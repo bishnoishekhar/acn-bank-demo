@@ -1,0 +1,9 @@
+{
+  "name": "issue_otp",
+  "pythonFunction": {
+    "name": "issue_otp",
+    "pythonCode": "tools/issue_otp/python_function/python_code.py",
+    "description": "Generate OTP challenge and dispatch to registered mobile.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    preferred_channel: Delivery channel — \u0027sms\u0027 (default) | \u0027voice\u0027 | \u0027email\u0027.\n\nReturns:\n    {otp_request_id, expires_in_seconds, masked_destination}"
+  },
+  "displayName": "issue_otp"
+}

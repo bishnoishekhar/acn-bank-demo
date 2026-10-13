@@ -1,0 +1,7 @@
+{
+  "name": "c40937fb-5339-4f76-af1e-d49ddcaee613",
+  "displayName": "eval_exp_a6490640",
+  "llmCriteria": {
+    "prompt": "CONTAINS: October 1 | November 1 | December 1"
+  }
+}

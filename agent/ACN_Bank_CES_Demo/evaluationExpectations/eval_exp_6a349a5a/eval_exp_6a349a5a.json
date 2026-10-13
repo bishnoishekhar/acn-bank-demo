@@ -1,0 +1,7 @@
+{
+  "name": "0d8b2841-403e-4812-af79-b9d254556244",
+  "displayName": "eval_exp_6a349a5a",
+  "llmCriteria": {
+    "prompt": "The agent must respond in English for all subsequent turns without switching language."
+  }
+}

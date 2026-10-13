@@ -1,0 +1,50 @@
+{
+  "name": "067be29b-aa98-478a-8684-e8574b6041b8",
+  "displayName": "tc_m0_006_cie_called_once_per_session",
+  "tags": ["acn_bank_ces_demo", "m0", "m1", "CIE", "TR-6", "webchat", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Your chequing account balance is $4,823.17 and your savings account balance is $12,500. Is there anything else you\u0027d like to know?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-bca0b780-e334-493e-b9fc-ef59362f1e61",
+            "tool": "acn_customer_intelligence_engine",
+            "args": {
+            },
+            "displayName": "acn_customer_intelligence_engine"
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Now show me my transactions"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are your most recent transactions on your chequing account."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_0258244b"]
+  },
+  "invalid": true
+}

@@ -1,0 +1,24 @@
+{
+  "name": "9277a389-f336-4c55-abda-ed6dbd7b82a0",
+  "displayName": "TC-GB-010 — Wire disclosure + FINTRAC check before wire execution 2",
+  "description": "Wire disclosure + FINTRAC check before wire execution | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d3, mode\u003dstep_up",
+  "tags": ["GB-10 1", "BR-ACN-012 1", "wire 1", "fintrac 1", "disclosure 1", "compliance 1", "P0 1", "NO-GO 1", "voice 1"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 3.0,
+            "auth_mode": "step_up",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Wire $5000 to India"
+        }
+      }]
+    }]
+  }
+}

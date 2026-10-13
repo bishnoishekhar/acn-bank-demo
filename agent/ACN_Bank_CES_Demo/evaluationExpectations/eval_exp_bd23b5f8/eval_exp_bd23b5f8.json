@@ -1,0 +1,7 @@
+{
+  "name": "fe1d037f-94c1-490d-af3c-c8205a7dd05c",
+  "displayName": "eval_exp_bd23b5f8",
+  "llmCriteria": {
+    "prompt": "createRedemption must NOT be called on the first turn — agent must read back 10000 points and statement credit and confirm first."
+  }
+}

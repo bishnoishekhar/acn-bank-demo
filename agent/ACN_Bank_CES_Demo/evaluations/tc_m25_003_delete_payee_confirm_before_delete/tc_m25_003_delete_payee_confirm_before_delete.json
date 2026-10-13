@@ -1,0 +1,49 @@
+{
+  "name": "9c0964a2-06e1-41b1-b683-4ea5f56fd9ae",
+  "displayName": "tc_m25_003_delete_payee_confirm_before_delete",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.5", "payee", "PMG-04", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Delete Rogers from my payees"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Before I delete Rogers from your payees, I want to let you know that any upcoming scheduled or recurring payments to Rogers may be affected. Are you sure you want to remove Rogers?"
+            }]
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes, go ahead and delete it"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Rogers has been removed from your payees successfully."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5543598f-b292-44d4-8fc7-6a97c5016921",
+            "tool": "",
+            "args": {
+            }
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_2af145d3", "eval_exp_7e2d7495"]
+  },
+  "invalid": true
+}

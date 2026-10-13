@@ -1,0 +1,7 @@
+{
+  "name": "3e5f45f0-90a5-4939-9f6b-3ea04e70ce2c",
+  "displayName": "eval_exp_cbf722cf",
+  "llmCriteria": {
+    "prompt": "payment_failed_notice copy key must be delivered when createTransaction returns HTTP 500."
+  }
+}

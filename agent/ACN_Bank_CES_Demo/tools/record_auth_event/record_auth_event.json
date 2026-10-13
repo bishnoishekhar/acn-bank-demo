@@ -1,0 +1,9 @@
+{
+  "name": "record_auth_event",
+  "pythonFunction": {
+    "name": "record_auth_event",
+    "pythonCode": "tools/record_auth_event/python_function/python_code.py",
+    "description": "Write an authentication event to the compliance audit log.\n\nArgs:\n    customer_id: Firestore customer document ID.\n    event_type: Event type: auth_success | auth_failure | auth_expired |\n                step_up_issued | step_up_completed | auth_locked | otp_issued |\n                otp_verified | pin_verified.\n    auth_level: Resulting auth level after this event (0-3).\n    channel: Channel: voice | webchat | whatsapp.\n    metadata: Optional JSON string with additional context (no PII values).\n\nReturns:\n    {recorded(bool)}"
+  },
+  "displayName": "record_auth_event"
+}

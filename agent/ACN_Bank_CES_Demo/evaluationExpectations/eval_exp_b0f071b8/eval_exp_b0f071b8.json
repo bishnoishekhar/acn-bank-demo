@@ -1,0 +1,7 @@
+{
+  "name": "d547f1ac-4848-4c3d-81ba-7bfb0133f266",
+  "displayName": "eval_exp_b0f071b8",
+  "llmCriteria": {
+    "prompt": "[TC-M22-003] Interac e-Transfer to a new recipient requires authorize_step_up before createTransaction"
+  }
+}

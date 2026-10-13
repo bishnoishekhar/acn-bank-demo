@@ -1,0 +1,7 @@
+{
+  "name": "cf66d88b-dc98-4439-bdc2-cffa2f6823b2",
+  "displayName": "eval_exp_ce39846d",
+  "llmCriteria": {
+    "prompt": "vulnerability_sub_type must be set to bereavement."
+  }
+}

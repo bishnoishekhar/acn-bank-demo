@@ -1,0 +1,31 @@
+{
+  "name": "TC-GB-023",
+  "displayName": "TC-GB-023 — One nudge per session cap",
+  "description": "One nudge per session cap | Priority: P1 | Severity: HIGH | Phase gate: 1 | Persona: CUST-PREMIUM-001 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["GB-23", "BR-ACN-036", "nudge", "premium", "webchat", "P1", "HIGH"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "nudge_shown": false,
+            "persona_id": "CUST-PREMIUM-001",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Check my balance"
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "What credit cards do you have?"
+        }
+      }]
+    }]
+  }
+}

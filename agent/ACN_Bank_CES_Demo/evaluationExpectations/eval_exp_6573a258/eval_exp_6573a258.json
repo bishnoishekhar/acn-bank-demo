@@ -1,0 +1,7 @@
+{
+  "name": "4068baed-94b8-402e-9098-458d7209cd38",
+  "displayName": "eval_exp_6573a258",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the exact verbatim CDIC copy text as defined in the copy library."
+  }
+}

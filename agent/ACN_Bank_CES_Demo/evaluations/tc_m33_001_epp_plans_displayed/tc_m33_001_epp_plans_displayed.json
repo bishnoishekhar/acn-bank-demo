@@ -1,0 +1,35 @@
+{
+  "name": "6b117dd7-ab42-489c-8056-af461443fcd0",
+  "displayName": "tc_m33_001_epp_plans_displayed",
+  "tags": ["acn_bank_ces_demo", "m3", "m3.3", "epp", "EPP-02", "webchat", "P1", "HIGH", "phase-gate-3", "golden_m3_products"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I want to spread my $3000 purchase over payments"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "Here are the available Equal Payment Plan options for a $3,000 purchase. You can choose from 6, 12, or 24 months."
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-dc0d838a-c074-4f56-8f72-70e5be562b2a",
+            "tool": "calculate_epp_plans",
+            "args": {
+            },
+            "displayName": "calculate_epp_plans"
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ed5a959c", "eval_exp_995601b2"]
+  },
+  "invalid": true
+}

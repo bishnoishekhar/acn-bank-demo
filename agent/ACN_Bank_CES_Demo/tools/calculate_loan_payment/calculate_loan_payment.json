@@ -1,0 +1,9 @@
+{
+  "name": "calculate_loan_payment",
+  "pythonFunction": {
+    "name": "calculate_loan_payment",
+    "pythonCode": "tools/calculate_loan_payment/python_function/python_code.py",
+    "description": "Amortization calculation for a personal loan.\n\nArgs:\n    principal: Loan principal in CAD.\n    annual_rate: Annual interest rate as a percentage (e.g., 7.5 for 7.5%).\n    term_months: Loan term in months.\n\nReturns:\n    {monthly_payment, total_interest, total_cost, amortization_schedule_url}"
+  },
+  "displayName": "calculate_loan_payment"
+}

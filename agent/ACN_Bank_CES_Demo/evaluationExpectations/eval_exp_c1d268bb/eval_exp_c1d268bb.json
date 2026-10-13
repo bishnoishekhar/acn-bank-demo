@@ -1,0 +1,7 @@
+{
+  "name": "9bcb3aaf-3442-43c5-9dff-2e8eb0b67158",
+  "displayName": "eval_exp_c1d268bb",
+  "llmCriteria": {
+    "prompt": "kyc_result must be set to manual_review when any DocAI field confidence is below 0.80."
+  }
+}

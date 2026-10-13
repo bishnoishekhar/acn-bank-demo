@@ -1,0 +1,7 @@
+{
+  "name": "5db9ac4f-8956-40a4-b9cb-02263e79d74d",
+  "displayName": "eval_exp_4137df42",
+  "llmCriteria": {
+    "prompt": "authorize_step_up must be called for any payment at or above the CAD 1,000 step-up threshold (NO-GO)."
+  }
+}

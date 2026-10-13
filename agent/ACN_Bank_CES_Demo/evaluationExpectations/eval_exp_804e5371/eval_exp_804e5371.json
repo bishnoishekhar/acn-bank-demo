@@ -1,0 +1,7 @@
+{
+  "name": "bdca1d89-41d5-4900-82d3-3a6da5e5d3a1",
+  "displayName": "eval_exp_804e5371",
+  "llmCriteria": {
+    "prompt": "Any card number reference must be masked to the last 4 digits only, formatted as a masked sequence (e.g., ending in XXXX)."
+  }
+}

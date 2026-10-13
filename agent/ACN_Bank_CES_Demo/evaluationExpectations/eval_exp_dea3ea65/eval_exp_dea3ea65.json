@@ -1,0 +1,7 @@
+{
+  "name": "b4f634ef-1d08-4038-b63e-f93cc2a08159",
+  "displayName": "eval_exp_dea3ea65",
+  "llmCriteria": {
+    "prompt": "[NO-GO] Session must be immediately transferred to acn_exception_escalation when auth is locked"
+  }
+}

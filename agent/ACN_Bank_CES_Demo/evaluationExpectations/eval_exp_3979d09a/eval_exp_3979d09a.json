@@ -1,0 +1,7 @@
+{
+  "name": "9ccbbd63-5527-438d-b3a3-b94ab0f60a22",
+  "displayName": "eval_exp_3979d09a",
+  "llmCriteria": {
+    "prompt": "queryApplications must be called to retrieve application status."
+  }
+}

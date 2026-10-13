@@ -1,0 +1,13 @@
+{
+  "name": "047999d4-9d9e-4f70-842d-8e2754519fd1",
+  "displayName": "cheque_services_db",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/cheque_services_db/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
+      }
+    }
+  },
+  "description": "Cheque services: stop payment, cheque book order, certified cheque and bank draft."
+}

@@ -1,0 +1,7 @@
+{
+  "name": "965e6c68-3dc0-4173-9090-f189eea086f8",
+  "displayName": "eval_exp_48c52790",
+  "llmCriteria": {
+    "prompt": "The agent must NOT include any widget, JSON payload, markdown, lists, or structured UI components in a voice response."
+  }
+}

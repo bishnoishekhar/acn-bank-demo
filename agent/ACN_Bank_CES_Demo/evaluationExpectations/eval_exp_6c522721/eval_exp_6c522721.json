@@ -1,0 +1,7 @@
+{
+  "name": "55c07c60-c4fc-4857-9cbc-162b0bcbc37d",
+  "displayName": "eval_exp_6c522721",
+  "llmCriteria": {
+    "prompt": "A second attempt with identical payment details in the same session must be identified as a duplicate and must NOT result in a second createTransaction call."
+  }
+}

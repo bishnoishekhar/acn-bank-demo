@@ -1,0 +1,10 @@
+{
+  "name": "identify_customer",
+  "pythonFunction": {
+    "name": "identify_customer",
+    "pythonCode": "tools/identify_customer/python_function/python_code.py",
+    "description": "    M5 identification tool: L0 → L1.\n    identifier_type: caller_id | phone | email | card_dob_postal | wa_id | webchat_sso\n    Returns customer_id, auth_level\u003d1, identified_by on success.\nCalled silently during initial caller lookup. Do NOT speak any pacing phrase before calling this tool."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "identify_customer"
+}

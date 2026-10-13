@@ -1,0 +1,50 @@
+{
+  "name": "3ce3aa71-fb5c-469b-b2f8-7cb0e57b27dc",
+  "displayName": "tc_m23_001_lost_stolen_card_suspend_then_replace",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.3", "lost-stolen", "CRD-01", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "I lost my card"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ve suspended your card immediately to prevent any unauthorized use. Your card ending in 4471 has been suspended. Would you like me to send you a replacement card?"
+            }]
+          }
+        }
+      }, {
+        "expectation": {
+          "toolCall": {
+            "id": "adk-5ed1b6e6-c483-4853-9eb7-cf891f10e6de",
+            "tool": "",
+            "args": {
+              "action": "suspend"
+            }
+          }
+        }
+      }]
+    }, {
+      "steps": [{
+        "userInput": {
+          "text": "Yes please send me a replacement"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027ll arrange for a replacement card to be sent to your address on file. It should arrive within 5 to 7 business days."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_635d5a36", "eval_exp_d8eae078", "eval_exp_10000166"]
+  },
+  "invalid": true
+}

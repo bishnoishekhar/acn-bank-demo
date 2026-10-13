@@ -1,0 +1,33 @@
+{
+  "name": "1ec7897d-377c-4d46-a657-d36d31238a03",
+  "displayName": "TC-M0-004 — M0 routes products intent to acn_products_hub 1",
+  "description": "M0 routes products intent to acn_products_hub | Priority: P0 | Severity: HIGH | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: webchat | Auth: level\u003d2, mode\u003dpin",
+  "tags": ["M0", "routing", "M3", "products-hub", "P0", "HIGH", "webchat"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 2.0,
+            "auth_mode": "pin",
+            "channel": "webchat",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "I want a new credit card"
+        }
+      }, {
+        "expectation": {
+          "note": "[HIGH]",
+          "agentTransfer": {
+            "targetAgent": "acn_products_hub",
+            "displayName": "acn_products_hub"
+          }
+        }
+      }]
+    }]
+  }
+}

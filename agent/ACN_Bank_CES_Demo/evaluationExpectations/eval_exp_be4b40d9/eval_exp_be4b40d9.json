@@ -1,0 +1,7 @@
+{
+  "name": "6fa95414-3035-4327-a1c0-3da34469cf4e",
+  "displayName": "eval_exp_be4b40d9",
+  "llmCriteria": {
+    "prompt": "NOT_CONTAINS: waived | reversed"
+  }
+}

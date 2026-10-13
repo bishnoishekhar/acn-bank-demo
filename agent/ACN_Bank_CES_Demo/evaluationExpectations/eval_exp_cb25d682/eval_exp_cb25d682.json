@@ -1,0 +1,7 @@
+{
+  "name": "bccd9a8c-5097-49e6-8e73-2e617aecef80",
+  "displayName": "eval_exp_cb25d682",
+  "llmCriteria": {
+    "prompt": "Response must confirm activation success (activated, ready to use, successful)."
+  }
+}

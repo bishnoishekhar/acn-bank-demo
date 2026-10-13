@@ -1,0 +1,7 @@
+{
+  "name": "a9025e10-5cf2-4bce-9cb0-a0e1bc70aa7f",
+  "displayName": "eval_exp_6edaddb4",
+  "llmCriteria": {
+    "prompt": "Once locked to voice, the channel must not change for the remainder of the session."
+  }
+}

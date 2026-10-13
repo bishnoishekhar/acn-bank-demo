@@ -1,0 +1,7 @@
+{
+  "name": "15cdc0c3-df46-4727-b9a8-74cdd2919cc0",
+  "displayName": "eval_exp_dfb8edc1",
+  "llmCriteria": {
+    "prompt": "[TC-M28-006] ODP-04 NSF reversal: getNSFHistory checked first; eligible case calls createNSFReversal; nsf_reversal_eligible set false after success"
+  }
+}

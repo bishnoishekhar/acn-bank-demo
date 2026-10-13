@@ -1,0 +1,25 @@
+{
+  "name": "7c989427-acb0-4cbe-9053-92672f53d512",
+  "displayName": "tc_m21_003_unrecognised_charge_routes_disputes",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.1", "fraud", "ACC-03", "voice", "P0", "NO-GO", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "There\u0027s a charge I don\u0027t recognise from Amazon for $299"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I understand you have an unrecognised charge. I\u0027ll connect you with our disputes specialists who can investigate this right away."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_910ae9f1", "eval_exp_7566a96a"]
+  },
+  "invalid": true
+}

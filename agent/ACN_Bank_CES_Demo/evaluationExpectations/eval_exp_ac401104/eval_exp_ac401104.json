@@ -1,0 +1,7 @@
+{
+  "name": "3e9e64a3-81d1-4291-8e40-481ada259350",
+  "displayName": "eval_exp_ac401104",
+  "llmCriteria": {
+    "prompt": "SESSION_VAR: auth_level\u003d1. [NO-GO] Successful caller-ID match must elevate session to auth_level\u003d1"
+  }
+}

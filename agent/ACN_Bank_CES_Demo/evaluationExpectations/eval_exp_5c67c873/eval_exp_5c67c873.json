@@ -1,0 +1,7 @@
+{
+  "name": "fea2ee03-b001-439d-8411-2c5c736f90b9",
+  "displayName": "eval_exp_5c67c873",
+  "llmCriteria": {
+    "prompt": "Response must reference most recent, last 3, or recent transaction language."
+  }
+}

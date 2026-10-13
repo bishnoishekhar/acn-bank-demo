@@ -1,0 +1,7 @@
+{
+  "name": "9ca5e4cd-71b4-406f-b32f-7227f805a09c",
+  "displayName": "eval_exp_3a230e85",
+  "llmCriteria": {
+    "prompt": "CONTAINS: pad_cancellation_rights"
+  }
+}

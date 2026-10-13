@@ -1,0 +1,7 @@
+{
+  "name": "cb39f036-d4fb-4faa-ba03-cc1e9b097646",
+  "displayName": "eval_exp_af9b0183",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the PIPEDA privacy disclosure and call-recording notice on its very first utterance."
+  }
+}

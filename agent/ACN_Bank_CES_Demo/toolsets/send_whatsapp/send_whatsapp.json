@@ -1,0 +1,12 @@
+{
+  "name": "4d6a4971-625d-4309-83d6-b7f29b00fd9f",
+  "displayName": "send_whatsapp",
+  "openApiToolset": {
+    "openApiSchema": "toolsets/send_whatsapp/open_api_toolset/open_api_schema.yaml",
+    "apiAuthentication": {
+      "serviceAgentIdTokenAuthConfig": {
+      }
+    }
+  },
+  "description": "Send WhatsApp messages to customers via the ACN Bank WhatsApp integration. Supports text, link, and template message types."
+}

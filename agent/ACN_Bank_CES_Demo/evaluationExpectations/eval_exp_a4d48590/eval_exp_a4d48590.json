@@ -1,0 +1,7 @@
+{
+  "name": "80539d3a-69d0-44be-95e4-5fe51372437b",
+  "displayName": "eval_exp_a4d48590",
+  "llmCriteria": {
+    "prompt": "verify_otp must be called when the customer provides the OTP code."
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "7deffc0e-bd24-4777-8883-d06acd94791f",
+  "displayName": "tc_m01_004_cdic_on_deposit_faq",
+  "tags": ["acn_bank_ces_demo", "m0.1", "cdic", "FAQ-01", "webchat", "deposit", "P0", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "What is CDIC coverage?"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "CDIC coverage protects eligible deposits at ACN Bank up to $100,000 per depositor per insured category. Your deposits are insured by the Canada Deposit Insurance Corporation, a federal Crown corporation."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_e1a03515"]
+  },
+  "invalid": true
+}

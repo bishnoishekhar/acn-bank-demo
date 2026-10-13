@@ -1,0 +1,7 @@
+{
+  "name": "917cc0d0-374c-4611-b2ce-cc1627dad66a",
+  "displayName": "eval_exp_dbc19c7d",
+  "llmCriteria": {
+    "prompt": "The PIPEDA disclosure must appear in the agent\u0027s very first response, before any PII is requested or shared."
+  }
+}

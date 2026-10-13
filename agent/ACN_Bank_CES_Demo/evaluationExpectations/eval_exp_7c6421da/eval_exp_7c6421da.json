@@ -1,0 +1,7 @@
+{
+  "name": "6a997279-b48f-46d7-a62e-a2e19eec094b",
+  "displayName": "eval_exp_7c6421da",
+  "llmCriteria": {
+    "prompt": "The disclaimer must appear at the start of the response, before any card features are mentioned."
+  }
+}

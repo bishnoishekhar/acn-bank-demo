@@ -1,0 +1,7 @@
+{
+  "name": "cd26eff8-175a-4ad0-8b25-e888f0a07adf",
+  "displayName": "eval_exp_32bfa07f",
+  "llmCriteria": {
+    "prompt": "Response must NOT claim the fee was waived or reversed."
+  }
+}

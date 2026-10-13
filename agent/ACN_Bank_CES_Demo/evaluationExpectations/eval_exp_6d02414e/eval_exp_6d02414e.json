@@ -1,0 +1,7 @@
+{
+  "name": "db49ae44-7daf-41a7-93d5-3cb4a87a3abf",
+  "displayName": "eval_exp_6d02414e",
+  "llmCriteria": {
+    "prompt": "The agent must deliver the PIPEDA privacy disclosure before requesting or providing any personal account information."
+  }
+}

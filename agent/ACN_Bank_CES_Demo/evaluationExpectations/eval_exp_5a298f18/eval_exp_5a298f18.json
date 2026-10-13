@@ -1,0 +1,7 @@
+{
+  "name": "f99879b2-04fb-4280-b380-3eaab1efe61c",
+  "displayName": "eval_exp_5a298f18",
+  "llmCriteria": {
+    "prompt": "CONTAINS: financial_advice_disclaimer"
+  }
+}

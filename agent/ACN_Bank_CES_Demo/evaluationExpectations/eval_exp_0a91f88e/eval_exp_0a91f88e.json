@@ -1,0 +1,7 @@
+{
+  "name": "2664393b-0724-43f8-a3ad-2786d4cf5625",
+  "displayName": "eval_exp_0a91f88e",
+  "llmCriteria": {
+    "prompt": "CONTAINS: status | cheque"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "d15eaf54-3121-4d4a-b417-16a194bf1481",
+  "displayName": "eval_exp_1f793ddc",
+  "llmCriteria": {
+    "prompt": "overdraft_enabled session variable must be set to true after success (ODP-02)."
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "38491cf8-7cdc-447a-b270-0e9782e7452c",
+  "pythonFunction": {
+    "name": "epp_product_catalog",
+    "pythonCode": "tools/epp_product_catalog/python_function/python_code.py",
+    "description": "Return catalogue rows, filtered by any combination of brand + category.\n\nBoth filters are optional; passing neither returns the whole catalogue.\nAn unknown brand or category returns an empty list — the agent should\nhandle that by asking the customer to clarify or dropping the filter.\n\nNote: helpers are defined as NESTED functions instead of module-level\n`_underscore` functions. CES Agent Builder auto-registers every\ntop-level `def` as an importable tool and ignores the underscore\nconvention, so keeping them nested prevents them from polluting the\ntool list in the console."
+  },
+  "executionType": "SYNCHRONOUS",
+  "displayName": "epp_product_catalog"
+}

@@ -1,0 +1,24 @@
+{
+  "name": "9a31f99f-c8b3-4746-9436-768878fe0f70",
+  "displayName": "TC-GB-037a — Social engineering warning before new payee 3",
+  "description": "Social engineering warning before new payee | Priority: P0 | Severity: NO-GO | Phase gate: 1 | Persona: CUST_DOC_1988 | Channel: voice | Auth: level\u003d3, mode\u003dstep_up",
+  "tags": ["GB-37", "BR-ACN-090", "social-engineering", "payee", "voice", "P0", "NO-GO"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "variables": {
+            "auth_level": 3.0,
+            "auth_mode": "step_up",
+            "persona_id": "CUST_DOC_1988",
+            "preferred_language": "en-CA"
+          }
+        }
+      }, {
+        "userInput": {
+          "text": "Add John Smith at TD Bank as a payee"
+        }
+      }]
+    }]
+  }
+}

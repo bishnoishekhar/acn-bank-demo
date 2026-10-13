@@ -1,0 +1,7 @@
+{
+  "name": "2ba57615-7ef3-4ab7-aaeb-4ec4fe3c598e",
+  "displayName": "eval_exp_0c2af2ad",
+  "llmCriteria": {
+    "prompt": "CONTAINS: offer | promotion"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "6ed6019a-7001-4754-8661-3268c8e149d7",
+  "displayName": "eval_exp_62c3a08e",
+  "llmCriteria": {
+    "prompt": "The agent must NEVER mention internal agent names such as \u0027acn_banking_hub\u0027, \u0027acn_products_hub\u0027, \u0027acn_disputes\u0027, or any \u0027acn_\u0027 prefixed identifier in its response."
+  }
+}

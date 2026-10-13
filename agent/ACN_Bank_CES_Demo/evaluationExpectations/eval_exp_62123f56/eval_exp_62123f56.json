@@ -1,0 +1,7 @@
+{
+  "name": "6d23a405-74ee-4e2a-9122-093e7368190d",
+  "displayName": "eval_exp_62123f56",
+  "llmCriteria": {
+    "prompt": "step_up_required must be set to true before step-up is initiated."
+  }
+}

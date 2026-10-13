@@ -1,0 +1,25 @@
+{
+  "name": "bc0ae63f-a42f-4bc7-9339-8052919771c5",
+  "displayName": "tc_m1_003_cie_channel_eligibility_filter",
+  "tags": ["acn_bank_ces_demo", "m1", "CIE", "channel-eligibility", "BR-ACN-092", "webchat", "P1", "HIGH", "phase-gate-1", "golden_m0_orchestrator"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Tell me about your margin lending options"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry, but margin lending is not available for your account at this time. I\u0027d recommend speaking with a financial advisor who can help you explore options that may be suitable for you."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_ee348caf", "eval_exp_3223dfac", "eval_exp_4c7d4915"]
+  },
+  "invalid": true
+}

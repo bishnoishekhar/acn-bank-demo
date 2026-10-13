@@ -1,0 +1,7 @@
+{
+  "name": "db0173e9-26db-4b7f-9521-db39e71498f5",
+  "displayName": "eval_exp_38e260ba",
+  "llmCriteria": {
+    "prompt": "Response on first turn must reference fee or charge before executing stopPayment."
+  }
+}

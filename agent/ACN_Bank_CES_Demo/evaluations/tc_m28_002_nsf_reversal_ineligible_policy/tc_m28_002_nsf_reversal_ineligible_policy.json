@@ -1,0 +1,25 @@
+{
+  "name": "4c69c283-da59-4d7c-a4a9-d39b4ee31c9d",
+  "displayName": "tc_m28_002_nsf_reversal_ineligible_policy",
+  "tags": ["acn_bank_ces_demo", "m2", "m2.8", "nsf", "policy", "webchat", "P1", "HIGH", "phase-gate-2", "golden_m2_banking"],
+  "golden": {
+    "turns": [{
+      "steps": [{
+        "userInput": {
+          "text": "Waive my NSF fee"
+        }
+      }, {
+        "expectation": {
+          "agentResponse": {
+            "role": "agent",
+            "chunks": [{
+              "text": "I\u0027m sorry, based on your account history we\u0027re unable to reverse this NSF fee at this time. This is based on our fee waiver policy. If you\u0027d like to dispute this decision, you may contact our complaints team or escalate to the OBSI."
+            }]
+          }
+        }
+      }]
+    }],
+    "evaluationExpectations": ["eval_exp_32bfa07f", "eval_exp_180b1131"]
+  },
+  "invalid": true
+}

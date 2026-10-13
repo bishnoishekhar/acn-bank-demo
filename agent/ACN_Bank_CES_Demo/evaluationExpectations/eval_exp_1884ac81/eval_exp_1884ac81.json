@@ -1,0 +1,7 @@
+{
+  "name": "34d35c4e-f601-4e93-8092-97fced789335",
+  "displayName": "eval_exp_1884ac81",
+  "llmCriteria": {
+    "prompt": "The agent must route to the exception and escalation agent (M4.3) on the same turn the request is made."
+  }
+}

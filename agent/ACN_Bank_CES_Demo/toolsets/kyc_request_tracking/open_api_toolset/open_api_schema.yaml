@@ -1,0 +1,123 @@
+openapi: "3.0.3"
+info:
+  title: KYC Request Tracking - Direct Firestore
+  version: "1.0.0"
+  description: KYC request creation, status tracking, and record writing API (Direct Firestore)
+servers:
+  - url: $env_var
+paths:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_requests:
+    post:
+      operationId: createKycRequest
+      summary: Create a new KYC identity verification request
+      security:
+        - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateKycRequest"
+      responses:
+        "200":
+          description: KYC request created
+          content:
+            application/json:
+              schema:
+                type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_requests/{requestId}:
+    get:
+      operationId: getKycStatus
+      summary: Get the status of a KYC verification request
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: KYC request status
+          content:
+            application/json:
+              schema:
+                type: object
+    patch:
+      operationId: writeKycRecord
+      summary: Write KYC verification outcome and extracted entities
+      security:
+        - GoogleBearerAuth: []
+      parameters:
+        - name: requestId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WriteKycRecordRequest"
+      responses:
+        "200":
+          description: KYC record written
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  securitySchemes:
+    GoogleBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: OAuth 2.0 access token
+  schemas:
+    CreateKycRequest:
+      type: object
+      required:
+        - customerId
+        - channel
+        - documentType
+      properties:
+        customerId:
+          type: string
+        channel:
+          type: string
+          enum: [chat, phone, branch, app]
+        documentType:
+          type: string
+          enum: [passport, drivers_licence, pr_card, sin_card, utility_bill]
+        purpose:
+          type: string
+        idempotencyKey:
+          type: string
+    WriteKycRecordRequest:
+      type: object
+      required:
+        - outcome
+      properties:
+        entities:
+          type: object
+          properties:
+            firstName:
+              type: string
+            lastName:
+              type: string
+            dateOfBirth:
+              type: string
+            documentNumber:
+              type: string
+            expiryDate:
+              type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+        outcome:
+          type: string
+          enum: [pass, fail, manual_review]
+        failureReason:
+          type: string

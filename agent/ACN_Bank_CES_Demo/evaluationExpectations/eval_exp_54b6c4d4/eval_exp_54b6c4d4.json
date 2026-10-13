@@ -1,0 +1,7 @@
+{
+  "name": "27f2370d-63fd-469b-9ec7-559da3c2246b",
+  "displayName": "eval_exp_54b6c4d4",
+  "llmCriteria": {
+    "prompt": "Response must include contribution room or available contribution language."
+  }
+}
