@@ -1,3 +1,5 @@
+import { isVoiceSessionOpen, sendVoiceText } from './gecxBidi';
+
 const DEPLOYMENT = 'projects/483471568825/locations/us/apps/e29e31ff-b686-46c8-8f02-f431f1422f1d/deployments/b2abf514-25c0-4beb-9a04-87ccb714e213';
 
 const SIGN_IN_RESUME_MESSAGE =
@@ -437,7 +439,13 @@ export function initGecx() {
             enableTokenBroker: true,
             enableRecaptcha: false,
           },
-          enableWelcomeEvent: true,
+          // Off on purpose. The welcome event fires over the unary path, so its
+          // greeting arrives as silent text — and the voice session greets as
+          // well, which showed the customer two hellos in a row, one of them
+          // mute. The spoken greeting from inside the session is the one we
+          // want; ChatPanel falls back to a local greeting if voice is
+          // unavailable.
+          enableWelcomeEvent: false,
         })
       );
 
@@ -498,8 +506,22 @@ export function resetGecx() {
 
 /* Send a normal message to GECX.
    Do not use this function for the immediate post-login continuation. Use
-   resumeGecxAfterSignIn(customer) instead. */
+   resumeGecxAfterSignIn(customer) instead.
+
+   While a voice session is open this routes into the live stream instead of the
+   text endpoint. Two reasons, both of which bite otherwise:
+
+     - a unary turn comes back SILENT, so typing mid-conversation would get a
+       reply the customer never hears;
+     - it would also be delivered twice, once by the fetch interceptor and once
+       by the bidi message consumer, drawing every reply as a duplicate.
+
+   Routing through the session keeps one transport live at a time. */
 export function gecxSend(text) {
+  if (isVoiceSessionOpen() && sendVoiceText(text)) {
+    return undefined;
+  }
+
   const messenger = getMessenger();
 
   if (

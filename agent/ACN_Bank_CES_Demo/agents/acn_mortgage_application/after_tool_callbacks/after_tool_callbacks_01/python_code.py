@@ -876,6 +876,28 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
         response["_instruction"] = "DELIVER VERBATIM: {{copy.pad_cancellation_rights}}"
         state["pad_cancel_id"] = data.get("cancelId", "") if isinstance(data, dict) else ""
 
+    # AT-widget-pair: force the calculator widget to follow its estimate tool.
+    #
+    # The instruction already says to emit these, but the model reliably calls
+    # the estimate tool, gets a complete result, and then asks for income, down
+    # payment and debts in prose anyway -- so the customer types the numbers the
+    # sliders exist to collect. Prompt wording did not move it; this does,
+    # because the directive arrives attached to the tool result it refers to,
+    # at the moment the model is deciding what to do next.
+    WIDGET_FOR_ESTIMATE = {
+        'mortgage_affordability_estimate': 'mortgage_affordability',
+        'mortgage_payment_estimate': 'mortgage_calculator',
+    }
+    widget = WIDGET_FOR_ESTIMATE.get(tool_name)
+    if widget and response.get("status") == "success" and state.get("widgets_enabled"):
+        response["_instruction"] = (
+            f"NOW call {widget} and emit it. Use the figures in this response as "
+            f"defaults and bounds. Do NOT ask the customer for income, down "
+            f"payment or monthly debts in text -- the widget's sliders collect "
+            f"them, and asking first makes them answer twice. Say one short "
+            f"line, then emit the widget."
+        )
+
     # Reset idempotency key after successful write
     WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}

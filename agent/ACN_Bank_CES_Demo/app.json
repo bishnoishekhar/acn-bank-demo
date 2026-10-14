@@ -33,7 +33,7 @@
   ],
   "modelSettings": {
     "model": "gemini-composite-v1",
-    "temperature": 1.0
+    "temperature": 0.3
   },
   "variableDeclarations": [
     {

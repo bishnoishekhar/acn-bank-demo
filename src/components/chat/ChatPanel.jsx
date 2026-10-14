@@ -1075,8 +1075,16 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           if (!bidiGreetedRef.current) {
             bidiGreetedRef.current = true;
             showTyping();
+            // Ask for the agent's OWN approved opening, not a greeting of our
+            // invention. The orchestrator's instruction carries the compliant
+            // copy — welcome, recording notice, and the PIPEDA privacy
+            // disclosure Canadian banking requires. An earlier version of this
+            // prompt said "greet in one short sentence", and the agent complied
+            // exactly: a friendly hello with the disclosure stripped out.
             sendVoiceText(
-              'Greet the customer and ask how you can help, in one short sentence.',
+              'Begin the session. Deliver your approved opening greeting exactly '
+                + 'as your instructions specify, including the PIPEDA privacy '
+                + 'disclosure.',
               { silent: true }
             );
           }
@@ -1166,6 +1174,22 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             voiceModeRef.current = false;
             setVoiceActive(false);
             console.warn('[ACN] voice session unavailable — continuing in text mode');
+
+            // The CES welcome event is disabled (it greeted silently and
+            // doubled up with the spoken one), so without this the panel would
+            // just sit blank. Rendered locally — no agent turn is consumed.
+            // Mirrors the orchestrator's approved webchat opening, PIPEDA
+            // disclosure included. This path renders without any agent turn, so
+            // the disclosure has to be carried here or a mic refusal would
+            // quietly drop it.
+            if (!bidiGreetedRef.current) {
+              bidiGreetedRef.current = true;
+              removeTyping();
+              addBot(
+                "Hello and welcome to ACN Bank! We're committed to protecting "
+                  + 'your privacy under PIPEDA. How can I help you today?'
+              );
+            }
           }
         });
       }

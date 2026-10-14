@@ -47,6 +47,20 @@ let _consumerInstalled = false;
 let _listenersInstalled = false;
 let _bidiActive = false;
 
+/* True from the moment we hand over the mic until the caller explicitly closes
+   the session.
+
+   This is deliberately NOT the same as _bidiActive. The SDK dispatches
+   disconnect-bidi during normal startup — while the browser's microphone prompt
+   is pending, and between a failed first attempt and the retry that succeeds.
+   The console shows "disconnected, disconnected, connected" on a perfectly
+   healthy session.
+
+   Gating the bridge on _bidiActive therefore drops whatever the customer says
+   inside those windows: they speak, and no bubble appears. Gating on intent
+   instead keeps the bridge live across the gaps. */
+let _sessionIntended = false;
+
 let _onOutputs = null;
 let _onUserTranscript = null;
 let _onAgentText = null;
@@ -56,8 +70,34 @@ let _onStateChange = null;
 // turns collapse into each other.
 let _turnIndex = 10000;
 
-// Set by sendVoiceText(..., { silent: true }). See that function.
-let _suppressNextUserTranscript = false;
+/* Text we sent on the customer's behalf that must not be drawn as their
+   message — currently just the greeting kickoff.
+
+   This is matched on CONTENT, with an expiry, and deliberately not a bare
+   boolean. A boolean assumes CES always echoes the kickoff back as a user
+   utterance; when it does not, the flag survives and eats the customer's
+   first real sentence instead. That is exactly what happened — the opening
+   "I want to loan a mortgage" never appeared, while the agent answered it. */
+let _pendingSilentText = '';
+let _pendingSilentUntil = 0;
+
+function isSilentEcho(text) {
+  if (!_pendingSilentText) return false;
+  if (Date.now() > _pendingSilentUntil) {
+    // Never echoed. Stop waiting, so the next real utterance is safe.
+    _pendingSilentText = '';
+    return false;
+  }
+  const norm = (s) => s.replace(/\s+/g, ' ').trim().toLowerCase();
+  if (norm(text) === norm(_pendingSilentText)) {
+    _pendingSilentText = '';
+    return true;
+  }
+  // Something the customer actually said arrived first — the kickoff is not
+  // coming back. Clear and let this through.
+  _pendingSilentText = '';
+  return false;
+}
 
 export function isBidiActive() {
   return _bidiActive;
@@ -165,7 +205,9 @@ export function installUtteranceBridge() {
 
   messenger.registerMessageConsumer({
     addMessages(utterances = []) {
-      if (!_bidiActive) return;
+      // Intent, not liveness — see _sessionIntended. Using _bidiActive here
+      // silently swallowed speech during the SDK's startup reconnects.
+      if (!_sessionIntended) return;
 
       utterances.forEach((utterance) => {
         if (!utterance) return;
@@ -174,16 +216,14 @@ export function installUtteranceBridge() {
           // The customer's own speech, transcribed by the platform. ChatPanel
           // renders it as a user bubble; it must not go through processOutputs
           // or it would be treated as agent output.
-          if (_suppressNextUserTranscript) {
-            _suppressNextUserTranscript = false;
-            return;
-          }
           const text = (utterance.messages || [])
             .filter((m) => m?.type === 'text')
             .map((m) => m.text)
             .join(' ')
             .trim();
-          if (text) _onUserTranscript?.(text, true);
+          if (!text) return;
+          if (isSilentEcho(text)) return;
+          _onUserTranscript?.(text, true);
           return;
         }
 
@@ -276,6 +316,9 @@ export async function connectBidi() {
     return false;
   }
 
+  // Set before the click: the SDK can dispatch connect/disconnect synchronously
+  // from it, and the bridge must already be open when it does.
+  _sessionIntended = true;
   _onStateChange?.({ connected: false, connecting: true });
 
   await whenAuthorised();
@@ -283,8 +326,16 @@ export async function connectBidi() {
   return true;
 }
 
+/* True once the mic has been handed over, and until the session is explicitly
+   closed. Use this — not isBidiActive() — to decide whether typed text should
+   be routed into the voice session. */
+export function isVoiceSessionOpen() {
+  return _sessionIntended;
+}
+
 /* Close the session and release the microphone. */
 export async function disconnectBidi() {
+  _sessionIntended = false;
   try {
     await messengerElement()?.presenter?.toggleBidiSession?.(false);
   } catch {
@@ -305,7 +356,10 @@ export async function disconnectBidi() {
 export function sendVoiceText(text, { silent = false } = {}) {
   const presenter = messengerElement()?.presenter;
   if (typeof presenter?.sendQuery !== 'function') return false;
-  if (silent) _suppressNextUserTranscript = true;
+  if (silent) {
+    _pendingSilentText = text;
+    _pendingSilentUntil = Date.now() + 8000;
+  }
   presenter.sendQuery(text)?.catch?.(() => {});
   return true;
 }
@@ -332,4 +386,7 @@ export function resetBidiBridge() {
   _consumerInstalled = false;
   _listenersInstalled = false;
   _bidiActive = false;
+  _sessionIntended = false;
+  _pendingSilentText = '';
+  _pendingSilentUntil = 0;
 }
