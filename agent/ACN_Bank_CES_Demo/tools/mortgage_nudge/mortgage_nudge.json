@@ -3,6 +3,7 @@
   "displayName": "mortgage_nudge",
   "widgetTool": {
     "name": "mortgage_nudge",
+    "description": "Emit the mortgage next-best-action nudge. Fed by mortgage_next_best_action -- copy its suggestions verbatim; never invent, reword or reorder one. Call it with max_suggestions=1 mid-flow, and pass declined_suggestion_ids so a declined card is never offered twice. Before calling this tool, speak a brief conversational pacing phrase: 'One other thing that might be worth a look.' Webchat only -- on voice, mention the suggestion in plain text instead. Never present a nudge as financial advice.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

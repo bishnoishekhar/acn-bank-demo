@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { SIGN_IN_SENTINEL } from './ChatPanel';
+import { connectBidiWhenReady, disconnectBidi, isBidiActive } from '../gecxBidi';
 
 // ── Quick-action suggestions (mirrors ChatPanel) ───────────────────────────────
 const GUEST_SUGGESTIONS = [
@@ -114,30 +115,35 @@ export default function FloatingChatWidget({
   };
 
   // ── Voice (mic) ────────────────────────────────────────────────────────────
+  // This widget mirrors ChatPanel's thread, so it must drive the same single
+  // bidi session rather than opening a second one — two sessions would mean two
+  // microphones competing and two transcripts of the same sentence.
+  //
+  // Browser SpeechRecognition used to live here. It was removed with the rest
+  // of the Web Speech path: recognition now happens on the platform, in the
+  // same engine that produces the agent's replies.
   const toggleVoice = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Voice input is not supported in this browser.');
-      return;
-    }
-    if (voiceActive) {
-      recognitionRef.current?.stop();
+    if (isBidiActive()) {
+      disconnectBidi();
       setVoiceActive(false);
       return;
     }
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang = 'en-CA';
-    rec.interimResults = false;
-    rec.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      onSend?.(transcript);
-    };
-    rec.onend = () => setVoiceActive(false);
-    rec.onerror = () => setVoiceActive(false);
-    rec.start();
-    recognitionRef.current = rec;
+
     setVoiceActive(true);
-  }, [voiceActive, onSend]);
+    connectBidiWhenReady().then((ok) => {
+      if (!ok) {
+        setVoiceActive(false);
+        console.warn('[ACN] floating widget could not start the voice session');
+      }
+    });
+  }, []);
+
+  // Keep the mic indicator in step with the session, including when it is
+  // started or stopped from the main ChatPanel.
+  useEffect(() => {
+    const sync = setInterval(() => setVoiceActive(isBidiActive()), 500);
+    return () => clearInterval(sync);
+  }, []);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (

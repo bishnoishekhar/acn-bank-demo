@@ -513,6 +513,18 @@ export function gecxSend(text) {
   return undefined;
 }
 
+/* ── Why there is no audio on this path ────────────────────────────────────────
+   There was an attempt here to make unary turns speak by attaching
+   `outputAudioConfig` to the outgoing request via `chat-messenger-request-sent`.
+   It does not work and cannot be made to work: **CES rejects outputAudioConfig
+   on unary runSession**. The turn succeeds, the text comes back, and there is
+   simply no audio — no error to notice.
+
+   Agent audio exists only on a live BidiRunSession stream, where the SDK
+   decodes and plays it itself. See gecxBidi.js. Do not reintroduce an
+   audio-request hook here.
+── */
+
 let _interceptorInstalled = false;
 
 /* Fetch interceptor: catches runSession responses. */

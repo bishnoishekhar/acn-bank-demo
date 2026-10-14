@@ -12,3 +12,5 @@ gecx-config.json
 AGENTS.md
 examples/
 .claude/
+.agent-baseline-2026-10-14/
+cxas_app/ACN_Bank_CES_Demo/

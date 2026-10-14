@@ -10,6 +10,14 @@ import {
   softResetGecx,
   clearGecxSession,
 } from '../gecx';
+import {
+  connectBidiWhenReady,
+  disconnectBidi,
+  setBidiHandlers,
+  resetBidiBridge,
+  sendVoiceText,
+  isBidiActive,
+} from '../gecxBidi';
 import { useAuth } from '../../context/AuthContext';
 import ComboCard      from '../ComboCard';
 import AcnFormWidget  from '../AcnFormWidget';
@@ -463,7 +471,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   const msgsRef        = useRef(null);
   const inputRef       = useRef(null);
-  const recognitionRef = useRef(null);
   const galleryInputRef = useRef(null);
   const cameraInputRef  = useRef(null);
   const fileInputRef    = useRef(null);
@@ -481,8 +488,28 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const ttsFlushTimer  = useRef(null);    // debounce timer — plays queue once streaming quiets down
   const sendMessageRef = useRef(null);    // updated after sendMessage is defined
   const playTTSRef     = useRef(null);    // updated after playTTS is defined
-  const startVoiceRef  = useRef(null);    // updated after startVoiceRecognition is defined
+  const startVoiceRef  = useRef(null);    // legacy hook; bidi holds the mic open, so it is a no-op
   const authResumeInFlightRef = useRef(false); // prevents duplicate post-login resume turns
+  const bidiAutoStartedRef    = useRef(false); // guards one bidi auto-connect per session
+  const bidiGreetedRef        = useRef(false); // guards one spoken greeting per session
+
+  // ── GECX audio cleanup ─────────────────────────────────────────────────────
+  // Defined up here because showTyping (barge-in), the mute toggle and unmount
+  // all need it, and they are declared before the playback code below.
+  // ttsAudioRef holds the <audio> element currently playing a GECX-synthesised
+  // reply, or null.
+  const stopGecxAudio = useCallback(() => {
+    const audio = ttsAudioRef.current;
+    if (!audio) return;
+    try {
+      audio.pause();
+      audio.src = '';
+    } catch (err) {
+      console.error('[ACN TTS] stop error:', err);
+    }
+    ttsAudioRef.current = null;
+    setTTSPlaying(false);
+  }, []);
 
   // ── Scroll ─────────────────────────────────────────────────────────────────
   const scrollToBottom = useCallback(() => {
@@ -556,12 +583,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       clearTimeout(ttsFlushTimer.current);
       ttsFlushTimer.current = null;
     }
-    // Cancel any active TTS when starting a new response (user interrupted)
-    try {
-      window.speechSynthesis?.cancel();
-    } catch (err) {
-      console.error('[ACN TTS] speechSynthesis cancel on new response error:', err);
-    }
+    // Cancel any active speech when a new response starts (user interrupted).
+    // In a bidi session the SDK handles barge-in on its own stream; this covers
+    // the unary path.
+    stopGecxAudio();
     setIsResponding(true);
     setMessages((prev) => [
       ...prev.filter((m) => m.type !== 'typing'),
@@ -572,7 +597,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       setIsResponding(false);
       setMessages((prev) => prev.filter((m) => m.type !== 'typing'));
     }, 12000);
-  }, []);
+  }, [stopGecxAudio]);
 
   const removeTyping = useCallback(() => {
     if (respondingTimer.current) clearTimeout(respondingTimer.current);
@@ -930,18 +955,25 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   // Stops all timers, cancels TTS requests, pauses audio, revokes URLs, stops recording
   useEffect(() => {
     return () => {
-      // Stop voice recognition
+      // Close the live voice session so the mic indicator clears and the
+      // stream does not outlive the component.
       try {
-        recognitionRef.current?.stop();
+        disconnectBidi();
+        resetBidiBridge();
       } catch (err) {
-        console.error('[ACN] recognition stop error:', err);
+        console.error('[ACN] bidi teardown error:', err);
       }
 
-      // Stop any active TTS utterance on unmount
+      // Stop any GECX audio still playing on the unary path
       try {
-        window.speechSynthesis?.cancel();
+        const audio = ttsAudioRef.current;
+        if (audio) {
+          audio.pause();
+          audio.src = '';
+          ttsAudioRef.current = null;
+        }
       } catch (err) {
-        console.error('[ACN TTS] unmount speechSynthesis cancel error:', err);
+        console.error('[ACN TTS] unmount audio stop error:', err);
       }
 
       // Clear all timers
@@ -985,15 +1017,78 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     //
     //  3. softResetGecx() — clears _initDone so the next chat open calls
     //     initGecx() / registerContext() and fires a guest welcome event.
+    // The bidi consumer and its listeners are bound to the <chat-messenger>
+    // element that is about to be thrown away, so tear the session down and
+    // clear the module guards — otherwise the bridge believes it is still
+    // registered and the new element gets no consumer at all.
+    disconnectBidi();
+    resetBidiBridge();
+    bidiAutoStartedRef.current = false;
+    bidiGreetedRef.current = false;
+    stopGecxAudio();
+    setVoiceMode(false);
+    voiceModeRef.current = false;
+    setVoiceActive(false);
+
     clearGecxSession();
     setMessengerKey((k) => k + 1);
     softResetGecx();
-  }, [resetSignal]);
+  }, [resetSignal, stopGecxAudio]);
 
   // ── GECX native event handler ──────────────────────────────────────────────
   useEffect(() => {
     setResponseHandler((outs) => processOutputsRef.current(outs));
   }, []);
+
+  // ── Bidi session bridge ────────────────────────────────────────────────────
+  // Agent output from a live voice session arrives as SDK utterances rather
+  // than as a runSession response, so it reaches us through gecxBidi's message
+  // consumer instead of the fetch interceptor. It is reshaped there into the
+  // same `outputs` array processOutputs already consumes, which is what keeps
+  // the widgets rendering identically in voice and in text.
+  useEffect(() => {
+    setBidiHandlers({
+      onOutputs: (outs) => processOutputsRef.current(outs),
+
+      // The customer's transcribed speech. Only the final transcript becomes a
+      // message; interim ones would rewrite the bubble on every syllable.
+      onUserTranscript: (text, isFinal) => {
+        if (!isFinal || !text?.trim()) return;
+        addUser(text.trim());
+        showTyping();
+      },
+
+      onStateChange: ({ connected, connecting }) => {
+        setVoiceActive(connected);
+
+        if (connected) {
+          stopGecxAudio();
+
+          // Greet, once per session. This is the only way to get an audible
+          // hello: the CES welcome event rides the unary path and comes back
+          // silent, so we ask the agent to open the conversation from inside
+          // the live session instead.
+          //
+          // silent: true because the customer did not say this — CES echoes it
+          // back as a user utterance and the bridge drops it, so no phantom
+          // message bubble appears.
+          if (!bidiGreetedRef.current) {
+            bidiGreetedRef.current = true;
+            showTyping();
+            sendVoiceText(
+              'Greet the customer and ask how you can help, in one short sentence.',
+              { silent: true }
+            );
+          }
+        }
+
+        if (!connected && !connecting) {
+          setVoiceMode(false);
+          voiceModeRef.current = false;
+        }
+      },
+    });
+  }, [addUser, showTyping, stopGecxAudio]);
 
   // ── Rate-limit (429) handler ────────────────────────────────────────────────
   // Without this, a 429 leaves the typing indicator spinning for 12s and then
@@ -1045,6 +1140,35 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       // synchronous sessionStorage operation.
       clearGecxSession();
       initGecx();
+
+      // ── Open the live voice session ────────────────────────────────────────
+      // The spoken greeting has to come from inside the session: CES rejects
+      // outputAudioConfig on unary runSession, so the welcome event that
+      // registerContext() fires arrives as silent text. Connecting first and
+      // greeting second is the only ordering that produces an audible hello.
+      //
+      // connectBidiWhenReady() resolves once the microphone has been handed to
+      // the SDK, not once the stream is up — the greeting is sent from the
+      // connected handler in the bidi state-change effect below.
+      //
+      // Opening the chat is the user gesture the browser needs before it will
+      // grant the mic, so this is the earliest safe point to ask.
+      if (!bidiAutoStartedRef.current) {
+        bidiAutoStartedRef.current = true;
+        setVoiceMode(true);
+        voiceModeRef.current = true;
+        connectBidiWhenReady().then((ok) => {
+          if (!ok) {
+            // No mic, or the SDK never exposed its microphone button. Fall back
+            // to text. Replies are silent in this mode — there is no unary
+            // audio to fall back to — so the chat still works, just muted.
+            setVoiceMode(false);
+            voiceModeRef.current = false;
+            setVoiceActive(false);
+            console.warn('[ACN] voice session unavailable — continuing in text mode');
+          }
+        });
+      }
     }
 
     if (intent) {
@@ -1114,7 +1238,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     showTyping();
     gecxSend(text);
   }, [inputVal, addUser, showTyping, isResponding]);
-  // Keep sendMessageRef current so startVoiceRecognition can call it without a stale closure.
+  // Keep sendMessageRef current so async callers can send without a stale closure.
   useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
   // Sync messages to parent (App) so FloatingChatWidget can mirror the conversation.
   useEffect(() => { onMessagesChange?.(messages); }, [messages, onMessagesChange]);
@@ -1167,115 +1291,44 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   useEffect(() => { onExposeResume?.(handleResumeAfterSignIn); },
     [handleResumeAfterSignIn, onExposeResume]);
 
-  // ── STT helper — starts a single recognition pass and sends the result ────────
-  const startVoiceRecognition = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) return;
-    const SR  = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const rec = new SR();
-    rec.lang           = 'en-CA';
-    rec.interimResults = false;
-    rec.onresult = (e) => {
-      const transcript = e.results[0][0].transcript;
-      setInputVal(transcript);
-      sendMessageRef.current?.(transcript);
-    };
-    rec.onerror = () => setVoiceActive(false);
-    rec.onend   = () => setVoiceActive(false);
-    rec.start();
-    recognitionRef.current = rec;
-    setVoiceActive(true);
-  }, []);
-  useEffect(() => { startVoiceRef.current = startVoiceRecognition; }, [startVoiceRecognition]);
-
-  // ── Browser-native TTS (Web Speech API) ──────────────────────────────────────
-  // Uses window.speechSynthesis — in Chrome/Edge this is Google's neural voices,
-  // in Safari it's Apple's. No network call, no CORS, no API key, no cost.
-  // Replaces the retired ElevenLabs Cloud Run proxy.
+  // ── Speech-to-text ─────────────────────────────────────────────────────────
+  // There is no browser SpeechRecognition here any more. In a bidi session the
+  // microphone is owned by the SDK: raw audio streams to CES, and the platform
+  // returns the transcript as a user utterance, which gecxBidi's message
+  // consumer forwards to handleBidiUserTranscript below. That keeps recognition
+  // in the same engine that produces the agent's replies, instead of pairing a
+  // browser recogniser with a server-side voice.
   //
-  // Lifecycle:
-  // - Monotonically increasing request IDs prevent stale utterances from speaking
-  // - speechSynthesis.cancel() stops any prior utterance before a new one starts
-  // - Microphone stays off while speaking; re-enables on end/error in voice mode
+  // startVoiceRef is retained because older call sites still reference it; with
+  // bidi holding an open mic there is no per-turn pass to restart.
+  useEffect(() => { startVoiceRef.current = () => {}; }, []);
 
-  const ttsRequestIdRef       = useRef(0);
-  const ttsActiveRequestRef   = useRef(null);
-  // Kept for compatibility with existing cleanup paths (mute button, unmount) —
-  // no longer populated; speechSynthesis.cancel() handles the real cleanup.
-  const ttsAbortControllerRef = useRef(null);
-  const ttsObjectUrlsRef      = useRef(new Set());
+  // ── Who speaks, and when ───────────────────────────────────────────────────
+  // The agent is spoken by the voice configured on the CES app (app.json
+  // audioProcessingConfig → Iapetus, en-CA, plus the persona director's note),
+  // never by window.speechSynthesis. Browser voices ignore the persona and vary
+  // per browser and OS, which is why that path was removed.
+  //
+  // There is no playback code here on purpose. Agent audio exists only inside a
+  // live bidi session, and the SDK decodes and plays it itself — even with our
+  // <chat-messenger> parked off-screen. Playing it here as well would double
+  // every reply.
+  //
+  // Text turns are genuinely silent: CES rejects outputAudioConfig on unary
+  // runSession, so there is no audio to play outside a voice session. If you
+  // want a reply spoken, it has to go through the open session — see
+  // sendVoiceText().
+  //
+  // stopGecxAudio() remains as the cleanup path for the mute button and
+  // unmount; ttsAudioRef is now only ever populated if something else sets it.
 
-  const playTTS = useCallback(async (text) => {
-    if (!text?.trim()) return;
-
-    const cleanText  = cleanTextForTTS(text.trim());
-    const speechText = normalizeForTTS(cleanText);
-    if (!speechText) return;
-
-    const synth = typeof window !== 'undefined' ? window.speechSynthesis : null;
-    if (!synth || typeof window.SpeechSynthesisUtterance !== 'function') {
-      console.warn('[ACN TTS] Web Speech API not available in this browser');
-      return;
-    }
-
-    const requestId = ++ttsRequestIdRef.current;
-    ttsActiveRequestRef.current = requestId;
-
-    // Stop any prior utterance before starting a new one
-    try { synth.cancel(); } catch (err) { console.error('[ACN TTS] cancel error:', err); }
-
-    setTTSPlaying(true);
-
-    const utter = new SpeechSynthesisUtterance(speechText);
-    utter.rate   = 1.0;
-    utter.pitch  = 1.0;
-    utter.volume = 1.0;
-
-    // Prefer an English Google/Neural voice when one is available. Voices load
-    // asynchronously in some browsers; if the list is empty we let the browser
-    // pick its default rather than blocking.
-    const pickVoice = () => {
-      const voices = synth.getVoices() || [];
-      if (!voices.length) return null;
-      return (
-        voices.find((v) => /Google.*English/i.test(v.name)) ||
-        voices.find((v) => v.lang?.startsWith('en') && /Neural|Natural/i.test(v.name)) ||
-        voices.find((v) => v.lang?.startsWith('en-US')) ||
-        voices.find((v) => v.lang?.startsWith('en')) ||
-        null
-      );
-    };
-    const chosen = pickVoice();
-    if (chosen) utter.voice = chosen;
-
-    utter.onend = () => {
-      if (requestId !== ttsActiveRequestRef.current) return;
-      setTTSPlaying(false);
-      if (voiceModeRef.current) {
-        startVoiceRef.current?.();
-      }
-    };
-
-    utter.onerror = (event) => {
-      if (event?.error !== 'interrupted') {
-        console.error('[ACN TTS] utterance error on request', requestId, ':', event?.error);
-      }
-      if (requestId !== ttsActiveRequestRef.current) return;
-      setTTSPlaying(false);
-      if (voiceModeRef.current) {
-        startVoiceRef.current?.();
-      }
-    };
-
-    try {
-      synth.speak(utter);
-    } catch (err) {
-      console.error('[ACN TTS] speak error on request', requestId, ':', err);
-      setTTSPlaying(false);
-      if (voiceModeRef.current) {
-        startVoiceRef.current?.();
-      }
-    }
-  }, []);
+  // The text-accumulation queue (addBot → scheduleTTSFlush) predates GECX
+  // voice, when the browser synthesised from the transcript. Speech now arrives
+  // as audio on its own channel, so the flush has nothing left to do. The queue
+  // is kept because addBot still uses it to decide combo headings; this shim
+  // just makes the speech half a no-op rather than threading a second removal
+  // through every call site.
+  const playTTS = useCallback(() => {}, []);
   useEffect(() => { playTTSRef.current = playTTS; }, [playTTS]);
 
   // ── Bot-speaks toggle (mute / unmute) ─────────────────────────────────────
@@ -1287,12 +1340,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       const next = !prev;
       ttsEnabledRef.current = next;
       if (!next) {
-        // Muting mid-playback: cancel any speaking utterance, clear queue
-        try {
-          window.speechSynthesis?.cancel();
-        } catch (err) {
-          console.error('[ACN TTS] speechSynthesis cancel on mute error:', err);
-        }
+        // Muting mid-playback: stop the GECX audio and clear the queue.
+        stopGecxAudio();
 
         if (ttsFlushTimer.current) {
           clearTimeout(ttsFlushTimer.current);
@@ -1303,29 +1352,38 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       }
       return next;
     });
-  }, []);
+  }, [stopGecxAudio]);
 
-  // ── Voice conversation mode toggle ────────────────────────────────────────────
-  // Activating starts STT → user speaks → GECX responds → TTS plays → STT restarts.
+  // ── Voice conversation toggle ──────────────────────────────────────────────
+  // Opens or closes the live bidi session. The session holds the mic open for
+  // its whole lifetime — there is no per-turn press-to-talk — and barge-in is
+  // enabled, so the customer can cut the agent off mid-sentence.
   const toggleVoice = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
-      alert('Voice input not supported in this browser.');
-      return;
-    }
     if (voiceMode) {
-      // Deactivate: stop listening, clear queued TTS text
-      recognitionRef.current?.stop();
-      setVoiceActive(false);
       setVoiceMode(false);
       voiceModeRef.current = false;
-      ttsQueueRef.current  = '';
+      setVoiceActive(false);
+      ttsQueueRef.current = '';
+      stopGecxAudio();
+      disconnectBidi();
       return;
     }
-    // Activate voice conversation mode
+
     setVoiceMode(true);
     voiceModeRef.current = true;
-    startVoiceRecognition();
-  }, [voiceMode, startVoiceRecognition]);
+    // Any unary audio still playing would collide with the live stream.
+    stopGecxAudio();
+    connectBidiWhenReady().then((ok) => {
+      if (!ok) {
+        setVoiceMode(false);
+        voiceModeRef.current = false;
+        setVoiceActive(false);
+        addBot(
+          "I couldn't start the voice session. Please allow microphone access and try again."
+        );
+      }
+    });
+  }, [voiceMode, stopGecxAudio, addBot]);
 
   const handleFileUpload = useCallback((e) => {
     const file = e.target.files[0];
@@ -1374,15 +1432,25 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           zIndex: -1,
         }}
       >
+        {/* barge-in-enabled is read off this element when the bidi session is
+            created, so it has to be declared here rather than set later — it is
+            what lets the customer talk over the agent instead of waiting for it
+            to finish. language-code is en-CA to match the app's default and the
+            voice configured in app.json. */}
         <chat-messenger
           key={messengerKey}
           id="gecx-messenger"
           url-allowlist="*"
-          language-code="en"
+          language-code="en-CA"
           max-query-length="-1"
+          barge-in-enabled="true"
           style={{ display: 'block', width: '400px', height: '600px' }}
         >
-          <chat-messenger-container chat-title="ACN Bank AI">
+          {/* enable-audio-input turns on the SDK's microphone capture path.
+              NOT enable-audio-input-only: that would drop the text transport,
+              and this demo needs both voice and the typed/widget conversation
+              in the same session. */}
+          <chat-messenger-container chat-title="ACN Bank AI" enable-audio-input="true">
             <chat-reset-session-button slot="titlebar-actions" title-text="New conversation" />
           </chat-messenger-container>
         </chat-messenger>

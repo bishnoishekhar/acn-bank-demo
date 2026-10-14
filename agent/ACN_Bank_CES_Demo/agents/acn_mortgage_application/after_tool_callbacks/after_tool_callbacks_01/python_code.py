@@ -68,6 +68,28 @@ WIDGET_TYPES_REQUIRING_DISCLAIMER = {
     'card_carousel', 'mortgage_rate_shelf', 'loan_preapproval', 'card_widget'
 }
 
+# Widget (presentation) tools.
+#
+# A widgetTool call is not a data fetch: the arguments the model supplies ARE
+# the payload the client renders. The tool pipeline in this module is built for
+# backend data tools -- it rewraps every response as {status, code, data}, masks
+# fields, and enforces identity/ownership/auth. Put a widget payload through
+# that and it comes back out as {"status": "success", "data": {...}}, which the
+# platform no longer recognises as a widget. The tool fires, nothing renders,
+# and nothing errors. That silent failure is what this set exists to prevent.
+#
+# These tools bypass the pipeline in both directions. They read no customer
+# data, so there is nothing to mask, own or gate.
+WIDGET_TOOLS = frozenset({
+    'acn-amount-input', 'acn-credit-card-widget', 'acn-form-input',
+    'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector',
+    'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
+    'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
+    'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',
+    'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'qr_widget',
+    'quick_actions',
+})
+
 TOOL_MIN_AUTH = {
     'getCustomer': 1,
     'getAccounts': 2,
@@ -800,6 +822,11 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     """
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
+
+    # Hand the widget payload back exactly as it came. Normalising it would
+    # destroy the shape the client renders -- see WIDGET_TOOLS.
+    if tool_name in WIDGET_TOOLS:
+        return tool_response
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
