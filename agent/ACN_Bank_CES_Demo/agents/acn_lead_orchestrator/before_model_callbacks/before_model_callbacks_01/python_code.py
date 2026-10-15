@@ -83,6 +83,14 @@ def before_model_callback_impl(callback_context, llm_request) -> Optional[object
     # Extract latest user utterance
     user_text = _extract_last_user_text(contents)
 
+    # BM-0: Deterministic opening greeting (TDD: "fixed greeting template").
+    # Left to the LLM, the opening turn was a bare quick_actions widget with no
+    # spoken text in ~5 of 6 sessions, so the customer got no welcome and no
+    # PIPEDA disclosure. Short-circuits the model on the first turn only.
+    greeting = _deterministic_greeting(state, callback_context, user_text)
+    if greeting is not None:
+        return greeting
+
     # BM-3: Safety fast-path (deterministic, runs before everything)
     if user_text and FRAUD_PATTERNS.search(user_text):
         state["fraud_suspected"] = True
@@ -116,10 +124,21 @@ def before_model_callback_impl(callback_context, llm_request) -> Optional[object
     _compute_nudge_eligibility(state)
 
     # BM-8: PIPEDA disclosure pending
-    if not state.get("pipeda_disclosed"):
+    if not _is_true(state.get("pipeda_disclosed")):
+        # If the agent already said it earlier in this conversation (the LLM
+        # path, e.g. a first message that was a real request), record that so the
+        # reminder below does not repeat on every later turn.
+        for _c in (contents or []):
+            if getattr(_c, "role", "") == "model":
+                for _p in (getattr(_c, "parts", None) or []):
+                    if "PIPEDA" in (getattr(_p, "text", "") or ""):
+                        state["pipeda_disclosed"] = True
+    if not _is_true(state.get("pipeda_disclosed")):
+        # The old text said "{{copy.pipeda_disclosure}}", a placeholder nothing
+        # resolves, so the model improvised. Give it the real sentence.
         _inject_instruction(llm_request,
-            "DISCLOSURE REQUIRED: Deliver {{copy.pipeda_disclosure}} verbatim before "
-            "requesting any personal information from the customer.")
+            "DISCLOSURE REQUIRED: Before requesting any personal information, say "
+            "exactly: \"We're committed to protecting your privacy under PIPEDA.\"")
 
     # BM-9: Vulnerability detection
     if user_text:
@@ -166,6 +185,68 @@ def before_model_callback_impl(callback_context, llm_request) -> Optional[object
     _inject_turn1_greeting(state, llm_request)
 
     return None
+
+# First-turn inputs that mean "open the conversation": the platform's
+# session-start event, the web app's silent opening prompt (ChatPanel.jsx), or a
+# bare hello. Anything with a real request in it is NOT matched, so the customer's
+# first question is never swallowed by the greeting.
+_GREETING_TRIGGER = re.compile(
+    r'^\s*(<event>\s*session start\s*</event>|begin the session\b.*|'
+    r'(hi|hello|hey|hiya|bonjour|good (morning|afternoon|evening))[\s!.,?]*)\s*$',
+    re.IGNORECASE | re.DOTALL
+)
+
+def _is_true(value) -> bool:
+    return str(value).strip().lower() in ("true", "1", "yes")
+
+def _is_voice_session(state) -> bool:
+    """Recording notice is only required on voice / telephony sessions."""
+    try:
+        if str(state.get("channel", "")).lower() in ("voice", "telephony", "phone"):
+            return True
+        return "AUDIO" in str(state.get("_session", "")).upper()
+    except Exception:
+        return False
+
+def _deterministic_greeting(state, callback_context, user_text) -> Optional[object]:
+    """Return the fixed opening as an LlmResponse on turn 1, else None."""
+    try:
+        if _is_true(state.get("pipeda_disclosed")):
+            return None
+        turn = int(_cnt(state).get("turns", "0") or "0")
+        if turn > 1:
+            return None
+
+        text = (user_text or "").strip()
+        if not text:
+            # Session-start event: no user text at all. Also check the raw input
+            # parts, where the platform puts "<event>session start</event>".
+            try:
+                for part in callback_context.get_last_user_input():
+                    if getattr(part, "text", None):
+                        text = part.text.strip()
+                        break
+            except Exception:
+                pass
+        if text and not _GREETING_TRIGGER.match(text):
+            return None
+
+        c = _cust(state)
+        display_name = (c.get("display_name", "") or state.get("customer_display_name", "")
+                        or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name"))
+        inject_name = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
+        opening = (f"Hello {display_name}, welcome to ACN Bank! "
+                   if inject_name == "true" and display_name
+                   else "Hello and welcome to ACN Bank! ")
+        if _is_voice_session(state):
+            opening += "This call may be recorded for quality and training purposes. "
+        opening += ("We're committed to protecting your privacy under PIPEDA. "
+                    "How can I help you today?")
+
+        state["pipeda_disclosed"] = True
+        return LlmResponse.from_parts(parts=[Part.from_text(text=opening)])
+    except Exception:
+        return None  # never block the turn on a greeting failure
 
 def _extract_last_user_text(contents) -> str:
     """Extract the most recent user utterance text."""
