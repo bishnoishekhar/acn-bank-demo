@@ -3,7 +3,7 @@
   "displayName": "mortgage_rate_shelf",
   "widgetTool": {
     "name": "mortgage_rate_shelf",
-    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our current mortgage rates.'",
+    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you our current mortgage rates.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -30,7 +30,7 @@
               "description": "Positive means variable is ahead across the term, negative means behind."
             }
           },
-          "description": "Shown only inside the variable product's expanded detail. Copy straight from mortgage_rate_board."
+          "description": "Shown only inside the variable product\u0027s expanded detail. Copy straight from mortgage_rate_board."
         },
         "confirm_cta_label": {
           "type": "STRING",
@@ -42,15 +42,15 @@
         },
         "expand_projection": {
           "type": "BOOLEAN",
-          "description": "Open the variable product's projection chart on load instead of leaving it behind the 'what we project' toggle. Set true when the customer asked to COMPARE fixed against variable -- the chart and the break-even month are the answer to that question. Leave false/absent when they are choosing a rate."
+          "description": "Open the variable product\u0027s projection chart on load instead of leaving it behind the \u0027what we project\u0027 toggle. Set true when the customer asked to COMPARE fixed against variable -- the chart and the break-even month are the answer to that question. Leave false/absent when they are choosing a rate."
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'mortgage_rate_shelf'"
+          "description": "Required. Always output the exact string: \u0027mortgage_rate_shelf\u0027"
         },
         "payment_frequency_label": {
           "type": "STRING",
-          "description": "e.g. 'Monthly' or 'Accelerated bi-weekly'."
+          "description": "e.g. \u0027Monthly\u0027 or \u0027Accelerated bi-weekly\u0027."
         },
         "payments_per_year": {
           "type": "NUMBER",
@@ -68,7 +68,7 @@
             "properties": {
               "badge": {
                 "type": "STRING",
-                "description": "Pipe-separated badges, e.g. 'Lowest today | Payment locked'."
+                "description": "Pipe-separated badges, e.g. \u0027Lowest today | Payment locked\u0027."
               },
               "blurb": {
                 "type": "STRING",
@@ -83,14 +83,14 @@
               },
               "payment_per_period_cad": {
                 "type": "NUMBER",
-                "description": "The headline figure on the row, at the customer's chosen frequency."
+                "description": "The headline figure on the row, at the customer\u0027s chosen frequency."
               },
               "product_id": {
                 "type": "STRING"
               },
               "rate_basis": {
                 "type": "STRING",
-                "description": "How the rate is built, e.g. 'Prime 4.45% minus 1.1%'. Shown small under the rate."
+                "description": "How the rate is built, e.g. \u0027Prime 4.45% minus 1.1%\u0027. Shown small under the rate."
               },
               "rate_pct": {
                 "type": "NUMBER"
@@ -119,15 +119,15 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Widget header, e.g. 'Choose your rate'."
+          "description": "Widget header, e.g. \u0027Choose your rate\u0027."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         },
         "variable_projection": {
           "type": "ARRAY",
-          "description": "Projected variable rate path, plotted as a sparkline inside the variable product's detail. Must always be labelled a projection, never a promise.",
+          "description": "Projected variable rate path, plotted as a sparkline inside the variable product\u0027s detail. Must always be labelled a projection, never a promise.",
           "items": {
             "type": "OBJECT",
             "properties": {
@@ -148,12 +148,7 @@
           "description": "Required whenever variable_projection is supplied. Rendered verbatim beneath the chart."
         }
       },
-      "required": [
-        "type",
-        "name",
-        "products",
-        "confirm_cta_value"
-      ]
+      "required": ["type", "name", "products", "confirm_cta_value"]
     }
   }
 }

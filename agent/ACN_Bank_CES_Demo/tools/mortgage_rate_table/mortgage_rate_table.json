@@ -1,27 +1,20 @@
 {
+  "name": "c4990be2-9aa6-4d5f-bf7c-69b8152a90a2",
   "displayName": "mortgage_rate_table",
   "widgetTool": {
     "name": "mortgage_rate_table",
-    "description": "Show the current mortgage rates as a read-only table, for customers asking what the rates ARE rather than choosing one. No selection control and no call to action -- it reads as information, not a decision being pushed. Fed by mortgage_rate_board; copy every figure straight from it. Before calling this tool, speak a brief conversational pacing phrase: 'Here's where our rates sit today.' Use mortgage_rate_shelf instead when the customer is choosing a rate, or comparing fixed against variable.",
+    "description": "Show the current mortgage rates as a read-only table, for customers asking what the rates ARE rather than choosing one. No selection control and no call to action -- it reads as information, not a decision being pushed. Fed by mortgage_rate_board; copy every figure straight from it. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here\u0027s where our rates sit today.\u0027 Use mortgage_rate_shelf instead when the customer is choosing a rate, or comparing fixed against variable.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
       "properties": {
-        "type": {
-          "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
-        },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'mortgage_rate_table'"
+          "description": "Required. Always output the exact string: \u0027mortgage_rate_table\u0027"
         },
-        "title": {
+        "payment_frequency_label": {
           "type": "STRING",
-          "description": "Table header, e.g. 'Our current mortgage rates'."
-        },
-        "subtitle": {
-          "type": "STRING",
-          "description": "One plain line of context, e.g. the illustrative principal the payments are based on."
+          "description": "e.g. \u0027Monthly\u0027. Labels the payment column."
         },
         "prime_rate_pct": {
           "type": "NUMBER",
@@ -31,22 +24,25 @@
           "type": "NUMBER",
           "description": "Shown as a footnote, e.g. 120. Omit or set 0 to hide."
         },
-        "payment_frequency_label": {
-          "type": "STRING",
-          "description": "e.g. 'Monthly'. Labels the payment column."
-        },
         "rows": {
           "type": "ARRAY",
           "description": "Required. Every product from mortgage_rate_board, in the order returned. Never reorder, never invent a rate.",
           "items": {
             "type": "OBJECT",
             "properties": {
+              "note": {
+                "type": "STRING",
+                "description": "Optional short note, e.g. \u0027Lowest today\u0027."
+              },
+              "payment_per_period_cad": {
+                "type": "NUMBER"
+              },
               "product_id": {
                 "type": "STRING"
               },
-              "term_label": {
+              "rate_basis": {
                 "type": "STRING",
-                "description": "Short label for the term column, e.g. '5-yr fixed'."
+                "description": "How a variable rate is built, e.g. \u0027Prime 4.45% minus 1.1%\u0027. Omit for fixed."
               },
               "rate_pct": {
                 "type": "NUMBER"
@@ -55,19 +51,24 @@
                 "type": "STRING",
                 "description": "fixed | variable. Variable rows get the projection sparkline."
               },
-              "payment_per_period_cad": {
-                "type": "NUMBER"
-              },
-              "rate_basis": {
+              "term_label": {
                 "type": "STRING",
-                "description": "How a variable rate is built, e.g. 'Prime 4.45% minus 1.1%'. Omit for fixed."
-              },
-              "note": {
-                "type": "STRING",
-                "description": "Optional short note, e.g. 'Lowest today'."
+                "description": "Short label for the term column, e.g. \u00275-yr fixed\u0027."
               }
             }
           }
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "One plain line of context, e.g. the illustrative principal the payments are based on."
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Table header, e.g. \u0027Our current mortgage rates\u0027."
+        },
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         },
         "variable_projection": {
           "type": "ARRAY",
@@ -75,14 +76,14 @@
           "items": {
             "type": "OBJECT",
             "properties": {
+              "label": {
+                "type": "STRING"
+              },
               "month": {
                 "type": "NUMBER"
               },
               "rate_pct": {
                 "type": "NUMBER"
-              },
-              "label": {
-                "type": "STRING"
               }
             }
           }
@@ -92,11 +93,7 @@
           "description": "Required whenever variable_projection is supplied. Rendered verbatim beneath the table."
         }
       },
-      "required": [
-        "type",
-        "name",
-        "rows"
-      ]
+      "required": ["type", "name", "rows"]
     }
   }
 }

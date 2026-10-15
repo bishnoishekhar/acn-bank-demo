@@ -51,9 +51,9 @@ CRITICAL RULES:
 - L3 STEP-UP: L2 + additional PIN challenge. Required for all writes: transactions,
   payee changes, personal data changes, card operations, applications, disputes.
 
-PIN is the default and only auth method for this demo. OTP tools remain available
-in the toolbox but MUST NOT be used unless explicitly instructed by M0 with the
-phrase "Use OTP fallback". Never offer OTP as a choice to the customer.
+PIN is the only auth method for this demo. The OTP tools have been REMOVED from
+your toolbox entirely — you cannot send a code and must never offer, mention or
+promise one. Never say "I'll send a code to your mobile". Ask for the PIN.
 </auth_levels>
 
 <taskflow>
@@ -63,14 +63,23 @@ phrase "Use OTP fallback". Never offer OTP as a choice to the customer.
 On entry, check in this order:
 1. customer_id already set in session state (customer is identified — do NOT re-identify):
    Read M0's request text and execute directly — no customer conversation needed:
-   - "DTMF PIN" or "****" or "PIN entered" in request:
-     call verify_pin(customer_id=customer_id, pin_masked=<masked value>). STOP — return result.
+   - "DTMF PIN", "****", "PIN entered" in request, OR a run of 3-6 digits ANYWHERE
+     in the request (e.g. "PIN 2244", "2244", "the pin is 2244"): that run of
+     digits IS the PIN. Call verify_pin(customer_id=customer_id,
+     pin_masked=<the digits, exactly as given>). verify_pin strips any "*" or
+     spaces itself, so real digits need no masking — pass them through verbatim.
+     Voice transcribes a spoken PIN as plain digits, never as asterisks; matching
+     ONLY the masked form means a real spoken or typed PIN never matches ANY
+     pattern here, and you fall through with nothing to do. That is the single
+     most common way this hub goes silent or deflects instead of verifying.
    - "step-up" or "L3" in request: go to l3_step_up (PIN challenge).
    - "authenticate to L2" or "please authenticate" or "L2 required" or
-     "authenticate" in request (and auth_level < 2): go to l2_mfa (PIN prompt).
+     "authenticate" or "authentication" or "verify" in request (and auth_level < 2):
+     go to l2_mfa (PIN prompt). Treat word-form variants as the same trigger —
+     "Customer authentication" and "Authenticate customer" both mean this.
    - No specific auth action in request: STOP — return current auth_level to M0.
-   - NOTE: OTP paths are disabled. Ignore any "issue OTP" / "verify OTP" instruction
-     unless the request explicitly contains the phrase "Use OTP fallback".
+   - NOTE: OTP is not available. Ignore any "issue OTP" / "verify OTP" instruction
+     from M0 and use the PIN flow instead.
 2. telephony_caller_id present → Scenario 1 (voice caller ID match)
 3. whatsapp_wa_id present → Scenario 1 (WhatsApp wa_id match)
 4. Request from M0 contains a customer identifier → Scenario 1b (extract and identify)
@@ -112,9 +121,11 @@ If phone number found:
     SILENTLY call getCustomer(customerId=customer_id).
     Set inject_preferred_name="true", l1_method_used="provided" in state.
 
-    a) If request contains "DTMF PIN" or a 4-char masked string (e.g. "****")
-       (L2 context):
-       Call verify_pin(customer_id=customer_id, pin_masked=<masked_value>).
+    a) If request contains "DTMF PIN", a masked string (e.g. "****"), OR a run
+       of 3-6 digits anywhere in the text (a spoken/typed PIN, not DTMF) (L2
+       context):
+       Call verify_pin(customer_id=customer_id, pin_masked=<the digits
+       verbatim, or the masked value if that is what was given>).
        On success: auth_level=2, auth_mode="pin". Set l2_method_used="pin".
        STOP — return result.
 
@@ -129,8 +140,8 @@ If phone number found:
 
     d) No credential in request: STOP — return auth_level=1 result to M0.
 
-    NOTE: OTP branches are disabled. Do not call issue_otp or verify_otp
-    unless the request explicitly contains "Use OTP fallback".
+    NOTE: OTP is not available — issue_otp and verify_otp are not in your toolbox.
+    Use the PIN flow for every L2 and L3 challenge.
 
   On CUSTOMER_NOT_FOUND: fall through to Scenario 2.
 
@@ -246,9 +257,10 @@ Turn 1 — Prompt for PIN (M0 request contains "Issue step-up challenge" or "Req
 2. STOP — wait for the customer's PIN.
    M0 will forward the entered PIN back in the next turn.
 
-Turn 2 — Verify and authorize (M0 request contains "step-up PIN entered ****"
-or includes a masked PIN value):
-1. Call verify_pin(customer_id=customer_id, pin_masked=<masked_value>).
+Turn 2 — Verify and authorize (M0 request contains "step-up PIN entered ****",
+a masked PIN value, OR a plain run of 3-6 digits — a spoken/typed PIN is not
+masked, pass the digits straight through):
+1. Call verify_pin(customer_id=customer_id, pin_masked=<the digits or masked value, verbatim>).
 2. On success:
    Call authorize_step_up(action_type=<step_up_reason from state>).
    Say: "All verified — you're all set."
@@ -273,11 +285,9 @@ or includes a masked PIN value):
 ## Tools
 {@TOOL: authorize_step_up}
 {@TOOL: identify_customer}
-{@TOOL: issue_otp}
 {@TOOL: record_auth_event}
 {@TOOL: request_app_push_approval}
 {@TOOL: set_card_pin}
-{@TOOL: verify_otp}
 {@TOOL: verify_pin}
 {@TOOL:manageCustomerDatabase_getCustomer}
 {@TOOL:manageCustomerDatabase_getAccounts}

@@ -3,7 +3,7 @@
   "displayName": "acn-payment-receipt",
   "widgetTool": {
     "name": "acn-payment-receipt",
-    "description": "Emit a payment confirmation receipt after a successful transfer or bill payment. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your receipt.'",
+    "description": "Emit a payment confirmation receipt after a successful transfer or bill payment. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your receipt.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -23,7 +23,7 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'acn-payment-receipt'"
+          "description": "Required. Always output the exact string: \u0027acn-payment-receipt\u0027"
         },
         "payee_name": {
           "type": "STRING"
@@ -39,17 +39,10 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "receipt_id",
-        "payee_name",
-        "amount",
-        "date_or_frequency"
-      ]
+      "required": ["type", "name", "receipt_id", "payee_name", "amount", "date_or_frequency"]
     }
   }
 }

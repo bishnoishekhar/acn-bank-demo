@@ -8,12 +8,12 @@
       "en-CA": {
         "voice": "Iapetus",
         "speakingRate": 1.05,
-        "instruction": "# Audio Profile\nVoice: Iapetus. Rate: 1.05x. Channel: live bidi webchat voice, telephony (PSTN/VoIP), WhatsApp TTS. Locale: Canadian English (en-CA).\n\n# Director's note\nYou are an experienced ACN Bank advisor talking to someone across a desk, not reading them a policy document. Speak the way a good banker actually speaks: warm, unhurried, genuinely interested in the person's situation.\n\nUse contractions -- \"you'll\", \"let's\", \"that's\". Vary your rhythm; short sentences after long ones. Let small natural fillers land where a real person would pause to think -- \"right\", \"okay\", \"so\" -- but sparingly, never as a verbal tic.\n\nWhen you hand over a number, slow down and let it sit. Money deserves a beat of silence around it. When the customer gives you something personal -- an income, a worry about affording a place -- acknowledge it like a human before you move on.\n\nStay plain-spoken. No corporate throat-clearing, no \"I'd be happy to assist you with that today\". Say \"sure\" or \"of course\" and get on with it. Confident, never salesy; you are not pushing a product, you are helping someone decide.\n\nFor errors or bad news, soften and slow slightly -- steady, not apologetic. During authentication, keep an easy unhurried pace that takes the anxiety out of it. Barge-in is expected in live conversation: if the customer starts talking, stop cleanly and listen.\n\n## Transcript:"
+        "instruction": "# Audio Profile\nVoice: Iapetus. Rate: 1.05x. Channel: live bidi webchat voice, telephony (PSTN/VoIP), WhatsApp TTS. Locale: Canadian English (en-CA).\n\n# Director\u0027s note\nYou are an experienced ACN Bank advisor talking to someone across a desk, not reading them a policy document. Speak the way a good banker actually speaks: warm, unhurried, genuinely interested in the person\u0027s situation.\n\nUse contractions -- \"you\u0027ll\", \"let\u0027s\", \"that\u0027s\". Vary your rhythm; short sentences after long ones. Let small natural fillers land where a real person would pause to think -- \"right\", \"okay\", \"so\" -- but sparingly, never as a verbal tic.\n\nWhen you hand over a number, slow down and let it sit. Money deserves a beat of silence around it. When the customer gives you something personal -- an income, a worry about affording a place -- acknowledge it like a human before you move on.\n\nStay plain-spoken. No corporate throat-clearing, no \"I\u0027d be happy to assist you with that today\". Say \"sure\" or \"of course\" and get on with it. Confident, never salesy; you are not pushing a product, you are helping someone decide.\n\nFor errors or bad news, soften and slow slightly -- steady, not apologetic. During authentication, keep an easy unhurried pace that takes the anxiety out of it. Barge-in is expected in live conversation: if the customer starts talking, stop cleanly and listen.\n\n## Transcript:"
       },
       "fr-CA": {
         "voice": "Iapetus",
         "speakingRate": 1.05,
-        "instruction": "# Audio Profile\nVoix : Iapetus. Cadence : 1.05x. Canal : clavardage web vocal en direct (bidi), téléphonie (RTPC/VoIP), WhatsApp TTS. Paramètres régionaux : français canadien (fr-CA).\n\n# Director's note\nVous êtes un conseiller chevronné de Banque ACN qui parle à quelqu'un assis en face de vous, et non quelqu'un qui lit une politique à voix haute. Parlez comme un bon conseiller parle vraiment : chaleureux, posé, sincèrement intéressé par la situation de la personne.\n\nEmployez un registre naturel et familier, sans relâchement. Variez le rythme : des phrases courtes après les longues. Laissez tomber de petites marques d'hésitation là où une vraie personne réfléchirait -- « bon », « d'accord », « alors » -- mais avec parcimonie, jamais comme un tic.\n\nQuand vous annoncez un montant, ralentissez et laissez-le résonner. L'argent mérite un temps de silence autour de lui. Quand le client vous confie quelque chose de personnel -- un revenu, une inquiétude sur sa capacité à payer -- accueillez-le humainement avant de poursuivre.\n\nRestez simple et direct. Pas de formules creuses, pas de « je serais ravi de vous assister aujourd'hui ». Dites « bien sûr » et passez à l'action. Confiant, jamais vendeur : vous ne poussez pas un produit, vous aidez quelqu'un à décider.\n\nEn cas d'erreur ou de mauvaise nouvelle, adoucissez et ralentissez légèrement -- calme, sans vous excuser. Pendant l'authentification, gardez un rythme tranquille qui désamorce l'anxiété. L'interruption fait partie de la conversation en direct : si le client se met à parler, arrêtez-vous net et écoutez.\n\n## Transcript:"
+        "instruction": "# Audio Profile\nVoix : Iapetus. Cadence : 1.05x. Canal : clavardage web vocal en direct (bidi), téléphonie (RTPC/VoIP), WhatsApp TTS. Paramètres régionaux : français canadien (fr-CA).\n\n# Director\u0027s note\nVous êtes un conseiller chevronné de Banque ACN qui parle à quelqu\u0027un assis en face de vous, et non quelqu\u0027un qui lit une politique à voix haute. Parlez comme un bon conseiller parle vraiment : chaleureux, posé, sincèrement intéressé par la situation de la personne.\n\nEmployez un registre naturel et familier, sans relâchement. Variez le rythme : des phrases courtes après les longues. Laissez tomber de petites marques d\u0027hésitation là où une vraie personne réfléchirait -- « bon », « d\u0027accord », « alors » -- mais avec parcimonie, jamais comme un tic.\n\nQuand vous annoncez un montant, ralentissez et laissez-le résonner. L\u0027argent mérite un temps de silence autour de lui. Quand le client vous confie quelque chose de personnel -- un revenu, une inquiétude sur sa capacité à payer -- accueillez-le humainement avant de poursuivre.\n\nRestez simple et direct. Pas de formules creuses, pas de « je serais ravi de vous assister aujourd\u0027hui ». Dites « bien sûr » et passez à l\u0027action. Confiant, jamais vendeur : vous ne poussez pas un produit, vous aidez quelqu\u0027un à décider.\n\nEn cas d\u0027erreur ou de mauvaise nouvelle, adoucissez et ralentissez légèrement -- calme, sans vous excuser. Pendant l\u0027authentification, gardez un rythme tranquille qui désamorce l\u0027anxiété. L\u0027interruption fait partie de la conversation en direct : si le client se met à parler, arrêtez-vous net et écoutez.\n\n## Transcript:"
       }
     }
   },
@@ -21,650 +21,565 @@
     "conversationLoggingSettings": {
       "retentionWindow": "31536000s"
     },
-    "evaluationAudioRecordingConfig": {}
+    "evaluationAudioRecordingConfig": {
+    }
   },
-  "guardrails": [
-    "Phishing & Social Engineering",
-    "Smishing Detection",
-    "Personal Data Extraction Attempt",
-    "Sensitive Data Disclosure"
-  ],
+  "guardrails": ["Phishing \u0026 Social Engineering", "Smishing Detection", "Personal Data Extraction Attempt", "Sensitive Data Disclosure"],
   "modelSettings": {
     "model": "gemini-composite-v1",
     "temperature": 1.0
   },
-  "variableDeclarations": [
-    {
-      "name": "active_intent",
-      "description": "Current classified intent code (e.g., ACC-01, PAY-05) being handled.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "after_hours",
-      "description": "True if current time is outside business hours.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "annual_income",
-      "description": "Customer's declared annual income, carried as a string for the same reason as credit_score_value.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "appointment_id",
-      "description": "Branch appointment ID. Set by AT STATE_MAP from createAppointment response.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "auth_level",
-      "description": "Flat numeric auth level (0-3) written by auth tools (identify_customer/verify_pin/verify_otp/authorize_step_up). Bridged into auth_state.level by _seed_identity_from_session. MUST stay declared or every L2 grant is silently dropped.",
-      "schema": {
-        "type": "STRING",
-        "default": "0"
-      }
-    },
-    {
-      "name": "auth_methods",
-      "description": "Auth method tracking object. Fields: l1_method, l2_method, step_up_otp_id. Set by M5 during auth flows.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "auth_mode",
-      "description": "Flat auth method actually used: pin | otp | push | guest. Written by verify_pin / verify_otp; bridged into auth_state.mode.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "auth_state",
-      "description": "Authentication state. Fields: level (0-3), mode, locked, expires_at, last_activity, step_up_required, step_up_reason, step_up_action_hash, step_up_valid_until, otp_request_id, otp_attempts, pin_attempts. Set by AT STATE_MAP and BA/BT callbacks.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "authentication_status",
-      "description": "True once the web frontend has signed the customer in. Written by src/App.jsx customerVariables().",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "card_id",
-      "description": "Card document ID in context for card management operations. Set by M2.3 / M4.2.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "card_last4",
-      "description": "Last 4 digits of the card in context. Set by M2.3 / M4.2 for display.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "cdic_disclosed",
-      "description": "True once CDIC disclosure has been delivered this session.",
-      "schema": {
-        "type": "STRING",
-        "default": "false"
-      }
-    },
-    {
-      "name": "channel",
-      "description": "Detected channel: voice | webchat | whatsapp. Locked after turn 1.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "channel_locked",
-      "description": "True after channel detection on turn 1. Guards BA-1 re-run.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "cie_context",
-      "description": "Customer Intelligence Engine context. Fields: loaded, loaded_at, life_stage, next_best_action, nba_shown, nba_suppressed, open_applications, credit_profile_band, spending_top_categories, product_holdings. Set by AT STATE_MAP from getCustomerSegment / getNextBestActions.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "completed_actions",
-      "description": "JSON-serialized list of successfully completed actions this session.",
-      "schema": {
-        "type": "STRING",
-        "default": "[]"
-      }
-    },
-    {
-      "name": "credit_score_value",
-      "description": "Customer's credit score, carried as a string to match this app's STRING/BOOLEAN-only declaration convention.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "csat",
-      "description": "CSAT tracking object. Fields: offered (bool), rating (0-5). Set by M0 at session end.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "current_agent",
-      "description": "Resource name of the agent currently in control. Updated by callback on every transfer.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "current_hub",
-      "description": "Currently active hub agent: M2 | M3 | M4 | empty. Set by callback on transfer.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customerId",
-      "description": "Firestore document ID of the signed-in customer. Camel-case twin of customer_id, sent by the frontend and used as a tool argument.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customer_display_name",
-      "description": "Customer preferred display name. Set by BA-5 passive lookup or M5 after getCustomer.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customer_global_status",
-      "description": "Global account standing for the signed-in customer. Writer: frontend.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customer_id",
-      "description": "Trusted Firestore customer document ID. Empty at L0. Set exclusively by M5.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customer_name",
-      "description": "Customer's full legal name. Read by the callback state bridge.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "customer_profile",
-      "description": "Customer identity and profile. Fields: id (kept flat), display_name, first_name, last_name, email_masked, phone_masked, segment, since_year, marketing_opt_out, vulnerable_flag, preferred_language, inject_preferred_name, identified_by. Set by AT STATE_MAP from getCustomer / identify_customer.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "degraded_toolsets",
-      "description": "JSON list of toolsets currently in degraded/read-only mode. Set by AT-7 on repeated system_error.",
-      "schema": {
-        "type": "STRING",
-        "default": "[]"
-      }
-    },
-    {
-      "name": "device_type",
-      "description": "Device type from frontend: desktop | mobile_web | ios_app | android_app | phone.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "disclosures_delivered",
-      "description": "JSON-serialized list of verbatim copy keys delivered this session.",
-      "schema": {
-        "type": "STRING",
-        "default": "[]"
-      }
-    },
-    {
-      "name": "dispute_rights_disclosed",
-      "description": "True once dispute rights disclosure has been delivered.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "dtmf_enabled",
-      "description": "True during PIN/OTP/SIN collection on voice.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "email",
-      "description": "Signed-in customer's email address. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "escalation_reason",
-      "description": "Reason for deterministic escalation routing to M4.3.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "financial_advice_disclaimer_shown",
-      "description": "True once financial advice disclaimer has been shown this session.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "fraud_suspected",
-      "description": "True when fraud fast-path is active. Set by callback BM-3. Never override.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "identified_by",
-      "description": "Method used to identify the customer: caller_id | wa_id | phone | webchat_sso.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "inject_preferred_name",
-      "description": "Flag: true when model should greet customer by preferred name on this turn.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "intent_confidence",
-      "description": "Intent classification confidence score (0.0 to 1.0). Set by callback after classification.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "is_existing_customer",
-      "description": "True when the signed-in web user is a known ACN Bank customer. Writer: frontend.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "journey_context",
-      "description": "JSON-serialized current journey state for active workflow.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "journey_id",
-      "description": "Active journey identifier string. Set by specialist agent at journey start.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "journey_resume_offered",
-      "description": "True once journey resumption prompt has been delivered this session.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "journey_step",
-      "description": "Named step within the active journey (e.g., kyc_pending, verification, decision). Set by specialist.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "kyc_expires_at",
-      "description": "ISO date the customer's KYC refresh falls due. Writer: frontend.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "last_quick_actions",
-      "description": "JSON-serialized last quick_actions chips shown (webchat).",
-      "schema": {
-        "type": "STRING",
-        "default": "[]"
-      }
-    },
-    {
-      "name": "last_widget_type",
-      "description": "Type of last widget emitted in webchat channel (for sequence enforcement).",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "live_agent_requested",
-      "description": "True if customer has explicitly requested a live agent.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "mobile_number",
-      "description": "Signed-in customer's mobile number. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "mock_mode",
-      "description": "True enables deterministic mock fixture responses instead of live API calls.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "nsf_reversal_eligible",
-      "description": "Computed from NSF history (max 1 reversal/12 months); NEVER override. Writer: M2.9",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "nudge_allowed",
-      "description": "True when NBA nudge may be surfaced this turn. Set by acn_callbacks before_model.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "otp_attempts",
-      "description": "Consecutive OTP attempts this session. Written by verify_otp.",
-      "schema": {
-        "type": "STRING",
-        "default": "0"
-      }
-    },
-    {
-      "name": "otp_request_id",
-      "description": "Active OTP request identifier. Written by issue_otp, consumed by verify_otp.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "overdraft_enabled",
-      "description": "Current overdraft protection state. Writer: M2.9",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "pad_cancel_id",
-      "description": "PAD authorization reference ID set after cancelPAD succeeds. Read in AT-PAD-rights callback.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "pending_intent_queue",
-      "description": "JSON-serialized list of queued intents for multi-intent handling. Max 5.",
-      "schema": {
-        "type": "STRING",
-        "default": "[]"
-      }
-    },
-    {
-      "name": "pin_attempts",
-      "description": "Consecutive PIN attempts this session. Written by verify_pin; 2 failures route to KBA fallback, 3 locks.",
-      "schema": {
-        "type": "STRING",
-        "default": "0"
-      }
-    },
-    {
-      "name": "pipeda_disclosed",
-      "description": "True once PIPEDA disclosure copy delivered.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "pref_name",
-      "description": "Customer's preferred first name. Read by the callback state bridge (_first_nonempty).",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "previous_agent",
-      "description": "Resource name of the prior agent, for return-after-subtask flows.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "provisional_credit_eligible",
-      "description": "True if dispute meets provisional credit policy (<=CAD5000, within 120 days, <=2 disputes in 12 months).",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "push_id",
-      "description": "Active app-push approval identifier. Written by request_app_push_approval.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "rewards_balance_points",
-      "description": "Rewards points balance. Set by AT STATE_MAP from getRewardsBalance response.",
-      "schema": {
-        "type": "STRING",
-        "default": "0"
-      }
-    },
-    {
-      "name": "routing_reason",
-      "description": "Reason for current routing decision: classified | fast_path_fraud | fast_path_lost_stolen | resume | nudge_accept | escalation.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "session_counters",
-      "description": "Session behaviour counters. Fields: turns, no_match, no_input, small_talk, retry_strikes, tool_errors, validation_errors, injection_attempts, disambiguation. Incremented by BA/BM/AM/AT callbacks.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "session_language_locked",
-      "description": "True once language is locked on first utterance.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "spending_persona",
-      "description": "CIE spending persona label. Read by the callback state bridge as a fallback for customer_segment.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "step_up_action_hash",
-      "description": "Hash binding the L3 step-up grant to one specific action. Written by authorize_step_up; checked by BT-4.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "step_up_required",
-      "description": "True when a pending action needs L3 step-up. Written by authorize_step_up / BT-4.",
-      "schema": {
-        "type": "STRING",
-        "default": "false"
-      }
-    },
-    {
-      "name": "step_up_valid_until",
-      "description": "ISO-8601 expiry of the current L3 step-up grant (120s single-action validity). Written by authorize_step_up.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "stop_payment_id",
-      "description": "Set on successful stop-payment; used in confirmation receipt. Writer: M2.7",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "telephony-caller-id",
-      "description": "Caller phone number injected by the telephony platform at call start (dashes). Read-only in callbacks — use telephony_caller_id (bridged) for application logic.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "telephony_caller_id",
-      "description": "Caller ID from telephony platform. Presence signals voice channel.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "transaction_context",
-      "description": "Active transaction state. Fields: awaiting_confirmation, idempotency_key, wire_disclosure_ack, fintrac_check_status, status, transaction_id, confirmation_payload_hash, fx_currency_pair, fx_rate_quoted. Set by BT/AT callbacks during money-movement flows.",
-      "schema": {
-        "type": "STRING",
-        "default": "{}"
-      }
-    },
-    {
-      "name": "wa_id_linked",
-      "description": "True when a first-time WhatsApp user was identified this session and wa_id was linked to their profile.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "web_channel",
-      "description": "True when the session originates from the ACN Bank web app. Writer: frontend.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
-    },
-    {
-      "name": "whatsapp_wa_id",
-      "description": "WhatsApp account ID (wa_id) set by WhatsApp connector. Presence signals WhatsApp channel.",
-      "schema": {
-        "type": "STRING",
-        "default": ""
-      }
-    },
-    {
-      "name": "widgets_enabled",
-      "description": "True only for webchat channel.",
-      "schema": {
-        "type": "BOOLEAN",
-        "default": false
-      }
+  "variableDeclarations": [{
+    "name": "active_intent",
+    "description": "Current classified intent code (e.g., ACC-01, PAY-05) being handled.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
     }
-  ],
+  }, {
+    "name": "after_hours",
+    "description": "True if current time is outside business hours.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "annual_income",
+    "description": "Customer\u0027s declared annual income, carried as a string for the same reason as credit_score_value.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "appointment_id",
+    "description": "Branch appointment ID. Set by AT STATE_MAP from createAppointment response.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "auth_level",
+    "description": "Flat numeric auth level (0-3) written by auth tools (identify_customer/verify_pin/verify_otp/authorize_step_up). Bridged into auth_state.level by _seed_identity_from_session. MUST stay declared or every L2 grant is silently dropped.",
+    "schema": {
+      "type": "STRING",
+      "default": "0"
+    }
+  }, {
+    "name": "auth_methods",
+    "description": "Auth method tracking object. Fields: l1_method, l2_method, step_up_otp_id. Set by M5 during auth flows.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "auth_mode",
+    "description": "Flat auth method actually used: pin | otp | push | guest. Written by verify_pin / verify_otp; bridged into auth_state.mode.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "auth_state",
+    "description": "Authentication state. Fields: level (0-3), mode, locked, expires_at, last_activity, step_up_required, step_up_reason, step_up_action_hash, step_up_valid_until, otp_request_id, otp_attempts, pin_attempts. Set by AT STATE_MAP and BA/BT callbacks.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "authentication_status",
+    "description": "True once the web frontend has signed the customer in. Written by src/App.jsx customerVariables().",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "card_id",
+    "description": "Card document ID in context for card management operations. Set by M2.3 / M4.2.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "card_last4",
+    "description": "Last 4 digits of the card in context. Set by M2.3 / M4.2 for display.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "cdic_disclosed",
+    "description": "True once CDIC disclosure has been delivered this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "false"
+    }
+  }, {
+    "name": "channel",
+    "description": "Detected channel: voice | webchat | whatsapp. Locked after turn 1.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "channel_locked",
+    "description": "True after channel detection on turn 1. Guards BA-1 re-run.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "cie_context",
+    "description": "Customer Intelligence Engine context. Fields: loaded, loaded_at, life_stage, next_best_action, nba_shown, nba_suppressed, open_applications, credit_profile_band, spending_top_categories, product_holdings. Set by AT STATE_MAP from getCustomerSegment / getNextBestActions.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "completed_actions",
+    "description": "JSON-serialized list of successfully completed actions this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "credit_score_value",
+    "description": "Customer\u0027s credit score, carried as a string to match this app\u0027s STRING/BOOLEAN-only declaration convention.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "csat",
+    "description": "CSAT tracking object. Fields: offered (bool), rating (0-5). Set by M0 at session end.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "current_agent",
+    "description": "Resource name of the agent currently in control. Updated by callback on every transfer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "current_hub",
+    "description": "Currently active hub agent: M2 | M3 | M4 | empty. Set by callback on transfer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customerId",
+    "description": "Firestore document ID of the signed-in customer. Camel-case twin of customer_id, sent by the frontend and used as a tool argument.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_display_name",
+    "description": "Customer preferred display name. Set by BA-5 passive lookup or M5 after getCustomer.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_global_status",
+    "description": "Global account standing for the signed-in customer. Writer: frontend.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_id",
+    "description": "Trusted Firestore customer document ID. Empty at L0. Set exclusively by M5.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_name",
+    "description": "Customer\u0027s full legal name. Read by the callback state bridge.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "customer_profile",
+    "description": "Customer identity and profile. Fields: id (kept flat), display_name, first_name, last_name, email_masked, phone_masked, segment, since_year, marketing_opt_out, vulnerable_flag, preferred_language, inject_preferred_name, identified_by. Set by AT STATE_MAP from getCustomer / identify_customer.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "degraded_toolsets",
+    "description": "JSON list of toolsets currently in degraded/read-only mode. Set by AT-7 on repeated system_error.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "device_type",
+    "description": "Device type from frontend: desktop | mobile_web | ios_app | android_app | phone.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "disclosures_delivered",
+    "description": "JSON-serialized list of verbatim copy keys delivered this session.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "dispute_rights_disclosed",
+    "description": "True once dispute rights disclosure has been delivered.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "dtmf_enabled",
+    "description": "True during PIN/OTP/SIN collection on voice.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "email",
+    "description": "Signed-in customer\u0027s email address. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "escalation_reason",
+    "description": "Reason for deterministic escalation routing to M4.3.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "financial_advice_disclaimer_shown",
+    "description": "True once financial advice disclaimer has been shown this session.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "fraud_suspected",
+    "description": "True when fraud fast-path is active. Set by callback BM-3. Never override.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "identified_by",
+    "description": "Method used to identify the customer: caller_id | wa_id | phone | webchat_sso.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "inject_preferred_name",
+    "description": "Flag: true when model should greet customer by preferred name on this turn.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "intent_confidence",
+    "description": "Intent classification confidence score (0.0 to 1.0). Set by callback after classification.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "is_existing_customer",
+    "description": "True when the signed-in web user is a known ACN Bank customer. Writer: frontend.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "journey_context",
+    "description": "JSON-serialized current journey state for active workflow.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "journey_id",
+    "description": "Active journey identifier string. Set by specialist agent at journey start.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "journey_resume_offered",
+    "description": "True once journey resumption prompt has been delivered this session.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "journey_step",
+    "description": "Named step within the active journey (e.g., kyc_pending, verification, decision). Set by specialist.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "kyc_expires_at",
+    "description": "ISO date the customer\u0027s KYC refresh falls due. Writer: frontend.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "last_quick_actions",
+    "description": "JSON-serialized last quick_actions chips shown (webchat).",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "last_widget_type",
+    "description": "Type of last widget emitted in webchat channel (for sequence enforcement).",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "live_agent_requested",
+    "description": "True if customer has explicitly requested a live agent.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "mobile_number",
+    "description": "Signed-in customer\u0027s mobile number. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "mock_mode",
+    "description": "True enables deterministic mock fixture responses instead of live API calls.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "nsf_reversal_eligible",
+    "description": "Computed from NSF history (max 1 reversal/12 months); NEVER override. Writer: M2.9",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "nudge_allowed",
+    "description": "True when NBA nudge may be surfaced this turn. Set by acn_callbacks before_model.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "otp_attempts",
+    "description": "Consecutive OTP attempts this session. Written by verify_otp.",
+    "schema": {
+      "type": "STRING",
+      "default": "0"
+    }
+  }, {
+    "name": "otp_request_id",
+    "description": "Active OTP request identifier. Written by issue_otp, consumed by verify_otp.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "overdraft_enabled",
+    "description": "Current overdraft protection state. Writer: M2.9",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "pad_cancel_id",
+    "description": "PAD authorization reference ID set after cancelPAD succeeds. Read in AT-PAD-rights callback.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "pending_intent_queue",
+    "description": "JSON-serialized list of queued intents for multi-intent handling. Max 5.",
+    "schema": {
+      "type": "STRING",
+      "default": "[]"
+    }
+  }, {
+    "name": "pin_attempts",
+    "description": "Consecutive PIN attempts this session. Written by verify_pin; 2 failures route to KBA fallback, 3 locks.",
+    "schema": {
+      "type": "STRING",
+      "default": "0"
+    }
+  }, {
+    "name": "pipeda_disclosed",
+    "description": "True once PIPEDA disclosure copy delivered.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "pref_name",
+    "description": "Customer\u0027s preferred first name. Read by the callback state bridge (_first_nonempty).",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "previous_agent",
+    "description": "Resource name of the prior agent, for return-after-subtask flows.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "provisional_credit_eligible",
+    "description": "True if dispute meets provisional credit policy (\u003c\u003dCAD5000, within 120 days, \u003c\u003d2 disputes in 12 months).",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "push_id",
+    "description": "Active app-push approval identifier. Written by request_app_push_approval.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "rewards_balance_points",
+    "description": "Rewards points balance. Set by AT STATE_MAP from getRewardsBalance response.",
+    "schema": {
+      "type": "STRING",
+      "default": "0"
+    }
+  }, {
+    "name": "routing_reason",
+    "description": "Reason for current routing decision: classified | fast_path_fraud | fast_path_lost_stolen | resume | nudge_accept | escalation.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "session_counters",
+    "description": "Session behaviour counters. Fields: turns, no_match, no_input, small_talk, retry_strikes, tool_errors, validation_errors, injection_attempts, disambiguation. Incremented by BA/BM/AM/AT callbacks.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "session_language_locked",
+    "description": "True once language is locked on first utterance.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "spending_persona",
+    "description": "CIE spending persona label. Read by the callback state bridge as a fallback for customer_segment.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "step_up_action_hash",
+    "description": "Hash binding the L3 step-up grant to one specific action. Written by authorize_step_up; checked by BT-4.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "step_up_required",
+    "description": "True when a pending action needs L3 step-up. Written by authorize_step_up / BT-4.",
+    "schema": {
+      "type": "STRING",
+      "default": "false"
+    }
+  }, {
+    "name": "step_up_valid_until",
+    "description": "ISO-8601 expiry of the current L3 step-up grant (120s single-action validity). Written by authorize_step_up.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "stop_payment_id",
+    "description": "Set on successful stop-payment; used in confirmation receipt. Writer: M2.7",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "telephony-caller-id",
+    "description": "Caller phone number injected by the telephony platform at call start (dashes). Read-only in callbacks — use telephony_caller_id (bridged) for application logic.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "telephony_caller_id",
+    "description": "Caller ID from telephony platform. Presence signals voice channel.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "transaction_context",
+    "description": "Active transaction state. Fields: awaiting_confirmation, idempotency_key, wire_disclosure_ack, fintrac_check_status, status, transaction_id, confirmation_payload_hash, fx_currency_pair, fx_rate_quoted. Set by BT/AT callbacks during money-movement flows.",
+    "schema": {
+      "type": "STRING",
+      "default": "{}"
+    }
+  }, {
+    "name": "wa_id_linked",
+    "description": "True when a first-time WhatsApp user was identified this session and wa_id was linked to their profile.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "web_channel",
+    "description": "True when the session originates from the ACN Bank web app. Writer: frontend.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }, {
+    "name": "whatsapp_wa_id",
+    "description": "WhatsApp account ID (wa_id) set by WhatsApp connector. Presence signals WhatsApp channel.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
+    "name": "widgets_enabled",
+    "description": "True only for webchat channel.",
+    "schema": {
+      "type": "BOOLEAN",
+      "default": false
+    }
+  }],
   "globalInstruction": "global_instruction.txt",
   "languageSettings": {
     "defaultLanguageCode": "en-CA",
-    "supportedLanguageCodes": [
-      "fr-CA"
-    ]
+    "supportedLanguageCodes": ["fr-CA"]
   },
   "evaluationMetricsThresholds": {
     "goldenEvaluationMetricsThresholds": {

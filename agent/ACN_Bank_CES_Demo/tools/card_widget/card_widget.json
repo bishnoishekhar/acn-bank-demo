@@ -3,7 +3,7 @@
   "displayName": "card_widget",
   "widgetTool": {
     "name": "card_widget",
-    "description": "Emit a single credit card product detail view. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Here are the details for that card.'",
+    "description": "Emit a single credit card product detail view. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here are the details for that card.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -45,10 +45,7 @@
               }
             }
           },
-          "required": [
-            "card_id",
-            "card_name"
-          ]
+          "required": ["card_id", "card_name"]
         },
         "name": {
           "type": "STRING"
@@ -57,10 +54,7 @@
           "type": "STRING"
         }
       },
-      "required": [
-        "name",
-        "card"
-      ]
+      "required": ["name", "card"]
     }
   }
 }

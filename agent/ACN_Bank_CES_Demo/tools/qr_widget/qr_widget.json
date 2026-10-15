@@ -3,7 +3,7 @@
   "displayName": "qr_widget",
   "widgetTool": {
     "name": "qr_widget",
-    "description": "Emit a QR code for a payment request. The payer scans it with their banking app. Before calling this tool, speak a brief conversational pacing phrase: 'Here is your QR code for the payment.'",
+    "description": "Emit a QR code for a payment request. The payer scans it with their banking app. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here is your QR code for the payment.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -33,13 +33,7 @@
           "type": "STRING"
         }
       },
-      "required": [
-        "name",
-        "qr_code_url",
-        "amount",
-        "currency",
-        "reference"
-      ]
+      "required": ["name", "qr_code_url", "amount", "currency", "reference"]
     }
   }
 }

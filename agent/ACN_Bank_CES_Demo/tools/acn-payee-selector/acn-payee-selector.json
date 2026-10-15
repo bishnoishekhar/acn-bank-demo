@@ -3,14 +3,14 @@
   "displayName": "acn-payee-selector",
   "widgetTool": {
     "name": "acn-payee-selector",
-    "description": "Emit a list of saved payees for the user to choose who to pay. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your saved payees.'",
+    "description": "Emit a list of saved payees for the user to choose who to pay. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your saved payees.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'acn-payee-selector'"
+          "description": "Required. Always output the exact string: \u0027acn-payee-selector\u0027"
         },
         "payees": {
           "type": "ARRAY",
@@ -24,7 +24,7 @@
               },
               "cta_value": {
                 "type": "STRING",
-                "description": "The command string, e.g., 'select_payee:PY-001'."
+                "description": "The command string, e.g., \u0027select_payee:PY-001\u0027."
               },
               "logo_url": {
                 "type": "STRING",
@@ -47,14 +47,10 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "payees"
-      ]
+      "required": ["type", "name", "payees"]
     }
   }
 }
