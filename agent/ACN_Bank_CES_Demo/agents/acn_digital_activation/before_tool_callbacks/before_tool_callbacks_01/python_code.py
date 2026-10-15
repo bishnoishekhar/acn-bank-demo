@@ -277,13 +277,21 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
             }
         return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
 
-    # BT-10: Firestore query guard — check BEFORE overwriting customerId
-    if 'customerId' in input_dict and input_dict.get('customerId') != customer_id:
-        logger.warning(f"BT-10 BLOCKED: customerId mismatch in {tool_name}")
-        return {"error": "OWNERSHIP_VIOLATION", "message": "Access denied."}
-
+    # BT-10: Firestore query guard. Once a customer is authenticated, THEIR customer_id
+    # is the only id customer-data tools may use. The leaf agents are never told the id,
+    # so the model guesses one (a phone number, a made-up "CUST-10001", or ""), and
+    # blocking that with a bare "Access denied" gave it no way to recover: the balance
+    # was never returned. Correct the id instead of blocking. With no authenticated
+    # customer, a model-supplied id is still refused.
     if customer_id:
+        for _k in ('customerId', 'customer_id'):
+            if _k in input_dict and input_dict.get(_k) != customer_id:
+                logger.warning(f"BT-10 corrected {_k} in {tool_name}: model sent {input_dict.get(_k)!r}")
+                input_dict[_k] = customer_id
         input_dict['customerId'] = customer_id
+    elif input_dict.get('customerId'):
+        logger.warning(f"BT-10 BLOCKED: customerId supplied with no authenticated customer in {tool_name}")
+        return {"error": "OWNERSHIP_VIOLATION", "message": "Access denied."}
     if 'limit' in input_dict:
         input_dict['limit'] = min(int(input_dict.get('limit', 50) or 50), 50)
 
