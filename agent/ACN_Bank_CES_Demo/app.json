@@ -316,7 +316,7 @@
     },
     {
       "name": "identified_by",
-      "description": "Method used to identify the customer: caller_id | wa_id | phone | account_number | card_last4 | webchat_sso.",
+      "description": "Method used to identify the customer: caller_id | wa_id | phone | webchat_sso.",
       "schema": {
         "type": "STRING",
         "default": ""
