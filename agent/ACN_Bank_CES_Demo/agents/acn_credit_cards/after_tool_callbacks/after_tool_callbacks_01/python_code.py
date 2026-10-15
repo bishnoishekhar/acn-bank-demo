@@ -329,7 +329,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
         return out
     return text
 
-_HUB_PIN_REQUEST_RE = re.compile(r'PIN|step-?up|verify|authenticat', re.IGNORECASE)
+_HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+_HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+_HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:
     """What the parent model should be told when the hub had nothing to say.
@@ -341,6 +343,25 @@ def _hub_status_text(request: str, customer_id: str, level: int) -> str:
     (each retry burns a PIN attempt) and never asks for the PIN. Say what actually
     happened and what to do next instead.
     """
+    req = request or ''
+    entered = bool(_HUB_PIN_ENTERED_RE.search(req))
+    stepup = bool(_HUB_STEPUP_RE.search(req))
+    pin_prompt = ("on chat say \"For this action, please re-enter your 4-digit PIN.\"; on voice say "
+                  "\"For this action, please re-enter your 4-digit PIN on your keypad now, or say it.\"")
+    if stepup:
+        if level >= 3:
+            return ("Step-up verified: the customer is authorized (L3) for this action. "
+                    "Continue the action now. Do not ask for the PIN again and do not "
+                    "call the identity hub again.")
+        if not entered:
+            # A step-up was requested but no PIN has been supplied yet: the customer must be asked.
+            return ("Step-up required: the customer is NOT yet authorized for this action. Ask them "
+                    "to re-enter their 4-digit PIN now (" + pin_prompt + "). Do not continue the "
+                    "action and do not call the identity hub again until they reply with the PIN.")
+        return ("The step-up PIN was not accepted. Tell the customer it didn't match and ask them to "
+                "re-enter their 4-digit PIN. They get 3 attempts in total; after the third failure "
+                "tell them a specialist will help from here and stop trying. Do not continue the "
+                "action and do not call the identity hub again until they reply.")
     if level >= 3:
         return ("Step-up verified: the customer is authorized (L3) for this action. "
                 "Continue the action now. Do not ask for the PIN again and do not "
@@ -349,12 +370,18 @@ def _hub_status_text(request: str, customer_id: str, level: int) -> str:
         return ("PIN verified: the customer is authenticated (L2). Continue with the "
                 "customer's original request now. Do not ask for the PIN again and "
                 "do not call the identity hub again.")
-    if customer_id and not _HUB_PIN_REQUEST_RE.search(request or ''):
+    if customer_id and not _HUB_PIN_REQUEST_RE.search(req):
         return ("Customer identified (L1). This is a success, not an error. Next, ask "
                 "the customer for their 4-digit PIN: on chat say \"To verify it's you, "
                 "please type your 4-digit PIN.\"; on voice say \"For your security, "
                 "please enter your 4-digit PIN on your keypad now, or say it.\" Do not "
                 "call the identity hub again until the customer replies with the PIN.")
+    if customer_id and not entered:
+        # Asked to authenticate to L2 but no PIN supplied yet: prompt for it.
+        return ("The customer is identified (L1) but not yet verified. Ask them for their 4-digit PIN: "
+                "on chat say \"To verify it's you, please type your 4-digit PIN.\"; on voice say "
+                "\"For your security, please enter your 4-digit PIN on your keypad now, or say it.\" "
+                "Do not call the identity hub again until they reply with the PIN.")
     if customer_id:
         return ("The PIN was not accepted. Tell the customer it didn't match and ask "
                 "them to re-enter their 4-digit PIN. They get 3 attempts in total; "
