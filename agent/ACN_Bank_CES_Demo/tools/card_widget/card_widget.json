@@ -3,7 +3,7 @@
   "displayName": "card_widget",
   "widgetTool": {
     "name": "card_widget",
-    "description": "Emit a single credit card product detail view. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here are the details for that card.\u0027 Webchat only — on voice, read card details aloud.",
+    "description": "Emit a single credit card product detail view. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Here are the details for that card.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -45,7 +45,10 @@
               }
             }
           },
-          "required": ["card_id", "card_name"]
+          "required": [
+            "card_id",
+            "card_name"
+          ]
         },
         "name": {
           "type": "STRING"
@@ -54,7 +57,10 @@
           "type": "STRING"
         }
       },
-      "required": ["name", "card"]
+      "required": [
+        "name",
+        "card"
+      ]
     }
   }
 }

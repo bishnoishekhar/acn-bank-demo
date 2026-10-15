@@ -43,9 +43,26 @@
 const TAG = '[ACN BIDI]';
 const AUTH_WAIT_MS = 15000;
 
-let _consumerInstalled = false;
+/* The consumer and the element it is registered against.
+
+   The SDK keys consumers in a Map by object identity, so handing it a fresh
+   object registers a SECOND consumer rather than replacing the first — and then
+   every utterance is delivered twice, which shows up as the whole conversation
+   duplicating itself bubble for bubble. connectBidi() runs on each reconnect and
+   from the floating widget as well as the panel, so that is easy to hit.
+
+   Tracking the element too means a genuine remount (sign-out, new session) still
+   re-registers against the new element, while a reconnect against the same
+   element does not. */
+let _consumer = null;
+let _consumerElement = null;
 let _listenersInstalled = false;
+let _listenersElement = null;
 let _bidiActive = false;
+
+// Utterances already forwarded, so a repeated addMessages for the same
+// utteranceId cannot double-render a turn.
+const _seenUtterances = new Set();
 
 /* True from the moment we hand over the mic until the caller explicitly closes
    the session.
@@ -80,6 +97,60 @@ let _turnIndex = 10000;
    "I want to loan a mortgage" never appeared, while the agent answered it. */
 let _pendingSilentText = '';
 let _pendingSilentUntil = 0;
+
+/* ── Rejecting the agent's own voice ──────────────────────────────────────────
+   On speakers (not headphones) the microphone hears the agent and the platform
+   transcribes it as the customer. It arrives as a perfectly ordinary final user
+   utterance — that is where stray bubbles like "around if I cannot" come from:
+   a fragment of the agent's own sentence, fed back in.
+
+   Browser echo cancellation is already on by default and does not fully handle
+   loudspeaker playback, and barge-in makes it worse by design: any sound,
+   including the agent's, is treated as the customer interrupting.
+
+   So reject on CONTENT rather than by muting the mic while the agent talks.
+   Muting would be simpler but would kill real barge-in, which is the thing that
+   makes the conversation feel live. Matching text only drops audio that the
+   agent demonstrably just said. */
+const AGENT_ECHO_MEMORY = 3;
+const AGENT_ECHO_WINDOW_MS = 6000;
+const agentSpeech = []; // [{ text, at }]
+
+function noteAgentSpeech(text) {
+  if (!text?.trim()) return;
+  agentSpeech.push({ text: normaliseForMatch(text), at: Date.now() });
+  while (agentSpeech.length > AGENT_ECHO_MEMORY) agentSpeech.shift();
+}
+
+function normaliseForMatch(s) {
+  return s
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isAgentEcho(text) {
+  const candidate = normaliseForMatch(text);
+  if (!candidate) return false;
+
+  // Long utterances are the customer talking. Echo fragments are short, and a
+  // genuine long sentence that happens to quote the agent is still worth
+  // showing.
+  const words = candidate.split(' ');
+  if (words.length > 12) return false;
+
+  const now = Date.now();
+  return agentSpeech.some(({ text: spoken, at }) => {
+    if (now - at > AGENT_ECHO_WINDOW_MS) return false;
+    if (spoken.includes(candidate)) return true;
+    // Partial capture: most of the fragment's words appear in what the agent
+    // just said, in a run of at least three (so "yes" or "ok" stay through).
+    if (words.length < 3) return false;
+    const matched = words.filter((w) => spoken.includes(w)).length;
+    return matched / words.length >= 0.8;
+  });
+}
 
 function isSilentEcho(text) {
   if (!_pendingSilentText) return false;
@@ -198,12 +269,14 @@ function utteranceToOutputs(utterance) {
    would render twice. Keeping it dormant outside bidi leaves the text path
    byte-for-byte unchanged. Do not "simplify" this by dropping the gate. */
 export function installUtteranceBridge() {
-  if (_consumerInstalled) return true;
-
   const messenger = messengerElement();
   if (!messenger || typeof messenger.registerMessageConsumer !== 'function') return false;
 
-  messenger.registerMessageConsumer({
+  // Already registered against THIS element — registering again would add a
+  // second consumer and duplicate every message. See _consumer.
+  if (_consumer && _consumerElement === messenger) return true;
+
+  _consumer = {
     addMessages(utterances = []) {
       // Intent, not liveness — see _sessionIntended. Using _bidiActive here
       // silently swallowed speech during the SDK's startup reconnects.
@@ -211,6 +284,18 @@ export function installUtteranceBridge() {
 
       utterances.forEach((utterance) => {
         if (!utterance) return;
+
+        // Belt and braces against the duplicate-consumer failure above: even if
+        // two consumers somehow end up registered, a given utterance is only
+        // rendered once.
+        const id = utterance.utteranceId;
+        if (id) {
+          if (_seenUtterances.has(id)) return;
+          _seenUtterances.add(id);
+          if (_seenUtterances.size > 200) {
+            _seenUtterances.delete(_seenUtterances.values().next().value);
+          }
+        }
 
         if (utterance.isBot === false) {
           // The customer's own speech, transcribed by the platform. ChatPanel
@@ -223,11 +308,24 @@ export function installUtteranceBridge() {
             .trim();
           if (!text) return;
           if (isSilentEcho(text)) return;
+          if (isAgentEcho(text)) {
+            console.log(TAG, 'dropped agent echo:', text);
+            return;
+          }
           _onUserTranscript?.(text, true);
           return;
         }
 
         const outputs = utteranceToOutputs(utterance);
+
+        // Everything the agent says goes into the echo memory, not just the
+        // streaming events — a reply that arrives complete never fires
+        // bidi-utterance-updated, and that is exactly the audio the speakers
+        // are about to play.
+        outputs.forEach((o) => {
+          if (o.text) noteAgentSpeech(o.text);
+        });
+
         if (outputs.length) _onOutputs?.(outputs);
       });
     },
@@ -240,18 +338,22 @@ export function installUtteranceBridge() {
     getRenderedMessages() {
       return [];
     },
-  });
+  };
 
-  _consumerInstalled = true;
+  messenger.registerMessageConsumer(_consumer);
+  _consumerElement = messenger;
   console.log(TAG, 'widget bridge registered');
   return true;
 }
 
 function installBidiListeners() {
-  if (_listenersInstalled) return;
-
   const messenger = messengerElement();
   if (!messenger) return;
+
+  // Same trap as the consumer: re-adding these on every reconnect would fire
+  // each handler once per registration.
+  if (_listenersInstalled && _listenersElement === messenger) return;
+  _listenersElement = messenger;
 
   messenger.addEventListener('chat-messenger-connect-bidi', () => {
     _bidiActive = true;
@@ -274,9 +376,12 @@ function installBidiListeners() {
   });
 
   // The agent's reply text as it streams. Audio is played by the SDK.
+  // Remembered so the microphone can't feed it back to us as the customer —
+  // see isAgentEcho.
   messenger.addEventListener('chat-messenger-bidi-utterance-updated', (event) => {
     const utterance = event?.detail?.utterance;
     if (typeof utterance === 'string' && utterance.trim()) {
+      noteAgentSpeech(utterance);
       _onAgentText?.(utterance);
     }
   });
@@ -383,10 +488,14 @@ export async function connectBidiWhenReady({ timeoutMs = 10000 } = {}) {
 /* Reset module state when <chat-messenger> is remounted (sign-out, new
    session). The consumer and listeners are bound to the old element. */
 export function resetBidiBridge() {
-  _consumerInstalled = false;
+  _consumer = null;
+  _consumerElement = null;
   _listenersInstalled = false;
+  _listenersElement = null;
   _bidiActive = false;
   _sessionIntended = false;
   _pendingSilentText = '';
   _pendingSilentUntil = 0;
+  _seenUtterances.clear();
+  agentSpeech.length = 0;
 }

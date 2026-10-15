@@ -14,6 +14,10 @@ agent tries to skip the tenure argument it lands in call-shape A and gets a
 menu, not a decision — which the pre-approval step then rejects.
 
 Tenures are fixed at [6, 12, 24] for the demo.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me work out the instalment options for you.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict
@@ -21,6 +25,9 @@ from typing import Any, Dict
 EPP_INTEREST_RATE_PCT = 1.5
 TENURES_MONTHS = [6, 12, 24]
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def epp_plan_calculator(
     retail_price_cad: float,

@@ -3,7 +3,7 @@
   "displayName": "mortgage_rate_shelf",
   "widgetTool": {
     "name": "mortgage_rate_shelf",
-    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our current mortgage rates.' Webchat only — on voice, read rates aloud.",
+    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our current mortgage rates.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -39,6 +39,10 @@
         "confirm_cta_value": {
           "type": "STRING",
           "description": "Sent back to the agent on tap. The widget appends the selected product as JSON."
+        },
+        "expand_projection": {
+          "type": "BOOLEAN",
+          "description": "Open the variable product's projection chart on load instead of leaving it behind the 'what we project' toggle. Set true when the customer asked to COMPARE fixed against variable -- the chart and the break-even month are the answer to that question. Leave false/absent when they are choosing a rate."
         },
         "name": {
           "type": "STRING",

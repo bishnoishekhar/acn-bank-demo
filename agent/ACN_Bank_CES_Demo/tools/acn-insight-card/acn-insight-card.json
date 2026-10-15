@@ -3,7 +3,7 @@
   "displayName": "acn-insight-card",
   "widgetTool": {
     "name": "acn-insight-card",
-    "description": "Emit a spending or balance insight card to surface proactive financial intelligence. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here is your spending summary.\u0027 Webchat only — on voice, read the top insights aloud.",
+    "description": "Emit a spending or balance insight card to surface proactive financial intelligence. Before calling this tool, speak a brief conversational pacing phrase: 'Here is your spending summary.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -27,7 +27,11 @@
           "type": "STRING"
         }
       },
-      "required": ["name", "insight_type", "headline"]
+      "required": [
+        "name",
+        "insight_type",
+        "headline"
+      ]
     }
   }
 }

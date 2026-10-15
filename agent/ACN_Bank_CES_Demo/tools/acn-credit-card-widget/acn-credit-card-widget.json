@@ -3,7 +3,7 @@
   "displayName": "acn-credit-card-widget",
   "widgetTool": {
     "name": "acn-credit-card-widget",
-    "description": "Emit the customer\u0027s existing credit card(s) with balance, limit, and payment details. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me pull up your card details.\u0027 Webchat only — on voice, read card details aloud.",
+    "description": "Emit the customer's existing credit card(s) with balance, limit, and payment details. Before calling this tool, speak a brief conversational pacing phrase: 'Let me pull up your card details.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -41,10 +41,16 @@
                 "type": "STRING",
                 "description": "The URL directing users to the full product detail page."
               }
-            }
+            },
+            "required": [
+              "title"
+            ]
           }
         }
-      }
+      },
+      "required": [
+        "productDetails"
+      ]
     }
   }
 }

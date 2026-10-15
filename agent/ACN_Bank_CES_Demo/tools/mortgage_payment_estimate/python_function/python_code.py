@@ -20,6 +20,10 @@ against any Canadian calculator are done properly:
     surprised by this, so we surface it.
 
 Appraisals, bureau data and actual approval are out of scope.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me work out what that payment would look like.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 import math
@@ -125,6 +129,9 @@ _PST_ON_PREMIUM_PCT: Dict[str, float] = {"ON": 8.0, "QC": 9.0, "MB": 7.0, "SK": 
 _TORONTO_ALIASES = {"toronto", "city of toronto", "north york", "scarborough", "etobicoke"}
 _MONTREAL_ALIASES = {"montreal", "montréal", "ville de montreal", "ville de montréal"}
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def mortgage_payment_estimate(
     property_price_cad: float,

@@ -21,6 +21,10 @@ How the number is actually produced:
     payment up and the affordable price down. Customers never expect this.
 
 Bureau data, appraisals and actual approval are out of scope.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me work out what you could afford.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict, List, Optional, Tuple
@@ -59,6 +63,9 @@ HBP_WITHDRAWAL_LIMIT_CAD = 60_000.0
 
 _SEARCH_CEILING_CAD = 5_000_000.0
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def mortgage_affordability_estimate(
     gross_annual_income_cad: float,

@@ -20,6 +20,10 @@ only other cross-product nudge in this app:
   - Acknowledge what the customer already has before offering a layer on top.
   - Plain ASCII only, per the global webchat JSON cleanliness rule.
   - A declined suggestion never comes back. Pass declined_suggestion_ids.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me look at what makes sense as a next step.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict, List, Optional, Tuple
@@ -64,6 +68,9 @@ _MOMENTS = (
     "handoff",
 )
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def mortgage_next_best_action(
     moment: str = "",

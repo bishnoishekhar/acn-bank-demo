@@ -33,7 +33,7 @@
   ],
   "modelSettings": {
     "model": "gemini-composite-v1",
-    "temperature": 0.3
+    "temperature": 1.0
   },
   "variableDeclarations": [
     {
@@ -61,11 +61,27 @@
       }
     },
     {
+      "name": "auth_level",
+      "description": "Flat numeric auth level (0-3) written by auth tools (identify_customer/verify_pin/verify_otp/authorize_step_up). Bridged into auth_state.level by _seed_identity_from_session. MUST stay declared or every L2 grant is silently dropped.",
+      "schema": {
+        "type": "STRING",
+        "default": "0"
+      }
+    },
+    {
       "name": "auth_methods",
       "description": "Auth method tracking object. Fields: l1_method, l2_method, step_up_otp_id. Set by M5 during auth flows.",
       "schema": {
         "type": "STRING",
         "default": "{}"
+      }
+    },
+    {
+      "name": "auth_mode",
+      "description": "Flat auth method actually used: pin | otp | push | guest. Written by verify_pin / verify_otp; bridged into auth_state.mode.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {
@@ -349,6 +365,22 @@
       }
     },
     {
+      "name": "otp_attempts",
+      "description": "Consecutive OTP attempts this session. Written by verify_otp.",
+      "schema": {
+        "type": "STRING",
+        "default": "0"
+      }
+    },
+    {
+      "name": "otp_request_id",
+      "description": "Active OTP request identifier. Written by issue_otp, consumed by verify_otp.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "overdraft_enabled",
       "description": "Current overdraft protection state. Writer: M2.9",
       "schema": {
@@ -373,6 +405,14 @@
       }
     },
     {
+      "name": "pin_attempts",
+      "description": "Consecutive PIN attempts this session. Written by verify_pin; 2 failures route to KBA fallback, 3 locks.",
+      "schema": {
+        "type": "STRING",
+        "default": "0"
+      }
+    },
+    {
       "name": "pipeda_disclosed",
       "description": "True once PIPEDA disclosure copy delivered.",
       "schema": {
@@ -394,6 +434,14 @@
       "schema": {
         "type": "BOOLEAN",
         "default": false
+      }
+    },
+    {
+      "name": "push_id",
+      "description": "Active app-push approval identifier. Written by request_app_push_approval.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {
@@ -426,6 +474,30 @@
       "schema": {
         "type": "BOOLEAN",
         "default": false
+      }
+    },
+    {
+      "name": "step_up_action_hash",
+      "description": "Hash binding the L3 step-up grant to one specific action. Written by authorize_step_up; checked by BT-4.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
+      "name": "step_up_required",
+      "description": "True when a pending action needs L3 step-up. Written by authorize_step_up / BT-4.",
+      "schema": {
+        "type": "STRING",
+        "default": "false"
+      }
+    },
+    {
+      "name": "step_up_valid_until",
+      "description": "ISO-8601 expiry of the current L3 step-up grant (120s single-action validity). Written by authorize_step_up.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {

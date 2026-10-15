@@ -22,6 +22,10 @@ Image URLs — approach:
     leave image_url empty. The acn-epp-carousel widget's onError handler
     then draws a category-coloured emoji card so the tile still looks
     intentional.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me pull up the plans available on your card.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict, List
@@ -356,6 +360,9 @@ _CATALOG: List[Dict[str, Any]] = [
     },
 ]
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def epp_product_catalog(category: str = "", brand: str = "") -> Dict[str, Any]:
     """Return catalogue rows, filtered by any combination of brand + category.

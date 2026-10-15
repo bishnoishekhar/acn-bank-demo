@@ -1,72 +1,23 @@
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
 LlmResponse, LlmRequest, Tool) are auto-provided at runtime — do NOT import them.
 Everything else MUST be explicitly imported.
 """
-import re
+
 import json
+
 import hashlib
+
 import logging
-from datetime import datetime, timezone, timedelta
+
 from typing import Any, Optional
 
 logger = logging.getLogger(__name__)
-
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-
-FRAUD_PATTERNS = re.compile(
-    r'\b(fraud|scam|unauthorized|hacked|stolen funds?|someone took|wire fraud|'
-    r'I was scammed|my account was compromised|suspicious transaction)\b',
-    re.IGNORECASE
-)
-
-LOST_PATTERNS = re.compile(
-    r'\b(lost (my )?card|stolen (my )?card|card (is |was )?(lost|stolen|missing)|'
-    r'I lost my card|my card was stolen)\b',
-    re.IGNORECASE
-)
-
-SELF_HARM_PATTERNS = re.compile(
-    r'\b(kill myself|end my life|suicide|self.harm|hurt myself|no reason to live)\b',
-    re.IGNORECASE
-)
-
-INJECTION_PATTERNS = re.compile(
-    r'(ignore (previous|all|your) instructions?|system prompt|you are now|'
-    r'disregard (all )?previous|act as (if )?|new persona|DAN mode|jailbreak)',
-    re.IGNORECASE
-)
-
-AGENT_NAME_PATTERNS = re.compile(
-    r'\b(acn_lead_orchestrator|acn_banking_hub|acn_products_hub|acn_service_hub|'
-    r'acn_accounts_insights|acn_payments|acn_card_management|acn_offers_nudge|'
-    r'acn_payee_management|acn_rewards_loyalty|acn_cheque_services|acn_overdraft_nsf|'
-    r'acn_pad_management|acn_foreign_exchange|acn_credit_cards|acn_cc_kyc|'
-    r'acn_cc_verification|acn_cc_credit_decision|acn_mortgage_application|'
-    r'acn_loans_epp|acn_trip_lifestyle|acn_investments_registered|acn_account_opening|'
-    r'acn_disputes|acn_digital_activation|acn_exception_escalation|'
-    r'acn_branch_appointments|acn_customer_preferences|acn_customer_intelligence_engine|'
-    r'acn_faq_knowledge|acn_identity_security_hub|'
-    r'Banking Hub|Products Hub|Service Hub|Identity Hub|Accounts Hub|'
-    r'Payments Agent|Credit Cards? Agent|Cards? Agent|Service Agent|'
-    r'transfer(?:ring)? (?:you )?to|routing you to|sending you to|I\'ll transfer|'
-    r'Connecting you to|connecting you to|passing you to|handing you (?:off|over)|'
-    r'another agent|different agent|specialist agent)\b',
-    re.IGNORECASE
-)
-
-PAN_PATTERN = re.compile(r'\b(\d{4})[- ]?(\d{4})[- ]?(\d{4})[- ]?(\d{4})\b')
-SIN_PATTERN = re.compile(r'\b\d{3}[- ]?\d{3}[- ]?\d{3}\b')
-CVV_PATTERN = re.compile(r'\b(cvv|cvc|security code)[:\s]*\d{3,4}\b', re.IGNORECASE)
-OTP_PATTERN = re.compile(r'\b(otp|one[- ]?time\s+(?:password|code|passcode))\b.*?(\d{4,8})\b', re.IGNORECASE)
-ACCOUNT_NUMBER_PATTERN = re.compile(r'\b(\d{7,9}|\d{12,16})\b')
-
-WIDGET_TYPES_REQUIRING_DISCLAIMER = {
-    'card_carousel', 'mortgage_rate_shelf', 'loan_preapproval', 'card_widget'
-}
 
 TOOL_MIN_AUTH = {
     # AgentTool names (platform resolves wrapper → agent name at runtime)
@@ -163,6 +114,64 @@ TOOL_MIN_AUTH = {
     'getAccountApplicationStatus': 1,
     'updateAccountApplication': 2,
     'executeACNBankApplicationEmail': 2,
+    # --- auth-deadlock fix: tools previously falling through to default=2 ---
+    'quick_actions':                   0,  # UI chips
+    'ccaas_handoff':                   0,  # escalation path — never gate
+    'ccaas_create_case':               0,  # escalation path — never gate
+    'ccaas_schedule_callback':         0,  # escalation path — never gate
+    'identify_customer':               0,  # L0 -> L1
+    'record_auth_event':               0,  # audit log
+    'issue_otp':                       0,  # BT-1 gates
+    'verify_otp':                      0,  # BT-1 gates
+    'verify_pin':                      0,  # BT-1 gates
+    'authorize_step_up':               0,  # grants L3
+    'request_app_push_approval':       1,  # L3 step-up, needs L1
+    'acn-form-input':                  0,  # widget render
+    'acn-amount-input':                0,  # widget render
+    'acn-insight-card':                0,  # widget render
+    'acn-nudge-card':                  0,  # widget render
+    'acn-credit-card-widget':          0,  # widget render
+    'acn-payee-selector':              0,  # widget render
+    'acn-payment-carousel':            0,  # widget render
+    'acn-payment-receipt':             0,  # widget render
+    'card_widget':                     0,  # widget render
+    'card_carousel':                   0,  # widget render
+    'epp_carousel':                    0,  # widget render
+    'qr_widget':                       0,  # widget render
+    'mortgage_rate_board':             0,  # public rates
+    'mortgage_rate_shelf':             0,  # public rates
+    'mortgage_rate_table':             0,  # public rates
+    'epp_product_catalog':             0,  # public catalog
+    'epp_plans':                       0,  # public catalog
+    'mortgage_calculator':             0,  # pure calc
+    'calculate_mortgage_payment':      0,  # pure calc
+    'mortgage_payment_estimate':       0,  # pure calc
+    'calculate_affordability':         0,  # pure calc
+    'mortgage_affordability':          0,  # pure calc
+    'mortgage_affordability_estimate': 0,  # pure calc
+    'calculate_loan_payment':          0,  # pure calc
+    'calculate_epp_plans':             0,  # pure calc
+    'epp_plan_calculator':             0,  # pure calc
+    'mobile_handoff':                  1,  # needs identity
+    'mortgage_kyc':                    1,  # needs identity
+    'loan_preapproval':                1,  # needs identity
+    'mortgage_preapproval_check':      1,  # needs identity
+    'mortgage_next_best_action':       1,  # needs identity
+    'mortgage_nudge':                  1,  # needs identity
+    'docai_document_processors':       1,  # needs identity
+    'docai_drivers_license':           1,  # needs identity
+    'fintrac_precheck':                1,  # needs identity
+    'evaluate_credit_policy':          1,  # needs identity
+    'build_spend_plan':                1,  # needs identity
+    'build_trip_plan':                 1,  # needs identity
+    'compute_spending_insights':       2,  # customer txn data
+    'qr_decode_payment':               2,  # money movement
+    'qr_generate_request':             2,  # money movement
+    'set_card_pin':                    3,  # sensitive write — requires step-up
+    # agentTool resource-ID aliases (name != displayName)
+    'call_identity_hub': 0,  # alias of acn_identity_security_hub
+    'call_faq':          0,  # alias of acn_faq_knowledge
+    'call_cie':          1,  # alias of acn_customer_intelligence_engine
 }
 
 STEP_UP_OPS = {
@@ -191,26 +200,25 @@ STEP_UP_OPS = {
     'createDispute', 'updateDispute', 'createPADDispute',
 }
 
-# Wire transfers always require step-up regardless of amount (DEV-012)
-WIRE_TOOL_NAMES = {'createTransaction'}
+# BT-3b: consecutive auth-blocks on one tool before aborting the retry loop.
+AUTH_BLOCK_MAX = 3
 
-HIGH_RISK_AMOUNT_THRESHOLD = 1000  # CAD — demo override (PRD v2.4 A2.4-02; production default is 3000)
-
+HIGH_RISK_AMOUNT_THRESHOLD = 1000
 
 # ── JSON group helpers ──────────────────────────────────────────────────────
-
 def _auth(state):  return json.loads(state.get("auth_state",          "{}") or "{}")
+
 def _cust(state):  return json.loads(state.get("customer_profile",    "{}") or "{}")
-def _cie(state):   return json.loads(state.get("cie_context",         "{}") or "{}")
+
 def _txn(state):   return json.loads(state.get("transaction_context", "{}") or "{}")
+
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
 
 def _set_auth(state, **kw): a=_auth(state); a.update(kw); state["auth_state"]          = json.dumps(a)
-def _set_cust(state, **kw): c=_cust(state); c.update(kw); state["customer_profile"]   = json.dumps(c)
-def _set_cie(state,  **kw): c=_cie(state);  c.update(kw); state["cie_context"]        = json.dumps(c)
-def _set_txn(state,  **kw): t=_txn(state);  t.update(kw); state["transaction_context"]= json.dumps(t)
-def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counters"]   = json.dumps(c)
 
+def _set_txn(state,  **kw): t=_txn(state);  t.update(kw); state["transaction_context"]= json.dumps(t)
+
+def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counters"]   = json.dumps(c)
 
 # -- Flat session variable <-> JSON group bridge ------------------------------
 # The ACN Bank web page (src/App.jsx customerVariables) and AT STATE_MAP both
@@ -218,7 +226,6 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # The injectors below read the JSON GROUPS (customer_profile, auth_state,
 # cie_context). Without this bridge the groups stay empty, every turn injects
 # "name= | auth_level=0", and the agent re-asks for identity it already has.
-
 def _first_nonempty(state, *keys):
     for k in keys:
         v = state.get(k)
@@ -226,409 +233,9 @@ def _first_nonempty(state, *keys):
             return str(v)
     return ""
 
-
-def _seed_identity_from_session(state) -> None:
-    """Mirror flat page/tool variables into the JSON groups the injectors read."""
-    cust = _cust(state)
-    auth = _auth(state)
-
-    first = _first_nonempty(state, "customer_first_name", "pref_name")
-    if not first:
-        full = _first_nonempty(state, "customer_display_name", "customer_name")
-        first = full.split()[0] if full else ""
-    updates = {
-        "first_name":    first,
-        "last_name":     _first_nonempty(state, "customer_last_name"),
-        "display_name":  _first_nonempty(state, "customer_display_name", "pref_name", "customer_name"),
-        "email_masked":  _first_nonempty(state, "customer_email_masked"),
-        "phone_masked":  _first_nonempty(state, "customer_phone_masked"),
-        "segment":       _first_nonempty(state, "customer_segment", "spending_persona"),
-        "since_year":    _first_nonempty(state, "customer_since_year"),
-        "identified_by": _first_nonempty(state, "identified_by"),
-    }
-    changed = {k: v for k, v in updates.items() if v and cust.get(k) != v}
-    if changed:
-        _set_cust(state, **changed)
-
-    # auth_state.level is what _inject_auth_context reports. The page sets a
-    # numeric auth_level (2 once signed in); AT STATE_MAP sets it from
-    # identify_customer. Never downgrade a level the session already earned --
-    # expiry in BA-2/BA-3 is the only thing allowed to drop it.
-    auth_changed = {}
-    flat_level = _first_nonempty(state, "auth_level")
-    if flat_level:
-        try:
-            if int(float(flat_level)) > int(float(auth.get("level", "0") or "0")):
-                auth_changed["level"] = str(int(float(flat_level)))
-        except (TypeError, ValueError):
-            pass
-    mode = _first_nonempty(state, "auth_mode")
-    if mode and mode != "guest" and auth.get("mode") != mode:
-        auth_changed["mode"] = mode
-    for flat in ("step_up_valid_until", "step_up_action_hash"):
-        v = _first_nonempty(state, flat)
-        if v and auth.get(flat) != v:
-            auth_changed[flat] = v
-    if auth_changed:
-        _set_auth(state, **auth_changed)
-
-    cie = _cie(state)
-    cie_changed = {}
-    life = _first_nonempty(state, "life_stage_signal")
-    if life and cie.get("life_stage") != life:
-        cie_changed["life_stage"] = life
-    nba = _first_nonempty(state, "next_best_action")
-    if nba and nba != "[]" and cie.get("next_best_action") != nba:
-        cie_changed["next_best_action"] = nba
-    if cie_changed:
-        _set_cie(state, **cie_changed)
-
-
-# ---------------------------------------------------------------------------
-# BA: before_agent_callback
-# ---------------------------------------------------------------------------
-
-def before_agent_callback_impl(callback_context) -> Optional[object]:
-    """
-    BA-1 through BA-4 + voice_name_confirmation.
-    CRITICAL: Must guard with channel_locked check to prevent re-running.
-    """
-    state = callback_context.state
-
-    # BA-2: Idle expiry — run every turn regardless of channel_locked
-    now_iso = datetime.now(timezone.utc).isoformat()
-    auth_expires_at = _auth(state).get("expires_at", "")
-    if auth_expires_at:
-        try:
-            expires = datetime.fromisoformat(auth_expires_at)
-            auth_level = int(_auth(state).get("level", "0") or "0")
-            if datetime.now(timezone.utc) > expires and auth_level >= 2:
-                _set_auth(state, level="1")
-                logger.info("auth_expired: dropped to L1")
-        except (ValueError, TypeError):
-            pass
-
-    # BA-3: Step-up expiry
-    step_up_valid_until = _auth(state).get("step_up_valid_until", "")
-    if step_up_valid_until:
-        try:
-            step_up_expires = datetime.fromisoformat(step_up_valid_until)
-            if datetime.now(timezone.utc) > step_up_expires:
-                auth_level = int(_auth(state).get("level", "0") or "0")
-                _set_auth(state, level=str(min(auth_level, 2)),
-                          step_up_action_hash="", step_up_valid_until="")
-        except (ValueError, TypeError):
-            pass
-
-    # BA-4: Turn counter + activity timestamp
-    turn_count = int(_cnt(state).get("turns", "0") or "0")
-    _set_cnt(state, turns=str(turn_count + 1))
-    expires_dt = datetime.now(timezone.utc) + timedelta(seconds=900)
-    _set_auth(state, last_activity=now_iso, expires_at=expires_dt.isoformat())
-
-    # BA-0: Bridge flat session variables into the JSON groups the model-side
-    # injectors read. Runs every turn -- the page can sign a customer in
-    # mid-session, and AT STATE_MAP writes flat keys after every tool call.
-    _seed_identity_from_session(state)
-
-    # BA-1: Session init — only once (guarded by channel_locked)
-    if not state.get("channel_locked"):
-        # Detect channel
-        if state.get("telephony_caller_id"):
-            state["channel"] = "voice"
-        elif state.get("whatsapp_wa_id"):
-            state["channel"] = "whatsapp"
-        else:
-            state["channel"] = "webchat"
-
-        state["channel_locked"] = True
-        state["widgets_enabled"] = (state["channel"] == "webchat")
-        state["dtmf_enabled"] = False
-
-        # Load after_hours
-        _compute_after_hours(state)
-
-    return None
-
-
-def _compute_after_hours(state: dict[str, Any]) -> None:
-    """Compute after_hours based on America/Toronto business hours."""
-    try:
-        from datetime import datetime
-        import zoneinfo
-        tz = zoneinfo.ZoneInfo("America/Toronto")
-        now_local = datetime.now(tz)
-        hour = now_local.hour
-        weekday = now_local.weekday()  # 0=Monday, 6=Sunday
-        if weekday >= 5:  # Weekend
-            state["after_hours"] = True
-        elif hour < 8 or hour >= 20:  # Before 8am or after 8pm
-            state["after_hours"] = True
-        else:
-            state["after_hours"] = False
-    except Exception:
-        state["after_hours"] = False
-
-
-# ---------------------------------------------------------------------------
-# BM: before_model_callback
-# ---------------------------------------------------------------------------
-
-def before_model_callback_impl(callback_context, llm_request) -> Optional[object]:
-    """
-    BM-1 through BM-14 safety, auth, CIE injection, language lock.
-    Returns None to allow LLM to proceed; returns LlmResponse to short-circuit.
-    """
-    state = callback_context.state
-    contents = llm_request.contents if hasattr(llm_request, 'contents') else []
-
-    # Extract latest user utterance
-    user_text = _extract_last_user_text(contents)
-
-    # BM-3: Safety fast-path (deterministic, runs before everything)
-    if user_text and FRAUD_PATTERNS.search(user_text):
-        state["fraud_suspected"] = True
-        _set_cie(state, nba_suppressed=True)
-        state["escalation_reason"] = "fraud_detected"
-        # Let LLM route — instruction.txt handles transfer to M4.1
-
-    if user_text and LOST_PATTERNS.search(user_text):
-        state["escalation_reason"] = "lost_stolen_card"
-
-    if user_text and SELF_HARM_PATTERNS.search(user_text):
-        _set_cust(state, vulnerable_flag=True)
-        _set_cie(state, nba_suppressed=True)
-        state["escalation_reason"] = "self_harm"
-
-    # BM-4: Escalation route
-    retry_strike = int(_cnt(state).get("retry_strikes", "0") or "0")
-    if (state.get("escalation_reason") or
-            retry_strike >= 3 or
-            state.get("live_agent_requested")):
-        pass  # LLM instruction handles routing
-
-    # BM-5: Auth state injection
-    _inject_auth_context(state, llm_request)
-
-    # BM-6: CIE context injection
-    if _cie(state).get("loaded"):
-        _inject_cie_context(state, llm_request)
-
-    # BM-7: Nudge eligibility
-    _compute_nudge_eligibility(state)
-
-    # BM-8: PIPEDA disclosure pending
-    if not state.get("pipeda_disclosed"):
-        _inject_instruction(llm_request,
-            "DISCLOSURE REQUIRED: Deliver {{copy.pipeda_disclosure}} verbatim before "
-            "requesting any personal information from the customer.")
-
-    # BM-9: Vulnerability detection
-    if user_text:
-        _check_vulnerability(user_text, state)
-
-    # BM-10: Prompt injection guard
-    if user_text and INJECTION_PATTERNS.search(user_text):
-        count = int(_cnt(state).get("injection_attempts", "0") or "0") + 1
-        _set_cnt(state, injection_attempts=str(count))
-        if count >= 3:
-            state["escalation_reason"] = "injection_limit"
-
-    # BM-12: Small talk
-    if user_text and _is_small_talk(user_text):
-        count = int(_cnt(state).get("small_talk", "0") or "0") + 1
-        _set_cnt(state, small_talk=str(count))
-    else:
-        _set_cnt(state, small_talk="0")
-
-    # BM-13: After-hours context
-    if state.get("after_hours"):
-        _inject_instruction(llm_request,
-            "AFTER-HOURS CONTEXT: The bank is currently closed. Offer callback scheduling, "
-            "secure message, or branch appointment for next business day. Do not promise "
-            "live agent transfer for non-emergency requests.")
-
-    # BM-1: Channel lock injection
-    channel = state.get("channel", "webchat")
-    _inject_instruction(llm_request,
-        f"CHANNEL CONTEXT: channel={channel} | "
-        f"widgets_enabled={state.get('widgets_enabled', False)} | "
-        f"dtmf_enabled={state.get('dtmf_enabled', False)}")
-
-    # BM-2: Language lock
-    lang = _cust(state).get("preferred_language", "en-CA")
-    if not state.get("session_language_locked") and user_text:
-        detected = _detect_language(user_text)
-        if detected:
-            _set_cust(state, preferred_language=detected)
-            state["session_language_locked"] = True
-    _inject_instruction(llm_request, f"LANGUAGE: Respond only in {lang}.")
-
-    return None
-
-
-def _extract_last_user_text(contents) -> str:
-    """Extract the most recent user utterance text."""
-    for content in reversed(contents or []):
-        if hasattr(content, 'role') and content.role == 'user':
-            for part in (content.parts or []):
-                if hasattr(part, 'text') and part.text:
-                    return part.text
-    return ""
-
-
-def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
-    a = _auth(state)
-    c = _cust(state)
-    display_name = c.get("display_name", "") or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name")
-    inject_name = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
-    # Fall back to the flat vars the page/AT STATE_MAP write, so a signed-in
-    # session is never reported as auth_level=0 (which made the model re-identify).
-    auth_level_str = a.get('level', '') or _first_nonempty(state, "auth_level") or '0'
-    auth_mode_str = a.get('mode', '') or _first_nonempty(state, "auth_mode") or 'none'
-    msg = (
-        f"AUTH CONTEXT: auth_level={auth_level_str} | auth_mode={auth_mode_str} | "
-        f"auth_locked={a.get('locked', False)} | step_up_required={a.get('step_up_required', False)}"
-    )
-    if display_name:
-        msg += f" | customer_display_name={display_name}"
-    if inject_name == "true":
-        msg += f" | GREET CUSTOMER AS '{display_name}' — address them by this name"
-    _inject_instruction(llm_request, msg)
-
-
-def _inject_cie_context(state: dict[str, Any], llm_request) -> None:
-    c = _cust(state)
-    k = _cie(state)
-    first_name = c.get("display_name", "") or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name")
-    segment = c.get("segment", "") or _first_nonempty(state, "customer_segment", "spending_persona")
-    life_stage = k.get("life_stage", "")
-    nba = k.get("next_best_action", "[]")
-    nudge_allowed = state.get("nudge_allowed", False)
-    open_apps = k.get("open_applications", "[]")
-    _inject_instruction(llm_request,
-        f"CUSTOMER CONTEXT: name={first_name} | segment={segment} | "
-        f"life_stage={life_stage} | nudge_allowed={nudge_allowed} | "
-        f"open_applications={open_apps} | next_best_action={str(nba)[:200]}")
-
-
-def _compute_nudge_eligibility(state: dict[str, Any]) -> None:
-    if (_cie(state).get("nba_suppressed") or
-            _cie(state).get("nba_shown") or
-            _cust(state).get("marketing_opt_out") or
-            _cust(state).get("vulnerable_flag") or
-            state.get("fraud_suspected")):
-        state["nudge_allowed"] = False
-    else:
-        state["nudge_allowed"] = True
-
-
-def _check_vulnerability(text: str, state: dict[str, Any]) -> None:
-    VULNERABILITY_PATTERNS = re.compile(
-        r'\b(bereaved?|bereavement|passed away|died|death|grieving|'
-        r'mental health|dementia|confused|overwhelmed|distressed|'
-        r'power of attorney|POA|estate|probate)\b',
-        re.IGNORECASE
-    )
-    if VULNERABILITY_PATTERNS.search(text):
-        _set_cust(state, vulnerable_flag=True)
-        _set_cie(state, nba_suppressed=True)
-
-
-def _is_small_talk(text: str) -> bool:
-    SMALL_TALK = re.compile(
-        r'^(hi|hello|hey|how are you|what\'s up|good morning|good afternoon|'
-        r'good evening|thanks|thank you|bye|goodbye|ok|okay|sure|great|awesome)\W*$',
-        re.IGNORECASE
-    )
-    return bool(SMALL_TALK.match(text.strip()))
-
-
-def _detect_language(text: str) -> Optional[str]:
-    FR_MARKERS = re.compile(
-        r'\b(je|vous|merci|bonjour|s\'il vous plaît|mon compte|ma carte|'
-        r'transfert|virement|solde|oui|non|je veux|je voudrais)\b',
-        re.IGNORECASE
-    )
-    if FR_MARKERS.search(text):
-        return "fr-CA"
-    return None
-
-
-def _inject_instruction(llm_request, text: str) -> None:
-    """Prepend a system-level instruction to the LLM request."""
-    try:
-        if hasattr(llm_request, 'system_instruction') and llm_request.system_instruction:
-            for part in (llm_request.system_instruction.parts or []):
-                if hasattr(part, 'text'):
-                    part.text = text + "\n\n" + part.text
-                    return
-    except Exception:
-        pass
-
-
-# ---------------------------------------------------------------------------
-# AM: after_model_callback
-# ---------------------------------------------------------------------------
-
-def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
-    """
-    AM-1 through AM-12 + social-eng + agent-name-strip.
-    Returns modified LlmResponse or None.
-    """
-    state = callback_context.state
-    channel = state.get("channel", "webchat")
-
-    if not llm_response or not getattr(llm_response, 'content', None):
-        return None
-
-    for part in (llm_response.content.parts or []):
-        if not part.text:
-            continue
-
-        text = part.text
-
-        # AM-6: PII scrubber
-        text = PAN_PATTERN.sub(lambda m: f"•••• {m.group(4)}", text)
-        text = SIN_PATTERN.sub("[SIN REMOVED]", text)
-        text = ACCOUNT_NUMBER_PATTERN.sub("[ACCOUNT REMOVED]", text)
-        text = CVV_PATTERN.sub("[SECURITY CODE REMOVED]", text)
-        text = OTP_PATTERN.sub("[CODE REMOVED]", text)
-
-        # AM-12: Voice markdown stripping
-        if channel == "voice":
-            text = re.sub(r'[*_`#\[\]{}|]', '', text)
-            text = re.sub(r'\n+', ' ', text)
-
-        # AM-agent-name-strip: Remove agent names
-        text = AGENT_NAME_PATTERNS.sub('our team', text)
-
-        # AM-11: Counter updates
-        _update_counters(text, state)
-
-        part.text = text
-
-    return llm_response
-
-
-def _update_counters(text: str, state: dict[str, Any]) -> None:
-    NO_MATCH_INDICATORS = re.compile(
-        r"(I'm not sure|I don't understand|could you clarify|"
-        r"I couldn't find|unable to help with that)",
-        re.IGNORECASE
-    )
-    if NO_MATCH_INDICATORS.search(text):
-        no_match = int(_cnt(state).get("no_match", "0") or "0") + 1
-        retry   = int(_cnt(state).get("retry_strikes", "0") or "0") + 1
-        _set_cnt(state, no_match=str(no_match), retry_strikes=str(retry))
-    else:
-        _set_cnt(state, retry_strikes="0")
-
-
 # ---------------------------------------------------------------------------
 # BT: before_tool_callback
 # ---------------------------------------------------------------------------
-
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -656,6 +263,9 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     customer_id = state.get("customer_id", "")
     if not customer_id and tool_name not in {
         'identify_customer', 'authenticate', 'authorize_step_up',
+        # agent-tools that establish identity must run before customer_id exists
+        'acn_identity_security_hub', 'call_identity_hub',
+        'acn_faq_knowledge', 'call_faq',
         'transfer_to_agent', 'end_session', 'business_hours_check', 'format_for_tts', 'getConfig',
         'searchFAQs', 'getFAQ', 'listFAQCategories',
         'getExchangeRate', 'getGICRates', 'getAccountProducts',
@@ -681,10 +291,36 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     auth_level = int(_auth(state).get("level", "0") or "0")
     required = TOOL_MIN_AUTH.get(tool_name, 2)
     if auth_level < required:
+        # BT-3b: auth-retry loop breaker. A blocked tool makes the model try to
+        # authenticate; if the auth path is itself blocked, that retry is blocked
+        # too -- an unbounded loop that burns the per-minute model quota and
+        # surfaces to the caller as RESOURCE_EXHAUSTED. Escalate, don't spin.
+        cnt = _cnt(state)
+        same = cnt.get("auth_block_tool", "") == tool_name
+        strikes = (int(cnt.get("auth_block_count", "0") or "0") + 1) if same else 1
+        _set_cnt(state, auth_block_count=str(strikes), auth_block_tool=tool_name)
+        if strikes >= AUTH_BLOCK_MAX:
+            logger.error(
+                f"BT-3b AUTH LOOP ABORTED: {tool_name} blocked {strikes}x at "
+                f"level {auth_level} (needs {required})"
+            )
+            if not state.get("escalation_reason"):
+                state["escalation_reason"] = "auth_loop"
+            return {
+                "error": "AUTH_LOOP_ABORTED",
+                "message": (
+                    f"'{tool_name}' has been blocked {strikes} times at auth level "
+                    f"{auth_level} (needs {required}). STOP calling this tool and STOP "
+                    f"re-requesting the PIN or OTP. Tell the customer verification "
+                    f"cannot be completed right now and offer a live agent."
+                ),
+            }
         return {
             "error": "AUTH_LEVEL_INSUFFICIENT",
             "message": f"Auth level {required} required. Current level: {auth_level}."
         }
+    if _cnt(state).get("auth_block_count", "0") not in ("", "0"):
+        _set_cnt(state, auth_block_count="0", auth_block_tool="")
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:
@@ -745,7 +381,6 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
 
     return None
 
-
 def _map_step_up_reason(tool_name: str) -> str:
     MAP = {
         # Payee
@@ -797,7 +432,6 @@ def _map_step_up_reason(tool_name: str) -> str:
         'createPADDispute': 'dispute',
     }
     return MAP.get(tool_name, 'threshold')
-
 
 def _get_mock_response(tool_name: str, input_dict: dict[str, Any], state: dict[str, Any]) -> dict:
     """Return deterministic mock fixtures for demo mode."""
@@ -979,232 +613,6 @@ def _get_mock_response(tool_name: str, input_dict: dict[str, Any], state: dict[s
         },
     }
     return MOCK_FIXTURES.get(tool_name, {"status": "success", "data": {}, "mock": True})
-
-
-# ---------------------------------------------------------------------------
-# AT: after_tool_callback
-# ---------------------------------------------------------------------------
-
-def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
-    """
-    AT-1 through AT-10 + AT-PAD-rights.
-    Returns modified tool_response dict or None.
-    """
-    state = callback_context.state
-    tool_name = tool.name if hasattr(tool, 'name') else str(tool)
-
-    # AT-1: Tri-state normalization
-    response = _normalize_response(tool_response)
-
-    # AT-3: Payload masking
-    response = _mask_payload(response)
-
-    # AT-4: Ownership check
-    customer_id = state.get("customer_id", "")
-    data = response.get("data", {})
-    if isinstance(data, dict) and customer_id:
-        resp_cid = data.get("customerId", data.get("customer_id", ""))
-        if resp_cid and resp_cid != customer_id:
-            logger.warning(f"AT-4 OWNERSHIP VIOLATION: {tool_name}")
-            return {"status": "business_error", "code": "NOT_FOUND", "data": {}}
-
-    # AT-5: State persistence
-    _persist_state(tool_name, response, state)
-
-    # AT-6: Journey context
-    _update_journey_context(tool_name, response, state)
-
-    # AT-7: Counters + degraded mode
-    if response.get("status") == "system_error":
-        count = int(_cnt(state).get("tool_errors", "0") or "0") + 1
-        _set_cnt(state, tool_errors=str(count))
-        if count >= 2:
-            degraded = json.loads(state.get("degraded_toolsets", "[]") or "[]")
-            if tool_name not in degraded:
-                degraded.append(tool_name)
-                state["degraded_toolsets"] = json.dumps(degraded)
-            if not state.get("escalation_reason"):
-                state["escalation_reason"] = "system_error"
-    else:
-        _set_cnt(state, tool_errors="0")
-
-    # AT-10: Audit logging
-    if tool_name not in {'getConfig', 'searchFAQs', 'getFAQ', 'getExchangeRate', 'getGICRates'}:
-        logger.info(
-            f"AUDIT: tool={tool_name} status={response.get('status')} "
-            f"idempotency_key={_txn(state).get('idempotency_key', '')} "
-            f"journey_id={json.loads(state.get('journey_context','{}') or '{}').get('journey_id','')}"
-        )
-
-    # AT-PAD-rights: After cancelPAD success
-    if tool_name == 'cancelPAD' and response.get("status") == "success":
-        response["_instruction"] = "DELIVER VERBATIM: {{copy.pad_cancellation_rights}}"
-        state["pad_cancel_id"] = data.get("cancelId", "") if isinstance(data, dict) else ""
-
-    # Reset idempotency key after successful write
-    WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
-                   'createBankDraft', 'createNSFReversal', 'cancelPAD'}
-    if tool_name in WRITE_TOOLS and response.get("status") == "success":
-        _set_txn(state, idempotency_key="", awaiting_confirmation=False)
-
-    return response
-
-
-def _normalize_response(response: dict[str, Any]) -> dict:
-    """AT-1: Normalize to {status, code, data}."""
-    if not isinstance(response, dict):
-        return {"status": "system_error", "code": "INVALID_RESPONSE", "data": {}}
-    status = response.get("status", "")
-    if status in {"success", "business_error", "validation_error", "system_error"}:
-        return response
-    # Map HTTP-style or raw responses
-    if "error" in response:
-        return {"status": "business_error", "code": response["error"], "data": response}
-    if "data" in response or "result" in response:
-        return {"status": "success", "code": "OK", "data": response.get("data", response.get("result", {}))}
-    return {"status": "success", "code": "OK", "data": response}
-
-
-def _mask_payload(response: dict[str, Any]) -> dict:
-    """AT-3: Mask sensitive fields."""
-    SENSITIVE_FIELDS = {'pin_hash', 'otp_secret', 'cvv', 'sin', 'password', 'security_answers',
-                         'password_hash', 'secret_question_answer',
-                         'mobile_pin', 'security_questions', 'sin_last_four'}
-    data = response.get("data", {})
-    if isinstance(data, dict):
-        for field in list(data.keys()):
-            if field in SENSITIVE_FIELDS:
-                del data[field]
-        # Mask PAN
-        for field in ('cardNumber', 'pan', 'accountNumber', 'account_number'):
-            if field in data and isinstance(data[field], str) and len(data[field]) > 4:
-                data[field] = "•••• " + data[field][-4:]
-    elif isinstance(data, list):
-        for item in data:
-            if isinstance(item, dict):
-                for field in list(item.keys()):
-                    if field in SENSITIVE_FIELDS:
-                        del item[field]
-    return response
-
-
-def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, Any]) -> None:
-    """AT-5: Map tool outputs to session variables."""
-    if response.get("status") != "success":
-        return
-    data = response.get("data", {})
-    if not isinstance(data, dict):
-        return
-
-    STATE_MAP = {
-        'identify_customer': {
-            'customerId':    'customer_id',
-            'customer_id':   'customer_id',
-            'authLevel':     'auth_level',
-            'auth_level':    'auth_level',
-            'identifiedBy':  'identified_by',
-            'identified_by': 'identified_by',
-        },
-        'authenticate': {
-            'authLevel':  'auth_level',
-            'auth_level': 'auth_level',
-            'authMode':   'auth_mode',
-            'auth_mode':  'auth_mode',
-        },
-        'authorize_step_up': {
-            'stepUpValidUntil':    'step_up_valid_until',
-            'step_up_valid_until': 'step_up_valid_until',
-            'stepUpActionHash':    'step_up_action_hash',
-            'step_up_action_hash': 'step_up_action_hash',
-        },
-        'getCustomer': {
-            # Firestore snake_case (actual field names in DB)
-            'preferred_name':    'customer_display_name',
-            'legal_name':        'customer_legal_name',
-            'email':             'customer_email_masked',
-            'registered_mobile': 'customer_phone_masked',
-            'segment':           'customer_segment',
-            'customer_tier':     'customer_tier',
-            'member_since':      'customer_since_year',
-            'vulnerability_flag':'is_vulnerable_flag',
-            'marketing_opt_out': 'marketing_opt_out',
-            'preferred_language':'preferred_language',
-            # OpenAPI camelCase (defensive dual mapping)
-            'preferredName':     'customer_display_name',
-            'legalName':         'customer_legal_name',
-            'phone':             'customer_phone_masked',
-            'memberSince':       'customer_since_year',
-            'vulnerabilityFlag': 'is_vulnerable_flag',
-            'marketingOptOut':   'marketing_opt_out',
-            'preferredLanguage': 'preferred_language',
-        },
-        'getCustomerSegment': {
-            'segment':    'customer_segment',
-            'life_stage': 'life_stage_signal',
-            'lifeStage':  'life_stage_signal',
-        },
-        'getNextBestActions': {
-            'actions':      'next_best_action',
-            'next_actions': 'next_best_action',
-        },
-        'getOverdraftDetails': {
-            'protection_enabled': 'overdraft_enabled',
-            'protectionEnabled':  'overdraft_enabled',
-            'limit':              'overdraft_limit',
-            'overdraft_limit':    'overdraft_limit',
-            'linked_account_id':  'overdraft_linked_account_id',
-            'linkedAccountId':    'overdraft_linked_account_id',
-        },
-        'getRewardsBalance': {
-            'points':        'rewards_balance_points',
-            'balancePoints': 'rewards_balance_points',
-        },
-        'createAppointment': {
-            'appointmentId':  'appointment_id',
-            'appointment_id': 'appointment_id',
-        },
-        'createStopPayment': {
-            'stopPaymentId':  'stop_payment_id',
-            'stop_payment_id':'stop_payment_id',
-        },
-        'createFXOrder': {
-            'rate': 'fx_rate_quoted',
-        },
-    }
-
-    mappings = STATE_MAP.get(tool_name, {})
-    for src_key, dest_key in mappings.items():
-        if src_key in data:
-            val = data[src_key]
-            val_str = json.dumps(val) if isinstance(val, (list, dict)) else str(val)
-            if '.' in dest_key:
-                grp, field = dest_key.split('.', 1)
-                g = json.loads(state.get(grp, '{}') or '{}')
-                g[field] = val_str
-                state[grp] = json.dumps(g)
-            else:
-                state[dest_key] = val_str
-
-    # STATE_MAP writes flat keys; the model-side injectors read the JSON
-    # groups. Mirror now so the very next turn sees the identity.
-    _seed_identity_from_session(state)
-
-
-def _update_journey_context(tool_name: str, response: dict[str, Any], state: dict[str, Any]) -> None:
-    """AT-6: Update journey context and completed_actions."""
-    if response.get("status") != "success":
-        return
-    try:
-        ctx = json.loads(state.get("journey_context", "{}") or "{}")
-        ctx["last_tool"] = tool_name
-        ctx["last_tool_status"] = "success"
-        state["journey_context"] = json.dumps(ctx)
-
-        completed = json.loads(state.get("completed_actions", "[]") or "[]")
-        completed.append({"tool": tool_name, "timestamp": datetime.now(timezone.utc).isoformat()})
-        state["completed_actions"] = json.dumps(completed[-20:])  # Keep last 20
-    except Exception:
-        pass
 
 # --- Entry point ---
 def before_tool_callback(tool: Tool, input: dict[str, Any], callback_context: CallbackContext) -> Optional[dict[str, Any]]:

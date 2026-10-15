@@ -3,6 +3,7 @@
   "displayName": "mortgage_affordability",
   "widgetTool": {
     "name": "mortgage_affordability",
+    "description": "Emit the interactive mortgage affordability widget: income, down payment, debt and amortization sliders that compute a maximum purchase price live on the customer's screen. Prefill defaults with anything already known about the customer. Requires the financial advice disclaimer — the result is an estimate, not a pre-approval. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you what you could afford.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -71,11 +72,11 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027mortgage_affordability\u0027"
+          "description": "Required. Always output the exact string: 'mortgage_affordability'"
         },
         "submit_cta_label": {
           "type": "STRING",
-          "description": "Primary button label, e.g. \u0027Continue with this budget\u0027."
+          "description": "Primary button label, e.g. 'Continue with this budget'."
         },
         "submit_cta_value": {
           "type": "STRING",
@@ -87,14 +88,19 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Widget header, e.g. \u0027What could you afford?\u0027."
+          "description": "Widget header, e.g. 'What could you afford?'."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "defaults", "submit_cta_value"]
+      "required": [
+        "type",
+        "name",
+        "defaults",
+        "submit_cta_value"
+      ]
     }
   }
 }

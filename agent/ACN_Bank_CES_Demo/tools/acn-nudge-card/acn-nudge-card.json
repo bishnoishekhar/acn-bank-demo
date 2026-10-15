@@ -3,7 +3,7 @@
   "displayName": "acn-nudge-card",
   "widgetTool": {
     "name": "acn-nudge-card",
-    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: 'I have something that might interest you.' Webchat only — on voice, describe the offer in plain text.",
+    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: 'I have something that might interest you.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

@@ -3,7 +3,7 @@
   "displayName": "mortgage_calculator",
   "widgetTool": {
     "name": "mortgage_calculator",
-    "description": "Emit an affordability and payment calculator result after calculate_affordability tool call. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your affordability breakdown.\u0027 Webchat only — on voice, read the figures aloud.",
+    "description": "Emit an affordability and payment calculator result after calculate_affordability tool call. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your affordability breakdown.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -34,7 +34,7 @@
         },
         "confirm_cta_label": {
           "type": "STRING",
-          "description": "Primary button label, e.g. \u0027Continue with these numbers\u0027."
+          "description": "Primary button label, e.g. 'Continue with these numbers'."
         },
         "confirm_cta_value": {
           "type": "STRING",
@@ -52,7 +52,7 @@
             },
             "interest_rate_pct": {
               "type": "NUMBER",
-              "description": "Illustrative rate only, and it must come from mortgage_rate_board rather than being invented. Labelled \u0027illustrative\u0027 in the UI."
+              "description": "Illustrative rate only, and it must come from mortgage_rate_board rather than being invented. Labelled 'illustrative' in the UI."
             },
             "payment_frequency": {
               "type": "STRING",
@@ -85,7 +85,7 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027mortgage_calculator\u0027"
+          "description": "Required. Always output the exact string: 'mortgage_calculator'"
         },
         "rate_options": {
           "type": "ARRAY",
@@ -118,14 +118,19 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Widget header, e.g. \u0027Estimate your monthly payment\u0027."
+          "description": "Widget header, e.g. 'Estimate your monthly payment'."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "defaults", "confirm_cta_value"]
+      "required": [
+        "type",
+        "name",
+        "defaults",
+        "confirm_cta_value"
+      ]
     }
   }
 }
