@@ -9,6 +9,8 @@ LlmResponse, LlmRequest, Tool) are auto-provided at runtime — do NOT import th
 Everything else MUST be explicitly imported.
 """
 
+import re
+
 import json
 
 import logging
@@ -37,9 +39,18 @@ WIDGET_TOOLS = frozenset({
     'quick_actions',
 })
 
+# ── JSON group helpers ──────────────────────────────────────────────────────
+def _auth(state):  return json.loads(state.get("auth_state",          "{}") or "{}")
+
+def _cust(state):  return json.loads(state.get("customer_profile",    "{}") or "{}")
+
 def _txn(state):   return json.loads(state.get("transaction_context", "{}") or "{}")
 
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
+
+def _set_auth(state, **kw): a=_auth(state); a.update(kw); state["auth_state"]          = json.dumps(a)
+
+def _set_cust(state, **kw): c=_cust(state); c.update(kw); state["customer_profile"]   = json.dumps(c)
 
 def _set_txn(state,  **kw): t=_txn(state);  t.update(kw); state["transaction_context"]= json.dumps(t)
 
@@ -55,6 +66,21 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     """
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
+
+
+    # AT-0: harvest the identity hub's result into THIS session.
+    #
+    # acn_identity_security_hub runs as an AgentTool, which the platform executes
+    # in its own sub-session (trace: "agent tool session id": "agent-tool-..."").
+    # Every set_variable() and STATE_MAP write it performs lands in that throwaway
+    # session and dies with it, so the parent kept customer_id="" even after the
+    # customer had fully authenticated. BT-1 then blocked every customer-data tool
+    # forever -> unbounded retries -> RESOURCE_EXHAUSTED.
+    #
+    # The hub therefore emits a machine-readable trailer, which we parse into state
+    # and STRIP before the parent model (and the customer) ever sees it.
+    if tool_name in {'acn_identity_security_hub', 'call_identity_hub'}:
+        return _harvest_identity_hub(tool_response, state)
 
     # Hand the widget payload back exactly as it came. Normalising it would
     # destroy the shape the client renders -- see WIDGET_TOOLS.
@@ -275,3 +301,73 @@ def _update_journey_context(tool_name: str, response: dict[str, Any], state: dic
 # --- Entry point ---
 def after_tool_callback(tool: Tool, input: dict[str, Any], callback_context: CallbackContext, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     return after_tool_callback_impl(tool, input, callback_context, tool_response)
+
+_AUTH_RESULT_RE = re.compile(r'\[\[AUTH_RESULT(?P<body>[^\]]*)\]\]')
+
+def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+    """Pull customer_id / auth_level out of the hub's reply, then strip the marker.
+
+    The hub is an AgentTool: its text IS its return value, and its sub-session
+    state never reaches us. The trailer is the only channel it has to report
+    what it actually established.
+    """
+    text = ''
+    if isinstance(tool_response, dict):
+        data = tool_response.get('data')
+        if isinstance(data, dict):
+            text = str(data.get('response', '') or '')
+        if not text:
+            text = str(tool_response.get('response', '') or '')
+    else:
+        text = str(tool_response or '')
+
+    match = _AUTH_RESULT_RE.search(text)
+    if not match:
+        return tool_response
+
+    fields = {}
+    for part in match.group('body').split():
+        if '=' in part:
+            key, _, value = part.partition('=')
+            fields[key.strip()] = value.strip()
+
+    customer_id = fields.get('customer_id', '')
+    if customer_id and customer_id.lower() not in ('none', 'null', ''):
+        state['customer_id'] = customer_id
+        state['customerId'] = customer_id
+
+    level = fields.get('auth_level', '')
+    if level.isdigit():
+        # Never downgrade a level the session already earned.
+        current = int(_auth(state).get('level', '0') or '0')
+        _set_auth(state, level=str(max(current, int(level))))
+        state['auth_level'] = str(max(current, int(level)))
+
+    mode = fields.get('auth_mode', '')
+    if mode:
+        _set_auth(state, mode=mode)
+        state['auth_mode'] = mode
+
+    identified_by = fields.get('identified_by', '')
+    if identified_by:
+        _set_cust(state, identified_by=identified_by)
+        state['identified_by'] = identified_by
+
+    logger.info(
+        f"AT-0 identity hub harvested: customer_id={customer_id or '-'} "
+        f"auth_level={level or '-'} auth_mode={mode or '-'}"
+    )
+
+    # Strip the marker so it is never spoken or shown.
+    cleaned = _AUTH_RESULT_RE.sub('', text).strip()
+    if isinstance(tool_response, dict):
+        out = dict(tool_response)
+        data = out.get('data')
+        if isinstance(data, dict) and 'response' in data:
+            data = dict(data)
+            data['response'] = cleaned
+            out['data'] = data
+        elif 'response' in out:
+            out['response'] = cleaned
+        return out
+    return cleaned

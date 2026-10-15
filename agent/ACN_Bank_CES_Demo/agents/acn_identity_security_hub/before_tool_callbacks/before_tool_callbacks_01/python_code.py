@@ -266,7 +266,37 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         'searchFAQs', 'getFAQ', 'listFAQCategories',
         'getExchangeRate', 'getGICRates', 'getAccountProducts'
     }:
-        logger.warning(f"BT-1 BLOCKED: {tool_name} — customer_id not set")
+        # BT-1b: identity-retry loop breaker, the mirror of BT-3b below. BT-1
+        # returns before BT-3 is ever reached, so without its own strike count a
+        # tool blocked for a missing customer_id retries unboundedly, burns the
+        # per-minute model quota and surfaces as RESOURCE_EXHAUSTED. This is the
+        # loop that survives even when auth "succeeds": the identity hub runs as
+        # an AgentTool in its own sub-session, so its customer_id never reaches
+        # this session and every customer-data tool keeps failing here.
+        cnt = _cnt(state)
+        same = cnt.get("id_block_tool", "") == tool_name
+        strikes = (int(cnt.get("id_block_count", "0") or "0") + 1) if same else 1
+        _set_cnt(state, id_block_count=str(strikes), id_block_tool=tool_name)
+        logger.warning(
+            f"BT-1 BLOCKED: {tool_name} — customer_id not set (strike {strikes})"
+        )
+        if strikes >= AUTH_BLOCK_MAX:
+            logger.error(
+                f"BT-1b IDENTITY LOOP ABORTED: {tool_name} blocked {strikes}x "
+                f"with no customer_id in session"
+            )
+            if not state.get("escalation_reason"):
+                state["escalation_reason"] = "identity_loop"
+            return {
+                "error": "IDENTITY_LOOP_ABORTED",
+                "message": (
+                    f"'{tool_name}' has been blocked {strikes} times because no "
+                    f"customer is identified in this session. STOP calling this tool "
+                    f"and STOP re-requesting the phone number, PIN or OTP. Tell the "
+                    f"customer you cannot complete this step right now and offer a "
+                    f"live agent."
+                ),
+            }
         return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
 
     # BT-10: Firestore query guard — check BEFORE overwriting customerId
@@ -313,6 +343,8 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         }
     if _cnt(state).get("auth_block_count", "0") not in ("", "0"):
         _set_cnt(state, auth_block_count="0", auth_block_tool="")
+    if _cnt(state).get("id_block_count", "0") not in ("", "0"):
+        _set_cnt(state, id_block_count="0", id_block_tool="")
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:
