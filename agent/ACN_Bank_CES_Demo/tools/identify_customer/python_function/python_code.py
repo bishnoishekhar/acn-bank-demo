@@ -1,6 +1,6 @@
 from typing import Any
 
-VALID_IDENTIFIER_TYPES = {"caller_id", "phone", "email", "card_dob_postal", "wa_id", "webchat_sso", "account_number", "card_last4"}
+VALID_IDENTIFIER_TYPES = {"caller_id", "phone", "email", "card_dob_postal", "wa_id", "webchat_sso"}
 
 def identify_customer(identifier_type: str, identifier_value: str, channel: str = "voice") -> dict[str, Any]:
     """
@@ -46,10 +46,6 @@ Called silently during initial caller lookup. Do NOT speak any pacing phrase bef
     elif identifier_type in {"email", "wa_id", "webchat_sso"}:
         customer_id = "CUST_DOC_1988"
     elif identifier_type == "card_dob_postal":
-        customer_id = "CUST_DOC_1988"
-    elif identifier_type == "account_number":
-        customer_id = "CUST_DOC_1988"
-    elif identifier_type == "card_last4":
         customer_id = "CUST_DOC_1988"
 
     if not customer_id:
