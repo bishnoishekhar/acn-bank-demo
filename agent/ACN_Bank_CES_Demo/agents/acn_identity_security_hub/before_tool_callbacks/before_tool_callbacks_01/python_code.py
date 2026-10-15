@@ -31,6 +31,13 @@ TOOL_MIN_AUTH = {
     'business_hours_check': 0,
     'format_for_tts': 0,
     'transfer_to_agent': 0,
+    'fx_db_getExchangeRate': 0,  # toolset tools arrive as <toolset>_<operationId>; public FX rates
+    'investments_db_getGICRates': 0,  # toolset tools arrive as <toolset>_<operationId>; public GIC rates
+    'faq_knowledge_db_searchFAQs': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'faq_knowledge_db_getFAQ': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'faq_knowledge_db_listFAQCategories': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'account_opening_db_getAccountProducts': 0,  # toolset tools arrive as <toolset>_<operationId>; public product catalogue
+    'manageCustomerDatabase_getConfig': 0,  # toolset tools arrive as <toolset>_<operationId>; public config (business hours)
     'getCustomer': 1,
     'getAccounts': 2,
     'getCards': 2,

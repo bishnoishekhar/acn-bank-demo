@@ -109,6 +109,14 @@ TOOL_MIN_AUTH = {
     # --- auth-deadlock fix: tools previously falling through to default=2 ---
     'acn_identity_security_hub':        0,  # call_identity_hub — GRANTS L2; must be callable pre-auth
     'end_session':                      0,  # session control
+    'transfer_to_agent':                   0,  # routing is not data access: a guest may be handed to a public specialist
+    'fx_db_getExchangeRate': 0,  # toolset tools arrive as <toolset>_<operationId>; public FX rates
+    'investments_db_getGICRates': 0,  # toolset tools arrive as <toolset>_<operationId>; public GIC rates
+    'faq_knowledge_db_searchFAQs': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'faq_knowledge_db_getFAQ': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'faq_knowledge_db_listFAQCategories': 0,  # toolset tools arrive as <toolset>_<operationId>; public FAQ
+    'account_opening_db_getAccountProducts': 0,  # toolset tools arrive as <toolset>_<operationId>; public product catalogue
+    'manageCustomerDatabase_getConfig': 0,  # toolset tools arrive as <toolset>_<operationId>; public config (business hours)
     'quick_actions':                    0,  # UI chips
     'format_for_tts':                   0,  # text shaping
     'business_hours_check':             0,  # public
