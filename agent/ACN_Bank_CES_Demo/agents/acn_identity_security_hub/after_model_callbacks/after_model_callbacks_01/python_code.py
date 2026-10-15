@@ -27,7 +27,7 @@ AGENT_NAME_PATTERNS = re.compile(
     r'acn_faq_knowledge|acn_identity_security_hub|'
     r'Banking Hub|Products Hub|Service Hub|Identity Hub|Accounts Hub|'
     r'Payments Agent|Credit Cards? Agent|Cards? Agent|Service Agent|'
-    r'transfer(?:ring)? (?:you )?to|routing you to|sending you to|I\'ll transfer|'
+    r'transfer(?:ring)? you to|routing you to|sending you to|I\'ll transfer you|'
     r'Connecting you to|connecting you to|passing you to|handing you (?:off|over)|'
     r'another agent|different agent|specialist agent)\b',
     re.IGNORECASE
