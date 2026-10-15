@@ -102,6 +102,67 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
     else:
         _set_cnt(state, retry_strikes="0")
 
+# ---------------------------------------------------------------------------
+# AM-CLOSE: never end a session silently (TDD GB-42, "M0-enforced; deterministic").
+# No instruction told the model how to close a session, so it called end_session
+# straight away: customers were dropped with no explanation (after a failed PIN,
+# on "goodbye", ...). The platform template for this tool says the same thing:
+# always include text with end_session.
+# ---------------------------------------------------------------------------
+_CSAT_PROMPT = "Before you go, how would you rate your experience today, from 1 to 5?"
+_CLOSING_TEXT = "Thanks for banking with ACN Bank. Take care!"
+_HANDOFF_TEXT = ("I'm going to connect you with a specialist who can help from here. "
+                 "Thank you for your patience.")
+_HANDOFF_AUTH_TEXT = ("I wasn't able to verify your identity, so I'm going to connect you "
+                      "with a specialist who can help from here. Thank you for your patience.")
+_AUTH_REASON_RE = re.compile(r'\b(pin|authenticat\w*|verif\w*|identity|identif\w*)\b', re.IGNORECASE)
+_ASKS_RATING_RE = re.compile(r'\b(rate|rating)\b|\b1\s*(to|-|–)\s*5\b|scale of', re.IGNORECASE)
+
+def _close_text(parts) -> str:
+    return "".join((getattr(p, 'text', '') or '') for p in parts if getattr(p, 'text', None)).strip()
+
+def _enforce_session_close(state, llm_response) -> Optional[object]:
+    """Return a replacement LlmResponse when end_session would end the call silently."""
+    try:
+        parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
+        call = None
+        for p in parts:
+            fc = getattr(p, 'function_call', None)
+            if fc is not None and getattr(fc, 'name', '') == 'end_session':
+                call = p
+                break
+        if call is None:
+            return None
+
+        args = dict(getattr(call.function_call, 'args', None) or {})
+        params = args.get('params') or {}
+        spoken = _close_text(parts)
+
+        if str(args.get('session_escalated', '')).strip().lower() in ('true', '1', 'yes'):
+            if spoken:
+                return None
+            why = f"{args.get('reason', '')} {state.get('escalation_reason', '')}"
+            text = _HANDOFF_AUTH_TEXT if _AUTH_REASON_RE.search(why) else _HANDOFF_TEXT
+            return LlmResponse.from_parts(parts=[Part.from_text(text=text)] + parts)
+
+        # Normal close: ask for the CSAT rating once, then end.
+        csat = json.loads(state.get("csat", "{}") or "{}")
+        rated = isinstance(params, dict) and params.get('csat_rating') not in (None, '')
+        if not rated and not csat.get('offered'):
+            csat['offered'] = True
+            state["csat"] = json.dumps(csat)
+            if spoken and _ASKS_RATING_RE.search(spoken):
+                # The model asked for the rating AND hung up in the same turn.
+                return LlmResponse.from_parts(parts=[p for p in parts if p is not call])
+            return LlmResponse.from_parts(parts=[Part.from_text(text=_CSAT_PROMPT)])
+        if spoken:
+            return None
+        return LlmResponse.from_parts(parts=[Part.from_text(text=_CLOSING_TEXT)] + parts)
+    except Exception:
+        return None  # never break the turn over a closing line
+
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
-    return after_model_callback_impl(callback_context, llm_response)
+    result = after_model_callback_impl(callback_context, llm_response)
+    closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
+    return closed if closed is not None else result
