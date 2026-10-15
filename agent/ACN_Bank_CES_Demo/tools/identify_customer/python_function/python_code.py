@@ -35,6 +35,7 @@ Called silently during initial caller lookup. Do NOT speak any pacing phrase bef
         "4165551234": "CUST_DOC_1988",
         "5141234567": "CUST-9921-X",
         "2269274374": "CUST_DOC_1988",
+        "2269374374": "CUST_DOC_1988",
     }
 
     customer_id = ""
@@ -42,7 +43,13 @@ Called silently during initial caller lookup. Do NOT speak any pacing phrase bef
         customer_id = CALLER_ID_MAP.get(identifier_value, "CUST_DOC_1988")
     elif identifier_type == "phone":
         normalized = identifier_value.replace("+1", "").replace("-", "").replace(" ", "").replace("(", "").replace(")", "")
-        customer_id = PHONE_MAP.get(normalized, "6oq3lBNGOFWfqOamn9ob")
+        # Fall back to CUST_DOC_1988, matching the caller_id branch above.
+        # The previous fallback ("6oq3lBNGOFWfqOamn9ob") has no entry in
+        # verify_pin's DEMO_PIN_MAP, so any unrecognised number identified
+        # successfully at L1 and then could never clear PIN verification —
+        # verify_pin compared the submitted PIN against an empty string and
+        # returned verified=False forever, with no error explaining why.
+        customer_id = PHONE_MAP.get(normalized, "CUST_DOC_1988")
     elif identifier_type in {"email", "wa_id", "webchat_sso"}:
         customer_id = "CUST_DOC_1988"
     elif identifier_type == "card_dob_postal":

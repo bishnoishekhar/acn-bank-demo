@@ -35,7 +35,7 @@ function guestVariables() {
   return {
     auth_mode:             'guest',
     authentication_status: false,
-    auth_level:            0,
+    auth_level:            '0',   // STRING — a number arrives as kotlin.Double and 400s the turn
     is_existing_customer:  false,
     customerId:            '',
     customer_id:           '',
@@ -49,7 +49,11 @@ function customerVariables(c) {
   return {
     auth_mode:             'authenticated',
     authentication_status: true,
-    auth_level:            2,
+    // STRING, not the number 2: app.json declares auth_level as STRING and the
+    // agent tools round-trip it as one (set_variable("auth_level", "1"),
+    // int(get_variable("auth_level", "1"))). Sending a number makes CES reject
+    // the whole setVariables payload with a 400 on runSession.
+    auth_level:            '2',
     is_existing_customer:  true,
     customerId:            c.customerId,
     customer_id:           c.businessCustomerId,
@@ -61,8 +65,9 @@ function customerVariables(c) {
     kyc_expires_at:        c.kycExpiresAt,
     customer_global_status: c.globalStatus,
     spending_persona:      c.spendingPersona,
-    credit_score_value:    c.creditScoreValue,
-    annual_income:         c.annualIncome,
+    // Stringified for the same reason: this app declares STRING/BOOLEAN only.
+    credit_score_value:    c.creditScoreValue == null ? '' : String(c.creditScoreValue),
+    annual_income:         c.annualIncome     == null ? '' : String(c.annualIncome),
     web_channel:           true,
   };
 }

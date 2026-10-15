@@ -3,7 +3,7 @@
   "displayName": "quick_actions",
   "widgetTool": {
     "name": "quick_actions",
-    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: 'Here are your options.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: 'Here are your options.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

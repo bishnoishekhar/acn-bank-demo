@@ -2,7 +2,7 @@
   "displayName": "mortgage_rate_table",
   "widgetTool": {
     "name": "mortgage_rate_table",
-    "description": "Show the current mortgage rates as a read-only table, for customers asking what the rates ARE rather than choosing one. No selection control and no call to action -- it reads as information, not a decision being pushed. Fed by mortgage_rate_board; copy every figure straight from it. Before calling this tool, speak a brief conversational pacing phrase: 'Here's where our rates sit today.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False. Use mortgage_rate_shelf instead when the customer is choosing a rate, or comparing fixed against variable.",
+    "description": "Show the current mortgage rates as a read-only table, for customers asking what the rates ARE rather than choosing one. No selection control and no call to action -- it reads as information, not a decision being pushed. Fed by mortgage_rate_board; copy every figure straight from it. Before calling this tool, speak a brief conversational pacing phrase: 'Here's where our rates sit today.' Use mortgage_rate_shelf instead when the customer is choosing a rate, or comparing fixed against variable.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

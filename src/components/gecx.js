@@ -124,6 +124,35 @@ function getMessenger() {
   return document.querySelector('chat-messenger');
 }
 
+/* ── Why every value is coerced before it leaves ───────────────────────────────
+   CES type-checks session variables against app.json > variableDeclarations and
+   rejects the WHOLE request if one disagrees:
+
+     400 INVALID_ARGUMENT — "Invalid value provided for auth_level:
+     Expected `String`, received `kotlin.Double` (0.0)."
+
+   A JS number literal (auth_level: 0) arrives as a Double, so a STRING-declared
+   variable fails and the turn never reaches the agent. This app declares STRING
+   and BOOLEAN only, so the rule is simply: booleans pass through, everything
+   else goes as a string. Coercing here — the single point where variables reach
+   the SDK — means a new builder cannot reintroduce the bug by writing a literal.
+── */
+function coerceCesVariables(vars) {
+  const out = {};
+
+  Object.keys(vars || {}).forEach((key) => {
+    const value = vars[key];
+
+    if (value === undefined || value === null) {
+      return;
+    }
+
+    out[key] = typeof value === 'boolean' ? value : String(value);
+  });
+
+  return out;
+}
+
 function applyCesVariables() {
   const messenger = getMessenger();
 
@@ -135,7 +164,7 @@ function applyCesVariables() {
   }
 
   try {
-    messenger.setVariables({ ..._cesVars });
+    messenger.setVariables(coerceCesVariables(_cesVars));
     return true;
   } catch (error) {
     // The presenter may not be attached yet. The caller can retry.
@@ -187,7 +216,7 @@ async function waitForReadyMessenger(timeoutMs = 5000) {
 async function flushCesVariables({ settleMs = 100 } = {}) {
   const messenger = await waitForReadyMessenger();
 
-  const result = messenger.setVariables({ ..._cesVars });
+  const result = messenger.setVariables(coerceCesVariables(_cesVars));
 
   // Compatible whether setVariables returns void or a Promise.
   if (result && typeof result.then === 'function') {
@@ -265,7 +294,7 @@ export function buildAuthenticatedCesVariables(customer) {
   const variables = {
     auth_mode: 'authenticated',
     authentication_status: true,
-    auth_level: 2,
+    auth_level: '2',
     is_existing_customer: true,
     customerId,
     customer_id:
@@ -576,6 +605,28 @@ export function installFetchInterceptor() {
             if (_onRateLimited) {
               _onRateLimited();
             }
+
+            return;
+          }
+
+          if (response.status === 400) {
+            /* Almost always the session-variable contract: CES rejects the whole
+               setVariables payload if a variable is undeclared in app.json or its
+               type does not match the declaration. The turn never reaches the
+               agent, so the symptom looks like the agent "forgetting" the signed-in
+               customer rather than a transport error. Log the body — it names the
+               offending variable. */
+            response
+              .clone()
+              .text()
+              .then((body) => {
+                console.error(
+                  '[ACN] runSession 400 (Bad Request). Check that every variable sent by ' +
+                    'customerVariables() is declared in app.json with a matching type.',
+                  body
+                );
+              })
+              .catch(() => {});
 
             return;
           }

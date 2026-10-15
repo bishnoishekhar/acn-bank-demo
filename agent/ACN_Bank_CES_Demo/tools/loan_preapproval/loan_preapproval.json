@@ -3,7 +3,7 @@
   "displayName": "loan_preapproval",
   "widgetTool": {
     "name": "loan_preapproval",
-    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your pre-approval result.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your pre-approval result.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

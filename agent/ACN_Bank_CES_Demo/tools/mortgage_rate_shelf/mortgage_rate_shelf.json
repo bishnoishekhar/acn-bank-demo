@@ -3,7 +3,7 @@
   "displayName": "mortgage_rate_shelf",
   "widgetTool": {
     "name": "mortgage_rate_shelf",
-    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our current mortgage rates.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit the current mortgage rate shelf. Requires financial advice disclaimer and CDIC disclosure. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our current mortgage rates.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

@@ -26,9 +26,7 @@
   "guardrails": [
     "Phishing & Social Engineering",
     "Smishing Detection",
-    "Inappropriate Language",
     "Personal Data Extraction Attempt",
-    "Prompt Injection Attack",
     "Sensitive Data Disclosure"
   ],
   "modelSettings": {
@@ -50,6 +48,14 @@
       "schema": {
         "type": "BOOLEAN",
         "default": false
+      }
+    },
+    {
+      "name": "annual_income",
+      "description": "Customer's declared annual income, carried as a string for the same reason as credit_score_value.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {
@@ -90,6 +96,14 @@
       "schema": {
         "type": "STRING",
         "default": "{}"
+      }
+    },
+    {
+      "name": "authentication_status",
+      "description": "True once the web frontend has signed the customer in. Written by src/App.jsx customerVariables().",
+      "schema": {
+        "type": "BOOLEAN",
+        "default": false
       }
     },
     {
@@ -149,6 +163,14 @@
       }
     },
     {
+      "name": "credit_score_value",
+      "description": "Customer's credit score, carried as a string to match this app's STRING/BOOLEAN-only declaration convention.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "csat",
       "description": "CSAT tracking object. Fields: offered (bool), rating (0-5). Set by M0 at session end.",
       "schema": {
@@ -173,6 +195,14 @@
       }
     },
     {
+      "name": "customerId",
+      "description": "Firestore document ID of the signed-in customer. Camel-case twin of customer_id, sent by the frontend and used as a tool argument.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "customer_display_name",
       "description": "Customer preferred display name. Set by BA-5 passive lookup or M5 after getCustomer.",
       "schema": {
@@ -181,8 +211,24 @@
       }
     },
     {
+      "name": "customer_global_status",
+      "description": "Global account standing for the signed-in customer. Writer: frontend.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "customer_id",
       "description": "Trusted Firestore customer document ID. Empty at L0. Set exclusively by M5.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
+      "name": "customer_name",
+      "description": "Customer's full legal name. Read by the callback state bridge.",
       "schema": {
         "type": "STRING",
         "default": ""
@@ -237,6 +283,14 @@
       }
     },
     {
+      "name": "email",
+      "description": "Signed-in customer's email address. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "escalation_reason",
       "description": "Reason for deterministic escalation routing to M4.3.",
       "schema": {
@@ -285,6 +339,14 @@
       }
     },
     {
+      "name": "is_existing_customer",
+      "description": "True when the signed-in web user is a known ACN Bank customer. Writer: frontend.",
+      "schema": {
+        "type": "BOOLEAN",
+        "default": false
+      }
+    },
+    {
       "name": "journey_context",
       "description": "JSON-serialized current journey state for active workflow.",
       "schema": {
@@ -317,6 +379,14 @@
       }
     },
     {
+      "name": "kyc_expires_at",
+      "description": "ISO date the customer's KYC refresh falls due. Writer: frontend.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "last_quick_actions",
       "description": "JSON-serialized last quick_actions chips shown (webchat).",
       "schema": {
@@ -338,6 +408,14 @@
       "schema": {
         "type": "BOOLEAN",
         "default": false
+      }
+    },
+    {
+      "name": "mobile_number",
+      "description": "Signed-in customer's mobile number. Written by buildAuthenticatedCesVariables() in src/components/gecx.js.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {
@@ -421,6 +499,14 @@
       }
     },
     {
+      "name": "pref_name",
+      "description": "Customer's preferred first name. Read by the callback state bridge (_first_nonempty).",
+      "schema": {
+        "type": "STRING",
+        "default": ""
+      }
+    },
+    {
       "name": "previous_agent",
       "description": "Resource name of the prior agent, for return-after-subtask flows.",
       "schema": {
@@ -474,6 +560,14 @@
       "schema": {
         "type": "BOOLEAN",
         "default": false
+      }
+    },
+    {
+      "name": "spending_persona",
+      "description": "CIE spending persona label. Read by the callback state bridge as a fallback for customer_segment.",
+      "schema": {
+        "type": "STRING",
+        "default": ""
       }
     },
     {
@@ -538,6 +632,14 @@
       "schema": {
         "type": "STRING",
         "default": ""
+      }
+    },
+    {
+      "name": "web_channel",
+      "description": "True when the session originates from the ACN Bank web app. Writer: frontend.",
+      "schema": {
+        "type": "BOOLEAN",
+        "default": false
       }
     },
     {

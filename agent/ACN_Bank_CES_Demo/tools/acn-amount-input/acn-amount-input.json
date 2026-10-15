@@ -3,7 +3,7 @@
   "displayName": "acn-amount-input",
   "widgetTool": {
     "name": "acn-amount-input",
-    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: 'How much would you like to send?' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: 'How much would you like to send?'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

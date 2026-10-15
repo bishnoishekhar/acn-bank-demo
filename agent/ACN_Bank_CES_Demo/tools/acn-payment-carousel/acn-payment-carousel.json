@@ -3,7 +3,7 @@
   "displayName": "acn-payment-carousel",
   "widgetTool": {
     "name": "acn-payment-carousel",
-    "description": "Emit a scrollable list of accounts, transactions, or payment options for the user to select from. Before calling this tool, speak a brief conversational pacing phrase: 'Let me pull up your accounts.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit a scrollable list of accounts, transactions, or payment options for the user to select from. Before calling this tool, speak a brief conversational pacing phrase: 'Let me pull up your accounts.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

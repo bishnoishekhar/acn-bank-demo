@@ -3,7 +3,7 @@
   "displayName": "mortgage_calculator",
   "widgetTool": {
     "name": "mortgage_calculator",
-    "description": "Emit an affordability and payment calculator result after calculate_affordability tool call. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your affordability breakdown.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit an affordability and payment calculator result after calculate_affordability tool call. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your affordability breakdown.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

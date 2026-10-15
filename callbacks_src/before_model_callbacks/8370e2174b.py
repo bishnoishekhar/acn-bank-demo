@@ -600,9 +600,15 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     if str(state.get("mock_mode", "")).lower() == "true":
         return _get_mock_response(tool_name, input_dict, state)
 
+    # A tool declared level 0 in TOOL_MIN_AUTH (public rates, pure calculators)
+    # needs no customer identity, so lacking customer_id must not block it.
+    # Without this, BT-1 ran ahead of BT-3 and rejected tools the policy map
+    # explicitly marks "0  # public rates" with AUTH_LEVEL_INSUFFICIENT. The
+    # model then re-planned against a misleading error, costing extra ~19.5k-token
+    # LLM round trips per turn and inventing tool arguments it was never given.
     # BT-1: Trusted ID injection
     customer_id = state.get("customer_id", "")
-    if not customer_id and tool_name not in {
+    if not customer_id and TOOL_MIN_AUTH.get(tool_name, 2) > 0 and tool_name not in {
         'identify_customer', 'authenticate', 'authorize_step_up',
         # agent-tools that establish identity must run before customer_id exists
         'acn_identity_security_hub', 'call_identity_hub',

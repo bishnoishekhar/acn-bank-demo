@@ -3,7 +3,7 @@
   "displayName": "mortgage_kyc",
   "widgetTool": {
     "name": "mortgage_kyc",
-    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: 'I will need you to upload a document.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: 'I will need you to upload a document.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

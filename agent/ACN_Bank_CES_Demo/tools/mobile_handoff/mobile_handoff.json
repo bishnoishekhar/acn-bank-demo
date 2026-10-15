@@ -3,7 +3,7 @@
   "displayName": "mobile_handoff",
   "widgetTool": {
     "name": "mobile_handoff",
-    "description": "Emit a deep-link card to continue the flow in the ACN Bank mobile app (e.g. Apple Pay setup, document upload). Before calling this tool, speak a brief conversational pacing phrase: 'Let me give you a link to continue in the app.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
+    "description": "Emit a deep-link card to continue the flow in the ACN Bank mobile app (e.g. Apple Pay setup, document upload). Before calling this tool, speak a brief conversational pacing phrase: 'Let me give you a link to continue in the app.'",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
