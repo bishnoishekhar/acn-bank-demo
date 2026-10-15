@@ -124,29 +124,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: accountId
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: startDate
-          in: query
-          schema:
-            type: string
-        - name: endDate
-          in: query
-          schema:
-            type: string
-        - name: limit
+        - name: pageSize
           in: query
           schema:
             type: integer
             default: 20
-            maximum: 50
-        - name: category
-          in: query
-          schema:
-            type: string
       responses:
         "200":
           description: List of transactions
@@ -246,10 +228,6 @@ paths:
         - name: customerId
           in: path
           required: true
-          schema:
-            type: string
-        - name: taxYear
-          in: query
           schema:
             type: string
       responses:

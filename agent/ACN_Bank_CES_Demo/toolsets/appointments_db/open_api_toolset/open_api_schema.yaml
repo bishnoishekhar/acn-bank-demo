@@ -13,22 +13,6 @@ paths:
       security:
         - GoogleBearerAuth: []
       parameters:
-        - name: branchId
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: date
-          in: query
-          required: true
-          schema:
-            type: string
-            format: date
-        - name: serviceType
-          in: query
-          schema:
-            type: string
-            enum: [account_opening, mortgage, investments, general, card_services, loan]
       responses:
         "200":
           description: Available appointment slots

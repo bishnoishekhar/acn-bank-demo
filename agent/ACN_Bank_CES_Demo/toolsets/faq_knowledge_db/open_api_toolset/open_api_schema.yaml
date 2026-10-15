@@ -51,12 +51,6 @@ paths:
       security:
         - GoogleBearerAuth: []
       parameters:
-        - name: language
-          in: query
-          schema:
-            type: string
-            default: en
-            enum: [en, fr]
       responses:
         "200":
           description: List of FAQ categories

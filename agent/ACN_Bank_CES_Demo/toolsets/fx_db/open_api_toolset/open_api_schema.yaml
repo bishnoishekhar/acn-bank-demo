@@ -13,20 +13,6 @@ paths:
       security:
         - GoogleBearerAuth: []
       parameters:
-        - name: fromCurrency
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: toCurrency
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: amount
-          in: query
-          schema:
-            type: number
       responses:
         "200":
           description: Exchange rate data

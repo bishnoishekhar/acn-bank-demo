@@ -37,17 +37,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: channel
-          in: query
-          schema:
-            type: string
-            enum: [chat, phone, branch, app]
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 5
-            maximum: 20
       responses:
         "200":
           description: List of next-best-actions

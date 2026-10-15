@@ -24,7 +24,7 @@ If customer_id is empty, no customer has been identified yet.
 ## Behavior
 1. Ignore ALL conversation history — do not respond to it.
 2. Call customer_intelligence_db.getCustomerSegment with customerId from state.
-3. Call customer_intelligence_db.getNextBestActions with customerId and channel from state.
+3. Call customer_intelligence_db.getNextBestActions with customerId only (it accepts no channel or limit: filter by channel yourself in step 7).
 4. Set session variables: customer_segment, life_stage_signal, next_best_action, open_applications, marketing_opt_out.
 5. Set cie_loaded=true on completion.
 6. If marketing_opt_out=true: set next_best_action=[], nba_suppressed=true.
@@ -34,10 +34,10 @@ If customer_id is empty, no customer has been identified yet.
 </subtask>
 <subtask id="fail-soft">
 ## Fail-Soft
-If any tool call fails or times out (2500ms limit):
+If any tool call fails, returns not-found, or times out (2500ms limit):
 - Set cie_loaded=false, nba_suppressed=true.
-- Do NOT surface error to customer.
-- Return empty response.
+- Do NOT retry the same tool, and do NOT surface the error to the customer.
+- Stop and finish: your final answer is only a one-line status (for example "CIE done"); a callback turns it into the machine-readable result. Never apologise, never ask whether to try again, never call end_session.
 
 </subtask>
 <subtask id="tools">

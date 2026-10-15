@@ -37,16 +37,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: limit
+        - name: pageSize
           in: query
           schema:
             type: integer
             default: 20
-            maximum: 100
-        - name: startDate
-          in: query
-          schema:
-            type: string
       responses:
         "200":
           description: Rewards transaction history

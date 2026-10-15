@@ -35,13 +35,14 @@ If customer_id is empty, no customer has been identified yet.
 </subtask>
 <subtask id="acc-02:_recent_transactions">
 ## ACC-02: Recent Transactions
-1. Call manageCustomerDatabase.listCustomerTransactions with limit=3 for voice, limit=10 for webchat.
+1. Call manageCustomerDatabase.listCustomerTransactions with pageSize=3 for voice, pageSize=10 for webchat.
+   (The API only accepts pageSize: it has no account, date or category filters.)
 3. "I don't recognise this charge" → IMMEDIATELY route back to acn_banking_hub for fraud path (do NOT handle here).
 
 </subtask>
 <subtask id="acc-03:_transaction_search">
 ## ACC-03: Transaction Search
-1. Call manageCustomerDatabase.listCustomerTransactions with merchant/category/date filters.
+1. Call manageCustomerDatabase.listCustomerTransactions (no filters exist: fetch the list, then filter by merchant/category/date yourself).
 2. Present matches naturally.
 3. If customer says "I don't recognise this" → route to acn_banking_hub → acn_disputes.
 
@@ -71,7 +72,7 @@ If customer_id is empty, no customer has been identified yet.
 </subtask>
 <subtask id="tax-01:_tax_documents">
 ## TAX-01: Tax Documents
-1. Call manageCustomerDatabase.getTaxDocuments with taxYear if specified.
+1. Call manageCustomerDatabase.getTaxDocuments (it has no taxYear filter: pick the requested tax year from the results).
 2. Provide secure link via email if requested.
 3. Include CDIC protects eligible deposits at member institutions up to $100,000 per depositor per insured category. when discussing interest income.
 

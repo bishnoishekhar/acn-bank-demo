@@ -13,16 +13,6 @@ paths:
       security:
         - GoogleBearerAuth: []
       parameters:
-        - name: type
-          in: query
-          schema:
-            type: string
-            enum: [chequing, savings, tfsa, rrsp, fhsa, gic, all]
-        - name: eligibility
-          in: query
-          schema:
-            type: string
-          description: Filter by customer segment or eligibility flag
       responses:
         "200":
           description: Available account products

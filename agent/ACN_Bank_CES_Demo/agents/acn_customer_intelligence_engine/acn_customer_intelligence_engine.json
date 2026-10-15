@@ -2,7 +2,7 @@
   "name": "acn_customer_intelligence_engine",
   "displayName": "acn_customer_intelligence_engine",
   "instruction": "agents/acn_customer_intelligence_engine/instruction.txt",
-  "tools": ["end_session"],
+  "tools": [],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_customer_intelligence_engine/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

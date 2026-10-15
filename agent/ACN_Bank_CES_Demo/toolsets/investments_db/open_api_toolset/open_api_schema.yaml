@@ -18,11 +18,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: type
-          in: query
-          schema:
-            type: string
-            enum: [TFSA, RRSP, FHSA, GIC, non_registered, all]
       responses:
         "200":
           description: Investment accounts
@@ -37,17 +32,6 @@ paths:
       security:
         - GoogleBearerAuth: []
       parameters:
-        - name: term
-          in: query
-          schema:
-            type: string
-            enum: [30_day, 60_day, 90_day, 180_day, 1_year, 2_year, 3_year, 4_year, 5_year]
-        - name: currency
-          in: query
-          schema:
-            type: string
-            enum: [CAD, USD]
-            default: CAD
       responses:
         "200":
           description: GIC rates
@@ -67,11 +51,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: accountType
-          in: query
-          schema:
-            type: string
-            enum: [TFSA, RRSP, FHSA]
       responses:
         "200":
           description: Contribution room details

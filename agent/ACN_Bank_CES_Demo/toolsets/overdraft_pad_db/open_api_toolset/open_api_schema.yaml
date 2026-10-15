@@ -61,11 +61,6 @@ paths:
           required: true
           schema:
             type: string
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, cancelled, all]
       responses:
         "200":
           description: List of PAD agreements
@@ -140,16 +135,11 @@ paths:
           required: true
           schema:
             type: string
-        - name: limit
+        - name: pageSize
           in: query
           schema:
             type: integer
             default: 20
-            maximum: 100
-        - name: startDate
-          in: query
-          schema:
-            type: string
       responses:
         "200":
           description: NSF fee history
