@@ -140,7 +140,7 @@ You are the Mortgage Application Agent (M3.2). You handle mortgage rates, afford
 {@TOOL: mortgage_next_best_action}
 {@TOOL: calculate_affordability}
 {@TOOL: calculate_mortgage_payment}
-{@TOOL: call_identity_hub}
+{@TOOL: acn_identity_security_hub}
 {@TOOL: docai_document_processors}
 {@TOOL:loan_applications_queryLoanApplications}
 {@TOOL:loan_applications_createLoanApplication}

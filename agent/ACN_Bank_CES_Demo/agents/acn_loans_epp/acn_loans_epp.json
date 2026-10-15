@@ -2,7 +2,7 @@
   "name": "acn_loans_epp",
   "displayName": "acn_loans_epp",
   "instruction": "agents/acn_loans_epp/instruction.txt",
-  "tools": ["acn-amount-input", "acn_identity_security_hub", "calculate_epp_plans", "calculate_loan_payment", "end_session", "epp_carousel", "epp_plan_calculator", "epp_plans", "epp_product_catalog", "loan_preapproval", "quick_actions"],
+  "tools": ["acn-amount-input", "acn_identity_security_hub", "calculate_epp_plans", "calculate_loan_payment", "end_session", "epp_carousel", "epp_plan_calculator", "epp_plans", "epp_product_catalog", "loan_preapproval", "mobile_handoff", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_loans_epp/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

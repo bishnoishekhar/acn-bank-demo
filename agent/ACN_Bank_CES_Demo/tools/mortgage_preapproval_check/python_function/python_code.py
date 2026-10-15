@@ -17,6 +17,10 @@ against any public Canadian calculator:
 Kept deliberately in step with mortgage_payment_estimate and
 mortgage_affordability_estimate — all three share the same constants and the
 same formulas, so the three never contradict one another.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me run those numbers for you.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict, List, Tuple
@@ -52,6 +56,9 @@ ASSUMED_PROPERTY_TAX_MONTHLY_PCT = 0.085
 ASSUMED_HEAT_MONTHLY_CAD = 150.0
 ASSUMED_CONDO_FEE_MONTHLY_PCT = 0.055
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def mortgage_preapproval_check(
     property_price_cad: float,

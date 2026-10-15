@@ -2,6 +2,7 @@
   "name": "a6cd531f-67e9-4ea1-aea7-f5552675c030",
   "pythonFunction": {
     "name": "epp_plan_calculator",
+    "description": "Calculate Easy Payment Plan instalment options for a retail purchase. Call with retail_price_cad only to return every available tenure for the plan chooser; call again with chosen_tenure_months set to the tenure the customer actually selected to return just that plan in chosen_plan, so the monthly amount you quote matches what they tapped. A flat 1.5% one-time processing fee is applied. Args: retail_price_cad (float, required), chosen_tenure_months (int, 0 = show all tenures). Returns: {status, plans[], interest_rate_pct, recommended_tenure_months} or chosen_plan when a tenure is given. Before calling this tool, speak a brief conversational pacing phrase: 'Let me work out the instalment options for you.'",
     "pythonCode": "tools/epp_plan_calculator/python_function/python_code.py"
   },
   "executionType": "SYNCHRONOUS",

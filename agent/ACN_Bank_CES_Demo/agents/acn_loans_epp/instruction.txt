@@ -66,7 +66,7 @@ You are the Loans & EPP Agent (M3.3). You handle personal loans, lines of credit
 {@TOOL: epp_plan_calculator}
 {@TOOL: calculate_epp_plans}
 {@TOOL: calculate_loan_payment}
-{@TOOL: call_identity_hub}
+{@TOOL: acn_identity_security_hub}
 {@TOOL:loan_applications_queryLoanApplications}
 {@TOOL:loan_applications_createLoanApplication}
 {@TOOL:loan_applications_updateLoanApplication}

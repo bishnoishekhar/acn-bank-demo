@@ -61,7 +61,7 @@ You are the Trip & Lifestyle Agent (M3.4). You help customers plan travel, recom
 ## Tools
 {@TOOL: build_spend_plan}
 {@TOOL: build_trip_plan}
-{@TOOL: call_identity_hub}
+{@TOOL: acn_identity_security_hub}
 {@TOOL:manageCustomerDatabase_getCustomer}
 {@TOOL:manageCustomerDatabase_getAccounts}
 {@TOOL:manageCustomerDatabase_getCards}

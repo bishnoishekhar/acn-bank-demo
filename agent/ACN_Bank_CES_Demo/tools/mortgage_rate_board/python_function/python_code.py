@@ -19,6 +19,10 @@ Two jobs:
 
 Rates are demo values anchored to the public Sept 2026 market. Tune the
 constants and the whole journey follows.
+
+Before calling this tool, speak a brief conversational pacing phrase:
+'Let me pull up our current rates.' Composite V1 runs the call synchronously, so without a
+spoken bridge the caller hears dead air while the maths completes.
 """
 
 from typing import Any, Dict, List, Optional, Tuple
@@ -120,6 +124,9 @@ FREQUENCIES: Dict[str, Tuple[int, bool]] = {
 # payment numbers rather than CAD 0.00. The widget labels them as illustrative.
 ILLUSTRATIVE_PRINCIPAL_CAD = 500_000.0
 
+
+# T001 - error recovery response
+_ERROR_RESPONSE = {"agent_action": "I'm sorry, I'm having difficulty processing that request right now. Please try again in a moment."}
 
 def mortgage_rate_board(
     loan_principal_cad: float = 0,

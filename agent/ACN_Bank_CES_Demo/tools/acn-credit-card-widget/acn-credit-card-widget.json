@@ -41,10 +41,16 @@
                 "type": "STRING",
                 "description": "The URL directing users to the full product detail page."
               }
-            }
+            },
+            "required": [
+              "title"
+            ]
           }
         }
-      }
+      },
+      "required": [
+        "productDetails"
+      ]
     }
   }
 }

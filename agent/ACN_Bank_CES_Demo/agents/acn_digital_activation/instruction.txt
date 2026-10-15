@@ -70,7 +70,7 @@ You are the Digital Activation Agent (M4.2). You handle card activation, digital
 </subtask>
 <subtask id="tools">
 ## Tools
-{@TOOL: call_identity_hub}
+{@TOOL: acn_identity_security_hub}
 {@TOOL:digital_activation_db_createActivationRequest}
 {@TOOL:digital_activation_db_getActivationStatus}
 {@TOOL:digital_activation_db_updateActivationRequest}
