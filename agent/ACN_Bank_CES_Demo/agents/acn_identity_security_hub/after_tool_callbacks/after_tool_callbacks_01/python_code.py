@@ -159,7 +159,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # The hub therefore emits a machine-readable trailer, which we parse into state
     # and STRIP before the parent model (and the customer) ever sees it.
     if tool_name in {'acn_identity_security_hub', 'call_identity_hub'}:
-        return _harvest_identity_hub(tool_response, state)
+        return _harvest_identity_hub(tool_response, state, str((input_dict or {}).get('request', '') or ''))
 
     # Hand the widget payload back exactly as it came. Normalising it would
     # destroy the shape the client renders -- see WIDGET_TOOLS.
@@ -380,7 +380,61 @@ def after_tool_callback(tool: Tool, input: dict[str, Any], callback_context: Cal
 
 _AUTH_RESULT_RE = re.compile(r'\[\[AUTH_RESULT(?P<body>[^\]]*)\]\]')
 
-def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
+def _hub_value(fields: dict[str, str], key: str) -> str:
+    """A trailer field, with the hub's `-` / none / null placeholders read as empty."""
+    value = (fields.get(key, '') or '').strip()
+    return '' if value.lower() in ('-', 'none', 'null') else value
+
+def _put_hub_text(tool_response: Any, text: str) -> Any:
+    """Return tool_response with the hub's text replaced, keeping its shape."""
+    if isinstance(tool_response, dict):
+        out = dict(tool_response)
+        data = out.get('data')
+        if isinstance(data, dict) and 'response' in data:
+            data = dict(data)
+            data['response'] = text
+            out['data'] = data
+        else:
+            out['response'] = text
+        return out
+    return text
+
+_HUB_PIN_REQUEST_RE = re.compile(r'PIN|step-?up|verify|authenticat', re.IGNORECASE)
+
+def _hub_status_text(request: str, customer_id: str, level: int) -> str:
+    """What the parent model should be told when the hub had nothing to say.
+
+    The hub is told to STOP silently after a successful identify / PIN check, so
+    once the trailer is stripped its reply is empty. CES replaces an empty
+    AgentTool reply with "Hmm, I'm having trouble with that. Do you want me to try
+    again?" -- the parent model then apologises to the customer, retries the hub
+    (each retry burns a PIN attempt) and never asks for the PIN. Say what actually
+    happened and what to do next instead.
+    """
+    if level >= 3:
+        return ("Step-up verified: the customer is authorized (L3) for this action. "
+                "Continue the action now. Do not ask for the PIN again and do not "
+                "call the identity hub again.")
+    if level == 2:
+        return ("PIN verified: the customer is authenticated (L2). Continue with the "
+                "customer's original request now. Do not ask for the PIN again and "
+                "do not call the identity hub again.")
+    if customer_id and not _HUB_PIN_REQUEST_RE.search(request or ''):
+        return ("Customer identified (L1). This is a success, not an error. Next, ask "
+                "the customer for their 4-digit PIN: on chat say \"To verify it's you, "
+                "please type your 4-digit PIN.\"; on voice say \"For your security, "
+                "please enter your 4-digit PIN on your keypad now, or say it.\" Do not "
+                "call the identity hub again until the customer replies with the PIN.")
+    if customer_id:
+        return ("The PIN was not accepted. Tell the customer it didn't match and ask "
+                "them to re-enter their 4-digit PIN. They get 3 attempts in total; "
+                "after the third failure tell them a specialist will help from here "
+                "and stop trying. Do not call the identity hub again until they reply.")
+    return ("No customer was identified from what was provided. Ask the customer to "
+            "re-enter their registered 10-digit phone number. Do not call the "
+            "identity hub again until they reply.")
+
+def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], request: str = '') -> dict[str, Any]:
     """Pull customer_id / auth_level out of the hub's reply, then strip the marker.
 
     The hub is an AgentTool: its text IS its return value, and its sub-session
@@ -399,7 +453,13 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any]) 
 
     match = _AUTH_RESULT_RE.search(text)
     if not match:
-        return tool_response
+        if text.strip():
+            return tool_response
+        # No trailer and no text: the hub returned nothing at all.
+        return _put_hub_text(
+            tool_response,
+            _hub_status_text(request, str(state.get('customer_id', '') or ''),
+                             int(_auth(state).get('level', '0') or '0')))
 
     fields = {}
     for part in match.group('body').split():
@@ -407,24 +467,24 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any]) 
             key, _, value = part.partition('=')
             fields[key.strip()] = value.strip()
 
-    customer_id = fields.get('customer_id', '')
-    if customer_id and customer_id.lower() not in ('none', 'null', ''):
+    customer_id = _hub_value(fields, 'customer_id')
+    if customer_id:
         state['customer_id'] = customer_id
         state['customerId'] = customer_id
 
-    level = fields.get('auth_level', '')
+    level = _hub_value(fields, 'auth_level')
     if level.isdigit():
         # Never downgrade a level the session already earned.
         current = int(_auth(state).get('level', '0') or '0')
         _set_auth(state, level=str(max(current, int(level))))
         state['auth_level'] = str(max(current, int(level)))
 
-    mode = fields.get('auth_mode', '')
+    mode = _hub_value(fields, 'auth_mode')
     if mode:
         _set_auth(state, mode=mode)
         state['auth_mode'] = mode
 
-    identified_by = fields.get('identified_by', '')
+    identified_by = _hub_value(fields, 'identified_by')
     if identified_by:
         _set_cust(state, identified_by=identified_by)
         state['identified_by'] = identified_by
@@ -436,14 +496,8 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any]) 
 
     # Strip the marker so it is never spoken or shown.
     cleaned = _AUTH_RESULT_RE.sub('', text).strip()
-    if isinstance(tool_response, dict):
-        out = dict(tool_response)
-        data = out.get('data')
-        if isinstance(data, dict) and 'response' in data:
-            data = dict(data)
-            data['response'] = cleaned
-            out['data'] = data
-        elif 'response' in out:
-            out['response'] = cleaned
-        return out
-    return cleaned
+    if not cleaned:
+        effective_cid = customer_id or str(state.get('customer_id', '') or '')
+        effective_level = int(_auth(state).get('level', '0') or '0')
+        cleaned = _hub_status_text(request, effective_cid, effective_level)
+    return _put_hub_text(tool_response, cleaned)
