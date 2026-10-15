@@ -36,7 +36,21 @@ export default function MortgageRateShelf({ payload, onCta }) {
     const rec = products.find((p) => p.recommended);
     return (rec || products[0] || {}).product_id || '';
   });
-  const [detailsOpenId, setDetailsOpenId] = useState('');
+  /* `expand_projection` opens the projection chart on load instead of leaving
+     it behind the "what we project" toggle.
+
+     The agent sets it when the customer asked to COMPARE fixed against
+     variable, rather than to pick a rate. For that question the chart and the
+     break-even month are the answer, and burying them one click down means the
+     reply looks like a plain list of rates — which is what the agent used to
+     fall back to describing in prose. Only variable products have a projection,
+     so this only ever opens one of those. */
+  const [detailsOpenId, setDetailsOpenId] = useState(() => {
+    if (!payload?.expand_projection) return '';
+    const rec = products.find((p) => p.recommended && p.rate_type === 'variable');
+    const anyVariable = products.find((p) => p.rate_type === 'variable');
+    return (rec || anyVariable || {}).product_id || '';
+  });
   const [helocOpen, setHelocOpen] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 

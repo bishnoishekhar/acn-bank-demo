@@ -3,7 +3,7 @@
   "displayName": "card_carousel",
   "widgetTool": {
     "name": "card_carousel",
-    "description": "Emit a credit card product carousel for card discovery and comparison. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you our credit card options.\u0027 Webchat only — on voice, describe each card aloud.",
+    "description": "Emit a credit card product carousel for card discovery and comparison. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you our credit card options.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -53,7 +53,11 @@
                 "type": "NUMBER"
               }
             },
-            "required": ["card_id", "card_name", "annual_fee"]
+            "required": [
+              "card_id",
+              "card_name",
+              "annual_fee"
+            ]
           }
         },
         "name": {
@@ -63,7 +67,10 @@
           "type": "STRING"
         }
       },
-      "required": ["name", "cards"]
+      "required": [
+        "name",
+        "cards"
+      ]
     }
   }
 }

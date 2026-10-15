@@ -1,0 +1,102 @@
+{
+  "displayName": "mortgage_rate_table",
+  "widgetTool": {
+    "name": "mortgage_rate_table",
+    "description": "Show the current mortgage rates as a read-only table, for customers asking what the rates ARE rather than choosing one. No selection control and no call to action -- it reads as information, not a decision being pushed. Fed by mortgage_rate_board; copy every figure straight from it. Before calling this tool, speak a brief conversational pacing phrase: 'Here's where our rates sit today.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False. Use mortgage_rate_shelf instead when the customer is choosing a rate, or comparing fixed against variable.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "type": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'custom_template'"
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'mortgage_rate_table'"
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Table header, e.g. 'Our current mortgage rates'."
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "One plain line of context, e.g. the illustrative principal the payments are based on."
+        },
+        "prime_rate_pct": {
+          "type": "NUMBER",
+          "description": "Shown in the footnote as the basis for every variable product."
+        },
+        "rate_hold_days": {
+          "type": "NUMBER",
+          "description": "Shown as a footnote, e.g. 120. Omit or set 0 to hide."
+        },
+        "payment_frequency_label": {
+          "type": "STRING",
+          "description": "e.g. 'Monthly'. Labels the payment column."
+        },
+        "rows": {
+          "type": "ARRAY",
+          "description": "Required. Every product from mortgage_rate_board, in the order returned. Never reorder, never invent a rate.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "product_id": {
+                "type": "STRING"
+              },
+              "term_label": {
+                "type": "STRING",
+                "description": "Short label for the term column, e.g. '5-yr fixed'."
+              },
+              "rate_pct": {
+                "type": "NUMBER"
+              },
+              "rate_type": {
+                "type": "STRING",
+                "description": "fixed | variable. Variable rows get the projection sparkline."
+              },
+              "payment_per_period_cad": {
+                "type": "NUMBER"
+              },
+              "rate_basis": {
+                "type": "STRING",
+                "description": "How a variable rate is built, e.g. 'Prime 4.45% minus 1.1%'. Omit for fixed."
+              },
+              "note": {
+                "type": "STRING",
+                "description": "Optional short note, e.g. 'Lowest today'."
+              }
+            }
+          }
+        },
+        "variable_projection": {
+          "type": "ARRAY",
+          "description": "Projected variable rate path from mortgage_rate_board, drawn as a small sparkline on variable rows. This is a FORWARD projection, never past performance -- the rate board does not publish rate history, so never present this as where rates have been.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "month": {
+                "type": "NUMBER"
+              },
+              "rate_pct": {
+                "type": "NUMBER"
+              },
+              "label": {
+                "type": "STRING"
+              }
+            }
+          }
+        },
+        "variable_projection_disclaimer": {
+          "type": "STRING",
+          "description": "Required whenever variable_projection is supplied. Rendered verbatim beneath the table."
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "rows"
+      ]
+    }
+  }
+}

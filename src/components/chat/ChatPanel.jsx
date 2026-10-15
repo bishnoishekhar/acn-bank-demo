@@ -30,6 +30,7 @@ import EppPlans           from '../EppPlans';
 import MortgageCalculator from '../MortgageCalculator';
 import MortgageAffordability from '../MortgageAffordability';
 import MortgageRateShelf  from '../MortgageRateShelf';
+import MortgageRateTable  from '../MortgageRateTable';
 import MortgageNudge      from '../MortgageNudge';
 import MortgageKyc        from '../MortgageKyc';
 import LoanPreapproval    from '../LoanPreapproval';
@@ -300,6 +301,7 @@ function resolvePayloadName(p) {
     card_carousel:        'acn-card-carousel',
     card_widget:          'acn-card-compare',
     mortgage_rate_shelf:  'acn-mortgage-rate-shelf',
+    mortgage_rate_table:  'acn-mortgage-rate-table',
     mortgage_calculator:  'acn-mortgage-calculator',
     mortgage_kyc:         'acn-mortgage-kyc',
     loan_preapproval:     'acn-loan-preapproval',
@@ -370,6 +372,7 @@ function isKnownPayload(p) {
     n === 'acn-epp-carousel'      || n === 'acn-epp-plans'       ||
     n === 'acn-mortgage-calculator' || n === 'acn-mortgage-kyc'  ||
     n === 'acn-mortgage-affordability' || n === 'acn-mortgage-rate-shelf' ||
+    n === 'acn-mortgage-rate-table' ||
     n === 'acn-mortgage-nudge'    ||
     n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'
   );
@@ -920,6 +923,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-mortgage-rate-shelf')
         setMessages((prev) => [...prev, { type: 'mortgage-rate-shelf', payload: p, id: uid() }]);
+
+      if (pname === 'acn-mortgage-rate-table')
+        setMessages((prev) => [...prev, { type: 'mortgage-rate-table', payload: p, id: uid() }]);
 
       // Nudges are the one loan widget that can legitimately repeat within a
       // journey, but never with the same suggestion set. De-dupe on the ids so
@@ -1652,6 +1658,13 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     gecxSend(v);
                   }}
                 />
+              </div>
+            );
+
+            // Read-only: informational rates carry no CTA, so no onCta here.
+            if (msg.type === 'mortgage-rate-table') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <MortgageRateTable payload={msg.payload} />
               </div>
             );
 

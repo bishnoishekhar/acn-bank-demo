@@ -3,7 +3,7 @@
   "displayName": "mortgage_kyc",
   "widgetTool": {
     "name": "mortgage_kyc",
-    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: \u0027I will need you to upload a document.\u0027 Webchat only — on voice, guide the customer to the mobile app.",
+    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: 'I will need you to upload a document.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -38,7 +38,7 @@
               },
               "options": {
                 "type": "ARRAY",
-                "description": "For input_kind\u003dselect. Each item is a plain string.",
+                "description": "For input_kind=select. Each item is a plain string.",
                 "items": {
                   "type": "STRING"
                 }
@@ -55,11 +55,11 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027mortgage_kyc\u0027"
+          "description": "Required. Always output the exact string: 'mortgage_kyc'"
         },
         "submit_cta_label": {
           "type": "STRING",
-          "description": "Primary button label, e.g. \u0027See my pre-approval\u0027."
+          "description": "Primary button label, e.g. 'See my pre-approval'."
         },
         "submit_cta_value": {
           "type": "STRING",
@@ -71,14 +71,19 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Form header, e.g. \u0027A few last details\u0027."
+          "description": "Form header, e.g. 'A few last details'."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         }
       },
-      "required": ["type", "name", "fields", "submit_cta_value"]
+      "required": [
+        "type",
+        "name",
+        "fields",
+        "submit_cta_value"
+      ]
     }
   }
 }

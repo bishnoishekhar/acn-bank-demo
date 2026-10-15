@@ -1,0 +1,73 @@
+{
+  "app_name": "projects/emvnzir-canada-song/locations/us/apps/e29e31ff-b686-46c8-8f02-f431f1422f1d",
+  "timestamp": "2026-10-13T16:34:07.050493Z",
+  "gates": [
+    {
+      "gate": 1,
+      "name": "Pull, Lint and Push",
+      "status": "fail",
+      "findings": [
+        {
+          "step": "lint",
+          "stdout": "y:1 [T014] Tool 'epp_plan_calculator' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\epp_product_catalog\\python_function\\python_code.py:1 [T014] Tool 'epp_product_catalog' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\mortgage_affordability_estimate\\python_function\\python_code.py:1 [T014] Tool 'mortgage_affordability_estimate' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\mortgage_next_best_action\\python_function\\python_code.py:1 [T014] Tool 'mortgage_next_best_action' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\mortgage_payment_estimate\\python_function\\python_code.py:1 [T014] Tool 'mortgage_payment_estimate' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\mortgage_preapproval_check\\python_function\\python_code.py:1 [T014] Tool 'mortgage_preapproval_check' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n  [W] ACN_Bank_CES_Demo\\tools\\mortgage_rate_board\\python_function\\python_code.py:1 [T014] Tool 'mortgage_rate_board' lacks a conversational pacing directive. In Gemini Composite V1, speak a brief natural bridge phrase before calling to prevent caller dead air during execution.\n\n  179 error(s), 40 warning(s), 1 info\n\nLint FAILED with 179 error(s).\n",
+          "stderr": ""
+        }
+      ],
+      "warnings": [
+        "Initial lint found violations \u2014 fix locally then push"
+      ],
+      "error": "Lint not clean \u2014 run cxas lint and fix violations before continuing"
+    },
+    {
+      "gate": 2,
+      "name": "Agent hierarchy",
+      "status": "fail",
+      "findings": [],
+      "warnings": [],
+      "error": "Failed to fetch agents: 429 CLIENT: Received message larger than max (6749842 vs. 4194304)"
+    },
+    {
+      "gate": 3,
+      "name": "Tool associations",
+      "status": "fail",
+      "findings": [],
+      "warnings": [],
+      "error": "Failed to fetch tools/agents: 429 CLIENT: Received message larger than max (6749842 vs. 4194304)"
+    },
+    {
+      "gate": 4,
+      "name": "Callback inventory + test discovery",
+      "status": "fail",
+      "findings": [],
+      "warnings": [],
+      "error": "Failed to fetch callbacks: 429 CLIENT: Received message larger than max (6749842 vs. 4194304)"
+    },
+    {
+      "gate": 5,
+      "name": "Single-turn smoke test",
+      "status": "pass",
+      "findings": [
+        {
+          "session_id": "gate5-73a63017",
+          "status": "responded"
+        }
+      ],
+      "warnings": [],
+      "error": null
+    },
+    {
+      "gate": 6,
+      "name": "Multi-turn smoke test",
+      "status": "skipped",
+      "findings": [],
+      "warnings": [],
+      "error": null
+    }
+  ],
+  "overall": {
+    "passed": 1,
+    "failed": 4,
+    "skipped": 1,
+    "all_pass": false
+  }
+}

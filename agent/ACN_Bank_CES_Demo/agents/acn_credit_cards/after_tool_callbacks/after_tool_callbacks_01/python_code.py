@@ -81,7 +81,8 @@ WIDGET_TOOLS = frozenset({
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',
-    'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'qr_widget',
+    'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf',
+    'mortgage_rate_table', 'qr_widget',
     'quick_actions',
 })
 

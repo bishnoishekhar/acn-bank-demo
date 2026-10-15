@@ -3,7 +3,7 @@
   "displayName": "acn-form-input",
   "widgetTool": {
     "name": "acn-form-input",
-    "description": "Emit an inline form for collecting structured input from the user (e.g. transfer details, KYC fields). Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me bring up that form for you.\u0027 Webchat only — on voice, collect fields conversationally.",
+    "description": "Emit an inline form for collecting structured input from the user (e.g. transfer details, KYC fields). Before calling this tool, speak a brief conversational pacing phrase: 'Let me bring up that form for you.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -35,7 +35,11 @@
                 "type": "STRING"
               }
             },
-            "required": ["id", "label", "type"]
+            "required": [
+              "id",
+              "label",
+              "type"
+            ]
           }
         },
         "name": {
@@ -51,7 +55,11 @@
           "type": "STRING"
         }
       },
-      "required": ["name", "title", "fields"]
+      "required": [
+        "name",
+        "title",
+        "fields"
+      ]
     }
   }
 }

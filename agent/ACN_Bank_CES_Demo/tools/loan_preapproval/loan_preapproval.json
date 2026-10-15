@@ -3,7 +3,7 @@
   "displayName": "loan_preapproval",
   "widgetTool": {
     "name": "loan_preapproval",
-    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your pre-approval result.\u0027 Webchat only — on voice, read the result aloud.",
+    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your pre-approval result.' Emit it whenever widgets_enabled=True, INCLUDING while you are speaking -- on a voice-enabled webchat the customer has both ears and a screen, so showing and speaking are complementary, not alternatives. Speak a short line and emit the widget. Only describe it aloud instead when widgets_enabled=False.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -25,7 +25,7 @@
         },
         "headline": {
           "type": "STRING",
-          "description": "One short line the customer reads first, e.g. \u0027You are pre-approved.\u0027"
+          "description": "One short line the customer reads first, e.g. 'You are pre-approved.'"
         },
         "interest_rate_pct": {
           "type": "NUMBER",
@@ -33,7 +33,7 @@
         },
         "is_provisional": {
           "type": "BOOLEAN",
-          "description": "Required to be true when income was declared but not verified. UI shows a \u0027Provisional estimate\u0027 pill."
+          "description": "Required to be true when income was declared but not verified. UI shows a 'Provisional estimate' pill."
         },
         "loan_kind": {
           "type": "STRING",
@@ -45,15 +45,15 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027loan_preapproval\u0027"
+          "description": "Required. Always output the exact string: 'loan_preapproval'"
         },
         "primary_cta_label": {
           "type": "STRING",
-          "description": "Label for the primary action, e.g. \u0027Review in the app\u0027."
+          "description": "Label for the primary action, e.g. 'Review in the app'."
         },
         "primary_cta_value": {
           "type": "STRING",
-          "description": "Sent to the agent on tap, e.g. \u0027loan_confirm_review\u0027."
+          "description": "Sent to the agent on tap, e.g. 'loan_confirm_review'."
         },
         "principal_cad": {
           "type": "NUMBER",
@@ -65,7 +65,7 @@
         },
         "product_name": {
           "type": "STRING",
-          "description": "For EPP: the gadget name. For mortgage: property address or \u0027Home mortgage estimate\u0027."
+          "description": "For EPP: the gadget name. For mortgage: property address or 'Home mortgage estimate'."
         },
         "secondary_cta_label": {
           "type": "STRING"
@@ -75,18 +75,25 @@
         },
         "tenure_label": {
           "type": "STRING",
-          "description": "Human-readable tenure, e.g. \u002725 years\u0027 or \u002712 months\u0027."
+          "description": "Human-readable tenure, e.g. '25 years' or '12 months'."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
+          "description": "Required. Always output the exact string: 'custom_template'"
         },
         "verdict": {
           "type": "STRING",
           "description": "pre_approved | needs_review | not_eligible. Never overridden by tone."
         }
       },
-      "required": ["type", "name", "loan_kind", "verdict", "monthly_payment_cad", "primary_cta_value"]
+      "required": [
+        "type",
+        "name",
+        "loan_kind",
+        "verdict",
+        "monthly_payment_cad",
+        "primary_cta_value"
+      ]
     }
   }
 }

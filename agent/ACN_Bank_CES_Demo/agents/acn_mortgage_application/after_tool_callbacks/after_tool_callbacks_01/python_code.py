@@ -86,7 +86,8 @@ WIDGET_TOOLS = frozenset({
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',
-    'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'qr_widget',
+    'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf',
+    'mortgage_rate_table', 'qr_widget',
     'quick_actions',
 })
 
@@ -887,16 +888,43 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     WIDGET_FOR_ESTIMATE = {
         'mortgage_affordability_estimate': 'mortgage_affordability',
         'mortgage_payment_estimate': 'mortgage_calculator',
+        # The rate board is the same trap: the model happily reads the four
+        # rates out as a bulleted list and never emits the shelf, which is
+        # where the projection chart and the break-even month live. Those are
+        # the whole point of showing fixed against variable honestly -- a
+        # prose list drops them silently.
+        'mortgage_rate_board': 'mortgage_rate_shelf',
     }
     widget = WIDGET_FOR_ESTIMATE.get(tool_name)
     if widget and response.get("status") == "success" and state.get("widgets_enabled"):
-        response["_instruction"] = (
-            f"NOW call {widget} and emit it. Use the figures in this response as "
-            f"defaults and bounds. Do NOT ask the customer for income, down "
-            f"payment or monthly debts in text -- the widget's sliders collect "
-            f"them, and asking first makes them answer twice. Say one short "
-            f"line, then emit the widget."
-        )
+        if widget == 'mortgage_rate_shelf':
+            # Deliberately does NOT name a single widget. There are three rate
+            # intents (MTG-01 step 2) and naming one here fought the
+            # instruction: when this said "emit mortgage_rate_shelf" while the
+            # instruction said "emit mortgage_rate_table for information", the
+            # model resolved the contradiction by emitting neither. State the
+            # non-negotiable part -- some rate widget, never a prose list --
+            # and leave the choice to the instruction.
+            response["_instruction"] = (
+                "NOW emit a rate widget in this same turn, copying every figure "
+                "from this response. Choose per MTG-01 step 2: "
+                "mortgage_rate_table when they are only asking what the rates "
+                "are; mortgage_rate_shelf with expand_projection=true and the "
+                "best variable product recommended when they are comparing fixed "
+                "against variable; mortgage_rate_shelf normally when they are "
+                "choosing. Include variable_projection and "
+                "variable_projection_disclaimer whenever present. Do NOT read "
+                "the rates out as a text list instead -- that silently drops the "
+                "projection chart. Say one short line, then emit the widget."
+            )
+        else:
+            response["_instruction"] = (
+                f"NOW call {widget} and emit it, in this same turn. Use the "
+                f"figures in this response as defaults and bounds. Do NOT ask the "
+                f"customer for income, down payment or monthly debts in text -- "
+                f"the widget's sliders collect them, and asking first makes them "
+                f"answer twice. Say one short line, then emit the widget."
+            )
 
     # Reset idempotency key after successful write
     WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
