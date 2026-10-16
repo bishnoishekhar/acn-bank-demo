@@ -164,8 +164,41 @@ def _enforce_session_close(state, llm_response) -> Optional[object]:
     except Exception:
         return None  # never break the turn over a closing line
 
+# --- A catalogue widget never goes out alone ---
+# On the web UI's live voice session the model sometimes calls a catalogue widget and ends the turn without a
+# word, so the customer hears nothing until they speak again. These lines also carry the mandatory
+# financial-advice disclaimer that must precede the card and rate widgets.
+_ADVICE_DISCLAIMER = ("I can provide information but not personalized financial advice. "
+                      "Please consider consulting a financial advisor for your specific situation.")
+_WIDGET_SPOKEN = {
+    'card_carousel': _ADVICE_DISCLAIMER + " Here are our credit card options on your screen.",
+    'card_widget': "Here are the details for that card on your screen.",
+    'mortgage_rate_table': _ADVICE_DISCLAIMER + " Here's where our rates sit today.",
+    'mortgage_rate_shelf': _ADVICE_DISCLAIMER + " Here are our current mortgage rates on your screen.",
+    'epp_carousel': "Here are the payment plan options on your screen.",
+    'epp_plans': "Here are the payment plan options on your screen.",
+}
+
+def _ensure_spoken_with_widget(llm_response) -> Optional[object]:
+    """If the reply calls a catalogue widget but says nothing, add the spoken line in front of it."""
+    try:
+        parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
+        if any((getattr(p, 'text', '') or '').strip() for p in parts):
+            return None
+        for p in parts:
+            fc = getattr(p, 'function_call', None)
+            name = str(getattr(fc, 'name', '') or '').split('/')[-1] if fc is not None else ''
+            if name in _WIDGET_SPOKEN:
+                return LlmResponse.from_parts(parts=[Part.from_text(text=_WIDGET_SPOKEN[name])] + parts)
+        return None
+    except Exception:
+        return None  # never break the turn over a spoken line
+
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
     result = after_model_callback_impl(callback_context, llm_response)
+    spoken = _ensure_spoken_with_widget(result if result is not None else llm_response)
+    if spoken is not None:
+        result = spoken
     closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
     return closed if closed is not None else result
