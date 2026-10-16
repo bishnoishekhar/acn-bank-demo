@@ -57,6 +57,8 @@ _FX_NUMBER = re.compile(r'(?<![\d,$])\d{1,3}\.\d{2,6}\b')
 _FX_NO_RATE_TEXT = ("I'm not able to show an exchange rate right now. I can connect you with a representative "
                     "or a branch who can help, or you can try again later. What would you prefer?")
 
+_OTP_WORDING = re.compile(r'(?i)\bverif(?:y|ying) your (?:one-time |verification )?(?:code|passcode)\b')
+
 def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
     """
     AM-1 through AM-12 + social-eng + agent-name-strip.
@@ -92,6 +94,7 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
 
         # AM-agent-name-strip: Remove agent names
         text = AGENT_NAME_PATTERNS.sub('our team', text)
+        text = _OTP_WORDING.sub('Verifying your PIN', text)
 
         # AM-11: Counter updates
         _update_counters(text, state)
