@@ -409,6 +409,58 @@ def _repair_handoff_url(raw, customer_id):
         kept.append('customer_id=' + customer_id)
     return base + '?' + '&'.join(kept)
 
+# --- VOICE speak-first gate (armed by after_model) ---
+_GATED_WIDGETS = frozenset(['acn-amount-input', 'acn-credit-card-widget', 'acn-form-input', 'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector', 'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel', 'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval', 'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator', 'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'mortgage_rate_table', 'qr_widget', 'quick_actions'])
+
+def _gate_fresh_summary(state):
+    try:
+        import time
+        raw = state.get('spoken_summary', '') or ''
+        if raw:
+            item = json.loads(raw)
+            if time.time() - float(item.get('ts', 0)) <= 90:
+                return str(item.get('text', '') or '')
+    except Exception:
+        pass
+    return ''
+
+def _speak_first_block(state, tool_name):
+    """Return a blocking dict if this widget call must be preceded by speech (voice sessions only)."""
+    try:
+        gate = str(state.get('speak_gate', '') or '')
+        short = str(tool_name).split('/')[-1]
+        if not gate or short not in _GATED_WIDGETS:
+            return None
+        if int(state.get('speak_gate_n', 0) or 0) >= 2:      # never loop: after two nudges let it through
+            state['speak_gate'] = ''
+            return None
+        state['speak_gate'] = ''
+        state['speak_gate_n'] = int(state.get('speak_gate_n', 0) or 0) + 1
+        kind = gate.split(':', 1)[0]
+        if kind == 'silent':
+            data = _gate_fresh_summary(state) if short in ('quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card') else ''
+            if data:
+                state['spoken_summary'] = ''
+                say = ("Say this to the customer, word for word: \"" + data + "\" Then call the widget again.")
+            elif short in ('card_carousel', 'card_widget', 'mortgage_rate_table', 'mortgage_rate_shelf'):
+                say = ("Start with: \"I can provide information but not personalized financial advice. Please consider consulting a "
+                       "financial advisor for your specific situation.\" then one short sentence about what is on the screen and one "
+                       "short question that moves the customer forward. Then call the widget again.")
+            else:
+                say = "Say one or two short sentences answering the customer and ending with a question, then call the widget again."
+            return {"error": "SPEAK_FIRST",
+                    "message": ("STOP. You called a widget without saying anything. In a voice conversation nothing can be said after "
+                                "a widget, so the customer would hear silence. Speak your reply NOW, in this response, before the "
+                                "widget call. " + say + " Do not mention this notice.")}
+        return {"error": "SPEAK_FIRST",
+                "message": ("You told the customer what you are showing but asked nothing, and nothing can be said after a widget, "
+                            "so the conversation would stall. Do NOT repeat what you already said. Add ONE short question that moves "
+                            "them forward (cards: whether they want more details on one of them or an eligibility check; rates: "
+                            "whether they are buying, renewing or want to see what they could afford; plans: which plan), then call "
+                            "the widget again. Do not mention this notice.")}
+    except Exception:
+        return None
+
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -417,6 +469,11 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     """
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
+
+    # BT-VOICE: in a voice session send the model back to speak before a silent / question-less widget
+    _gate_block = _speak_first_block(state, tool_name)
+    if _gate_block is not None:
+        return _gate_block
 
     # BT-9: Mock mode — compare as string; "false" must not evaluate as truthy
     if str(state.get("mock_mode", "")).lower() == "true":

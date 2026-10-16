@@ -186,40 +186,108 @@ def _enforce_session_close(state, llm_response) -> Optional[object]:
     except Exception:
         return None
 
-# --- A catalogue widget never goes out alone ---
-# On the web UI's live voice session the model sometimes calls a catalogue widget and ends the turn without a
-# word, so the customer hears nothing until they speak again. These lines also carry the mandatory
-# financial-advice disclaimer that must precede the card and rate widgets.
+# --- A widget never goes out alone (text channel) / speak-first gate (voice) ---
+# TEXT: a reply that calls a widget but says nothing gets a spoken line in front of the call.
+# VOICE: the platform streams the model's words to the speaker and the live transcript BEFORE after_model runs, so text
+# added here is never spoken, and a widget ends the turn (nothing can be said after it). So in a voice session we only
+# ARM a flag here; before_tool then sends the model back to say it first (SPEAK_FIRST).
+_WIDGET_TOOL_NAMES = frozenset(['acn-amount-input', 'acn-credit-card-widget', 'acn-form-input', 'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector', 'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel', 'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval', 'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator', 'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'mortgage_rate_table', 'qr_widget', 'quick_actions'])
+_FOLLOWUP_WIDGETS = frozenset(['card_carousel', 'card_widget', 'epp_carousel', 'epp_plans', 'mortgage_rate_shelf', 'mortgage_rate_table'])
 _ADVICE_DISCLAIMER = ("I can provide information but not personalized financial advice. "
                       "Please consider consulting a financial advisor for your specific situation.")
 _WIDGET_SPOKEN = {
-    'card_carousel': _ADVICE_DISCLAIMER + " Here are our credit card options on your screen.",
-    'card_widget': "Here are the details for that card on your screen.",
-    'mortgage_rate_table': _ADVICE_DISCLAIMER + " Here's where our rates sit today.",
-    'mortgage_rate_shelf': _ADVICE_DISCLAIMER + " Here are our current mortgage rates on your screen.",
-    'epp_carousel': "Here are the payment plan options on your screen.",
-    'epp_plans': "Here are the payment plan options on your screen.",
+    'card_carousel': _ADVICE_DISCLAIMER + " Here are our credit card options on your screen. Would you like more details on one of them, or should we check your eligibility?",
+    'card_widget': "Here are the details for that card on your screen. Would you like to apply for it, or compare another card?",
+    'mortgage_rate_table': _ADVICE_DISCLAIMER + " Here's where our rates sit today. Are you buying, renewing, or would you like to see what you could afford?",
+    'mortgage_rate_shelf': _ADVICE_DISCLAIMER + " Here are our current mortgage rates on your screen. Which term interests you?",
+    'epp_carousel': "Here are the payment plan options on your screen. Which plan would you like?",
+    'epp_plans': "Here are the payment plan options on your screen. Which plan would you like?",
+    'quick_actions': "Here are your options.",
+    'acn-payee-selector': "Here are your saved payees on your screen. Who would you like to send money to?",
+    'acn-payment-carousel': "Here is what I found on your screen.",
+    'acn-amount-input': "How much would you like to send? You can enter it on your screen.",
+    'acn-form-input': "Please fill in the details on your screen.",
+    'acn-payment-receipt': "Here is your receipt on your screen.",
+    'acn-insight-card': "Here is a quick insight on your screen.",
+    'acn-credit-card-widget': "Here are your card details on your screen.",
 }
+_SUMMARY_WIDGETS = frozenset({'quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card'})
 
-def _ensure_spoken_with_widget(llm_response) -> Optional[object]:
-    """If the reply calls a catalogue widget but says nothing, add the spoken line in front of it."""
+def _is_voice_state(state):
     try:
-        parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
-        if any((getattr(p, 'text', '') or '').strip() for p in parts):
+        return 'VOICE' in str(state.get('_session', '')).upper()
+    except Exception:
+        return False
+
+def _fresh_spoken_summary(state):
+    try:
+        import time
+        raw = state.get('spoken_summary', '') or ''
+        if raw:
+            item = json.loads(raw)
+            if time.time() - float(item.get('ts', 0)) <= 90:
+                return str(item.get('text', '') or '')
+    except Exception:
+        pass
+    return ''
+
+def _first_widget_and_text(llm_response):
+    parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
+    spoken = " ".join((getattr(p, 'text', '') or '').strip() for p in parts if (getattr(p, 'text', '') or '').strip())
+    widget = ''
+    for p in parts:
+        fc = getattr(p, 'function_call', None)
+        name = str(getattr(fc, 'name', '') or '').split('/')[-1] if fc is not None else ''
+        if name in _WIDGET_TOOL_NAMES:
+            widget = name
+            break
+    return parts, widget, spoken
+
+def _arm_speak_first(state, llm_response):
+    """Voice only: remember that this reply's widget call needs the model to speak first."""
+    try:
+        if not _is_voice_state(state):
+            state['speak_gate'] = ''
+            return
+        _parts, widget, spoken = _first_widget_and_text(llm_response)
+        if not widget:
+            state['speak_gate'] = ''
+            if spoken:
+                state['speak_gate_n'] = 0
+            return
+        if not spoken:
+            state['speak_gate'] = 'silent:' + widget
+        elif widget in _FOLLOWUP_WIDGETS and '?' not in spoken:
+            state['speak_gate'] = 'followup:' + widget
+        else:
+            state['speak_gate'] = ''
+            state['speak_gate_n'] = 0
+    except Exception:
+        pass
+
+def _ensure_spoken_with_widget(state, llm_response) -> Optional[object]:
+    """TEXT channel: if the reply calls a widget but says nothing, add the spoken line in front of the call."""
+    try:
+        if _is_voice_state(state):
+            return None  # voice: handled by the speak-first gate (text added here would never be spoken)
+        parts, widget, spoken = _first_widget_and_text(llm_response)
+        if spoken or not widget:
             return None
-        for p in parts:
-            fc = getattr(p, 'function_call', None)
-            name = str(getattr(fc, 'name', '') or '').split('/')[-1] if fc is not None else ''
-            if name in _WIDGET_SPOKEN:
-                return LlmResponse.from_parts(parts=[Part.from_text(text=_WIDGET_SPOKEN[name])] + parts)
-        return None
+        text = ''
+        if widget in _SUMMARY_WIDGETS:
+            text = _fresh_spoken_summary(state)
+            if text:
+                state['spoken_summary'] = ''
+        text = text or _WIDGET_SPOKEN.get(widget) or "Here you go."
+        return LlmResponse.from_parts(parts=[Part.from_text(text=text)] + parts)
     except Exception:
         return None  # never break the turn over a spoken line
 
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
     result = after_model_callback_impl(callback_context, llm_response)
-    spoken = _ensure_spoken_with_widget(result if result is not None else llm_response)
+    _arm_speak_first(callback_context.state, result if result is not None else llm_response)
+    spoken = _ensure_spoken_with_widget(callback_context.state, result if result is not None else llm_response)
     if spoken is not None:
         result = spoken
     closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)

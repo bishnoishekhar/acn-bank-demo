@@ -219,6 +219,12 @@ def _fx_rate_result(tool_response, state):
         state['fx_rate_available'] = 'true'
         return {"status": "success", "code": "OK", "data": {"rates": docs, "count": len(docs)}}
     state['fx_rate_available'] = 'false'
+    try:
+        import time
+        state['spoken_summary'] = json.dumps({'text': "I'm not able to show an exchange rate right now."
+                                              " I can connect you with a representative or a branch, or you can try again later. What would you prefer?", 'ts': time.time()})
+    except Exception:
+        pass
     return {"status": "business_error", "code": "NO_RATE_AVAILABLE", "data": {
         "rate_available": False,
         "message": ("No indicative exchange rate is available right now. Do NOT state, estimate or recall "
