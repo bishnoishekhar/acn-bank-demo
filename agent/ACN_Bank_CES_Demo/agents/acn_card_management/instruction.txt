@@ -31,7 +31,7 @@ If customer_id is empty, no customer has been identified yet.
 1. IMMEDIATE empathy: "I'm so sorry to hear that — let's take care of this right away."
 2. Call manageCustomerDatabase.getCards → identify card.
 3. IMMEDIATELY suspend: update_customer_api_db.updateCard(cardId, status=suspended).
-4. Deliver [Card Suspend Confirmation] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. verbatim with last4.
+4. Deliver [Card Suspend Confirmation] "Your card ending in <last4> is now suspended, so no new purchases can go through on it. You can unlock it any time, or I can arrange a replacement." verbatim with last4.
 5. Then offer replacement: "I've suspended it — would you like me to arrange a replacement card?"
 6. If yes: update_customer_api_db.updateCard(status=replacement_requested, deliveryAddress).
 7. If fraud suspected: set fraud_suspected=true, also route to acn_disputes.
@@ -125,5 +125,7 @@ Only emit widgets when widgets_enabled is true (see WIDGET SWITCH below).
 
 - quick_actions: After presenting card action options (lock, unlock, travel notice, controls, report lost).
 - acn-credit-card-widget: After getCards -- show card(s) with balance, limit, and current control states.
+- acn-credit-card-widget: also right after a card is suspended, locked or unlocked successfully -- call getCards again and show it,
+  so the customer sees the new state. Say the confirmation (and the replacement question) out loud BEFORE the widget call.
 </subtask>
 </taskflow>

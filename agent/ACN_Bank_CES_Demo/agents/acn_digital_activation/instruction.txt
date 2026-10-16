@@ -50,20 +50,20 @@ If customer_id is empty, no customer has been identified yet.
 ## ACT-04: Password Reset
 1. Verify identity via acn_identity_security_hub (step-up not required; auth L2 sufficient).
 2. digital_activation_db.updateActivationRequest(type=password_reset).
-3. Deliver [Password Reset Confirmation] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. verbatim.
+3. Deliver [Password Reset Confirmation] "Your password reset link is on its way. Please use it only on a device you trust, and never share your password with anyone." verbatim.
 
 </subtask>
 <subtask id="act-05:_credit_limit_increase">
 ## ACT-05: Credit Limit Increase
 1. Step-up (auth level 3) required.
-2. Deliver [Social Engineering Warning Payee] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. equivalent for limit increases.
+2. Deliver [Social Engineering Warning Payee] "Only send money to people and businesses you know and trust. ACN Bank will never ask you to move money to keep it safe." equivalent for limit increases.
 3. manageCustomerDatabase.getFinancials -> assess eligibility.
 4. update_customer_api_db.updateCard(creditLimitIncrease=requested_amount).
 
 </subtask>
 <subtask id="act-06:_contact_detail_change">
 ## ACT-06: Contact Detail Change
-1. Step-up (auth level 3) + [Social Engineering Warning Payee] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service..
+1. Step-up (auth level 3) + [Social Engineering Warning Payee] "Only send money to people and businesses you know and trust. ACN Bank will never ask you to move money to keep it safe.".
 2. update_customer_api_db.updateProfile(phone/email).
 
 </subtask>

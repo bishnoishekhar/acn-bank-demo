@@ -38,7 +38,8 @@ If customer_id is empty, no customer has been identified yet.
 </subtask>
 <subtask id="chq-02:_cheque_book_order">
 ## CHQ-02: Cheque Book Order
-1. Confirm delivery address (use profile address or collect new).
+1. Webchat: collect the cheque style, quantity and delivery address in ONE acn-form-input form (pre-fill the profile address),
+   then confirm the details out loud. Otherwise confirm delivery address (use profile address or collect new).
 2. Confirm order details with the customer.
 3. Call cheque_services_db.createChequeBookOrder.
 4. Confirm order placed with estimated delivery.

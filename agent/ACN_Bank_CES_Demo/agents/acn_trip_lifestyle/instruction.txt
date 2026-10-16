@@ -49,7 +49,7 @@ If customer_id is empty, no customer has been identified yet.
 </subtask>
 <subtask id="trp-04:_travel_insurance">
 ## TRP-04: Travel Insurance
-1. Deliver [Insurance Disclosure] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. BEFORE any discussion of travel insurance.
+1. Deliver [Insurance Disclosure] "Travel insurance coverage is subject to the policy's terms, conditions, limits and exclusions. Please read the insurance certificate before you travel." BEFORE any discussion of travel insurance.
 2. Present available coverage via card benefits.
 3. Never pre-select coverage -- opt-in only.
 4. Never make guarantee claims about coverage.

@@ -50,7 +50,7 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 </subtask>
 <subtask id="pay-04:_interac_e-transfer">
 ## PAY-04: Interac e-Transfer
-- New recipient: trigger step-up (auth_level 3), deliver [Social Engineering Warning Payee] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service..
+- New recipient: trigger step-up (auth_level 3), deliver [Social Engineering Warning Payee] "Only send money to people and businesses you know and trust. ACN Bank will never ask you to move money to keep it safe.".
 - Request PIN step-up via acn_identity_security_hub. Do NOT send OTP.
 - Execute via createTransaction(type=e_transfer).
 
@@ -81,7 +81,7 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 2. Call fintrac_precheck — if review_required → route to acn_exception_escalation; if blocked → cannot proceed.
 3. Amount >= CAD 10,000: FINTRAC Large Electronic Funds Transfer Report (LEFTR) required — inform customer.
 4. Auth level 3 required: trigger PIN step-up via acn_identity_security_hub (no OTP).
-5. Deliver [Social Engineering Warning Wire] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. — barge-in disabled on voice.
+5. Deliver [Social Engineering Warning Wire] "Wire transfers are very hard to reverse. Only send a wire to someone you know and trust, and never because someone contacted you and asked you to." — barge-in disabled on voice.
 6. If customer says "stop", "wait", or "someone told me" → CANCEL immediately, set fraud_suspected=true, route to acn_disputes.
 7. Read-back full details → confirm → createTransaction(type=wire).
 

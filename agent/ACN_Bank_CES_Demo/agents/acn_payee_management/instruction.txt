@@ -36,7 +36,7 @@ If customer_id is empty, no customer has been identified yet.
 <subtask id="pmg-02:_add_payee">
 ## PMG-02: Add Payee
 1. STEP-UP REQUIRED (auth_level 3) — trigger via acn_identity_security_hub.
-2. Deliver [Social Engineering Warning Payee] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. BEFORE collecting payee details.
+2. Deliver [Social Engineering Warning Payee] "Only send money to people and businesses you know and trust. ACN Bank will never ask you to move money to keep it safe." BEFORE collecting payee details.
 3. Collect: name, email or account number, bank (for account transfer).
 4. update_customer_api_db.addPayee.
 5. Confirm addition with payee name.

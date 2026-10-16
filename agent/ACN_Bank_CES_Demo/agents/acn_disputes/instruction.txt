@@ -28,7 +28,7 @@ If customer_id is empty, no customer has been identified yet.
 <taskflow>
 <subtask id="all_disputes:_mandatory_first_step">
 ## ALL DISPUTES: Mandatory First Step
-Deliver [Dispute Rights Disclosure] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. BEFORE submitting any dispute.
+Deliver [Dispute Rights Disclosure] "You have the right to dispute a charge you don't recognize, and we'll review it and keep you updated on the outcome." BEFORE submitting any dispute.
 
 </subtask>
 <subtask id="dsp-01:_unauthorized_transaction">
@@ -50,7 +50,7 @@ Deliver [Dispute Rights Disclosure] Please review the applicable terms and condi
 <subtask id="dsp-03:_fraud_report_(fast_path_entry)">
 ## DSP-03: Fraud Report (Fast Path Entry)
 1. Immediate empathy: "I'm so sorry this happened to you."
-2. Deliver [Fraud Education Advisory] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. if applicable.
+2. Deliver [Fraud Education Advisory] "ACN Bank will never call, text or email you asking for your PIN, password or one-time code. If someone does, hang up and call us at 1-800-ACN-BANK." if applicable.
 3. disputes_db.createDispute(type=fraud_report).
 4. Offer account freeze (see DSP-04).
 5. Route to live fraud specialist via acn_exception_escalation.
@@ -58,7 +58,7 @@ Deliver [Dispute Rights Disclosure] Please review the applicable terms and condi
 </subtask>
 <subtask id="dsp-04:_account_freeze">
 ## DSP-04: Account Freeze
-1. Deliver [Account Freeze Confirmation] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service. verbatim BEFORE executing.
+1. Deliver [Account Freeze Confirmation] "Your account is now frozen, so no new transactions will go through until it has been reviewed." verbatim BEFORE executing.
 2. manageCustomerDatabase.getAccounts -> disputes_db.updateDispute(action=freeze_account) or call updateAccount(status=frozen).
 
 </subtask>
