@@ -1,50 +1,20 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Account Opening DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Account opening workflow API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_products:
     get:
       operationId: getAccountProducts
       summary: Get available account products and their eligibility criteria
       security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: type
-          in: query
-          schema:
-            type: string
-            enum: [chequing, savings, tfsa, rrsp, fhsa, gic, all]
-        - name: eligibility
-          in: query
-          schema:
-            type: string
-          description: Filter by customer segment or eligibility flag
+      - GoogleBearerAuth: []
       responses:
-        "200":
+        '200':
           description: Available account products
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_applications:
-    post:
-      operationId: createAccountApplication
-      summary: Create a new account opening application
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateAccountApplicationRequest"
-      responses:
-        "200":
-          description: Account application created
           content:
             application/json:
               schema:
@@ -54,15 +24,15 @@ paths:
       operationId: getAccountApplicationStatus
       summary: Get the status of an account opening application
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Application status
           content:
             application/json:
@@ -72,26 +42,65 @@ paths:
       operationId: updateAccountApplication
       summary: Update an account opening application
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateAccountApplicationRequest"
+              $ref: '#/components/schemas/UpdateAccountApplicationRequest'
       responses:
-        "200":
+        '200':
           description: Application updated
           content:
             application/json:
               schema:
                 type: object
+      description: Update an account opening application
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/account_applications:
+    post:
+      operationId: createAccountApplication
+      summary: Create a new account opening application
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountApplicationRequest'
+      responses:
+        '200':
+          description: Account application created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new account opening application
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -101,33 +110,30 @@ components:
   schemas:
     CreateAccountApplicationRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, productId, applicationData (required: productId). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - productId
-      properties:
-        customerId:
-          type: string
-        productId:
-          type: string
-        applicationData:
-          type: object
-          properties:
-            purpose:
-              type: string
-            initialDeposit:
-              type: number
-            depositAccountId:
-              type: string
-            currency:
-              type: string
-        idempotencyKey:
-          type: string
+        - applicationData
+        required:
+        - productId
+        col: null
     UpdateAccountApplicationRequest:
       type: object
       properties:
-        status:
-          type: string
-        decisionReason:
-          type: string
-        applicationData:
+        fields:
           type: object
+          description: 'Plain key/value map with: status, decisionReason, applicationData. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - decisionReason
+        - applicationData
+        required: []
+        col: null

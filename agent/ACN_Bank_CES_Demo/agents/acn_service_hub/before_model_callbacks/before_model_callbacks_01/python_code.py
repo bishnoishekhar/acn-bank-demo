@@ -190,6 +190,18 @@ def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
         msg += f" | customer_display_name={display_name}"
     if inject_name == "true":
         msg += f" | GREET CUSTOMER AS '{display_name}' — address them by this name"
+    _cid = state.get("customer_id", "")
+    try:
+        _identified = bool(_cid) and int(auth_level_str or "0") >= 1
+    except Exception:
+        _identified = bool(_cid)
+    if _identified:
+        # Leaf agents were never told who they are serving, so they guessed ids
+        # (phone number, "CUST-10001", "") and the ownership check rejected every call.
+        msg += (f" | IDENTIFIED: customer_id={_cid}. The customer is already identified and "
+                f"customer-data tools apply this id automatically (customerId={_cid}). "
+                f"Never look the customer up by phone number, never ask for an id, and do not "
+                f"call the identity hub just to learn it.")
     _inject_instruction(llm_request, msg)
 
 def _inject_cie_context(state: dict[str, Any], llm_request) -> None:

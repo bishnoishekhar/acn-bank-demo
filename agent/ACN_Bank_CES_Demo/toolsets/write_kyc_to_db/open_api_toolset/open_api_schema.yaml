@@ -1,57 +1,77 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: ACN Bank KYC Database Write API - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Write KYC verification records directly to Firestore (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_records:
     post:
       operationId: writeKycToDb
       summary: Create a new KYC verification record
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WriteKycRequest"
+              $ref: '#/components/schemas/WriteKycRequest'
       responses:
-        "200":
+        '200':
           description: KYC record created
           content:
             application/json:
               schema:
                 type: object
-        "400":
+        '400':
           description: Validation error
-        "500":
+        '500':
           description: Service error
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new KYC verification record
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_records/{kycId}:
     patch:
       operationId: updateKycRecord
       summary: Update an existing KYC record (e.g., after manual review)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: kycId
-          in: path
-          required: true
-          schema:
+      - name: kycId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateKycRecordRequest"
+              $ref: '#/components/schemas/UpdateKycRecordRequest'
       responses:
-        "200":
+        '200':
           description: KYC record updated
-        "404":
+        '404':
           description: KYC record not found
+      description: Update an existing KYC record (e.g., after manual review)
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -61,47 +81,37 @@ components:
   schemas:
     WriteKycRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, applicationId, documentType, verificationStatus, overallConfidence, manualReviewRequired, extractedDataHash (required: applicationId, documentType, verificationStatus, overallConfidence). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - applicationId
         - documentType
         - verificationStatus
         - overallConfidence
-      properties:
-        customerId:
-          type: string
-          description: Firestore customer document ID
-        applicationId:
-          type: string
-          description: Application document ID this KYC is linked to
-        documentType:
-          type: string
-          description: Document type (income, t4, noa, pay_stub, employment_letter, bank_statement, drivers_license)
-        verificationStatus:
-          type: string
-          enum: [passed, failed, manual_review_required]
-          description: KYC verification outcome
-        overallConfidence:
-          type: number
-          format: float
-          minimum: 0
-          maximum: 1
-          description: DocAI confidence score (0-1)
-        manualReviewRequired:
-          type: boolean
-          description: True when confidence < 0.80
-        extractedDataHash:
-          type: string
-          description: SHA-256 hash of extracted data (no PII values stored)
+        - manualReviewRequired
+        - extractedDataHash
+        required:
+        - applicationId
+        - documentType
+        - verificationStatus
+        - overallConfidence
+        col: null
     UpdateKycRecordRequest:
       type: object
       properties:
-        verificationStatus:
-          type: string
-          enum: [passed, failed, manual_review_required]
-        reviewNotes:
-          type: string
-          description: Notes from manual review (no PII)
-        reviewedBy:
-          type: string
-          description: Reviewer identifier
+        fields:
+          type: object
+          description: 'Plain key/value map with: verificationStatus, reviewNotes, reviewedBy. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - verificationStatus
+        - reviewNotes
+        - reviewedBy
+        required: []
+        col: null

@@ -1,44 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Digital Activation DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Card activation, digital wallet, and online banking activation tracking API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/activation_requests:
-    post:
-      operationId: createActivationRequest
-      summary: Create a new activation request for card, digital wallet, or online banking
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateActivationRequest"
-      responses:
-        "200":
-          description: Activation request created
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/activation_requests/{requestId}:
     get:
       operationId: getActivationStatus
       summary: Get the status of an activation request
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: requestId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Activation request status
           content:
             application/json:
@@ -48,26 +29,65 @@ paths:
       operationId: updateActivationRequest
       summary: Update an activation request (e.g. mark completed or failed)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: requestId
-          in: path
-          required: true
-          schema:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateActivationRequest"
+              $ref: '#/components/schemas/UpdateActivationRequest'
       responses:
-        "200":
+        '200':
           description: Activation request updated
           content:
             application/json:
               schema:
                 type: object
+      description: Update an activation request (e.g. mark completed or failed)
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/activation_requests:
+    post:
+      operationId: createActivationRequest
+      summary: Create a new activation request for card, digital wallet, or online banking
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateActivationRequest'
+      responses:
+        '200':
+          description: Activation request created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new activation request for card, digital wallet, or online banking
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -77,36 +97,32 @@ components:
   schemas:
     CreateActivationRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, activationType, cardId, channel, deviceInfo (required: activationType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - activationType
-      properties:
-        customerId:
-          type: string
-        activationType:
-          type: string
-          enum: [card_activation, apple_pay, google_pay, online_banking, password_reset, pin_reset]
-        cardId:
-          type: string
-        channel:
-          type: string
-          enum: [chat, phone, branch, app]
-        deviceInfo:
-          type: object
-          properties:
-            deviceType:
-              type: string
-            deviceId:
-              type: string
-        idempotencyKey:
-          type: string
+        - cardId
+        - channel
+        - deviceInfo
+        required:
+        - activationType
+        col: null
     UpdateActivationRequest:
       type: object
       properties:
-        status:
-          type: string
-          enum: [completed, failed, cancelled]
-        failureReason:
-          type: string
-        completionData:
+        fields:
           type: object
+          description: 'Plain key/value map with: status, failureReason, completionData. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - failureReason
+        - completionData
+        required: []
+        col: null

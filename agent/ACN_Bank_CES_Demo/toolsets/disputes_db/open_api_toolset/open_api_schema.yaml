@@ -1,44 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Disputes DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Dispute creation, retrieval, update, and PAD dispute handling API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes:
-    post:
-      operationId: createDispute
-      summary: Create a new transaction dispute or chargeback
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateDisputeRequest"
-      responses:
-        "200":
-          description: Dispute created
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes/{disputeId}:
     get:
       operationId: getDispute
       summary: Get dispute details by ID
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: disputeId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Dispute details
           content:
             application/json:
@@ -48,45 +29,91 @@ paths:
       operationId: updateDispute
       summary: Update an existing dispute
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: disputeId
-          in: path
-          required: true
-          schema:
+      - name: disputeId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateDisputeRequest"
+              $ref: '#/components/schemas/UpdateDisputeRequest'
       responses:
-        "200":
+        '200':
           description: Dispute updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/pad_disputes:
+      description: Update an existing dispute
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes:
     post:
-      operationId: createPADDispute
-      summary: Create a Pre-Authorized Debit dispute
+      operationId: createDispute
+      summary: Create a new transaction dispute or chargeback
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreatePADDisputeRequest"
+              $ref: '#/components/schemas/CreateDisputeRequest'
       responses:
-        "200":
+        '200':
+          description: Dispute created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new transaction dispute or chargeback
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/pad_disputes:
+    post:
+      operationId: createPADDispute
+      summary: Create a Pre-Authorized Debit dispute
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePADDisputeRequest'
+      responses:
+        '200':
           description: PAD dispute created
           content:
             application/json:
               schema:
                 type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a Pre-Authorized Debit dispute
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -96,51 +123,53 @@ components:
   schemas:
     CreateDisputeRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, transactionId, type, amount, description (required: transactionId, type, amount). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - transactionId
         - type
         - amount
-      properties:
-        customerId:
-          type: string
-        transactionId:
-          type: string
-        type:
-          type: string
-          enum: [unauthorized, duplicate, incorrect_amount, item_not_received, cancelled_service]
-        amount:
-          type: number
-        description:
-          type: string
-        idempotencyKey:
-          type: string
+        - description
+        required:
+        - transactionId
+        - type
+        - amount
+        col: null
     UpdateDisputeRequest:
       type: object
       properties:
-        status:
-          type: string
-        resolution:
-          type: string
-        additionalInfo:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: status, resolution, additionalInfo. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - resolution
+        - additionalInfo
+        required: []
+        col: null
     CreatePADDisputeRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, padId, amount, reason, cpaRule (required: padId, amount, reason). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - padId
         - amount
         - reason
-      properties:
-        customerId:
-          type: string
-        padId:
-          type: string
-        amount:
-          type: number
-        reason:
-          type: string
-        cpaRule:
-          type: string
-        idempotencyKey:
-          type: string
+        - cpaRule
+        required:
+        - padId
+        - amount
+        - reason
+        col: null

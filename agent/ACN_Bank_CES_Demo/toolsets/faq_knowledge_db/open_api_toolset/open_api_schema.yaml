@@ -1,44 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: FAQ Knowledge DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: FAQ and knowledge base search API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/faqs:runQuery:
-    post:
-      operationId: searchFAQs
-      summary: Search FAQ knowledge base by query string
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/FAQSearchRequest"
-      responses:
-        "200":
-          description: Matching FAQ results
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/faqs/{faqId}:
     get:
       operationId: getFAQ
       summary: Get a specific FAQ by ID
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: faqId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: faqId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: FAQ details
           content:
             application/json:
@@ -49,21 +30,34 @@ paths:
       operationId: listFAQCategories
       summary: List all available FAQ categories
       security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: language
-          in: query
-          schema:
-            type: string
-            default: en
-            enum: [en, fr]
+      - GoogleBearerAuth: []
       responses:
-        "200":
+        '200':
           description: List of FAQ categories
           content:
             application/json:
               schema:
                 type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
+    post:
+      operationId: searchFAQs
+      summary: Search FAQ knowledge base by query string
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FAQSearchRequest'
+      responses:
+        '200':
+          description: Matching FAQ results
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Search FAQ knowledge base by query string
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -73,20 +67,17 @@ components:
   schemas:
     FAQSearchRequest:
       type: object
-      required:
-        - q
       properties:
-        q:
-          type: string
-          description: Search query string
-        category:
-          type: string
-          description: Filter by FAQ category
-        language:
-          type: string
-          default: en
-          enum: [en, fr]
-        limit:
-          type: integer
-          default: 10
-          maximum: 50
+        structuredQuery:
+          type: object
+          description: Do NOT build this yourself. Pass the filters as plain arguments (q, category, language, limit) and the Firestore query is built for you.
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - q
+        - category
+        - language
+        - limit
+        required:
+        - q
+        col: faqs

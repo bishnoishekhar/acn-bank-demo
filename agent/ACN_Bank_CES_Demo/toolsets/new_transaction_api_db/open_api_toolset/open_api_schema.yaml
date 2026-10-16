@@ -1,136 +1,188 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: New Transaction API DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Money movement API for transactions and recurring payment schedules (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/transactions:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/transactions:
     post:
       operationId: createTransaction
-      summary: Create a new money movement transaction (transfer, payment, bill pay)
+      summary: Create a money movement transaction (internal transfer, e-transfer, bill payment, wire) in the customer's transaction history
+      description: Pass the transaction as a PLAIN key/value map in `fields` (customerId, fromAccountId, amount, currency, type, counterpartyName and ONE of toAccountId / toBeneficiaryId / toBillId, optional memo). customerId and documentId are filled in for you. Do NOT format values for Firestore; that conversion is done for you.
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateTransactionRequest"
+              $ref: '#/components/schemas/CreateTransactionRequest'
       responses:
-        "200":
+        '200':
           description: Transaction created
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/transactions/{transactionId}:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/transactions/{transactionId}:
     patch:
       operationId: updateTransaction
       summary: Update transaction status or details
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: transactionId
-          in: path
-          required: true
-          schema:
+      - name: transactionId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateTransactionRequest"
+              $ref: '#/components/schemas/UpdateTransactionRequest'
       responses:
-        "200":
+        '200':
           description: Transaction updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/recurring_schedules:runQuery:
+      description: Update transaction status or details
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
     post:
       operationId: listRecurringSchedules
       summary: List recurring payment schedules for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ListRecurringSchedulesRequest"
+              $ref: '#/components/schemas/ListRecurringSchedulesRequest'
       responses:
-        "200":
+        '200':
           description: List of recurring schedules
           content:
             application/json:
               schema:
                 type: object
+      description: List recurring payment schedules for a customer
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/recurring_schedules:
     post:
       operationId: createRecurringSchedule
       summary: Create a new recurring payment schedule
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateRecurringScheduleRequest"
+              $ref: '#/components/schemas/CreateRecurringScheduleRequest'
       responses:
-        "200":
+        '200':
           description: Recurring schedule created
           content:
             application/json:
               schema:
                 type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new recurring payment schedule
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/recurring_schedules/{scheduleId}:
     patch:
       operationId: updateRecurringSchedule
       summary: Update a recurring payment schedule
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: scheduleId
-          in: path
-          required: true
-          schema:
+      - name: scheduleId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateRecurringScheduleRequest"
+              $ref: '#/components/schemas/UpdateRecurringScheduleRequest'
       responses:
-        "200":
+        '200':
           description: Schedule updated
           content:
             application/json:
               schema:
                 type: object
+      description: Update a recurring payment schedule
     delete:
       operationId: cancelRecurringSchedule
       summary: Cancel a recurring payment schedule
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: scheduleId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: scheduleId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Schedule cancelled
           content:
             application/json:
               schema:
                 type: object
+      description: Cancel a recurring payment schedule
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -140,97 +192,75 @@ components:
   schemas:
     CreateTransactionRequest:
       type: object
-      required:
-        - customerId
-        - fromAccountId
-        - amount
-        - currency
-        - type
-        - idempotencyKey
       properties:
-        customerId:
-          type: string
-        fromAccountId:
-          type: string
-        toAccountId:
-          type: string
-        toBeneficiaryId:
-          type: string
-        toBillId:
-          type: string
-        amount:
-          type: number
-        currency:
-          type: string
-          default: CAD
-        type:
-          type: string
-          enum: [internal_transfer, e_transfer, bill_payment, wire]
-        memo:
-          type: string
-        scheduledDate:
-          type: string
-        idempotencyKey:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map: customerId, fromAccountId, amount (number), currency (CAD), type (internal_transfer | e_transfer | bill_payment | wire | credit_card_payment | qr_pay), counterpartyName, memo, and one of toAccountId / toBeneficiaryId / toBillId.'
+          additionalProperties: true
     UpdateTransactionRequest:
       type: object
       properties:
-        status:
-          type: string
-        failureReason:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: status, failureReason. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - failureReason
+        required: []
+        col: null
     ListRecurringSchedulesRequest:
       type: object
-      required:
-        - customerId
       properties:
-        customerId:
-          type: string
+        structuredQuery:
+          type: object
+          description: Do NOT build this yourself. Pass the filters as plain arguments (customerId) and the Firestore query is built for you.
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - customerId
+        required: []
+        col: recurring_schedules
     CreateRecurringScheduleRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, fromAccountId, toAccountId, toBeneficiaryId, toBillId, amount, currency, frequency, startDate, endDate, memo (required: fromAccountId, amount, frequency, startDate). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
+        - fromAccountId
+        - toAccountId
+        - toBeneficiaryId
+        - toBillId
+        - amount
+        - currency
+        - frequency
+        - startDate
+        - endDate
+        - memo
+        required:
         - fromAccountId
         - amount
         - frequency
         - startDate
-      properties:
-        customerId:
-          type: string
-        fromAccountId:
-          type: string
-        toAccountId:
-          type: string
-        toBeneficiaryId:
-          type: string
-        toBillId:
-          type: string
-        amount:
-          type: number
-        currency:
-          type: string
-          default: CAD
-        frequency:
-          type: string
-          enum: [weekly, biweekly, monthly, quarterly]
-        startDate:
-          type: string
-        endDate:
-          type: string
-        memo:
-          type: string
-        idempotencyKey:
-          type: string
+        col: null
     UpdateRecurringScheduleRequest:
       type: object
       properties:
-        amount:
-          type: number
-        frequency:
-          type: string
-        nextRunDate:
-          type: string
-        endDate:
-          type: string
-        status:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: amount, frequency, nextRunDate, endDate, status. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - amount
+        - frequency
+        - nextRunDate
+        - endDate
+        - status
+        required: []
+        col: null

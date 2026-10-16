@@ -1,85 +1,104 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: ACN Bank Credit Card Application Persistence API - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Persist approved credit card applications directly to Firestore (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}:
     get:
       operationId: getCreditCardApplication
       summary: Get the current state of a credit card application
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Card application document ID
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card application document ID
       responses:
-        "200":
+        '200':
           description: Application record
           content:
             application/json:
               schema:
                 type: object
-        "404":
+        '404':
           description: Application not found
     patch:
       operationId: patchCreditCardApplication
       summary: Update fields on an existing credit card application
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PatchCreditCardApplicationRequest"
+              $ref: '#/components/schemas/PatchCreditCardApplicationRequest'
       responses:
-        "200":
+        '200':
           description: Application updated
-        "404":
+        '404':
           description: Application not found
+      description: Update fields on an existing credit card application
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications/{applicationId}/persist_approved:
     post:
       operationId: persistApprovedCreditCardApplication
       summary: Persist an approved credit card application to the core banking system
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
-          description: Card application document ID
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+        description: Card application document ID
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/PersistApprovedRequest"
+              $ref: '#/components/schemas/PersistApprovedRequest'
       responses:
-        "200":
+        '200':
           description: Application persisted successfully
           content:
             application/json:
               schema:
                 type: object
-        "400":
+        '400':
           description: Validation error
-        "409":
+        '409':
           description: Application already persisted (idempotency)
+      description: Persist an approved credit card application to the core banking system
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -89,33 +108,32 @@ components:
   schemas:
     PersistApprovedRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, approvedCreditLimit, interestRate, productType (required: approvedCreditLimit, interestRate, productType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - approvedCreditLimit
         - interestRate
         - productType
-      properties:
-        customerId:
-          type: string
-          description: Firestore customer document ID
-        approvedCreditLimit:
-          type: number
-          format: float
-          description: Approved credit limit in CAD
-        interestRate:
-          type: number
-          format: float
-          description: Approved interest rate (percentage)
-        productType:
-          type: string
-          description: Credit card product type code
-        idempotencyKey:
-          type: string
-          description: Idempotency key to prevent double-posting
+        required:
+        - approvedCreditLimit
+        - interestRate
+        - productType
+        col: null
     PatchCreditCardApplicationRequest:
       type: object
       properties:
-        applicationStatus:
-          type: string
-        notes:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: applicationStatus, notes. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - applicationStatus
+        - notes
+        required: []
+        col: null

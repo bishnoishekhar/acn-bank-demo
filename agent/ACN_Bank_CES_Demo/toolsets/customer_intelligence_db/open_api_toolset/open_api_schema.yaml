@@ -1,25 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Customer Intelligence DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Customer Intelligence Engine data API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/intelligence/segment:
     get:
       operationId: getCustomerSegment
       summary: Get customer segment and intelligence profile
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Customer segment data
           content:
             application/json:
@@ -30,26 +30,15 @@ paths:
       operationId: getNextBestActions
       summary: Get next-best-actions for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: channel
-          in: query
-          schema:
-            type: string
-            enum: [chat, phone, branch, app]
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 5
-            maximum: 20
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of next-best-actions
           content:
             application/json:
@@ -60,26 +49,32 @@ paths:
       operationId: logNudgeShown
       summary: Log a nudge shown to customer with outcome
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/NudgeLogRequest"
+              $ref: '#/components/schemas/NudgeLogRequest'
       responses:
-        "200":
+        '200':
           description: Nudge log recorded
           content:
             application/json:
               schema:
                 type: object
+      description: Log a nudge shown to customer with outcome
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -89,15 +84,18 @@ components:
   schemas:
     NudgeLogRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: nudgeId, outcome, channel (required: nudgeId, outcome, channel). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - nudgeId
         - outcome
         - channel
-      properties:
-        nudgeId:
-          type: string
-        outcome:
-          type: string
-          enum: [shown, clicked, dismissed, converted]
-        channel:
-          type: string
+        required:
+        - nudgeId
+        - outcome
+        - channel
+        col: null

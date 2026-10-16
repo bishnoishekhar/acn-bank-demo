@@ -27,7 +27,7 @@ AGENT_NAME_PATTERNS = re.compile(
     r'acn_faq_knowledge|acn_identity_security_hub|'
     r'Banking Hub|Products Hub|Service Hub|Identity Hub|Accounts Hub|'
     r'Payments Agent|Credit Cards? Agent|Cards? Agent|Service Agent|'
-    r'transfer(?:ring)? (?:you )?to|routing you to|sending you to|I\'ll transfer|'
+    r'transfer(?:ring)? you to|routing you to|sending you to|I\'ll transfer you|'
     r'Connecting you to|connecting you to|passing you to|handing you (?:off|over)|'
     r'another agent|different agent|specialist agent)\b',
     re.IGNORECASE
@@ -102,6 +102,41 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
     else:
         _set_cnt(state, retry_strikes="0")
 
+# ---------------------------------------------------------------------------
+# AM-CIE: the CIE is a silent background AgentTool whose instruction says "return an
+# empty response". Gemini cannot, so after its tools it answered "Hmm, I'm having
+# trouble with that. Do you want me to try again?" (or called end_session) and that
+# became the orchestrator's tool result. Replace ANY final answer (no tool call) with
+# a short status built from state, so the caller always gets a calm, non-empty result.
+# ---------------------------------------------------------------------------
+def _cie_group(state):
+    try:
+        return json.loads(state.get("cie_context", "{}") or "{}")
+    except Exception:
+        return {}
+
+def _cie_status(state) -> str:
+    loaded = bool(str(state.get("customer_segment", "") or "").strip()
+                  or str(state.get("life_stage_signal", "") or "").strip()
+                  or _cie_group(state).get("segment"))
+    group = _cie_group(state)
+    group["loaded"] = loaded
+    if not loaded:
+        group["nba_suppressed"] = True
+    state["cie_context"] = json.dumps(group)
+    if loaded:
+        return "CIE complete: customer profile loaded. Continue with the customer's request."
+    return ("CIE complete: no profile available (nudges suppressed). This is not an error. "
+            "Continue with the customer's request and do not mention it.")
+
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
-    return after_model_callback_impl(callback_context, llm_response)
+    result = after_model_callback_impl(callback_context, llm_response)
+    try:
+        current = result if result is not None else llm_response
+        parts = list(getattr(getattr(current, 'content', None), 'parts', None) or [])
+        if not any(getattr(p, 'function_call', None) for p in parts):
+            return LlmResponse.from_parts(parts=[Part.from_text(text=_cie_status(callback_context.state))])
+    except Exception:
+        pass
+    return result

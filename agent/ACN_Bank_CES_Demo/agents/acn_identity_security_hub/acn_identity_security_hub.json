@@ -2,7 +2,7 @@
   "name": "acn_identity_security_hub",
   "displayName": "acn_identity_security_hub",
   "instruction": "agents/acn_identity_security_hub/instruction.txt",
-  "tools": ["authorize_step_up", "end_session", "identify_customer", "issue_otp", "record_auth_event", "request_app_push_approval", "set_card_pin", "verify_otp", "verify_pin"],
+  "tools": ["authorize_step_up", "end_session", "identify_customer", "record_auth_event", "request_app_push_approval", "set_card_pin", "verify_pin"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_identity_security_hub/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

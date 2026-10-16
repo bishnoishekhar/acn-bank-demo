@@ -9,6 +9,8 @@ LlmResponse, LlmRequest, Tool) are auto-provided at runtime — do NOT import th
 Everything else MUST be explicitly imported.
 """
 
+import re
+
 import json
 
 import logging
@@ -130,6 +132,69 @@ def _seed_identity_from_session(state) -> None:
 # ---------------------------------------------------------------------------
 # AT: after_tool_callback
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
+# a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
+# ---------------------------------------------------------------------------
+_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
+
+def _fsw_plain_value(v):
+    if not isinstance(v, dict) or not v:
+        return None
+    k = next(iter(v))
+    x = v[k]
+    if k == 'integerValue':
+        try:
+            return int(x)
+        except (ValueError, TypeError):
+            return x
+    if k == 'mapValue':
+        return {a: _fsw_plain_value(b) for a, b in (x or {}).get('fields', {}).items()}
+    if k == 'arrayValue':
+        return [_fsw_plain_value(b) for b in (x or {}).get('values', [])]
+    if k == 'nullValue':
+        return None
+    return x
+
+def _fsw_doc(doc):
+    out = {a: _fsw_plain_value(b) for a, b in (doc.get('fields') or {}).items()}
+    out['id'] = str(doc.get('name', '')).split('/')[-1]
+    return out
+
+def _fsw_friendly(tool_response, kind):
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
+        if kind == 'query':
+            rows = body if isinstance(body, list) else None
+            if rows is None and isinstance(body, dict):
+                rows = body.get('result') if isinstance(body.get('result'), list) else body.get('documents')
+            if isinstance(rows, list):
+                docs = []
+                for r in rows:
+                    d = r.get('document') if isinstance(r, dict) and 'document' in r else r
+                    if isinstance(d, dict) and d.get('fields') is not None:
+                        docs.append(_fsw_doc(d))
+                return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
+        elif kind in ('create', 'patch'):
+            if isinstance(body, dict) and isinstance(body.get('fields'), dict) and body.get('name'):
+                d = _fsw_doc(body)
+                d['message'] = 'Recorded.' if kind == 'create' else 'Updated.'
+                return {"status": "success", "code": "OK", "data": d}
+        elif kind == 'delete':
+            if body in ({}, None, []) or (isinstance(body, dict) and not body):
+                return {"status": "success", "code": "OK", "data": {"deleted": True, "message": "Deleted."}}
+        blob = repr(tool_response)
+        if kind == 'create' and ('ALREADY_EXISTS' in blob or 'code=409' in blob or "'code': 409" in blob or 'already exists' in blob.lower()):
+            return {"status": "business_error", "code": "DUPLICATE_REQUEST", "data": {
+                "message": "This exact request was already submitted a moment ago, so it was not repeated. "
+                           "Tell the customer it is already recorded; do not retry."}}
+        if kind in ('patch', 'delete') and ('NOT_FOUND' in blob or 'code=404' in blob or "'code': 404" in blob):
+            return {"status": "business_error", "code": "NOT_FOUND", "data": {
+                "message": "That record does not exist (check the id). Nothing was changed."}}
+    except Exception:
+        pass
+    return tool_response
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -138,10 +203,35 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
 
+    # Normalize GECX full resource path -> short name, exactly as before_tool does.
+    # The platform passes the full `projects/.../tools/<id>` form for system-triggered
+    # calls, which includes AgentTool invocations. Without this every name-keyed check
+    # below (AT-0, WIDGET_TOOLS, STATE_MAP) silently misses.
+    if '/' in tool_name:
+        tool_name = tool_name.split('/')[-1]
+
+    # AT-0: harvest the identity hub's result into THIS session.
+    #
+    # acn_identity_security_hub runs as an AgentTool, which the platform executes
+    # in its own sub-session (trace: "agent tool session id": "agent-tool-..."").
+    # Every set_variable() and STATE_MAP write it performs lands in that throwaway
+    # session and dies with it, so the parent kept customer_id="" even after the
+    # customer had fully authenticated. BT-1 then blocked every customer-data tool
+    # forever -> unbounded retries -> RESOURCE_EXHAUSTED.
+    #
+    # The hub therefore emits a machine-readable trailer, which we parse into state
+    # and STRIP before the parent model (and the customer) ever sees it.
+    if tool_name in {'acn_identity_security_hub', 'call_identity_hub'}:
+        return _harvest_identity_hub(tool_response, state, str((input_dict or {}).get('request', '') or ''))
+
     # Hand the widget payload back exactly as it came. Normalising it would
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    _fsw_kind = _FSW_KINDS.get(tool_name)
+    if _fsw_kind:
+        tool_response = _fsw_friendly(tool_response, _fsw_kind)
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
@@ -206,6 +296,21 @@ def _normalize_response(response: dict[str, Any]) -> dict:
     status = response.get("status", "")
     if status in {"success", "business_error", "validation_error", "system_error"}:
         return response
+    # A toolset failure arrives as {"data": {"error", "errorCode", "status": "error"}, "status": "error"}.
+    # "error" is not one of the statuses above, so it used to fall through to the generic branch
+    # below and be relabelled status="success" with the error buried inside: the model then
+    # reported success for writes that had failed. Report failures as failures.
+    _d = response.get("data")
+    if (status == "error"
+            or (isinstance(_d, dict) and _d.get("status") == "error")
+            or (isinstance(_d, dict) and _d.get("errorCode"))
+            or (isinstance(_d, dict) and "error" in _d and not any(k in _d for k in ("fields", "documents", "name")))):
+        _code = ""
+        if isinstance(_d, dict):
+            _code = str(_d.get("errorCode") or _d.get("error") or "")
+        _code = _code or str(response.get("errorCode") or response.get("error") or response.get("code") or "ERROR")
+        _kind = "system_error" if _code.upper() in {"INTERNAL", "UNAVAILABLE", "DEADLINE_EXCEEDED", "UNKNOWN"} else "business_error"
+        return {"status": _kind, "code": _code[:80], "data": _d if isinstance(_d, dict) else response}
     # Map HTTP-style or raw responses
     if "error" in response:
         return {"status": "business_error", "code": response["error"], "data": response}
@@ -354,3 +459,154 @@ def _update_journey_context(tool_name: str, response: dict[str, Any], state: dic
 # --- Entry point ---
 def after_tool_callback(tool: Tool, input: dict[str, Any], callback_context: CallbackContext, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     return after_tool_callback_impl(tool, input, callback_context, tool_response)
+
+_AUTH_RESULT_RE = re.compile(r'\[\[AUTH_RESULT(?P<body>[^\]]*)\]\]')
+
+def _hub_value(fields: dict[str, str], key: str) -> str:
+    """A trailer field, with the hub's `-` / none / null placeholders read as empty."""
+    value = (fields.get(key, '') or '').strip()
+    return '' if value.lower() in ('-', 'none', 'null') else value
+
+def _put_hub_text(tool_response: Any, text: str) -> Any:
+    """Return tool_response with the hub's text replaced, keeping its shape."""
+    if isinstance(tool_response, dict):
+        out = dict(tool_response)
+        data = out.get('data')
+        if isinstance(data, dict) and 'response' in data:
+            data = dict(data)
+            data['response'] = text
+            out['data'] = data
+        else:
+            out['response'] = text
+        return out
+    return text
+
+_HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+_HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+_HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
+
+def _hub_status_text(request: str, customer_id: str, level: int) -> str:
+    """What the parent model should be told when the hub had nothing to say.
+
+    The hub is told to STOP silently after a successful identify / PIN check, so
+    once the trailer is stripped its reply is empty. CES replaces an empty
+    AgentTool reply with "Hmm, I'm having trouble with that. Do you want me to try
+    again?" -- the parent model then apologises to the customer, retries the hub
+    (each retry burns a PIN attempt) and never asks for the PIN. Say what actually
+    happened and what to do next instead.
+    """
+    req = request or ''
+    entered = bool(_HUB_PIN_ENTERED_RE.search(req))
+    stepup = bool(_HUB_STEPUP_RE.search(req))
+    pin_prompt = ("on chat say \"For this action, please re-enter your 4-digit PIN.\"; on voice say "
+                  "\"For this action, please re-enter your 4-digit PIN on your keypad now, or say it.\"")
+    if stepup:
+        if level >= 3:
+            return ("Step-up verified: the customer is authorized (L3) for this action. "
+                    "Continue the action now. Do not ask for the PIN again and do not "
+                    "call the identity hub again.")
+        if not entered:
+            # A step-up was requested but no PIN has been supplied yet: the customer must be asked.
+            return ("Step-up required: the customer is NOT yet authorized for this action. Ask them "
+                    "to re-enter their 4-digit PIN now (" + pin_prompt + "). Do not continue the "
+                    "action and do not call the identity hub again until they reply with the PIN.")
+        return ("The step-up PIN was not accepted. Tell the customer it didn't match and ask them to "
+                "re-enter their 4-digit PIN. They get 3 attempts in total; after the third failure "
+                "tell them a specialist will help from here and stop trying. Do not continue the "
+                "action and do not call the identity hub again until they reply.")
+    if level >= 3:
+        return ("Step-up verified: the customer is authorized (L3) for this action. "
+                "Continue the action now. Do not ask for the PIN again and do not "
+                "call the identity hub again.")
+    if level == 2:
+        return ("PIN verified: the customer is authenticated (L2). Continue with the "
+                "customer's original request now. Do not ask for the PIN again and "
+                "do not call the identity hub again.")
+    if customer_id and not _HUB_PIN_REQUEST_RE.search(req):
+        return ("Customer identified (L1). This is a success, not an error. Next, ask "
+                "the customer for their 4-digit PIN: on chat say \"To verify it's you, "
+                "please type your 4-digit PIN.\"; on voice say \"For your security, "
+                "please enter your 4-digit PIN on your keypad now, or say it.\" Do not "
+                "call the identity hub again until the customer replies with the PIN.")
+    if customer_id and not entered:
+        # Asked to authenticate to L2 but no PIN supplied yet: prompt for it.
+        return ("The customer is identified (L1) but not yet verified. Ask them for their 4-digit PIN: "
+                "on chat say \"To verify it's you, please type your 4-digit PIN.\"; on voice say "
+                "\"For your security, please enter your 4-digit PIN on your keypad now, or say it.\" "
+                "Do not call the identity hub again until they reply with the PIN.")
+    if customer_id:
+        return ("The PIN was not accepted. Tell the customer it didn't match and ask "
+                "them to re-enter their 4-digit PIN. They get 3 attempts in total; "
+                "after the third failure tell them a specialist will help from here "
+                "and stop trying. Do not call the identity hub again until they reply.")
+    return ("No customer was identified from what was provided. Ask the customer to "
+            "re-enter their registered 10-digit phone number. Do not call the "
+            "identity hub again until they reply.")
+
+def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], request: str = '') -> dict[str, Any]:
+    """Pull customer_id / auth_level out of the hub's reply, then strip the marker.
+
+    The hub is an AgentTool: its text IS its return value, and its sub-session
+    state never reaches us. The trailer is the only channel it has to report
+    what it actually established.
+    """
+    text = ''
+    if isinstance(tool_response, dict):
+        data = tool_response.get('data')
+        if isinstance(data, dict):
+            text = str(data.get('response', '') or '')
+        if not text:
+            text = str(tool_response.get('response', '') or '')
+    else:
+        text = str(tool_response or '')
+
+    match = _AUTH_RESULT_RE.search(text)
+    if not match:
+        if text.strip():
+            return tool_response
+        # No trailer and no text: the hub returned nothing at all.
+        return _put_hub_text(
+            tool_response,
+            _hub_status_text(request, str(state.get('customer_id', '') or ''),
+                             int(_auth(state).get('level', '0') or '0')))
+
+    fields = {}
+    for part in match.group('body').split():
+        if '=' in part:
+            key, _, value = part.partition('=')
+            fields[key.strip()] = value.strip()
+
+    customer_id = _hub_value(fields, 'customer_id')
+    if customer_id:
+        state['customer_id'] = customer_id
+        state['customerId'] = customer_id
+
+    level = _hub_value(fields, 'auth_level')
+    if level.isdigit():
+        # Never downgrade a level the session already earned.
+        current = int(_auth(state).get('level', '0') or '0')
+        _set_auth(state, level=str(max(current, int(level))))
+        state['auth_level'] = str(max(current, int(level)))
+
+    mode = _hub_value(fields, 'auth_mode')
+    if mode:
+        _set_auth(state, mode=mode)
+        state['auth_mode'] = mode
+
+    identified_by = _hub_value(fields, 'identified_by')
+    if identified_by:
+        _set_cust(state, identified_by=identified_by)
+        state['identified_by'] = identified_by
+
+    logger.info(
+        f"AT-0 identity hub harvested: customer_id={customer_id or '-'} "
+        f"auth_level={level or '-'} auth_mode={mode or '-'}"
+    )
+
+    # Strip the marker so it is never spoken or shown.
+    cleaned = _AUTH_RESULT_RE.sub('', text).strip()
+    if not cleaned:
+        effective_cid = customer_id or str(state.get('customer_id', '') or '')
+        effective_level = int(_auth(state).get('level', '0') or '0')
+        cleaned = _hub_status_text(request, effective_cid, effective_level)
+    return _put_hub_text(tool_response, cleaned)

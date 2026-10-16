@@ -1,101 +1,26 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Preferences DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Customer communication preferences and consent management API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/profile:
     get:
       operationId: getPreferences
       summary: Get all communication preferences for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Customer preferences
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/notifications:
-    patch:
-      operationId: updateNotificationPreferences
-      summary: Update notification alert preferences (push, email, SMS)
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateNotificationPreferencesRequest"
-      responses:
-        "200":
-          description: Notification preferences updated
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/paperless:
-    patch:
-      operationId: updatePaperlessEnrollment
-      summary: Enroll or unenroll customer in paperless statements
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdatePaperlessRequest"
-      responses:
-        "200":
-          description: Paperless enrollment updated
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/marketing_consent:
-    patch:
-      operationId: updateMarketingConsent
-      summary: Update marketing and promotional communications consent
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateMarketingConsentRequest"
-      responses:
-        "200":
-          description: Marketing consent updated
           content:
             application/json:
               schema:
@@ -105,20 +30,134 @@ paths:
       operationId: getCASLConsent
       summary: Get CASL (Canadian Anti-Spam Law) consent status and history
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: CASL consent details
           content:
             application/json:
               schema:
                 type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/notifications:
+    patch:
+      operationId: updateNotificationPreferences
+      summary: Update notification alert preferences (push, email, SMS)
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNotificationPreferencesRequest'
+      responses:
+        '200':
+          description: Notification preferences updated
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Update notification alert preferences (push, email, SMS)
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/paperless:
+    patch:
+      operationId: updatePaperlessEnrollment
+      summary: Enroll or unenroll customer in paperless statements
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePaperlessRequest'
+      responses:
+        '200':
+          description: Paperless enrollment updated
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Enroll or unenroll customer in paperless statements
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/preferences/marketing_consent:
+    patch:
+      operationId: updateMarketingConsent
+      summary: Update marketing and promotional communications consent
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateMarketingConsentRequest'
+      responses:
+        '200':
+          description: Marketing consent updated
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Update marketing and promotional communications consent
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -129,39 +168,48 @@ components:
     UpdateNotificationPreferencesRequest:
       type: object
       properties:
-        emailEnabled:
-          type: boolean
-        smsEnabled:
-          type: boolean
-        pushEnabled:
-          type: boolean
-        lowBalanceAlert:
-          type: boolean
-        transactionAlert:
-          type: boolean
-        securityAlert:
-          type: boolean
-        lowBalanceThreshold:
-          type: number
+        fields:
+          type: object
+          description: 'Plain key/value map with: emailEnabled, smsEnabled, pushEnabled, lowBalanceAlert, transactionAlert, securityAlert, lowBalanceThreshold. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - emailEnabled
+        - smsEnabled
+        - pushEnabled
+        - lowBalanceAlert
+        - transactionAlert
+        - securityAlert
+        - lowBalanceThreshold
+        required: []
+        col: null
     UpdatePaperlessRequest:
       type: object
       properties:
-        statementsEnabled:
-          type: boolean
-        taxDocumentsEnabled:
-          type: boolean
-        noticesEnabled:
-          type: boolean
+        fields:
+          type: object
+          description: 'Plain key/value map with: statementsEnabled, taxDocumentsEnabled, noticesEnabled. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - statementsEnabled
+        - taxDocumentsEnabled
+        - noticesEnabled
+        required: []
+        col: null
     UpdateMarketingConsentRequest:
       type: object
-      required:
-        - email
       properties:
-        email:
-          type: boolean
-        phone:
-          type: boolean
-        mail:
-          type: boolean
-        consentSource:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: email, phone, mail, consentSource (required: email). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - email
+        - phone
+        - mail
+        - consentSource
+        required:
+        - email
+        col: null

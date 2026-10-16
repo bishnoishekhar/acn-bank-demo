@@ -1,44 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: KYC Request Tracking - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: KYC request creation, status tracking, and record writing API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_requests:
-    post:
-      operationId: createKycRequest
-      summary: Create a new KYC identity verification request
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateKycRequest"
-      responses:
-        "200":
-          description: KYC request created
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_requests/{requestId}:
     get:
       operationId: getKycStatus
       summary: Get the status of a KYC verification request
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: requestId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: KYC request status
           content:
             application/json:
@@ -48,26 +29,65 @@ paths:
       operationId: writeKycRecord
       summary: Write KYC verification outcome and extracted entities
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: requestId
-          in: path
-          required: true
-          schema:
+      - name: requestId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/WriteKycRecordRequest"
+              $ref: '#/components/schemas/WriteKycRecordRequest'
       responses:
-        "200":
+        '200':
           description: KYC record written
           content:
             application/json:
               schema:
                 type: object
+      description: Write KYC verification outcome and extracted entities
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/kyc_requests:
+    post:
+      operationId: createKycRequest
+      summary: Create a new KYC identity verification request
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateKycRequest'
+      responses:
+        '200':
+          description: KYC request created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new KYC identity verification request
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -77,47 +97,34 @@ components:
   schemas:
     CreateKycRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, channel, documentType, purpose (required: channel, documentType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - channel
         - documentType
-      properties:
-        customerId:
-          type: string
-        channel:
-          type: string
-          enum: [chat, phone, branch, app]
-        documentType:
-          type: string
-          enum: [passport, drivers_licence, pr_card, sin_card, utility_bill]
-        purpose:
-          type: string
-        idempotencyKey:
-          type: string
+        - purpose
+        required:
+        - channel
+        - documentType
+        col: null
     WriteKycRecordRequest:
       type: object
-      required:
-        - outcome
       properties:
-        entities:
+        fields:
           type: object
-          properties:
-            firstName:
-              type: string
-            lastName:
-              type: string
-            dateOfBirth:
-              type: string
-            documentNumber:
-              type: string
-            expiryDate:
-              type: string
-        confidence:
-          type: number
-          minimum: 0
-          maximum: 1
-        outcome:
-          type: string
-          enum: [pass, fail, manual_review]
-        failureReason:
-          type: string
+          description: 'Plain key/value map with: entities, confidence, outcome, failureReason (required: outcome). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - entities
+        - confidence
+        - outcome
+        - failureReason
+        required:
+        - outcome
+        col: null

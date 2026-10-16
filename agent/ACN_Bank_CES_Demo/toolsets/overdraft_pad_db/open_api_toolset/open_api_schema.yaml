@@ -1,25 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Overdraft PAD DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Overdraft protection, NSF history/reversal, and PAD management API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/overdraft/settings:
     get:
       operationId: getOverdraftDetails
       summary: Get overdraft protection details and settings for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Overdraft protection details
           content:
             application/json:
@@ -29,101 +29,54 @@ paths:
       operationId: updateOverdraftProtection
       summary: Enable, disable, or change linked account for overdraft protection
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateOverdraftProtectionRequest"
+              $ref: '#/components/schemas/UpdateOverdraftProtectionRequest'
       responses:
-        "200":
+        '200':
           description: Overdraft protection updated
           content:
             application/json:
               schema:
                 type: object
+      description: Enable, disable, or change linked account for overdraft protection
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/pads:
     get:
       operationId: listPADs
       summary: List Pre-Authorized Debit agreements for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: status
-          in: query
-          schema:
-            type: string
-            enum: [active, cancelled, all]
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of PAD agreements
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/pads/{padId}:
-    patch:
-      operationId: cancelPAD
-      summary: Cancel a Pre-Authorized Debit agreement
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: padId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CancelPADRequest"
-      responses:
-        "200":
-          description: PAD agreement cancelled
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/pad_disputes:
-    post:
-      operationId: createPADDispute
-      summary: File a dispute for an unauthorized or incorrect Pre-Authorized Debit
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreatePADDisputeRequest"
-      responses:
-        "200":
-          description: PAD dispute filed
           content:
             application/json:
               schema:
@@ -133,55 +86,130 @@ paths:
       operationId: getNSFHistory
       summary: Get NSF (non-sufficient funds) fee history for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: limit
-          in: query
-          schema:
-            type: integer
-            default: 20
-            maximum: 100
-        - name: startDate
-          in: query
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          default: 20
       responses:
-        "200":
+        '200':
           description: NSF fee history
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/nsf_reversals:
-    post:
-      operationId: createNSFReversal
-      summary: Request reversal of an NSF fee (goodwill or policy-based)
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/pads/{padId}:
+    patch:
+      operationId: cancelPAD
+      summary: Cancel a Pre-Authorized Debit agreement
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: padId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateNSFReversalRequest"
+              $ref: '#/components/schemas/CancelPADRequest'
       responses:
-        "200":
+        '200':
+          description: PAD agreement cancelled
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Cancel a Pre-Authorized Debit agreement
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/pad_disputes:
+    post:
+      operationId: createPADDispute
+      summary: File a dispute for an unauthorized or incorrect Pre-Authorized Debit
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePADDisputeRequest'
+      responses:
+        '200':
+          description: PAD dispute filed
+          content:
+            application/json:
+              schema:
+                type: object
+      description: File a dispute for an unauthorized or incorrect Pre-Authorized Debit
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/nsf_reversals:
+    post:
+      operationId: createNSFReversal
+      summary: Request reversal of an NSF fee (goodwill or policy-based)
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNSFReversalRequest'
+      responses:
+        '200':
           description: NSF reversal request created
           content:
             application/json:
               schema:
                 type: object
+      description: Request reversal of an NSF fee (goodwill or policy-based)
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -191,53 +219,62 @@ components:
   schemas:
     UpdateOverdraftProtectionRequest:
       type: object
-      required:
-        - enabled
       properties:
-        enabled:
-          type: boolean
-        linkedAccountId:
-          type: string
-        overdraftLimit:
-          type: number
+        fields:
+          type: object
+          description: 'Plain key/value map with: enabled, linkedAccountId, overdraftLimit (required: enabled). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - enabled
+        - linkedAccountId
+        - overdraftLimit
+        required:
+        - enabled
+        col: null
     CancelPADRequest:
       type: object
-      required:
-        - reason
       properties:
-        reason:
-          type: string
-        idempotencyKey:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: reason (required: reason). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - reason
+        required:
+        - reason
+        col: null
     CreatePADDisputeRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: padId, amount, reason, cpaRule (required: padId, amount, reason). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - padId
         - amount
         - reason
-      properties:
-        padId:
-          type: string
-        amount:
-          type: number
-        reason:
-          type: string
-        cpaRule:
-          type: string
-          description: Applicable CPA rule (e.g. H1, H2, H3 for reimbursement)
-        idempotencyKey:
-          type: string
+        - cpaRule
+        required:
+        - padId
+        - amount
+        - reason
+        col: null
     CreateNSFReversalRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: nsfFeeId, reason (required: nsfFeeId, reason). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - nsfFeeId
         - reason
-        - idempotencyKey
-      properties:
-        nsfFeeId:
-          type: string
-        reason:
-          type: string
-          enum: [goodwill, policy, first_time_customer, error]
-        idempotencyKey:
-          type: string
+        required:
+        - nsfFeeId
+        - reason
+        col: null

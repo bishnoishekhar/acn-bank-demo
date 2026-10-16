@@ -1,87 +1,108 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Cheque Services DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Cheque services API for stop payments, cheque books, and bank drafts (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/stop_payments:
-    post:
-      operationId: createStopPayment
-      summary: Place a stop payment on a cheque
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateStopPaymentRequest"
-      responses:
-        "200":
-          description: Stop payment created
-          content:
-            application/json:
-              schema:
-                type: object
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/stop_payments/{stopPaymentId}:
     get:
       operationId: getStopPaymentStatus
       summary: Get the status of a stop payment request
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: stopPaymentId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: stopPaymentId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Stop payment status
           content:
             application/json:
               schema:
                 type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/stop_payments:
+    post:
+      operationId: createStopPayment
+      summary: Place a stop payment on a cheque
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateStopPaymentRequest'
+      responses:
+        '200':
+          description: Stop payment created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Place a stop payment on a cheque
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/cheque_book_orders:
     post:
       operationId: createChequeBookOrder
       summary: Order a new cheque book
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateChequeBookOrderRequest"
+              $ref: '#/components/schemas/CreateChequeBookOrderRequest'
       responses:
-        "200":
+        '200':
           description: Cheque book order placed
           content:
             application/json:
               schema:
                 type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Order a new cheque book
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/bank_drafts:
     post:
       operationId: createBankDraft
       summary: Request a certified cheque or bank draft
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateBankDraftRequest"
+              $ref: '#/components/schemas/CreateBankDraftRequest'
       responses:
-        "200":
+        '200':
           description: Bank draft order created
           content:
             application/json:
               schema:
                 type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Request a certified cheque or bank draft
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -91,69 +112,61 @@ components:
   schemas:
     CreateStopPaymentRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, accountId, chequeNumber, amount, payee, reason (required: accountId, chequeNumber, amount, reason). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - accountId
         - chequeNumber
         - amount
+        - payee
         - reason
-      properties:
-        customerId:
-          type: string
-        accountId:
-          type: string
-        chequeNumber:
-          type: string
-        amount:
-          type: number
-        payee:
-          type: string
-        reason:
-          type: string
-        idempotencyKey:
-          type: string
+        required:
+        - accountId
+        - chequeNumber
+        - amount
+        - reason
+        col: null
     CreateChequeBookOrderRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, accountId, quantity, deliveryAddress (required: accountId, quantity). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - accountId
         - quantity
-      properties:
-        customerId:
-          type: string
-        accountId:
-          type: string
-        quantity:
-          type: integer
-          enum: [25, 50, 100]
-        deliveryAddress:
-          type: object
-        idempotencyKey:
-          type: string
+        - deliveryAddress
+        required:
+        - accountId
+        - quantity
+        col: null
     CreateBankDraftRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, fromAccountId, amount, currency, payee, memo, pickupBranchId, deliveryAddress (required: amount, currency, payee). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
+        - fromAccountId
         - amount
         - currency
         - payee
-      properties:
-        customerId:
-          type: string
-        fromAccountId:
-          type: string
-        amount:
-          type: number
-        currency:
-          type: string
-          enum: [CAD, USD]
-        payee:
-          type: string
-        memo:
-          type: string
-        pickupBranchId:
-          type: string
-        deliveryAddress:
-          type: object
-        idempotencyKey:
-          type: string
+        - memo
+        - pickupBranchId
+        - deliveryAddress
+        required:
+        - amount
+        - currency
+        - payee
+        col: null
