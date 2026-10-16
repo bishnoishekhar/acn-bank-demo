@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -50,12 +54,10 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
-_FX_RATE_CLAIM = re.compile(
-    r'(?i:exchange rate|conversion rate|\brate\s+(?:is|of|for)\b)|\bper\s+(?:1\s+)?[A-Z]{3}\b|'
-    r'\b1\s+[A-Z]{3}\s*(?:=|(?i:is|equals))|\b[A-Z]{3}\s*/\s*[A-Z]{3}\b')
-_FX_NUMBER = re.compile(r'(?<![\d,$])\d{1,3}\.\d{2,6}\b')
-_FX_NO_RATE_TEXT = ("I'm not able to show an exchange rate right now. I can connect you with a representative "
-                    "or a branch who can help, or you can try again later. What would you prefer?")
+_GIC_CLAIM = re.compile(r'\d+(?:\.\d+)?\s*%|\b\d\s*(?:to|-)\s*\d\s*years?\b|(?i:competitive|guaranteed (?:return|interest))')
+
+_GIC_NO_DATA_TEXT = ("I'm not able to show our current GIC rates and terms right now. I can connect you with a "
+                     "representative or a branch who can help, or you can try again later. What would you prefer?")
 
 _OTP_WORDING = re.compile(r'(?i)\bverif(?:y|ying) your (?:one-time |verification )?(?:code|passcode)\b')
 
@@ -83,9 +85,9 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         text = CVV_PATTERN.sub("[SECURITY CODE REMOVED]", text)
         text = OTP_PATTERN.sub("[CODE REMOVED]", text)
 
-        # AM-FX: never state an exchange rate that did not come from getExchangeRate this session
-        if state.get("fx_rate_available") != "true" and _FX_RATE_CLAIM.search(text) and _FX_NUMBER.search(text):
-            text = _FX_NO_RATE_TEXT
+        # AM-GIC: never state GIC terms/rates when the rate lookup returned nothing
+        if state.get("nodata_gic") == "1" and _GIC_CLAIM.search(text):
+            text = _GIC_NO_DATA_TEXT
 
         # AM-12: Voice markdown stripping
         if channel == "voice":
@@ -124,12 +126,17 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
 # always include text with end_session.
 # ---------------------------------------------------------------------------
 _CSAT_PROMPT = "Before you go, how would you rate your experience today, from 1 to 5?"
+
 _CLOSING_TEXT = "Thanks for banking with ACN Bank. Take care!"
+
 _HANDOFF_TEXT = ("I'm going to connect you with a specialist who can help from here. "
                  "Thank you for your patience.")
+
 _HANDOFF_AUTH_TEXT = ("I wasn't able to verify your identity, so I'm going to connect you "
                       "with a specialist who can help from here. Thank you for your patience.")
+
 _AUTH_REASON_RE = re.compile(r'\b(pin|authenticat\w*|verif\w*|identity|identif\w*)\b', re.IGNORECASE)
+
 _ASKS_RATING_RE = re.compile(r'\b(rate|rating)\b|\b1\s*(to|-|–)\s*5\b|scale of', re.IGNORECASE)
 
 def _close_text(parts) -> str:
@@ -173,10 +180,43 @@ def _enforce_session_close(state, llm_response) -> Optional[object]:
             return None
         return LlmResponse.from_parts(parts=[Part.from_text(text=_CLOSING_TEXT)] + parts)
     except Exception:
-        return None  # never break the turn over a closing line
+        return None
+
+# --- A catalogue widget never goes out alone ---
+# On the web UI's live voice session the model sometimes calls a catalogue widget and ends the turn without a
+# word, so the customer hears nothing until they speak again. These lines also carry the mandatory
+# financial-advice disclaimer that must precede the card and rate widgets.
+_ADVICE_DISCLAIMER = ("I can provide information but not personalized financial advice. "
+                      "Please consider consulting a financial advisor for your specific situation.")
+_WIDGET_SPOKEN = {
+    'card_carousel': _ADVICE_DISCLAIMER + " Here are our credit card options on your screen.",
+    'card_widget': "Here are the details for that card on your screen.",
+    'mortgage_rate_table': _ADVICE_DISCLAIMER + " Here's where our rates sit today.",
+    'mortgage_rate_shelf': _ADVICE_DISCLAIMER + " Here are our current mortgage rates on your screen.",
+    'epp_carousel': "Here are the payment plan options on your screen.",
+    'epp_plans': "Here are the payment plan options on your screen.",
+}
+
+def _ensure_spoken_with_widget(llm_response) -> Optional[object]:
+    """If the reply calls a catalogue widget but says nothing, add the spoken line in front of it."""
+    try:
+        parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
+        if any((getattr(p, 'text', '') or '').strip() for p in parts):
+            return None
+        for p in parts:
+            fc = getattr(p, 'function_call', None)
+            name = str(getattr(fc, 'name', '') or '').split('/')[-1] if fc is not None else ''
+            if name in _WIDGET_SPOKEN:
+                return LlmResponse.from_parts(parts=[Part.from_text(text=_WIDGET_SPOKEN[name])] + parts)
+        return None
+    except Exception:
+        return None  # never break the turn over a spoken line
 
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
     result = after_model_callback_impl(callback_context, llm_response)
+    spoken = _ensure_spoken_with_widget(result if result is not None else llm_response)
+    if spoken is not None:
+        result = spoken
     closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
     return closed if closed is not None else result

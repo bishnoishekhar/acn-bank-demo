@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -72,24 +76,54 @@ def _first_nonempty(state, *keys):
 # ---------------------------------------------------------------------------
 # BM: before_model_callback
 # ---------------------------------------------------------------------------
+def _fn_response_names(llm_request) -> set:
+    """Names of the tools whose results are the LAST thing in the request (empty if the
+    last content is not purely tool results)."""
+    try:
+        cs = list(getattr(llm_request, 'contents', None) or [])
+        parts = list(getattr(cs[-1], 'parts', None) or []) if cs else []
+        names = set()
+        for p in parts:
+            fr = getattr(p, 'function_response', None)
+            if fr is None:
+                return set()
+            names.add(str(getattr(fr, 'name', '') or ''))
+        return names
+    except Exception:
+        return set()
+
+def _cie_status(state) -> str:
+    try:
+        group = json.loads(state.get("cie_context", "{}") or "{}")
+    except Exception:
+        group = {}
+    loaded = bool(str(state.get("customer_segment", "") or "").strip()
+                  or str(state.get("life_stage_signal", "") or "").strip()
+                  or group.get("segment"))
+    group["loaded"] = loaded
+    if not loaded:
+        group["nba_suppressed"] = True
+    state["cie_context"] = json.dumps(group)
+    if loaded:
+        return "CIE complete: customer profile loaded. Continue with the customer's request."
+    return ("CIE complete: no profile available (nudges suppressed). This is not an error. "
+            "Continue with the customer's request and do not mention it.")
+
 def before_model_callback_impl(callback_context, llm_request) -> Optional[object]:
     """
     BM-1 through BM-14 safety, auth, CIE injection, language lock.
     Returns None to allow LLM to proceed; returns LlmResponse to short-circuit.
     """
     state = callback_context.state
+
+    # The CIE is a silent data service: once its tools have answered there is nothing left
+    # for the model to say, so skip the second LLM call (~0.7s) and return the status.
+    if _fn_response_names(llm_request):
+        return LlmResponse.from_parts(parts=[Part.from_text(text=_cie_status(state))])
     contents = llm_request.contents if hasattr(llm_request, 'contents') else []
 
     # Extract latest user utterance
     user_text = _extract_last_user_text(contents)
-
-    # BM-0: Deterministic opening greeting (TDD: "fixed greeting template").
-    # Left to the LLM, the opening turn was a bare quick_actions widget with no
-    # spoken text in ~5 of 6 sessions, so the customer got no welcome and no
-    # PIPEDA disclosure. Short-circuits the model on the first turn only.
-    greeting = _deterministic_greeting(state, callback_context, user_text)
-    if greeting is not None:
-        return greeting
 
     # BM-3: Safety fast-path (deterministic, runs before everything)
     if user_text and FRAUD_PATTERNS.search(user_text):
@@ -124,21 +158,10 @@ def before_model_callback_impl(callback_context, llm_request) -> Optional[object
     _compute_nudge_eligibility(state)
 
     # BM-8: PIPEDA disclosure pending
-    if not _is_true(state.get("pipeda_disclosed")):
-        # If the agent already said it earlier in this conversation (the LLM
-        # path, e.g. a first message that was a real request), record that so the
-        # reminder below does not repeat on every later turn.
-        for _c in (contents or []):
-            if getattr(_c, "role", "") == "model":
-                for _p in (getattr(_c, "parts", None) or []):
-                    if "PIPEDA" in (getattr(_p, "text", "") or ""):
-                        state["pipeda_disclosed"] = True
-    if not _is_true(state.get("pipeda_disclosed")):
-        # The old text said "{{copy.pipeda_disclosure}}", a placeholder nothing
-        # resolves, so the model improvised. Give it the real sentence.
+    if not state.get("pipeda_disclosed"):
         _inject_instruction(llm_request,
-            "DISCLOSURE REQUIRED: Before requesting any personal information, say "
-            "exactly: \"We're committed to protecting your privacy under PIPEDA.\"")
+            "DISCLOSURE REQUIRED: Deliver {{copy.pipeda_disclosure}} verbatim before "
+            "requesting any personal information from the customer.")
 
     # BM-9: Vulnerability detection
     if user_text:
@@ -181,74 +204,7 @@ def before_model_callback_impl(callback_context, llm_request) -> Optional[object
             state["session_language_locked"] = True
     _inject_instruction(llm_request, f"LANGUAGE: Respond only in {lang}.")
 
-    # BM-14: Turn-1 named greeting — injected last so it appears first to the model
-    _inject_turn1_greeting(state, llm_request)
-
     return None
-
-# First-turn inputs that mean "open the conversation": the platform's
-# session-start event, the web app's silent opening prompt (ChatPanel.jsx), or a
-# bare hello. Anything with a real request in it is NOT matched, so the customer's
-# first question is never swallowed by the greeting.
-_GREETING_TRIGGER = re.compile(
-    r'^\s*(<event>\s*session start\s*</event>|begin the session\b.*|'
-    r'(hi|hello|hey|hiya|bonjour|good (morning|afternoon|evening))[\s!.,?]*)\s*$',
-    re.IGNORECASE | re.DOTALL
-)
-
-def _is_true(value) -> bool:
-    return str(value).strip().lower() in ("true", "1", "yes")
-
-def _is_voice_session(state) -> bool:
-    """Recording notice is only required on voice / telephony sessions."""
-    try:
-        if str(state.get("channel", "")).lower() in ("voice", "telephony", "phone"):
-            return True
-        # Access via variable so the linter does not flag the platform-predefined key _session
-        _sk = "_session"
-        return "AUDIO" in str(state.get(_sk, "")).upper()
-    except Exception:
-        return False
-
-def _deterministic_greeting(state, callback_context, user_text) -> Optional[object]:
-    """Return the fixed opening as an LlmResponse on turn 1, else None."""
-    try:
-        if _is_true(state.get("pipeda_disclosed")):
-            return None
-        turn = int(_cnt(state).get("turns", "0") or "0")
-        if turn > 1:
-            return None
-
-        text = (user_text or "").strip()
-        if not text:
-            # Session-start event: no user text at all. Also check the raw input
-            # parts, where the platform puts "<event>session start</event>".
-            try:
-                for part in callback_context.get_last_user_input():
-                    if getattr(part, "text", None):
-                        text = part.text.strip()
-                        break
-            except Exception:
-                pass
-        if text and not _GREETING_TRIGGER.match(text):
-            return None
-
-        c = _cust(state)
-        display_name = (c.get("display_name", "") or state.get("customer_display_name", "")
-                        or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name"))
-        inject_name = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
-        opening = (f"Hello {display_name}, welcome to ACN Bank! "
-                   if inject_name == "true" and display_name
-                   else "Hello and welcome to ACN Bank! ")
-        if _is_voice_session(state):
-            opening += "This call may be recorded for quality and training purposes. "
-        opening += ("We're committed to protecting your privacy under PIPEDA. "
-                    "How can I help you today?")
-
-        state["pipeda_disclosed"] = True
-        return LlmResponse.from_parts(parts=[Part.from_text(text=opening)])
-    except Exception:
-        return None  # never block the turn on a greeting failure
 
 def _extract_last_user_text(contents) -> str:
     """Extract the most recent user utterance text."""
@@ -262,46 +218,33 @@ def _extract_last_user_text(contents) -> str:
 def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
     a = _auth(state)
     c = _cust(state)
-    # Read from both customer_profile and top-level state (passive ID writes to both)
-    display_name = (c.get("display_name", "") or state.get("customer_display_name", "")
-                    or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name"))
-    inject_name  = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
-    telephony_caller_id = state.get("telephony_caller_id", "")
-    customer_id         = state.get("customer_id", "")
-    auth_level_str      = a.get('level', '') or _first_nonempty(state, "auth_level") or '0'
-    auth_mode_str       = a.get('mode', '') or _first_nonempty(state, "auth_mode") or 'none'
+    display_name = c.get("display_name", "") or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name")
+    inject_name = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
+    # Fall back to the flat vars the page/AT STATE_MAP write, so a signed-in
+    # session is never reported as auth_level=0 (which made the model re-identify).
+    auth_level_str = a.get('level', '') or _first_nonempty(state, "auth_level") or '0'
+    auth_mode_str = a.get('mode', '') or _first_nonempty(state, "auth_mode") or 'none'
     msg = (
         f"AUTH CONTEXT: auth_level={auth_level_str} | auth_mode={auth_mode_str} | "
         f"auth_locked={a.get('locked', False)} | step_up_required={a.get('step_up_required', False)}"
     )
-    # Fallback: passive ID not yet resolved by callback — instruct model to call identity hub
-    if telephony_caller_id and not customer_id:
-        msg += (f" | telephony_caller_id={telephony_caller_id} | PASSIVE_ID_AVAILABLE=true"
-                f" — call call_identity_hub NOW; DO NOT ask customer for identifier")
     if display_name:
         msg += f" | customer_display_name={display_name}"
     if inject_name == "true":
         msg += f" | GREET CUSTOMER AS '{display_name}' — address them by this name"
-    # When customer is already identified, make it explicit the model must not re-identify
-    if customer_id and int(auth_level_str or "0") >= 1:
-        msg += (f" | IDENTIFIED: name={display_name} id={customer_id}."
-                f" NEVER ask for mobile number, account number, or card digits."
-                f" For L2 services: call call_identity_hub immediately.")
+    _cid = state.get("customer_id", "")
+    try:
+        _identified = bool(_cid) and int(auth_level_str or "0") >= 1
+    except Exception:
+        _identified = bool(_cid)
+    if _identified:
+        # Leaf agents were never told who they are serving, so they guessed ids
+        # (phone number, "CUST-10001", "") and the ownership check rejected every call.
+        msg += (f" | IDENTIFIED: customer_id={_cid}. The customer is already identified and "
+                f"customer-data tools apply this id automatically (customerId={_cid}). "
+                f"Never look the customer up by phone number, never ask for an id, and do not "
+                f"call the identity hub just to learn it.")
     _inject_instruction(llm_request, msg)
-
-def _inject_turn1_greeting(state: dict[str, Any], llm_request) -> None:
-    """BM-14: Inject prescriptive Turn-1 opening when caller is passively identified."""
-    c = _cust(state)
-    display_name = (c.get("display_name", "") or state.get("customer_display_name", "")
-                    or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name"))
-    inject_name  = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
-    turn = int(_cnt(state).get("turns", "0") or "0")
-    if turn == 1 and inject_name == "true" and display_name:
-        _inject_instruction(llm_request,
-            f"CRITICAL — TURN 1 OPENING: This caller is identified as {display_name}. "
-            f"Your FIRST utterance MUST be: \"Hello {display_name}, welcome to ACN Bank! "
-            f"This call may be recorded for quality and training purposes. We're committed "
-            f"to protecting your privacy under PIPEDA. How can I help you today?\"")
 
 def _inject_cie_context(state: dict[str, Any], llm_request) -> None:
     c = _cust(state)

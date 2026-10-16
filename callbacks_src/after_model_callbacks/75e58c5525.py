@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -50,10 +54,6 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
-_GIC_CLAIM = re.compile(r'\d+(?:\.\d+)?\s*%|\b\d\s*(?:to|-)\s*\d\s*years?\b|(?i:competitive|guaranteed (?:return|interest))')
-_GIC_NO_DATA_TEXT = ("I'm not able to show our current GIC rates and terms right now. I can connect you with a "
-                     "representative or a branch who can help, or you can try again later. What would you prefer?")
-
 _OTP_WORDING = re.compile(r'(?i)\bverif(?:y|ying) your (?:one-time |verification )?(?:code|passcode)\b')
 
 def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
@@ -79,10 +79,6 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         text = ACCOUNT_NUMBER_PATTERN.sub("[ACCOUNT REMOVED]", text)
         text = CVV_PATTERN.sub("[SECURITY CODE REMOVED]", text)
         text = OTP_PATTERN.sub("[CODE REMOVED]", text)
-
-        # AM-GIC: never state GIC terms/rates when the rate lookup returned nothing
-        if state.get("nodata_gic") == "1" and _GIC_CLAIM.search(text):
-            text = _GIC_NO_DATA_TEXT
 
         # AM-12: Voice markdown stripping
         if channel == "voice":
@@ -114,66 +110,40 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
         _set_cnt(state, retry_strikes="0")
 
 # ---------------------------------------------------------------------------
-# AM-CLOSE: never end a session silently (TDD GB-42, "M0-enforced; deterministic").
-# No instruction told the model how to close a session, so it called end_session
-# straight away: customers were dropped with no explanation (after a failed PIN,
-# on "goodbye", ...). The platform template for this tool says the same thing:
-# always include text with end_session.
+# AM-CIE: the CIE is a silent background AgentTool whose instruction says "return an
+# empty response". Gemini cannot, so after its tools it answered "Hmm, I'm having
+# trouble with that. Do you want me to try again?" (or called end_session) and that
+# became the orchestrator's tool result. Replace ANY final answer (no tool call) with
+# a short status built from state, so the caller always gets a calm, non-empty result.
 # ---------------------------------------------------------------------------
-_CSAT_PROMPT = "Before you go, how would you rate your experience today, from 1 to 5?"
-_CLOSING_TEXT = "Thanks for banking with ACN Bank. Take care!"
-_HANDOFF_TEXT = ("I'm going to connect you with a specialist who can help from here. "
-                 "Thank you for your patience.")
-_HANDOFF_AUTH_TEXT = ("I wasn't able to verify your identity, so I'm going to connect you "
-                      "with a specialist who can help from here. Thank you for your patience.")
-_AUTH_REASON_RE = re.compile(r'\b(pin|authenticat\w*|verif\w*|identity|identif\w*)\b', re.IGNORECASE)
-_ASKS_RATING_RE = re.compile(r'\b(rate|rating)\b|\b1\s*(to|-|–)\s*5\b|scale of', re.IGNORECASE)
-
-def _close_text(parts) -> str:
-    return "".join((getattr(p, 'text', '') or '') for p in parts if getattr(p, 'text', None)).strip()
-
-def _enforce_session_close(state, llm_response) -> Optional[object]:
-    """Return a replacement LlmResponse when end_session would end the call silently."""
+def _cie_group(state):
     try:
-        parts = list(getattr(getattr(llm_response, 'content', None), 'parts', None) or [])
-        call = None
-        for p in parts:
-            fc = getattr(p, 'function_call', None)
-            if fc is not None and getattr(fc, 'name', '') == 'end_session':
-                call = p
-                break
-        if call is None:
-            return None
-
-        args = dict(getattr(call.function_call, 'args', None) or {})
-        params = args.get('params') or {}
-        spoken = _close_text(parts)
-
-        if str(args.get('session_escalated', '')).strip().lower() in ('true', '1', 'yes'):
-            if spoken:
-                return None
-            why = f"{args.get('reason', '')} {state.get('escalation_reason', '')}"
-            text = _HANDOFF_AUTH_TEXT if _AUTH_REASON_RE.search(why) else _HANDOFF_TEXT
-            return LlmResponse.from_parts(parts=[Part.from_text(text=text)] + parts)
-
-        # Normal close: ask for the CSAT rating once, then end.
-        csat = json.loads(state.get("csat", "{}") or "{}")
-        rated = isinstance(params, dict) and params.get('csat_rating') not in (None, '')
-        if not rated and not csat.get('offered'):
-            csat['offered'] = True
-            state["csat"] = json.dumps(csat)
-            if spoken and _ASKS_RATING_RE.search(spoken):
-                # The model asked for the rating AND hung up in the same turn.
-                return LlmResponse.from_parts(parts=[p for p in parts if p is not call])
-            return LlmResponse.from_parts(parts=[Part.from_text(text=_CSAT_PROMPT)])
-        if spoken:
-            return None
-        return LlmResponse.from_parts(parts=[Part.from_text(text=_CLOSING_TEXT)] + parts)
+        return json.loads(state.get("cie_context", "{}") or "{}")
     except Exception:
-        return None  # never break the turn over a closing line
+        return {}
+
+def _cie_status(state) -> str:
+    loaded = bool(str(state.get("customer_segment", "") or "").strip()
+                  or str(state.get("life_stage_signal", "") or "").strip()
+                  or _cie_group(state).get("segment"))
+    group = _cie_group(state)
+    group["loaded"] = loaded
+    if not loaded:
+        group["nba_suppressed"] = True
+    state["cie_context"] = json.dumps(group)
+    if loaded:
+        return "CIE complete: customer profile loaded. Continue with the customer's request."
+    return ("CIE complete: no profile available (nudges suppressed). This is not an error. "
+            "Continue with the customer's request and do not mention it.")
 
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
     result = after_model_callback_impl(callback_context, llm_response)
-    closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
-    return closed if closed is not None else result
+    try:
+        current = result if result is not None else llm_response
+        parts = list(getattr(getattr(current, 'content', None), 'parts', None) or [])
+        if not any(getattr(p, 'function_call', None) for p in parts):
+            return LlmResponse.from_parts(parts=[Part.from_text(text=_cie_status(callback_context.state))])
+    except Exception:
+        pass
+    return result

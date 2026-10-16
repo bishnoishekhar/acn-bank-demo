@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -195,6 +199,29 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _no_data_result(tool_response, state, slug, what):
+    """Public lookup -> plain documents, or NO_DATA when the collection is empty / the call failed."""
+    docs = []
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
+        rows = body if isinstance(body, list) else (body.get('documents') if isinstance(body, dict) else None)
+        for r in (rows or []):
+            d = r.get('document') if isinstance(r, dict) and 'document' in r else r
+            if isinstance(d, dict) and d.get('fields') is not None:
+                docs.append(_fsw_doc(d))
+            elif isinstance(d, dict) and d.get('id') is not None:
+                docs.append(d)
+    except Exception:
+        docs = []
+    if docs:
+        state['nodata_' + slug] = '0'
+        return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
+    state['nodata_' + slug] = '1'
+    return {"status": "business_error", "code": "NO_DATA", "data": {
+        "message": ("No " + what + " information is available right now. Do NOT state, estimate or recall any " + what +
+                    ", terms, rates or times from memory. Tell the customer plainly that you cannot show it at the "
+                    "moment and offer a representative, a branch, or trying again later.")}}
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -228,6 +255,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    # AT-NODATA: this public collection can be empty; never let the model fill the gap
+    if tool_name in ('investments_db_getGICRates', 'getGICRates'):
+        return _no_data_result(tool_response, state, 'gic', 'GIC rate')
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
@@ -489,7 +520,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
     return text
 
 _HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+
 _HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+
 _HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:

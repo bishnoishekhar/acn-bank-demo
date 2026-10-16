@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -43,6 +47,33 @@ OTP_PATTERN = re.compile(r'\b(otp|one[- ]?time\s+(?:password|code|passcode))\b.*
 
 ACCOUNT_NUMBER_PATTERN = re.compile(r'\b(\d{7,9}|\d{12,16})\b')
 
+# The hub reports what it established to its caller through this trailer (see
+# instruction.txt). It must survive intact, and must always be present.
+_AUTH_TRAILER_RE = re.compile(r'\[\[AUTH_RESULT[^\]]*\]\]')
+
+# What Gemini says by itself when a tool step errors and it has nothing to report.
+_HUB_FILLER_RE = re.compile(r"having trouble with that|try (it )?again\?", re.IGNORECASE)
+
+def _hub_state_val(state, *keys) -> str:
+    for k in keys:
+        v = state.get(k)
+        if v not in (None, "", "null"):
+            return str(v)
+    return "-"
+
+def _hub_trailer(state) -> str:
+    """Build the trailer from what the hub's tools actually set in state."""
+    level = _hub_state_val(state, "auth_level")
+    if level == "-":
+        try:
+            level = str(json.loads(state.get("auth_state", "{}") or "{}").get("level", "0") or "0")
+        except Exception:
+            level = "0"
+    return ("[[AUTH_RESULT customer_id=" + _hub_state_val(state, "customer_id", "customerId")
+            + " auth_level=" + level
+            + " auth_mode=" + _hub_state_val(state, "auth_mode")
+            + " identified_by=" + _hub_state_val(state, "identified_by") + "]]")
+
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
 
 def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counters"]   = json.dumps(c)
@@ -69,6 +100,14 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
 
         text = part.text
 
+        # Lift the AUTH_RESULT trailer out so the scrubbers below (notably the voice
+        # markdown strip, which deletes [ and ]) cannot corrupt it; re-attached after.
+        trailer = ""
+        _m = _AUTH_TRAILER_RE.search(text)
+        if _m:
+            trailer = _m.group(0)
+            text = text.replace(trailer, "")
+
         # AM-6: PII scrubber
         text = PAN_PATTERN.sub(lambda m: f"•••• {m.group(4)}", text)
         text = SIN_PATTERN.sub("[SIN REMOVED]", text)
@@ -88,7 +127,26 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         # AM-11: Counter updates
         _update_counters(text, state)
 
-        part.text = text
+        part.text = (text.rstrip() + " " + trailer).strip() if trailer else text
+
+    # AM-HUB: a final answer (no tool call) must always carry the trailer. After a
+    # tool step errors the model tends to answer with "Hmm, I'm having trouble with
+    # that. Do you want me to try again?"; CES hands that straight to the caller, which
+    # then apologises and retries. Replace it with the real, state-derived result.
+    try:
+        parts = llm_response.content.parts or []
+        if not any(getattr(p, 'function_call', None) for p in parts):
+            full = "".join((p.text or "") for p in parts if getattr(p, 'text', None))
+            if not _AUTH_TRAILER_RE.search(full):
+                trailer = _hub_trailer(state)
+                if not full.strip() or _HUB_FILLER_RE.search(full):
+                    return LlmResponse.from_parts(parts=[Part.from_text(text=trailer)])
+                for p in reversed(parts):
+                    if getattr(p, 'text', None):
+                        p.text = p.text.rstrip() + " " + trailer
+                        break
+    except Exception:
+        pass
 
     return llm_response
 
@@ -105,41 +163,6 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
     else:
         _set_cnt(state, retry_strikes="0")
 
-# ---------------------------------------------------------------------------
-# AM-CIE: the CIE is a silent background AgentTool whose instruction says "return an
-# empty response". Gemini cannot, so after its tools it answered "Hmm, I'm having
-# trouble with that. Do you want me to try again?" (or called end_session) and that
-# became the orchestrator's tool result. Replace ANY final answer (no tool call) with
-# a short status built from state, so the caller always gets a calm, non-empty result.
-# ---------------------------------------------------------------------------
-def _cie_group(state):
-    try:
-        return json.loads(state.get("cie_context", "{}") or "{}")
-    except Exception:
-        return {}
-
-def _cie_status(state) -> str:
-    loaded = bool(str(state.get("customer_segment", "") or "").strip()
-                  or str(state.get("life_stage_signal", "") or "").strip()
-                  or _cie_group(state).get("segment"))
-    group = _cie_group(state)
-    group["loaded"] = loaded
-    if not loaded:
-        group["nba_suppressed"] = True
-    state["cie_context"] = json.dumps(group)
-    if loaded:
-        return "CIE complete: customer profile loaded. Continue with the customer's request."
-    return ("CIE complete: no profile available (nudges suppressed). This is not an error. "
-            "Continue with the customer's request and do not mention it.")
-
 # --- Entry point ---
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
-    result = after_model_callback_impl(callback_context, llm_response)
-    try:
-        current = result if result is not None else llm_response
-        parts = list(getattr(getattr(current, 'content', None), 'parts', None) or [])
-        if not any(getattr(p, 'function_call', None) for p in parts):
-            return LlmResponse.from_parts(parts=[Part.from_text(text=_cie_status(callback_context.state))])
-    except Exception:
-        pass
-    return result
+    return after_model_callback_impl(callback_context, llm_response)

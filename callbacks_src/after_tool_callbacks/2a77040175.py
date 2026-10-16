@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -133,53 +137,6 @@ def _seed_identity_from_session(state) -> None:
 # AT: after_tool_callback
 # ---------------------------------------------------------------------------
 # ---------------------------------------------------------------------------
-# createTransaction result: Firestore answers with a raw document ({name, fields: {...typed}}).
-# Hand the model a plain result it can read out and feed into the payment receipt, and make a
-# duplicate (409) a clear business answer instead of a scary error.
-# ---------------------------------------------------------------------------
-_TXN_TOOL_NAMES = {'createTransaction', 'new_transaction_api_db_createTransaction'}
-
-def _fs_plain(v):
-    if not isinstance(v, dict) or not v:
-        return None
-    k = next(iter(v))
-    x = v[k]
-    if k == 'integerValue':
-        try:
-            return int(x)
-        except (ValueError, TypeError):
-            return x
-    if k == 'mapValue':
-        return {a: _fs_plain(b) for a, b in (x or {}).get('fields', {}).items()}
-    if k == 'arrayValue':
-        return [_fs_plain(b) for b in (x or {}).get('values', [])]
-    if k == 'nullValue':
-        return None
-    return x
-
-def _friendly_txn_response(tool_response):
-    try:
-        body = tool_response.get('data') if isinstance(tool_response, dict) and isinstance(tool_response.get('data'), dict) else tool_response
-        if isinstance(body, dict) and isinstance(body.get('fields'), dict) and body.get('name'):
-            f = {k: _fs_plain(v) for k, v in body['fields'].items()}
-            return {"status": "success", "code": "OK", "data": {
-                "transactionId": f.get('transaction_id') or str(body['name']).split('/')[-1],
-                "referenceNo": f.get('reference_no') or f.get('transaction_id'),
-                "amount": f.get('amount'), "currency": f.get('currency'),
-                "type": f.get('payment_type') or f.get('type'),
-                "status": f.get('status'), "counterparty": f.get('counterparty_name'),
-                "fromAccountId": f.get('account_id'), "timestamp": f.get('timestamp'),
-                "message": "Transaction recorded."}}
-        blob = repr(tool_response)
-        if 'ALREADY_EXISTS' in blob or 'code=409' in blob or "'code': 409" in blob or 'already exists' in blob.lower():
-            return {"status": "business_error", "code": "DUPLICATE_TRANSACTION", "data": {
-                "message": "This exact payment was already submitted a moment ago, so it was not repeated. "
-                           "Tell the customer it is already in their activity; do not retry."}}
-    except Exception:
-        pass
-    return tool_response
-
-# ---------------------------------------------------------------------------
 # FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
 # a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
 # ---------------------------------------------------------------------------
@@ -276,9 +233,6 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WIDGET_TOOLS:
         return tool_response
 
-    if tool_name in _TXN_TOOL_NAMES:
-        tool_response = _friendly_txn_response(tool_response)
-
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
         tool_response = _fsw_friendly(tool_response, _fsw_kind)
@@ -332,7 +286,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
         state["pad_cancel_id"] = data.get("cancelId", "") if isinstance(data, dict) else ""
 
     # Reset idempotency key after successful write
-    WRITE_TOOLS = {'createTransaction', 'new_transaction_api_db_createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
+    WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
@@ -393,22 +347,27 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
     """AT-5: Map tool outputs to session variables."""
     if response.get("status") != "success":
         return
-    # verify_otp / verify_pin return FLAT dicts with no 'data' wrapper.
+
+    # verify_otp and verify_pin return flat dicts (no 'data' wrapper)
     FLAT_TOOLS = {'verify_otp', 'verify_pin'}
     data = response if tool_name in FLAT_TOOLS else response.get("data", {})
     if not isinstance(data, dict):
         return
 
     STATE_MAP = {
+        # identify_customer returns camelCase fields nested under 'data'
         'identify_customer': {
             'customerId':    'customer_id',
             'customer_id':   'customer_id',
             'authLevel':     'auth_state.level',
             'auth_level':    'auth_state.level',
-            'identifiedBy':  'customer_profile.identified_by',
-            'identified_by': 'customer_profile.identified_by',
+            'identifiedBy':  'identified_by',
+            'identified_by': 'identified_by',
         },
-        # verify_otp / verify_pin emit flat snake_case 'auth_level'.
+        # verify_otp / verify_pin return flat snake_case dicts (no 'data' wrapper).
+        # They emit 'auth_level' (snake), NOT 'authLevel' — mapping only the
+        # camelCase key silently dropped every L2 grant and deadlocked the PIN
+        # step. Accept both casings and write the JSON group the injectors read.
         'verify_otp': {
             'authLevel':  'auth_state.level',
             'auth_level': 'auth_state.level',
@@ -421,50 +380,39 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             'authMode':   'auth_state.mode',
             'auth_mode':  'auth_state.mode',
         },
-        'authenticate': {
-            'authLevel':  'auth_state.level',
-            'auth_level': 'auth_state.level',
-            'authMode':   'auth_state.mode',
-            'auth_mode':  'auth_state.mode',
-        },
+        # authorize_step_up returns camelCase fields nested under 'data'
         'authorize_step_up': {
+            'authLevel':           'auth_state.level',
+            'auth_level':          'auth_state.level',
             'stepUpValidUntil':    'auth_state.step_up_valid_until',
             'step_up_valid_until': 'auth_state.step_up_valid_until',
             'stepUpActionHash':    'auth_state.step_up_action_hash',
             'step_up_action_hash': 'auth_state.step_up_action_hash',
         },
         'getCustomer': {
-            # Firestore snake_case
-            'preferred_name':    'customer_profile.display_name',
-            'legal_name':        'customer_profile.first_name',
-            'registered_mobile': 'customer_profile.phone_masked',
-            'member_since':      'customer_profile.since_year',
-            'segment':           'customer_profile.segment',
-            'email':             'customer_profile.email_masked',
-            'marketing_opt_out': 'customer_profile.marketing_opt_out',
-            'vulnerability_flag':'customer_profile.vulnerable_flag',
-            'preferred_language':'customer_profile.preferred_language',
-            # camelCase fallback
-            'preferredName':     'customer_profile.display_name',
-            'firstName':         'customer_profile.first_name',
-            'phone':             'customer_profile.phone_masked',
-            'memberSince':       'customer_profile.since_year',
-            'marketingOptOut':   'customer_profile.marketing_opt_out',
-            'vulnerabilityFlag': 'customer_profile.vulnerable_flag',
-            'preferredLanguage': 'customer_profile.preferred_language',
+            # Firestore snake_case (actual API response)
+            'preferred_name':    'customer_display_name',
+            'legal_name':        'customer_first_name',
+            'registered_mobile': 'customer_phone_masked',
+            'member_since':      'customer_since_year',
+            'segment':           'customer_segment',
+            'email':             'customer_email_masked',
+            # camelCase fallback (OpenAPI schema)
+            'preferredName':     'customer_display_name',
+            'firstName':         'customer_first_name',
+            'phone':             'customer_phone_masked',
+            'memberSince':       'customer_since_year',
         },
         'getCustomerSegment': {
-            'segment':    'customer_profile.segment',
-            'life_stage': 'cie_context.life_stage',
-            'lifeStage':  'cie_context.life_stage',
+            'segment':    'customer_segment',
+            'life_stage': 'life_stage_signal',
+            'lifeStage':  'life_stage_signal',
         },
         'getNextBestActions': {
-            'actions':      'cie_context.next_best_action',
-            'next_actions': 'cie_context.next_best_action',
+            'actions': 'next_best_action',
         },
         'getRewardsBalance': {
-            'points':        'rewards_balance_points',
-            'balancePoints': 'rewards_balance_points',
+            'points': 'rewards_balance_points',
         },
         'createAppointment': {
             'appointment_id': 'appointment_id',
@@ -475,8 +423,7 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             'stopPaymentId':   'stop_payment_id',
         },
         'createFXOrder': {
-            'rate':   'transaction_context.fx_rate_quoted',
-            'fxRate': 'transaction_context.fx_rate_quoted',
+            'rate': 'fx_rate_quoted',
         },
     }
 
@@ -539,7 +486,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
     return text
 
 _HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+
 _HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+
 _HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:

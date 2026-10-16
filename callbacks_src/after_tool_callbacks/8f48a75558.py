@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -44,6 +48,8 @@ def _auth(state):  return json.loads(state.get("auth_state",          "{}") or "
 
 def _cust(state):  return json.loads(state.get("customer_profile",    "{}") or "{}")
 
+def _cie(state):   return json.loads(state.get("cie_context",         "{}") or "{}")
+
 def _txn(state):   return json.loads(state.get("transaction_context", "{}") or "{}")
 
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
@@ -52,13 +58,131 @@ def _set_auth(state, **kw): a=_auth(state); a.update(kw); state["auth_state"]   
 
 def _set_cust(state, **kw): c=_cust(state); c.update(kw); state["customer_profile"]   = json.dumps(c)
 
+def _set_cie(state,  **kw): c=_cie(state);  c.update(kw); state["cie_context"]        = json.dumps(c)
+
 def _set_txn(state,  **kw): t=_txn(state);  t.update(kw); state["transaction_context"]= json.dumps(t)
 
 def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counters"]   = json.dumps(c)
 
+# -- Flat session variable <-> JSON group bridge ------------------------------
+# The ACN Bank web page (src/App.jsx customerVariables) and AT STATE_MAP both
+# write FLAT session variables (pref_name, auth_level, customer_first_name...).
+# The injectors below read the JSON GROUPS (customer_profile, auth_state,
+# cie_context). Without this bridge the groups stay empty, every turn injects
+# "name= | auth_level=0", and the agent re-asks for identity it already has.
+def _first_nonempty(state, *keys):
+    for k in keys:
+        v = state.get(k)
+        if v not in (None, "", "null"):
+            return str(v)
+    return ""
+
+def _seed_identity_from_session(state) -> None:
+    """Mirror flat page/tool variables into the JSON groups the injectors read."""
+    cust = _cust(state)
+    auth = _auth(state)
+
+    first = _first_nonempty(state, "customer_first_name", "pref_name")
+    if not first:
+        full = _first_nonempty(state, "customer_display_name", "customer_name")
+        first = full.split()[0] if full else ""
+    updates = {
+        "first_name":    first,
+        "last_name":     _first_nonempty(state, "customer_last_name"),
+        "display_name":  _first_nonempty(state, "customer_display_name", "pref_name", "customer_name"),
+        "email_masked":  _first_nonempty(state, "customer_email_masked"),
+        "phone_masked":  _first_nonempty(state, "customer_phone_masked"),
+        "segment":       _first_nonempty(state, "customer_segment", "spending_persona"),
+        "since_year":    _first_nonempty(state, "customer_since_year"),
+        "identified_by": _first_nonempty(state, "identified_by"),
+    }
+    changed = {k: v for k, v in updates.items() if v and cust.get(k) != v}
+    if changed:
+        _set_cust(state, **changed)
+
+    # auth_state.level is what _inject_auth_context reports. The page sets a
+    # numeric auth_level (2 once signed in); AT STATE_MAP sets it from
+    # identify_customer. Never downgrade a level the session already earned --
+    # expiry in BA-2/BA-3 is the only thing allowed to drop it.
+    auth_changed = {}
+    flat_level = _first_nonempty(state, "auth_level")
+    if flat_level:
+        try:
+            if int(float(flat_level)) > int(float(auth.get("level", "0") or "0")):
+                auth_changed["level"] = str(int(float(flat_level)))
+        except (TypeError, ValueError):
+            pass
+    mode = _first_nonempty(state, "auth_mode")
+    if mode and mode != "guest" and auth.get("mode") != mode:
+        auth_changed["mode"] = mode
+    for flat in ("step_up_valid_until", "step_up_action_hash"):
+        v = _first_nonempty(state, flat)
+        if v and auth.get(flat) != v:
+            auth_changed[flat] = v
+    if auth_changed:
+        _set_auth(state, **auth_changed)
+
+    cie = _cie(state)
+    cie_changed = {}
+    life = _first_nonempty(state, "life_stage_signal")
+    if life and cie.get("life_stage") != life:
+        cie_changed["life_stage"] = life
+    nba = _first_nonempty(state, "next_best_action")
+    if nba and nba != "[]" and cie.get("next_best_action") != nba:
+        cie_changed["next_best_action"] = nba
+    if cie_changed:
+        _set_cie(state, **cie_changed)
+
 # ---------------------------------------------------------------------------
 # AT: after_tool_callback
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# createTransaction result: Firestore answers with a raw document ({name, fields: {...typed}}).
+# Hand the model a plain result it can read out and feed into the payment receipt, and make a
+# duplicate (409) a clear business answer instead of a scary error.
+# ---------------------------------------------------------------------------
+_TXN_TOOL_NAMES = {'createTransaction', 'new_transaction_api_db_createTransaction'}
+
+def _fs_plain(v):
+    if not isinstance(v, dict) or not v:
+        return None
+    k = next(iter(v))
+    x = v[k]
+    if k == 'integerValue':
+        try:
+            return int(x)
+        except (ValueError, TypeError):
+            return x
+    if k == 'mapValue':
+        return {a: _fs_plain(b) for a, b in (x or {}).get('fields', {}).items()}
+    if k == 'arrayValue':
+        return [_fs_plain(b) for b in (x or {}).get('values', [])]
+    if k == 'nullValue':
+        return None
+    return x
+
+def _friendly_txn_response(tool_response):
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and isinstance(tool_response.get('data'), dict) else tool_response
+        if isinstance(body, dict) and isinstance(body.get('fields'), dict) and body.get('name'):
+            f = {k: _fs_plain(v) for k, v in body['fields'].items()}
+            return {"status": "success", "code": "OK", "data": {
+                "transactionId": f.get('transaction_id') or str(body['name']).split('/')[-1],
+                "referenceNo": f.get('reference_no') or f.get('transaction_id'),
+                "amount": f.get('amount'), "currency": f.get('currency'),
+                "type": f.get('payment_type') or f.get('type'),
+                "status": f.get('status'), "counterparty": f.get('counterparty_name'),
+                "fromAccountId": f.get('account_id'), "timestamp": f.get('timestamp'),
+                "message": "Transaction recorded."}}
+        blob = repr(tool_response)
+        if 'ALREADY_EXISTS' in blob or 'code=409' in blob or "'code': 409" in blob or 'already exists' in blob.lower():
+            return {"status": "business_error", "code": "DUPLICATE_TRANSACTION", "data": {
+                "message": "This exact payment was already submitted a moment ago, so it was not repeated. "
+                           "Tell the customer it is already in their activity; do not retry."}}
+    except Exception:
+        pass
+    return tool_response
+
 # ---------------------------------------------------------------------------
 # FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
 # a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
@@ -156,6 +280,9 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WIDGET_TOOLS:
         return tool_response
 
+    if tool_name in _TXN_TOOL_NAMES:
+        tool_response = _friendly_txn_response(tool_response)
+
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
         tool_response = _fsw_friendly(tool_response, _fsw_kind)
@@ -209,7 +336,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
         state["pad_cancel_id"] = data.get("cancelId", "") if isinstance(data, dict) else ""
 
     # Reset idempotency key after successful write
-    WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
+    WRITE_TOOLS = {'createTransaction', 'new_transaction_api_db_createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
@@ -370,6 +497,10 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             else:
                 state[dest_key] = val_str
 
+    # STATE_MAP writes flat keys; the model-side injectors read the JSON
+    # groups. Mirror now so the very next turn sees the identity.
+    _seed_identity_from_session(state)
+
 def _update_journey_context(tool_name: str, response: dict[str, Any], state: dict[str, Any]) -> None:
     """AT-6: Update journey context and completed_actions."""
     if response.get("status") != "success":
@@ -412,7 +543,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
     return text
 
 _HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+
 _HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+
 _HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:

@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -195,8 +199,8 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
-def _no_data_result(tool_response, state, slug, what):
-    """Public lookup -> plain documents, or NO_DATA when the collection is empty / the call failed."""
+def _fx_rate_result(tool_response, state):
+    """getExchangeRate -> plain rate documents, or NO_RATE_AVAILABLE (empty collection, error, odd shape)."""
     docs = []
     try:
         body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
@@ -209,14 +213,17 @@ def _no_data_result(tool_response, state, slug, what):
                 docs.append(d)
     except Exception:
         docs = []
-    if docs:
-        state['nodata_' + slug] = '0'
-        return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
-    state['nodata_' + slug] = '1'
-    return {"status": "business_error", "code": "NO_DATA", "data": {
-        "message": ("No " + what + " information is available right now. Do NOT state, estimate or recall any " + what +
-                    ", terms, rates or times from memory. Tell the customer plainly that you cannot show it at the "
-                    "moment and offer a representative, a branch, or trying again later.")}}
+    has_number = any(isinstance(v, (int, float)) and not isinstance(v, bool)
+                     for d in docs for v in d.values())
+    if docs and has_number:
+        state['fx_rate_available'] = 'true'
+        return {"status": "success", "code": "OK", "data": {"rates": docs, "count": len(docs)}}
+    state['fx_rate_available'] = 'false'
+    return {"status": "business_error", "code": "NO_RATE_AVAILABLE", "data": {
+        "rate_available": False,
+        "message": ("No indicative exchange rate is available right now. Do NOT state, estimate or recall "
+                    "any exchange rate or conversion. Tell the customer you cannot show a rate at the moment, "
+                    "and offer to connect them with a representative or a branch, or to try again later.")}}
 
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
@@ -252,9 +259,9 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WIDGET_TOOLS:
         return tool_response
 
-    # AT-NODATA: this public collection can be empty; never let the model fill the gap
-    if tool_name in ('appointments_db_getAvailableSlots', 'getAvailableSlots'):
-        return _no_data_result(tool_response, state, 'slots', 'appointment time')
+    # AT-FX: the rate lookup either returns real documents or a firm "no rate" answer
+    if tool_name in ('fx_db_getExchangeRate', 'getExchangeRate'):
+        return _fx_rate_result(tool_response, state)
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
@@ -516,7 +523,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
     return text
 
 _HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+
 _HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+
 _HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:

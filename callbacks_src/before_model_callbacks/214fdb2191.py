@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -72,50 +76,12 @@ def _first_nonempty(state, *keys):
 # ---------------------------------------------------------------------------
 # BM: before_model_callback
 # ---------------------------------------------------------------------------
-def _fn_response_names(llm_request) -> set:
-    """Names of the tools whose results are the LAST thing in the request (empty if the
-    last content is not purely tool results)."""
-    try:
-        cs = list(getattr(llm_request, 'contents', None) or [])
-        parts = list(getattr(cs[-1], 'parts', None) or []) if cs else []
-        names = set()
-        for p in parts:
-            fr = getattr(p, 'function_response', None)
-            if fr is None:
-                return set()
-            names.add(str(getattr(fr, 'name', '') or ''))
-        return names
-    except Exception:
-        return set()
-
-def _cie_status(state) -> str:
-    try:
-        group = json.loads(state.get("cie_context", "{}") or "{}")
-    except Exception:
-        group = {}
-    loaded = bool(str(state.get("customer_segment", "") or "").strip()
-                  or str(state.get("life_stage_signal", "") or "").strip()
-                  or group.get("segment"))
-    group["loaded"] = loaded
-    if not loaded:
-        group["nba_suppressed"] = True
-    state["cie_context"] = json.dumps(group)
-    if loaded:
-        return "CIE complete: customer profile loaded. Continue with the customer's request."
-    return ("CIE complete: no profile available (nudges suppressed). This is not an error. "
-            "Continue with the customer's request and do not mention it.")
-
 def before_model_callback_impl(callback_context, llm_request) -> Optional[object]:
     """
     BM-1 through BM-14 safety, auth, CIE injection, language lock.
     Returns None to allow LLM to proceed; returns LlmResponse to short-circuit.
     """
     state = callback_context.state
-
-    # The CIE is a silent data service: once its tools have answered there is nothing left
-    # for the model to say, so skip the second LLM call (~0.7s) and return the status.
-    if _fn_response_names(llm_request):
-        return LlmResponse.from_parts(parts=[Part.from_text(text=_cie_status(state))])
     contents = llm_request.contents if hasattr(llm_request, 'contents') else []
 
     # Extract latest user utterance

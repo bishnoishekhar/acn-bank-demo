@@ -283,7 +283,7 @@
     }
   }, {
     "name": "fx_rate_available",
-    "description": "String flag 'true'/'false' recording whether the last FX rate lookup returned usable numeric rates. Set by the acn_foreign_exchange after_tool callback; read by the after_model guard that suppresses invented FX figures and by the before_tool quote gate.",
+    "description": "String flag \u0027true\u0027/\u0027false\u0027 recording whether the last FX rate lookup returned usable numeric rates. Set by the acn_foreign_exchange after_tool callback; read by the after_model guard that suppresses invented FX figures and by the before_tool quote gate.",
     "schema": {
       "type": "STRING",
       "default": ""
@@ -395,7 +395,7 @@
     }
   }, {
     "name": "nodata_gic",
-    "description": "String flag '1'/'0' set by the after_tool no-data guard (state['nodata_' + slug]) when the GIC rate lookup returns no documents. Read by the acn_investments_registered after_model guard to block invented GIC terms or rates.",
+    "description": "String flag \u00271\u0027/\u00270\u0027 set by the after_tool no-data guard (state[\u0027nodata_\u0027 + slug]) when the GIC rate lookup returns no documents. Read by the acn_investments_registered after_model guard to block invented GIC terms or rates.",
     "schema": {
       "type": "STRING",
       "default": ""

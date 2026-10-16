@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -22,11 +26,88 @@ logger = logging.getLogger(__name__)
 # ── JSON group helpers ──────────────────────────────────────────────────────
 def _auth(state):  return json.loads(state.get("auth_state",          "{}") or "{}")
 
+def _cust(state):  return json.loads(state.get("customer_profile",    "{}") or "{}")
+
+def _cie(state):   return json.loads(state.get("cie_context",         "{}") or "{}")
+
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
 
 def _set_auth(state, **kw): a=_auth(state); a.update(kw); state["auth_state"]          = json.dumps(a)
 
+def _set_cust(state, **kw): c=_cust(state); c.update(kw); state["customer_profile"]   = json.dumps(c)
+
+def _set_cie(state,  **kw): c=_cie(state);  c.update(kw); state["cie_context"]        = json.dumps(c)
+
 def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counters"]   = json.dumps(c)
+
+# -- Flat session variable <-> JSON group bridge ------------------------------
+# The ACN Bank web page (src/App.jsx customerVariables) and AT STATE_MAP both
+# write FLAT session variables (pref_name, auth_level, customer_first_name...).
+# The injectors below read the JSON GROUPS (customer_profile, auth_state,
+# cie_context). Without this bridge the groups stay empty, every turn injects
+# "name= | auth_level=0", and the agent re-asks for identity it already has.
+def _first_nonempty(state, *keys):
+    for k in keys:
+        v = state.get(k)
+        if v not in (None, "", "null"):
+            return str(v)
+    return ""
+
+def _seed_identity_from_session(state) -> None:
+    """Mirror flat page/tool variables into the JSON groups the injectors read."""
+    cust = _cust(state)
+    auth = _auth(state)
+
+    first = _first_nonempty(state, "customer_first_name", "pref_name")
+    if not first:
+        full = _first_nonempty(state, "customer_display_name", "customer_name")
+        first = full.split()[0] if full else ""
+    updates = {
+        "first_name":    first,
+        "last_name":     _first_nonempty(state, "customer_last_name"),
+        "display_name":  _first_nonempty(state, "customer_display_name", "pref_name", "customer_name"),
+        "email_masked":  _first_nonempty(state, "customer_email_masked"),
+        "phone_masked":  _first_nonempty(state, "customer_phone_masked"),
+        "segment":       _first_nonempty(state, "customer_segment", "spending_persona"),
+        "since_year":    _first_nonempty(state, "customer_since_year"),
+        "identified_by": _first_nonempty(state, "identified_by"),
+    }
+    changed = {k: v for k, v in updates.items() if v and cust.get(k) != v}
+    if changed:
+        _set_cust(state, **changed)
+
+    # auth_state.level is what _inject_auth_context reports. The page sets a
+    # numeric auth_level (2 once signed in); AT STATE_MAP sets it from
+    # identify_customer. Never downgrade a level the session already earned --
+    # expiry in BA-2/BA-3 is the only thing allowed to drop it.
+    auth_changed = {}
+    flat_level = _first_nonempty(state, "auth_level")
+    if flat_level:
+        try:
+            if int(float(flat_level)) > int(float(auth.get("level", "0") or "0")):
+                auth_changed["level"] = str(int(float(flat_level)))
+        except (TypeError, ValueError):
+            pass
+    mode = _first_nonempty(state, "auth_mode")
+    if mode and mode != "guest" and auth.get("mode") != mode:
+        auth_changed["mode"] = mode
+    for flat in ("step_up_valid_until", "step_up_action_hash"):
+        v = _first_nonempty(state, flat)
+        if v and auth.get(flat) != v:
+            auth_changed[flat] = v
+    if auth_changed:
+        _set_auth(state, **auth_changed)
+
+    cie = _cie(state)
+    cie_changed = {}
+    life = _first_nonempty(state, "life_stage_signal")
+    if life and cie.get("life_stage") != life:
+        cie_changed["life_stage"] = life
+    nba = _first_nonempty(state, "next_best_action")
+    if nba and nba != "[]" and cie.get("next_best_action") != nba:
+        cie_changed["next_best_action"] = nba
+    if cie_changed:
+        _set_cie(state, **cie_changed)
 
 # ---------------------------------------------------------------------------
 # BA: before_agent_callback
@@ -68,6 +149,11 @@ def before_agent_callback_impl(callback_context) -> Optional[object]:
     _set_cnt(state, turns=str(turn_count + 1))
     expires_dt = datetime.now(timezone.utc) + timedelta(seconds=900)
     _set_auth(state, last_activity=now_iso, expires_at=expires_dt.isoformat())
+
+    # BA-0: Bridge flat session variables into the JSON groups the model-side
+    # injectors read. Runs every turn -- the page can sign a customer in
+    # mid-session, and AT STATE_MAP writes flat keys after every tool call.
+    _seed_identity_from_session(state)
 
     # BA-1: Session init — only once (guarded by channel_locked)
     if not state.get("channel_locked"):
