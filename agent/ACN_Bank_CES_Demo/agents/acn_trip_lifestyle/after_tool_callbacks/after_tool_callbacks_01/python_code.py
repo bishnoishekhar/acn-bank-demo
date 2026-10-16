@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -489,7 +493,9 @@ def _put_hub_text(tool_response: Any, text: str) -> Any:
     return text
 
 _HUB_PIN_REQUEST_RE = re.compile(r'\bPIN\b|step-?up|verify|authenticat', re.IGNORECASE)
+
 _HUB_PIN_ENTERED_RE = re.compile(r'\bentered\b|\bdtmf\b|\*{3,}', re.IGNORECASE)
+
 _HUB_STEPUP_RE = re.compile(r'step-?up|\bL3\b|auth_level\s*3|level\s*3', re.IGNORECASE)
 
 def _hub_status_text(request: str, customer_id: str, level: int) -> str:

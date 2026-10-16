@@ -26,22 +26,31 @@ function readApplicationLink() {
 
 /* ── CES session variables ─────────────────────────────────────────────────────
    Built from the Firestore profile and pushed into the CES session so the agent
-   knows who it is talking to without asking. `auth_mode` is the master gate the
-   Lead Orchestrator branches on.
+   knows who it is talking to without asking.
 
    All of these must be declared in app.json variableDeclarations.
+   Only send a variable the page actually owns — see guestVariables() below.
 ── */
+/* Guest means "this page does not know who the customer is" — NOT "the customer
+   is nobody". The difference matters because setVariables() installs a STICKY
+   snapshot that the SDK attaches to EVERY subsequent request, not just the next
+   one. Sending customer_id:'' / auth_level:'0' here re-asserted guest identity
+   on every turn and overwrote the identity the agent had just established
+   in-chat (phone + PIN): the flat keys were reset while the auth_state JSON
+   blob survived, leaving the agent at auth_level 2 with an empty customer_id.
+   BT-1 then blocked every auth-gated tool (mortgage_preapproval_check), the
+   model re-ran the identity hub, and that block/re-identify loop burned the
+   per-minute model quota — surfacing as RESOURCE_EXHAUSTED at pre-approval.
+
+   So the page stays silent about identity while it has none. app.json already
+   declares exactly these guest values as defaults (customer_id '', auth_level
+   '0', authentication_status false), and customer_id is documented there as
+   "Set exclusively by M5" — the identity hub. Sign-out needs no reset either:
+   handleSignOut soft-resets the CES session, discarding server state wholesale.
+   Only the channel hint is genuinely ours to assert. */
 function guestVariables() {
   return {
-    auth_mode:             'guest',
-    authentication_status: false,
-    auth_level:            '0',   // STRING — a number arrives as kotlin.Double and 400s the turn
-    is_existing_customer:  false,
-    customerId:            '',
-    customer_id:           '',
-    pref_name:             '',
-    customer_name:         '',
-    web_channel:           true,
+    web_channel: true,
   };
 }
 
