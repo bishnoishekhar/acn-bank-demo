@@ -1,198 +1,319 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Update Customer API DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Customer profile and account update operations API (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/accounts/{accountId}:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/accounts/{accountId}:
     patch:
       operationId: updateAccount
       summary: Update account details (nickname, alerts, settings)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: accountId
-          in: path
-          required: true
-          schema:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateAccountRequest"
+              $ref: '#/components/schemas/UpdateAccountRequest'
       responses:
-        "200":
+        '200':
           description: Account updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/bills/{billId}:
+      description: Update account details (nickname, alerts, settings)
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/bills/{billId}:
     patch:
       operationId: updateBill
       summary: Update a bill payee record
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: billId
-          in: path
-          required: true
-          schema:
+      - name: billId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateBillRequest"
+              $ref: '#/components/schemas/UpdateBillRequest'
       responses:
-        "200":
+        '200':
           description: Bill updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/cards/{cardId}:
+      description: Update a bill payee record
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/cards/{cardId}:
     patch:
       operationId: updateCard
       summary: Update card status, travel notice, or spending controls
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: cardId
-          in: path
-          required: true
-          schema:
+      - name: cardId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateCardRequest"
+              $ref: '#/components/schemas/UpdateCardRequest'
       responses:
-        "200":
+        '200':
           description: Card updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/beneficiaries:
+      description: Update card status, travel notice, or spending controls
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/beneficiaries:
     post:
       operationId: addPayee
       summary: Add a new beneficiary/payee for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/AddPayeeRequest"
+              $ref: '#/components/schemas/AddPayeeRequest'
       responses:
-        "200":
+        '200':
           description: Payee added
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/beneficiaries/{beneficiaryId}:
+      parameters:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Add a new beneficiary/payee for a customer
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/beneficiaries/{beneficiaryId}:
     patch:
       operationId: updatePayee
       summary: Update an existing beneficiary/payee
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: beneficiaryId
-          in: path
-          required: true
-          schema:
+      - name: beneficiaryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdatePayeeRequest"
+              $ref: '#/components/schemas/UpdatePayeeRequest'
       responses:
-        "200":
+        '200':
           description: Payee updated
           content:
             application/json:
               schema:
                 type: object
+      description: Update an existing beneficiary/payee
     delete:
       operationId: deletePayee
       summary: Delete a beneficiary/payee
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: beneficiaryId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: beneficiaryId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Payee deleted
           content:
             application/json:
               schema:
                 type: object
+      description: Delete a beneficiary/payee
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}:
     patch:
       operationId: updateProfile
       summary: Update customer contact or personal profile information
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateProfileRequest"
+              $ref: '#/components/schemas/UpdateProfileRequest'
       responses:
-        "200":
+        '200':
           description: Profile updated
           content:
             application/json:
               schema:
                 type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/accounts/{accountId}/overdraft_protection/settings:
-    patch:
+      description: Update customer contact or personal profile information
+  ? /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/accounts/{accountId}/overdraft_protection/settings
+  : patch:
       operationId: updateOverdraftProtection
       summary: Enable, disable, or update overdraft protection settings for an account
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: accountId
-          in: path
-          required: true
-          schema:
+      - name: accountId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateOverdraftProtectionRequest"
+              $ref: '#/components/schemas/UpdateOverdraftProtectionRequest'
       responses:
-        "200":
+        '200':
           description: Overdraft protection updated
           content:
             application/json:
               schema:
                 type: object
+      description: Enable, disable, or update overdraft protection settings for an account
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -203,85 +324,106 @@ components:
     UpdateAccountRequest:
       type: object
       properties:
-        nickname:
-          type: string
-        alertsEnabled:
-          type: boolean
-        lowBalanceThreshold:
-          type: number
+        fields:
+          type: object
+          description: 'Plain key/value map with: nickname, alertsEnabled, lowBalanceThreshold. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - nickname
+        - alertsEnabled
+        - lowBalanceThreshold
+        required: []
+        col: null
     UpdateBillRequest:
       type: object
       properties:
-        nickname:
-          type: string
-        accountNumber:
-          type: string
-        defaultAmount:
-          type: number
+        fields:
+          type: object
+          description: 'Plain key/value map with: nickname, accountNumber, defaultAmount. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - nickname
+        - accountNumber
+        - defaultAmount
+        required: []
+        col: null
     UpdateCardRequest:
       type: object
       properties:
-        status:
-          type: string
-          enum: [active, frozen, cancelled]
-        travelNotice:
+        fields:
           type: object
-        controls:
-          type: object
+          description: 'Plain key/value map with: status, travelNotice, controls. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - travelNotice
+        - controls
+        required: []
+        col: null
     AddPayeeRequest:
       type: object
-      required:
-        - customerId
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: name, email, accountNumber, bankName, institutionNumber, transitNumber, type (required: name, type). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - name
+        - email
+        - accountNumber
+        - bankName
+        - institutionNumber
+        - transitNumber
+        - type
+        required:
         - name
         - type
-      properties:
-        customerId:
-          type: string
-        name:
-          type: string
-        email:
-          type: string
-        accountNumber:
-          type: string
-        bankName:
-          type: string
-        institutionNumber:
-          type: string
-        transitNumber:
-          type: string
-        type:
-          type: string
-          enum: [interac, eft, wire]
-        idempotencyKey:
-          type: string
+        col: null
     UpdatePayeeRequest:
       type: object
       properties:
-        name:
-          type: string
-        email:
-          type: string
-        accountNumber:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: name, email, accountNumber. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - name
+        - email
+        - accountNumber
+        required: []
+        col: null
     UpdateProfileRequest:
       type: object
       properties:
-        email:
-          type: string
-        phone:
-          type: string
-        preferredName:
-          type: string
-        address:
+        fields:
           type: object
+          description: 'Plain key/value map with: email, phone, preferredName, address. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - email
+        - phone
+        - preferredName
+        - address
+        required: []
+        col: null
     UpdateOverdraftProtectionRequest:
       type: object
-      required:
-        - enabled
       properties:
-        enabled:
-          type: boolean
-        linkedAccountId:
-          type: string
-        overdraftLimit:
-          type: number
+        fields:
+          type: object
+          description: 'Plain key/value map with: enabled, linkedAccountId, overdraftLimit (required: enabled). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - enabled
+        - linkedAccountId
+        - overdraftLimit
+        required:
+        - enabled
+        col: null

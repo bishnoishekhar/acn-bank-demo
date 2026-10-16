@@ -1,59 +1,21 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: FX DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Foreign exchange rates and order execution API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_rates:
     get:
       operationId: getExchangeRate
       summary: Get indicative foreign exchange rate
       security:
-        - GoogleBearerAuth: []
-      parameters:
+      - GoogleBearerAuth: []
+      parameters: null
       responses:
-        "200":
+        '200':
           description: Exchange rate data
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_orders:
-    post:
-      operationId: createFXOrder
-      summary: Execute a foreign exchange conversion order
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateFXOrderRequest"
-      responses:
-        "200":
-          description: FX order created
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_drafts:
-    post:
-      operationId: createFXDraft
-      summary: Create a draft FX order for customer confirmation (rate held temporarily)
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateFXDraftRequest"
-      responses:
-        "200":
-          description: FX draft created with held rate
           content:
             application/json:
               schema:
@@ -63,20 +25,72 @@ paths:
       operationId: getFXOrderStatus
       summary: Get the status of an FX order
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: orderId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: orderId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: FX order status
           content:
             application/json:
               schema:
                 type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_orders:
+    post:
+      operationId: createFXOrder
+      summary: Execute a foreign exchange conversion order
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFXOrderRequest'
+      responses:
+        '200':
+          description: FX order created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Execute a foreign exchange conversion order
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/fx_drafts:
+    post:
+      operationId: createFXDraft
+      summary: Create a draft FX order for customer confirmation (rate held temporarily)
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFXDraftRequest'
+      responses:
+        '200':
+          description: FX draft created with held rate
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a draft FX order for customer confirmation (rate held temporarily)
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -86,44 +100,41 @@ components:
   schemas:
     CreateFXOrderRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, fromAccountId, toAccountId, fromCurrency, toCurrency, amount, draftId (required: fromCurrency, toCurrency, amount). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
+        - fromAccountId
+        - toAccountId
         - fromCurrency
         - toCurrency
         - amount
-        - idempotencyKey
-      properties:
-        customerId:
-          type: string
-        fromAccountId:
-          type: string
-        toAccountId:
-          type: string
-        fromCurrency:
-          type: string
-        toCurrency:
-          type: string
-        amount:
-          type: number
-        draftId:
-          type: string
-        idempotencyKey:
-          type: string
+        - draftId
+        required:
+        - fromCurrency
+        - toCurrency
+        - amount
+        col: null
     CreateFXDraftRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, fromCurrency, toCurrency, amount, purpose (required: fromCurrency, toCurrency, amount). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - fromCurrency
         - toCurrency
         - amount
-      properties:
-        customerId:
-          type: string
-        fromCurrency:
-          type: string
-        toCurrency:
-          type: string
-        amount:
-          type: number
-        purpose:
-          type: string
+        - purpose
+        required:
+        - fromCurrency
+        - toCurrency
+        - amount
+        col: null

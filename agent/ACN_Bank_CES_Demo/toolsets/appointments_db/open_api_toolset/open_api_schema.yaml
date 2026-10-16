@@ -1,40 +1,21 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Appointments DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Branch appointment management API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointment_slots:
     get:
       operationId: getAvailableSlots
       summary: Get available appointment slots at a branch
       security:
-        - GoogleBearerAuth: []
-      parameters:
+      - GoogleBearerAuth: []
+      parameters: null
       responses:
-        "200":
+        '200':
           description: Available appointment slots
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointments:
-    post:
-      operationId: createAppointment
-      summary: Book a new branch appointment
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateAppointmentRequest"
-      responses:
-        "200":
-          description: Appointment booked
           content:
             application/json:
               schema:
@@ -44,15 +25,15 @@ paths:
       operationId: getAppointment
       summary: Get appointment details
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: appointmentId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Appointment details
           content:
             application/json:
@@ -62,44 +43,84 @@ paths:
       operationId: updateAppointment
       summary: Update an existing appointment (reschedule, update notes)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
+      - name: appointmentId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
             type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateAppointmentRequest"
+              $ref: '#/components/schemas/UpdateAppointmentRequest'
       responses:
-        "200":
+        '200':
           description: Appointment updated
           content:
             application/json:
               schema:
                 type: object
+      description: Update an existing appointment (reschedule, update notes)
     delete:
       operationId: cancelAppointment
       summary: Cancel an appointment
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: appointmentId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: appointmentId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Appointment cancelled
           content:
             application/json:
               schema:
                 type: object
+      description: Cancel an appointment
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/appointments:
+    post:
+      operationId: createAppointment
+      summary: Book a new branch appointment
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAppointmentRequest'
+      responses:
+        '200':
+          description: Appointment booked
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Book a new branch appointment
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -109,33 +130,35 @@ components:
   schemas:
     CreateAppointmentRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, branchId, slotId, serviceType, notes, sendConfirmationEmail (required: branchId, slotId, serviceType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - branchId
         - slotId
         - serviceType
-      properties:
-        customerId:
-          type: string
-        branchId:
-          type: string
-        slotId:
-          type: string
-        serviceType:
-          type: string
-        notes:
-          type: string
-        sendConfirmationEmail:
-          type: boolean
-          default: true
-        idempotencyKey:
-          type: string
+        - notes
+        - sendConfirmationEmail
+        required:
+        - branchId
+        - slotId
+        - serviceType
+        col: null
     UpdateAppointmentRequest:
       type: object
       properties:
-        slotId:
-          type: string
-        notes:
-          type: string
-        status:
-          type: string
+        fields:
+          type: object
+          description: 'Plain key/value map with: slotId, notes, status. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - slotId
+        - notes
+        - status
+        required: []
+        col: null

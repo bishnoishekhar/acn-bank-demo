@@ -1,250 +1,241 @@
-openapi: "3.0.3"
-
+openapi: 3.0.3
 info:
   title: Manage Customer Database (Direct Firestore)
-  version: "1.0.0"
+  version: 1.0.0
   description: Direct Firestore REST contract bypassing Cloud Run for ACN Bank CES Demo.
-
 servers:
-  - url: $env_var
-
+- url: $env_var
 security:
-  - GoogleBearerAuth: []
-
+- GoogleBearerAuth: []
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}:
     get:
       operationId: getCustomer
       summary: Get customer profile
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Customer profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CustomerResponse"
-
+                $ref: '#/components/schemas/CustomerResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/accounts:
     get:
       operationId: getAccounts
       summary: Get all accounts for customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of accounts
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AccountsResponse"
-
+                $ref: '#/components/schemas/AccountsResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/cards:
     get:
       operationId: getCards
       summary: Get all cards for customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of cards
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CardsResponse"
-
+                $ref: '#/components/schemas/CardsResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/beneficiaries:
     get:
       operationId: getBeneficiaries
       summary: Get all payees/beneficiaries for customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of beneficiaries
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BeneficiariesResponse"
-
+                $ref: '#/components/schemas/BeneficiariesResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/bills:
     get:
       operationId: getBills
       summary: Get bill payment payees for customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: List of bills
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BillsResponse"
-
+                $ref: '#/components/schemas/BillsResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/transactions:
     get:
       operationId: listCustomerTransactions
       summary: List customer transactions with optional filters
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: pageSize
-          in: query
-          schema:
-            type: integer
-            default: 20
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: pageSize
+        in: query
+        schema:
+          type: integer
+          default: 20
       responses:
-        "200":
+        '200':
           description: List of transactions
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TransactionsResponse"
-
+                $ref: '#/components/schemas/TransactionsResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/config/{configKey}:
     get:
       operationId: getConfig
       summary: Get application configuration (rates, business hours, policy)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: configKey
-          in: path
-          required: true
-          schema:
-            type: string
-            enum: [mortgage_rates, business_hours, agent_policy, branches, epp_rates]
+      - name: configKey
+        in: path
+        required: true
+        schema:
+          type: string
+          enum:
+          - mortgage_rates
+          - business_hours
+          - agent_policy
+          - branches
+          - epp_rates
       responses:
-        "200":
+        '200':
           description: Configuration data
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ConfigResponse"
-
+                $ref: '#/components/schemas/ConfigResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/security:
     get:
       operationId: getSecurity
       summary: Get customer security profile (non-sensitive fields only)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Security profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SecurityResponse"
-
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
-    post:
-      operationId: queryCustomers
-      summary: Query customers by identifier (M5 use only)
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CustomerQueryRequest"
-      responses:
-        "200":
-          description: Matching customers
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/CustomerQueryResponse"
-
+                $ref: '#/components/schemas/SecurityResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/financials:
     get:
       operationId: getFinancials
       summary: Get customer financial profile for credit decisions
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Financial profile
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/FinancialsResponse"
-
+                $ref: '#/components/schemas/FinancialsResponse'
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/tax-documents:
     get:
       operationId: getTaxDocuments
       summary: Get tax documents list (T4, T5, NOA) with secure links
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Tax documents
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/TaxDocumentsResponse"
-
+                $ref: '#/components/schemas/TaxDocumentsResponse'
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
+    post:
+      operationId: queryCustomers
+      summary: Query customers by identifier (M5 use only)
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerQueryRequest'
+      responses:
+        '200':
+          description: Matching customers
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerQueryResponse'
+      parameters: []
+      description: Query customers by identifier (M5 use only)
 components:
   securitySchemes:
     GoogleBearerAuth:
       type: http
       scheme: bearer
       bearerFormat: OAuth 2.0 access token
-
   schemas:
     CustomerResponse:
       type: object
@@ -422,10 +413,16 @@ components:
     CustomerQueryRequest:
       type: object
       properties:
-        identifierType:
-          type: string
-        identifierValue:
-          type: string
+        structuredQuery:
+          type: object
+          description: Do NOT build this yourself. Pass the filters as plain arguments (identifierType, identifierValue) and the Firestore query is built for you.
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - identifierType
+        - identifierValue
+        required: []
+        col: null
     CustomerQueryResponse:
       type: object
       properties:

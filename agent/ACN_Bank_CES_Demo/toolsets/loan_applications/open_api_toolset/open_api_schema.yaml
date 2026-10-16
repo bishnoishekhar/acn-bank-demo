@@ -1,93 +1,115 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Loan Applications - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Loan and mortgage application lifecycle API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications:runQuery:
-    post:
-      operationId: queryLoanApplications
-      summary: Query loan applications by customer, type, or status
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/QueryLoanApplicationsRequest"
-      responses:
-        "200":
-          description: List of loan applications
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications:
-    post:
-      operationId: createLoanApplication
-      summary: Create a new loan or mortgage application
-      security:
-        - GoogleBearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/CreateLoanApplicationRequest"
-      responses:
-        "200":
-          description: Loan application created
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications/{applicationId}:
-    patch:
-      operationId: updateLoanApplication
-      summary: Update an existing loan application
-      security:
-        - GoogleBearerAuth: []
-      parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/UpdateLoanApplicationRequest"
-      responses:
-        "200":
-          description: Loan application updated
-          content:
-            application/json:
-              schema:
-                type: object
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications/{applicationId}/mortgage_details/details:
-    get:
+  ? /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications/{applicationId}/mortgage_details/details
+  : get:
       operationId: getMortgageDetails
       summary: Get detailed mortgage information for a mortgage application
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: applicationId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Mortgage details
           content:
             application/json:
               schema:
                 type: object
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
+    post:
+      operationId: queryLoanApplications
+      summary: Query loan applications by customer, type, or status
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryLoanApplicationsRequest'
+      responses:
+        '200':
+          description: List of loan applications
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters: []
+      description: Query loan applications by customer, type, or status
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications:
+    post:
+      operationId: createLoanApplication
+      summary: Create a new loan or mortgage application
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLoanApplicationRequest'
+      responses:
+        '200':
+          description: Loan application created
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Create a new loan or mortgage application
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications/{applicationId}:
+    patch:
+      operationId: updateLoanApplication
+      summary: Update an existing loan application
+      security:
+      - GoogleBearerAuth: []
+      parameters:
+      - name: applicationId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: updateMask.fieldPaths
+        in: query
+        description: 'Set automatically: only these fields are changed.'
+        schema:
+          type: array
+          items:
+            type: string
+      - name: currentDocument.exists
+        in: query
+        description: 'Set automatically: the document must already exist.'
+        schema:
+          type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateLoanApplicationRequest'
+      responses:
+        '200':
+          description: Loan application updated
+          content:
+            application/json:
+              schema:
+                type: object
+      description: Update an existing loan application
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -98,51 +120,52 @@ components:
     QueryLoanApplicationsRequest:
       type: object
       properties:
-        customerId:
-          type: string
-        type:
-          type: string
-          enum: [personal_loan, auto_loan, mortgage, heloc, line_of_credit]
-        status:
-          type: string
-          enum: [pending, in_review, approved, declined, funded, cancelled]
+        structuredQuery:
+          type: object
+          description: Do NOT build this yourself. Pass the filters as plain arguments (customerId, type, status) and the Firestore query is built for you.
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - customerId
+        - type
+        - status
+        required: []
+        col: loan_applications
     CreateLoanApplicationRequest:
       type: object
-      required:
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: customerId, type, amount, term, purpose, propertyValue, downPayment, employmentStatus, annualIncome (required: type, amount). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
         - customerId
         - type
         - amount
-      properties:
-        customerId:
-          type: string
-        type:
-          type: string
-        amount:
-          type: number
-        term:
-          type: integer
-        purpose:
-          type: string
-        propertyValue:
-          type: number
-        downPayment:
-          type: number
-        employmentStatus:
-          type: string
-        annualIncome:
-          type: number
-        idempotencyKey:
-          type: string
+        - term
+        - purpose
+        - propertyValue
+        - downPayment
+        - employmentStatus
+        - annualIncome
+        required:
+        - type
+        - amount
+        col: null
     UpdateLoanApplicationRequest:
       type: object
       properties:
-        status:
-          type: string
-        approvedAmount:
-          type: number
-        approvedRate:
-          type: number
-        decisionReason:
-          type: string
-        applicationData:
+        fields:
           type: object
+          description: 'Plain key/value map with: status, approvedAmount, approvedRate, decisionReason, applicationData. Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - status
+        - approvedAmount
+        - approvedRate
+        - decisionReason
+        - applicationData
+        required: []
+        col: null
