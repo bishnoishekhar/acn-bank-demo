@@ -229,6 +229,21 @@ def _normalize_response(response: dict[str, Any]) -> dict:
     status = response.get("status", "")
     if status in {"success", "business_error", "validation_error", "system_error"}:
         return response
+    # A toolset failure arrives as {"data": {"error", "errorCode", "status": "error"}, "status": "error"}.
+    # "error" is not one of the statuses above, so it used to fall through to the generic branch
+    # below and be relabelled status="success" with the error buried inside: the model then
+    # reported success for writes that had failed. Report failures as failures.
+    _d = response.get("data")
+    if (status == "error"
+            or (isinstance(_d, dict) and _d.get("status") == "error")
+            or (isinstance(_d, dict) and _d.get("errorCode"))
+            or (isinstance(_d, dict) and "error" in _d and not any(k in _d for k in ("fields", "documents", "name")))):
+        _code = ""
+        if isinstance(_d, dict):
+            _code = str(_d.get("errorCode") or _d.get("error") or "")
+        _code = _code or str(response.get("code") or "ERROR")
+        _kind = "system_error" if _code.upper() in {"INTERNAL", "UNAVAILABLE", "DEADLINE_EXCEEDED", "UNKNOWN"} else "business_error"
+        return {"status": _kind, "code": _code[:80], "data": _d if isinstance(_d, dict) else response}
     # Map HTTP-style or raw responses
     if "error" in response:
         return {"status": "business_error", "code": response["error"], "data": response}
