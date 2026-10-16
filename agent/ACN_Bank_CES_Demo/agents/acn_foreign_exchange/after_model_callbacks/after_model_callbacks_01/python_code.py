@@ -50,6 +50,13 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
+_FX_RATE_CLAIM = re.compile(
+    r'(?i:exchange rate|conversion rate|\brate\s+(?:is|of|for)\b)|\bper\s+(?:1\s+)?[A-Z]{3}\b|'
+    r'\b1\s+[A-Z]{3}\s*(?:=|(?i:is|equals))|\b[A-Z]{3}\s*/\s*[A-Z]{3}\b')
+_FX_NUMBER = re.compile(r'(?<![\d,$])\d{1,3}\.\d{2,6}\b')
+_FX_NO_RATE_TEXT = ("I'm not able to show an exchange rate right now. I can connect you with a representative "
+                    "or a branch who can help, or you can try again later. What would you prefer?")
+
 def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
     """
     AM-1 through AM-12 + social-eng + agent-name-strip.
@@ -73,6 +80,10 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         text = ACCOUNT_NUMBER_PATTERN.sub("[ACCOUNT REMOVED]", text)
         text = CVV_PATTERN.sub("[SECURITY CODE REMOVED]", text)
         text = OTP_PATTERN.sub("[CODE REMOVED]", text)
+
+        # AM-FX: never state an exchange rate that did not come from getExchangeRate this session
+        if state.get("fx_rate_available") != "true" and _FX_RATE_CLAIM.search(text) and _FX_NUMBER.search(text):
+            text = _FX_NO_RATE_TEXT
 
         # AM-12: Voice markdown stripping
         if channel == "voice":

@@ -195,6 +195,32 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _fx_rate_result(tool_response, state):
+    """getExchangeRate -> plain rate documents, or NO_RATE_AVAILABLE (empty collection, error, odd shape)."""
+    docs = []
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
+        rows = body if isinstance(body, list) else (body.get('documents') if isinstance(body, dict) else None)
+        for r in (rows or []):
+            d = r.get('document') if isinstance(r, dict) and 'document' in r else r
+            if isinstance(d, dict) and d.get('fields') is not None:
+                docs.append(_fsw_doc(d))
+            elif isinstance(d, dict) and d.get('id') is not None:
+                docs.append(d)
+    except Exception:
+        docs = []
+    has_number = any(isinstance(v, (int, float)) and not isinstance(v, bool)
+                     for d in docs for v in d.values())
+    if docs and has_number:
+        state['fx_rate_available'] = 'true'
+        return {"status": "success", "code": "OK", "data": {"rates": docs, "count": len(docs)}}
+    state['fx_rate_available'] = 'false'
+    return {"status": "business_error", "code": "NO_RATE_AVAILABLE", "data": {
+        "rate_available": False,
+        "message": ("No indicative exchange rate is available right now. Do NOT state, estimate or recall "
+                    "any exchange rate or conversion. Tell the customer you cannot show a rate at the moment, "
+                    "and offer to connect them with a representative or a branch, or to try again later.")}}
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -228,6 +254,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    # AT-FX: the rate lookup either returns real documents or a firm "no rate" answer
+    if tool_name in ('fx_db_getExchangeRate', 'getExchangeRate'):
+        return _fx_rate_result(tool_response, state)
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:

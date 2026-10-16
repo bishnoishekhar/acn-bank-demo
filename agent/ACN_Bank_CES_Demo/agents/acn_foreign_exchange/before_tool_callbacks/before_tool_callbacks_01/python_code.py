@@ -503,6 +503,17 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     if _cnt(state).get("id_block_count", "0") not in ("", "0"):
         _set_cnt(state, id_block_count="0", id_block_tool="")
 
+    # BT-FX: never price or place an FX order/draft without an indicative rate fetched in this session
+    # (fx_rates can be empty; the model must not make a rate up).
+    if tool_name in ('fx_db_createFXOrder', 'fx_db_createFXDraft', 'createFXOrder', 'createFXDraft') \
+            and state.get('fx_rate_available') != 'true':
+        return {
+            "error": "NO_RATE_AVAILABLE",
+            "message": ("No indicative rate is available, so no order or draft can be created. "
+                        "Do not quote or estimate a rate. Tell the customer you cannot place it right now "
+                        "and offer a representative or a branch."),
+        }
+
     # BT-FSW: toolset writes / queries -> validated, scoped, Firestore-shaped request
     _fsw_cfg = _FSW_BY_NAME.get(tool_name)
     if _fsw_cfg is not None:
