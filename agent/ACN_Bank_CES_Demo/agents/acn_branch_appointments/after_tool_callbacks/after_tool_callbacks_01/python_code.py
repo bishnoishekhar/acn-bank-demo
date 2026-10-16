@@ -195,6 +195,29 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _no_data_result(tool_response, state, slug, what):
+    """Public lookup -> plain documents, or NO_DATA when the collection is empty / the call failed."""
+    docs = []
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
+        rows = body if isinstance(body, list) else (body.get('documents') if isinstance(body, dict) else None)
+        for r in (rows or []):
+            d = r.get('document') if isinstance(r, dict) and 'document' in r else r
+            if isinstance(d, dict) and d.get('fields') is not None:
+                docs.append(_fsw_doc(d))
+            elif isinstance(d, dict) and d.get('id') is not None:
+                docs.append(d)
+    except Exception:
+        docs = []
+    if docs:
+        state['nodata_' + slug] = '0'
+        return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
+    state['nodata_' + slug] = '1'
+    return {"status": "business_error", "code": "NO_DATA", "data": {
+        "message": ("No " + what + " information is available right now. Do NOT state, estimate or recall any " + what +
+                    ", terms, rates or times from memory. Tell the customer plainly that you cannot show it at the "
+                    "moment and offer a representative, a branch, or trying again later.")}}
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -228,6 +251,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    # AT-NODATA: this public collection can be empty; never let the model fill the gap
+    if tool_name in ('appointments_db_getAvailableSlots', 'getAvailableSlots'):
+        return _no_data_result(tool_response, state, 'slots', 'appointment time')
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:

@@ -50,6 +50,10 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
+_GIC_CLAIM = re.compile(r'\d+(?:\.\d+)?\s*%|\b\d\s*(?:to|-)\s*\d\s*years?\b|(?i:competitive|guaranteed (?:return|interest))')
+_GIC_NO_DATA_TEXT = ("I'm not able to show our current GIC rates and terms right now. I can connect you with a "
+                     "representative or a branch who can help, or you can try again later. What would you prefer?")
+
 def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
     """
     AM-1 through AM-12 + social-eng + agent-name-strip.
@@ -73,6 +77,10 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         text = ACCOUNT_NUMBER_PATTERN.sub("[ACCOUNT REMOVED]", text)
         text = CVV_PATTERN.sub("[SECURITY CODE REMOVED]", text)
         text = OTP_PATTERN.sub("[CODE REMOVED]", text)
+
+        # AM-GIC: never state GIC terms/rates when the rate lookup returned nothing
+        if state.get("nodata_gic") == "1" and _GIC_CLAIM.search(text):
+            text = _GIC_NO_DATA_TEXT
 
         # AM-12: Voice markdown stripping
         if channel == "voice":
