@@ -81,7 +81,6 @@ paths:
             application/json:
               schema:
                 type: object
-      parameters: []
       description: Query credit card applications by customer or status
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/card_applications:
     post:

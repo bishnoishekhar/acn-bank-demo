@@ -12,7 +12,6 @@ paths:
       summary: Get available account products and their eligibility criteria
       security:
       - GoogleBearerAuth: []
-      parameters: null
       responses:
         '200':
           description: Available account products

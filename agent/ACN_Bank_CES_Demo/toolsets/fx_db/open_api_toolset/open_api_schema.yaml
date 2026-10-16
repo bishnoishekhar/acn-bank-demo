@@ -12,7 +12,6 @@ paths:
       summary: Get indicative foreign exchange rate
       security:
       - GoogleBearerAuth: []
-      parameters: null
       responses:
         '200':
           description: Exchange rate data

@@ -140,6 +140,13 @@ for spec_path in sorted(glob.glob(os.path.join(root, "toolsets", "*", "open_api_
     for path, ops in new_paths.items():
         for method, op in ops.items():
             merged.setdefault(path, {})[method] = op
+    # Untouched GET ops that had all their unsupported params stripped can carry `parameters: null`;
+    # CES refuses the whole toolset on import ("parameters is not of type array"). Drop empty ones.
+    for ops in merged.values():
+        for op in ops.values():
+            if isinstance(op, dict) and "parameters" in op and not op["parameters"]:
+                del op["parameters"]
+                changed = True
     spec["paths"] = merged
     if changed:
         open(spec_path, "w", encoding="utf8", newline="\n").write(

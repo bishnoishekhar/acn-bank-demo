@@ -228,7 +228,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CustomerQueryResponse'
-      parameters: []
       description: Query customers by identifier (M5 use only)
 components:
   securitySchemes:

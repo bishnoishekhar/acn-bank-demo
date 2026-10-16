@@ -1,25 +1,25 @@
-openapi: "3.0.3"
+openapi: 3.0.3
 info:
   title: Investments DB - Direct Firestore
-  version: "1.0.0"
+  version: 1.0.0
   description: Investment account information API for ACN Bank CES Demo (Direct Firestore)
 servers:
-  - url: $env_var
+- url: $env_var
 paths:
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/investment_accounts:
     get:
       operationId: getInvestmentAccounts
       summary: Get investment accounts for a customer (TFSA, RRSP, FHSA, GIC, non-registered)
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Investment accounts
           content:
             application/json:
@@ -30,10 +30,9 @@ paths:
       operationId: getGICRates
       summary: Get current GIC interest rates by term and currency
       security:
-        - GoogleBearerAuth: []
-      parameters:
+      - GoogleBearerAuth: []
       responses:
-        "200":
+        '200':
           description: GIC rates
           content:
             application/json:
@@ -44,15 +43,15 @@ paths:
       operationId: getContributionRoom
       summary: Get TFSA, RRSP, or FHSA contribution room for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Contribution room details
           content:
             application/json:
@@ -63,15 +62,15 @@ paths:
       operationId: getInvestmentHoldings
       summary: Get current investment holdings for a customer
       security:
-        - GoogleBearerAuth: []
+      - GoogleBearerAuth: []
       parameters:
-        - name: customerId
-          in: path
-          required: true
-          schema:
-            type: string
+      - name: customerId
+        in: path
+        required: true
+        schema:
+          type: string
       responses:
-        "200":
+        '200':
           description: Investment holdings
           content:
             application/json:
@@ -83,3 +82,4 @@ components:
       type: http
       scheme: bearer
       bearerFormat: OAuth 2.0 access token
+  schemas: {}

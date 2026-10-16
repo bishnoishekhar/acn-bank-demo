@@ -99,7 +99,6 @@ paths:
             application/json:
               schema:
                 type: object
-      parameters: []
       description: List recurring payment schedules for a customer
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/recurring_schedules:
     post:

@@ -44,7 +44,6 @@ paths:
             application/json:
               schema:
                 type: object
-      parameters: []
       description: Query loan applications by customer, type, or status
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/loan_applications:
     post:

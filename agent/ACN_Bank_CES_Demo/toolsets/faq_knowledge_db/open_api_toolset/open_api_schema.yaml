@@ -31,7 +31,6 @@ paths:
       summary: List all available FAQ categories
       security:
       - GoogleBearerAuth: []
-      parameters: null
       responses:
         '200':
           description: List of FAQ categories
@@ -58,7 +57,6 @@ paths:
             application/json:
               schema:
                 type: object
-      parameters: []
       description: Search FAQ knowledge base by query string
 components:
   securitySchemes:
