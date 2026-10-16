@@ -13,6 +13,8 @@ import json
 
 import hashlib
 
+from datetime import datetime, timezone
+
 import logging
 
 from typing import Any, Optional
@@ -207,6 +209,167 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # BT: before_tool_callback
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# FSW: direct-Firestore writes and queries for every toolset operation.
+#
+# The toolsets call Firestore's REST API, which only accepts typed documents
+# ({"fields": {"amount": {"doubleValue": 100}}}), a documentId query parameter on create,
+# an updateMask on update (without one a PATCH REPLACES the whole document) and a
+# structuredQuery for runQuery. The model sends plain arguments, so every write failed
+# with 400 "Unknown name ...". This builds the real request from the plain arguments, and:
+#   * allows only the fields the spec declares (no mass assignment)
+#   * forces customerId (body field and path parameter) to the session's customer
+#   * validates required fields and path ids (no '/' or '..')
+#   * makes a patch fail on a missing document instead of creating one
+#   * derives a deterministic documentId for creates, so a retry is a 409, not a duplicate
+#   * requires step-up (L3) for payee / profile / FX changes
+# The registry below is GENERATED from the toolset specs (scripts/gen_firestore_writes.py).
+# ---------------------------------------------------------------------------
+_FSW_REGISTRY = json.loads('''{"account_opening_db_createAccountApplication":{"allow":["customerId","productId","applicationData"],"col":"account_applications","cust_field":true,"cust_path":false,"kind":"create","op":"createAccountApplication","path":[],"required":["productId"],"set":{},"stepup":false,"ts":"account_opening_db"},"account_opening_db_updateAccountApplication":{"allow":["status","decisionReason","applicationData"],"col":"account_applications","cust_field":false,"cust_path":false,"kind":"patch","op":"updateAccountApplication","path":["applicationId"],"required":[],"set":{},"stepup":false,"ts":"account_opening_db"},"appointments_db_cancelAppointment":{"allow":[],"col":"appointments","cust_field":false,"cust_path":false,"kind":"delete","op":"cancelAppointment","path":["appointmentId"],"required":[],"set":{},"stepup":false,"ts":"appointments_db"},"appointments_db_createAppointment":{"allow":["customerId","branchId","slotId","serviceType","notes","sendConfirmationEmail"],"col":"appointments","cust_field":true,"cust_path":false,"kind":"create","op":"createAppointment","path":[],"required":["branchId","slotId","serviceType"],"set":{},"stepup":false,"ts":"appointments_db"},"appointments_db_updateAppointment":{"allow":["slotId","notes","status"],"col":"appointments","cust_field":false,"cust_path":false,"kind":"patch","op":"updateAppointment","path":["appointmentId"],"required":[],"set":{},"stepup":false,"ts":"appointments_db"},"card_applications_createApplication":{"allow":["customerId","cardType","applicationData"],"col":"card_applications","cust_field":true,"cust_path":false,"kind":"create","op":"createApplication","path":[],"required":["cardType"],"set":{},"stepup":false,"ts":"card_applications"},"card_applications_persistApprovedCreditCardApplication":{"allow":["approvedCreditLimit","cardType","cardNumber","expiryDate"],"col":"persist_approved","cust_field":false,"cust_path":false,"kind":"create","op":"persistApprovedCreditCardApplication","path":["applicationId"],"required":[],"set":{},"stepup":false,"ts":"card_applications"},"card_applications_queryApplications":{"allow":["customerId","status"],"col":"card_applications","cust_field":true,"cust_path":false,"kind":"query","op":"queryApplications","path":[],"required":[],"set":{},"stepup":false,"ts":"card_applications"},"card_applications_updateApplication":{"allow":["status","applicationData","decisionReason","approvedCreditLimit"],"col":"card_applications","cust_field":false,"cust_path":false,"kind":"patch","op":"updateApplication","path":["applicationId"],"required":[],"set":{},"stepup":false,"ts":"card_applications"},"cheque_services_db_createBankDraft":{"allow":["customerId","fromAccountId","amount","currency","payee","memo","pickupBranchId","deliveryAddress"],"col":"bank_drafts","cust_field":true,"cust_path":false,"kind":"create","op":"createBankDraft","path":[],"required":["amount","currency","payee"],"set":{},"stepup":false,"ts":"cheque_services_db"},"cheque_services_db_createChequeBookOrder":{"allow":["customerId","accountId","quantity","deliveryAddress"],"col":"cheque_book_orders","cust_field":true,"cust_path":false,"kind":"create","op":"createChequeBookOrder","path":[],"required":["accountId","quantity"],"set":{},"stepup":false,"ts":"cheque_services_db"},"cheque_services_db_createStopPayment":{"allow":["customerId","accountId","chequeNumber","amount","payee","reason"],"col":"stop_payments","cust_field":true,"cust_path":false,"kind":"create","op":"createStopPayment","path":[],"required":["accountId","chequeNumber","amount","reason"],"set":{},"stepup":false,"ts":"cheque_services_db"},"customer_intelligence_db_logNudgeShown":{"allow":["nudgeId","outcome","channel"],"col":"nudge_log","cust_field":false,"cust_path":true,"kind":"create","op":"logNudgeShown","path":["customerId"],"required":["nudgeId","outcome","channel"],"set":{},"stepup":false,"ts":"customer_intelligence_db"},"digital_activation_db_createActivationRequest":{"allow":["customerId","activationType","cardId","channel","deviceInfo"],"col":"activation_requests","cust_field":true,"cust_path":false,"kind":"create","op":"createActivationRequest","path":[],"required":["activationType"],"set":{},"stepup":false,"ts":"digital_activation_db"},"digital_activation_db_updateActivationRequest":{"allow":["status","failureReason","completionData"],"col":"activation_requests","cust_field":false,"cust_path":false,"kind":"patch","op":"updateActivationRequest","path":["requestId"],"required":[],"set":{},"stepup":false,"ts":"digital_activation_db"},"disputes_db_createDispute":{"allow":["customerId","transactionId","type","amount","description"],"col":"disputes","cust_field":true,"cust_path":false,"kind":"create","op":"createDispute","path":[],"required":["transactionId","type","amount"],"set":{},"stepup":false,"ts":"disputes_db"},"disputes_db_createPADDispute":{"allow":["customerId","padId","amount","reason","cpaRule"],"col":"pad_disputes","cust_field":true,"cust_path":false,"kind":"create","op":"createPADDispute","path":[],"required":["padId","amount","reason"],"set":{},"stepup":false,"ts":"disputes_db"},"disputes_db_updateDispute":{"allow":["status","resolution","additionalInfo"],"col":"disputes","cust_field":false,"cust_path":false,"kind":"patch","op":"updateDispute","path":["disputeId"],"required":[],"set":{},"stepup":false,"ts":"disputes_db"},"faq_knowledge_db_searchFAQs":{"allow":["q","category","language","limit"],"col":"faqs","cust_field":false,"cust_path":false,"kind":"query","op":"searchFAQs","path":[],"required":["q"],"set":{},"stepup":false,"ts":"faq_knowledge_db"},"fx_db_createFXDraft":{"allow":["customerId","fromCurrency","toCurrency","amount","purpose"],"col":"fx_drafts","cust_field":true,"cust_path":false,"kind":"create","op":"createFXDraft","path":[],"required":["fromCurrency","toCurrency","amount"],"set":{},"stepup":true,"ts":"fx_db"},"fx_db_createFXOrder":{"allow":["customerId","fromAccountId","toAccountId","fromCurrency","toCurrency","amount","draftId"],"col":"fx_orders","cust_field":true,"cust_path":false,"kind":"create","op":"createFXOrder","path":[],"required":["fromCurrency","toCurrency","amount"],"set":{},"stepup":true,"ts":"fx_db"},"kyc_request_tracking_createKycRequest":{"allow":["customerId","channel","documentType","purpose"],"col":"kyc_requests","cust_field":true,"cust_path":false,"kind":"create","op":"createKycRequest","path":[],"required":["channel","documentType"],"set":{},"stepup":false,"ts":"kyc_request_tracking"},"kyc_request_tracking_writeKycRecord":{"allow":["entities","confidence","outcome","failureReason"],"col":"kyc_requests","cust_field":false,"cust_path":false,"kind":"patch","op":"writeKycRecord","path":["requestId"],"required":["outcome"],"set":{},"stepup":false,"ts":"kyc_request_tracking"},"loan_applications_createLoanApplication":{"allow":["customerId","type","amount","term","purpose","propertyValue","downPayment","employmentStatus","annualIncome"],"col":"loan_applications","cust_field":true,"cust_path":false,"kind":"create","op":"createLoanApplication","path":[],"required":["type","amount"],"set":{},"stepup":false,"ts":"loan_applications"},"loan_applications_queryLoanApplications":{"allow":["customerId","type","status"],"col":"loan_applications","cust_field":true,"cust_path":false,"kind":"query","op":"queryLoanApplications","path":[],"required":[],"set":{},"stepup":false,"ts":"loan_applications"},"loan_applications_updateLoanApplication":{"allow":["status","approvedAmount","approvedRate","decisionReason","applicationData"],"col":"loan_applications","cust_field":false,"cust_path":false,"kind":"patch","op":"updateLoanApplication","path":["applicationId"],"required":[],"set":{},"stepup":false,"ts":"loan_applications"},"manageCustomerDatabase_queryCustomers":{"allow":["identifierType","identifierValue"],"col":"customers","cust_field":false,"cust_path":false,"kind":"query","op":"queryCustomers","path":[],"required":[],"set":{},"stepup":false,"ts":"manageCustomerDatabase"},"new_transaction_api_db_cancelRecurringSchedule":{"allow":[],"col":"recurring_schedules","cust_field":false,"cust_path":false,"kind":"delete","op":"cancelRecurringSchedule","path":["scheduleId"],"required":[],"set":{},"stepup":false,"ts":"new_transaction_api_db"},"new_transaction_api_db_createRecurringSchedule":{"allow":["customerId","fromAccountId","toAccountId","toBeneficiaryId","toBillId","amount","currency","frequency","startDate","endDate","memo"],"col":"recurring_schedules","cust_field":true,"cust_path":false,"kind":"create","op":"createRecurringSchedule","path":[],"required":["fromAccountId","amount","frequency","startDate"],"set":{},"stepup":false,"ts":"new_transaction_api_db"},"new_transaction_api_db_listRecurringSchedules":{"allow":["customerId"],"col":"recurring_schedules","cust_field":true,"cust_path":false,"kind":"query","op":"listRecurringSchedules","path":[],"required":[],"set":{},"stepup":false,"ts":"new_transaction_api_db"},"new_transaction_api_db_updateRecurringSchedule":{"allow":["amount","frequency","nextRunDate","endDate","status"],"col":"recurring_schedules","cust_field":false,"cust_path":false,"kind":"patch","op":"updateRecurringSchedule","path":["scheduleId"],"required":[],"set":{},"stepup":false,"ts":"new_transaction_api_db"},"new_transaction_api_db_updateTransaction":{"allow":["status","failureReason"],"col":"transactions","cust_field":false,"cust_path":true,"kind":"patch","op":"updateTransaction","path":["customerId","transactionId"],"required":[],"set":{},"stepup":false,"ts":"new_transaction_api_db"},"overdraft_pad_db_cancelPAD":{"allow":["reason"],"col":"pads","cust_field":false,"cust_path":true,"kind":"patch","op":"cancelPAD","path":["customerId","padId"],"required":["reason"],"set":{"status":"cancelled"},"stepup":false,"ts":"overdraft_pad_db"},"overdraft_pad_db_createNSFReversal":{"allow":["nsfFeeId","reason"],"col":"nsf_reversals","cust_field":false,"cust_path":true,"kind":"create","op":"createNSFReversal","path":["customerId"],"required":["nsfFeeId","reason"],"set":{},"stepup":false,"ts":"overdraft_pad_db"},"overdraft_pad_db_createPADDispute":{"allow":["padId","amount","reason","cpaRule"],"col":"pad_disputes","cust_field":false,"cust_path":true,"kind":"create","op":"createPADDispute","path":["customerId"],"required":["padId","amount","reason"],"set":{},"stepup":false,"ts":"overdraft_pad_db"},"overdraft_pad_db_updateOverdraftProtection":{"allow":["enabled","linkedAccountId","overdraftLimit"],"col":"settings","cust_field":false,"cust_path":true,"kind":"patch","op":"updateOverdraftProtection","path":["customerId"],"required":["enabled"],"set":{},"stepup":false,"ts":"overdraft_pad_db"},"persist_approved_credit_card_patchCreditCardApplication":{"allow":["applicationStatus","notes"],"col":"card_applications","cust_field":false,"cust_path":false,"kind":"patch","op":"patchCreditCardApplication","path":["applicationId"],"required":[],"set":{},"stepup":false,"ts":"persist_approved_credit_card"},"persist_approved_credit_card_persistApprovedCreditCardApplication":{"allow":["customerId","approvedCreditLimit","interestRate","productType"],"col":"persist_approved","cust_field":true,"cust_path":false,"kind":"create","op":"persistApprovedCreditCardApplication","path":["applicationId"],"required":["approvedCreditLimit","interestRate","productType"],"set":{},"stepup":false,"ts":"persist_approved_credit_card"},"preferences_db_updateMarketingConsent":{"allow":["email","phone","mail","consentSource"],"col":"marketing_consent","cust_field":false,"cust_path":true,"kind":"patch","op":"updateMarketingConsent","path":["customerId"],"required":["email"],"set":{},"stepup":false,"ts":"preferences_db"},"preferences_db_updateNotificationPreferences":{"allow":["emailEnabled","smsEnabled","pushEnabled","lowBalanceAlert","transactionAlert","securityAlert","lowBalanceThreshold"],"col":"notifications","cust_field":false,"cust_path":true,"kind":"patch","op":"updateNotificationPreferences","path":["customerId"],"required":[],"set":{},"stepup":false,"ts":"preferences_db"},"preferences_db_updatePaperlessEnrollment":{"allow":["statementsEnabled","taxDocumentsEnabled","noticesEnabled"],"col":"paperless","cust_field":false,"cust_path":true,"kind":"patch","op":"updatePaperlessEnrollment","path":["customerId"],"required":[],"set":{},"stepup":false,"ts":"preferences_db"},"rewards_loyalty_db_createRedemption":{"allow":["points","redemptionType","destination"],"col":"redemptions","cust_field":false,"cust_path":true,"kind":"create","op":"createRedemption","path":["customerId"],"required":["points","redemptionType"],"set":{},"stepup":false,"ts":"rewards_loyalty_db"},"send_application_email_executeACNBankApplicationEmail":{"allow":["customerId","templateId","recipientEmail","templateData"],"col":"email_queue","cust_field":true,"cust_path":false,"kind":"create","op":"executeACNBankApplicationEmail","path":[],"required":["templateId","recipientEmail"],"set":{},"stepup":false,"ts":"send_application_email"},"update_customer_api_db_addPayee":{"allow":["name","email","accountNumber","bankName","institutionNumber","transitNumber","type"],"col":"beneficiaries","cust_field":false,"cust_path":true,"kind":"create","op":"addPayee","path":["customerId"],"required":["name","type"],"set":{},"stepup":true,"ts":"update_customer_api_db"},"update_customer_api_db_deletePayee":{"allow":[],"col":"beneficiaries","cust_field":false,"cust_path":true,"kind":"delete","op":"deletePayee","path":["customerId","beneficiaryId"],"required":[],"set":{},"stepup":true,"ts":"update_customer_api_db"},"update_customer_api_db_updateAccount":{"allow":["nickname","alertsEnabled","lowBalanceThreshold"],"col":"accounts","cust_field":false,"cust_path":true,"kind":"patch","op":"updateAccount","path":["customerId","accountId"],"required":[],"set":{},"stepup":false,"ts":"update_customer_api_db"},"update_customer_api_db_updateBill":{"allow":["nickname","accountNumber","defaultAmount"],"col":"bills","cust_field":false,"cust_path":true,"kind":"patch","op":"updateBill","path":["customerId","billId"],"required":[],"set":{},"stepup":false,"ts":"update_customer_api_db"},"update_customer_api_db_updateCard":{"allow":["status","travelNotice","controls"],"col":"cards","cust_field":false,"cust_path":true,"kind":"patch","op":"updateCard","path":["customerId","cardId"],"required":[],"set":{},"stepup":false,"ts":"update_customer_api_db"},"update_customer_api_db_updateOverdraftProtection":{"allow":["enabled","linkedAccountId","overdraftLimit"],"col":"settings","cust_field":false,"cust_path":true,"kind":"patch","op":"updateOverdraftProtection","path":["customerId","accountId"],"required":["enabled"],"set":{},"stepup":false,"ts":"update_customer_api_db"},"update_customer_api_db_updatePayee":{"allow":["name","email","accountNumber"],"col":"beneficiaries","cust_field":false,"cust_path":true,"kind":"patch","op":"updatePayee","path":["customerId","beneficiaryId"],"required":[],"set":{},"stepup":true,"ts":"update_customer_api_db"},"update_customer_api_db_updateProfile":{"allow":["email","phone","preferredName","address"],"col":"customers","cust_field":false,"cust_path":true,"kind":"patch","op":"updateProfile","path":["customerId"],"required":[],"set":{},"stepup":true,"ts":"update_customer_api_db"},"write_kyc_to_db_updateKycRecord":{"allow":["verificationStatus","reviewNotes","reviewedBy"],"col":"kyc_records","cust_field":false,"cust_path":false,"kind":"patch","op":"updateKycRecord","path":["kycId"],"required":[],"set":{},"stepup":false,"ts":"write_kyc_to_db"},"write_kyc_to_db_writeKycToDb":{"allow":["customerId","applicationId","documentType","verificationStatus","overallConfidence","manualReviewRequired","extractedDataHash"],"col":"kyc_records","cust_field":true,"cust_path":false,"kind":"create","op":"writeKycToDb","path":[],"required":["applicationId","documentType","verificationStatus","overallConfidence"],"set":{},"stepup":false,"ts":"write_kyc_to_db"}}''')
+_FSW_BY_NAME = {}
+_FSW_RESERVED = {'fields', 'documentId', 'updateMask.fieldPaths', 'currentDocument.exists', 'structuredQuery'}
+_FSW_STEPUP_REASON = {'addPayee': 'new_payee', 'updatePayee': 'payee_edit', 'deletePayee': 'payee_edit',
+                      'updateProfile': 'contact_change', 'createFXOrder': 'wire', 'createFXDraft': 'wire'}
+_FSW_CUSTOMER_FIELD = {'phone': 'registered_mobile', 'email': 'email',
+                       'account_number': 'account_number', 'caller_id': 'telephony_caller_id'}
+_FSW_DOC_ROOT = 'projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents'
+
+def _fsw_build_index():
+    counts = {}
+    for _c in _FSW_REGISTRY.values():
+        counts[_c['op']] = counts.get(_c['op'], 0) + 1
+    for _k, _c in _FSW_REGISTRY.items():
+        _FSW_BY_NAME[_k] = _c
+        if counts[_c['op']] == 1:
+            _FSW_BY_NAME[_c['op']] = _c
+_fsw_build_index()
+
+def _fsw_value(v):
+    """Python value -> Firestore REST typed value."""
+    if v is None:
+        return {"nullValue": None}
+    if isinstance(v, bool):
+        return {"booleanValue": v}
+    if isinstance(v, int):
+        return {"integerValue": str(v)}
+    if isinstance(v, float):
+        return {"doubleValue": v}
+    if isinstance(v, dict):
+        return {"mapValue": {"fields": {str(k): _fsw_value(x) for k, x in v.items()}}}
+    if isinstance(v, (list, tuple)):
+        return {"arrayValue": {"values": [_fsw_value(x) for x in v]}}
+    return {"stringValue": str(v)}
+
+def _fsw_safe_id(v) -> str:
+    s = str(v if v is not None else '').strip()
+    if not s or len(s) > 128 or '..' in s or s in ('.', '..'):
+        return ''
+    return s if all(ch.isalnum() or ch in '-_.' for ch in s) else ''
+
+def _fsw_now() -> str:
+    return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+
+def _fsw_query(cfg, customer_id, plain):
+    op = cfg['op']
+    filters = []
+    limit = 50
+    if op == 'queryCustomers':
+        field = _FSW_CUSTOMER_FIELD.get(str(plain.get('identifierType', '')).strip().lower())
+        value = plain.get('identifierValue')
+        if not field or value in (None, ''):
+            return None, {"error": "MISSING_FIELD", "message": "identifierType (phone | email | account_number | caller_id) and identifierValue are required."}
+        filters.append((field, str(value)))
+        # only ever the session's own customer record, whatever identifier was supplied
+        sq_ref = _FSW_DOC_ROOT + '/customers/' + customer_id
+    else:
+        sq_ref = None
+        for k in cfg['allow']:
+            if k in ('q', 'limit'):
+                continue
+            if plain.get(k) not in (None, ''):
+                filters.append((k, plain[k]))
+        if cfg.get('cust_field'):
+            filters = [f for f in filters if f[0] != 'customerId'] + [('customerId', customer_id)]
+        try:
+            if plain.get('limit') not in (None, ''):
+                limit = max(1, min(int(float(plain['limit'])), 50))
+        except (ValueError, TypeError):
+            pass
+    parts = [{"fieldFilter": {"field": {"fieldPath": f}, "op": "EQUAL", "value": _fsw_value(v)}} for f, v in filters]
+    if sq_ref:
+        parts.append({"fieldFilter": {"field": {"fieldPath": "__name__"}, "op": "EQUAL", "value": {"referenceValue": sq_ref}}})
+    sq = {"from": [{"collectionId": cfg['col']}], "limit": limit}
+    if len(parts) == 1:
+        sq["where"] = parts[0]
+    elif parts:
+        sq["where"] = {"compositeFilter": {"op": "AND", "filters": parts}}
+    return sq, None
+
+def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
+    """Validate and rewrite a toolset write/query call in place. Returns an error dict to block it."""
+    customer_id = str(state.get("customer_id", "") or "")
+    public_query = cfg['kind'] == 'query' and not cfg.get('cust_field') and cfg['op'] != 'queryCustomers'
+    if not customer_id and not public_query:
+        return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
+    if cfg['stepup'] and auth_level < 3:
+        reason = _FSW_STEPUP_REASON.get(cfg['op'], 'threshold')
+        _set_auth(state, step_up_required=True, step_up_reason=reason)
+        return {"error": "STEP_UP_REQUIRED",
+                "message": "Additional verification required before this change: " + reason + ".",
+                "step_up_reason": reason}
+    nested = input_dict.get('fields') if isinstance(input_dict.get('fields'), dict) else {}
+    _sq_in = input_dict.get('structuredQuery')
+    if isinstance(_sq_in, dict) and 'from' not in _sq_in:
+        nested = dict(_sq_in, **nested)   # the model put its plain filters inside structuredQuery
+    path_vals = {}
+    for pp in cfg['path']:
+        if pp == 'customerId':
+            path_vals[pp] = customer_id
+            continue
+        sid = _fsw_safe_id(input_dict.get(pp) if input_dict.get(pp) not in (None, '') else nested.get(pp))
+        if not sid:
+            return {"error": "MISSING_FIELD", "message": pp + " is required (letters, digits, - _ . only)."}
+        path_vals[pp] = sid
+    plain = dict(nested)
+    for k, v in input_dict.items():
+        if k not in _FSW_RESERVED and k not in cfg['path']:
+            plain.setdefault(k, v)
+    kind = cfg['kind']
+    if kind == 'delete':
+        input_dict.clear()
+        input_dict.update(path_vals)
+        return None
+    if kind == 'query':
+        sq, err = _fsw_query(cfg, customer_id, plain)
+        if err:
+            return err
+        input_dict.clear()
+        input_dict['structuredQuery'] = sq
+        return None
+    data = {k: plain[k] for k in cfg['allow'] if k in plain and plain[k] is not None and plain[k] != ''}
+    if cfg.get('cust_field'):
+        data['customerId'] = customer_id
+    missing = [r for r in cfg['required'] if r not in data]
+    if missing:
+        return {"error": "MISSING_FIELD", "message": "Missing required field(s): " + ", ".join(missing) + "."}
+    data.update(cfg.get('set') or {})
+    changed = [k for k in data if k != 'customerId']
+    if kind == 'patch' and not changed:
+        return {"error": "NOTHING_TO_UPDATE", "message": "Provide at least one of: " + ", ".join(cfg['allow']) + "."}
+    data['createdAt' if kind == 'create' else 'updatedAt'] = _fsw_now()
+    input_dict.clear()
+    input_dict.update(path_vals)
+    if kind == 'create':
+        bucket = str(int(datetime.now(timezone.utc).timestamp()) // 600)
+        seed = "|".join([cfg['op'], customer_id, json.dumps({k: v for k, v in data.items() if k != 'createdAt'}, sort_keys=True, default=str), bucket])
+        prefix = (cfg['op'][6:] if cfg['op'].startswith('create') else cfg['op']).upper()[:14]
+        input_dict['documentId'] = prefix + "-" + hashlib.sha256(seed.encode()).hexdigest()[:16].upper()
+    else:
+        input_dict['updateMask.fieldPaths'] = list(data.keys())
+        input_dict['currentDocument.exists'] = True
+    input_dict['fields'] = {k: _fsw_value(v) for k, v in data.items()}
+    return None
+
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -324,6 +487,14 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         _set_cnt(state, auth_block_count="0", auth_block_tool="")
     if _cnt(state).get("id_block_count", "0") not in ("", "0"):
         _set_cnt(state, id_block_count="0", id_block_tool="")
+
+    # BT-FSW: toolset writes / queries -> validated, scoped, Firestore-shaped request
+    _fsw_cfg = _FSW_BY_NAME.get(tool_name)
+    if _fsw_cfg is not None:
+        _fsw_err = _fsw_prepare(_fsw_cfg, state, input_dict, auth_level)
+        if _fsw_err:
+            return _fsw_err
+        return None
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:

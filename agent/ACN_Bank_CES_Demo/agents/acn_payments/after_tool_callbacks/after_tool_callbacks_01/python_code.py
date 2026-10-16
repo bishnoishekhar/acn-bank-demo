@@ -179,6 +179,69 @@ def _friendly_txn_response(tool_response):
         pass
     return tool_response
 
+# ---------------------------------------------------------------------------
+# FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
+# a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
+# ---------------------------------------------------------------------------
+_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
+
+def _fsw_plain_value(v):
+    if not isinstance(v, dict) or not v:
+        return None
+    k = next(iter(v))
+    x = v[k]
+    if k == 'integerValue':
+        try:
+            return int(x)
+        except (ValueError, TypeError):
+            return x
+    if k == 'mapValue':
+        return {a: _fsw_plain_value(b) for a, b in (x or {}).get('fields', {}).items()}
+    if k == 'arrayValue':
+        return [_fsw_plain_value(b) for b in (x or {}).get('values', [])]
+    if k == 'nullValue':
+        return None
+    return x
+
+def _fsw_doc(doc):
+    out = {a: _fsw_plain_value(b) for a, b in (doc.get('fields') or {}).items()}
+    out['id'] = str(doc.get('name', '')).split('/')[-1]
+    return out
+
+def _fsw_friendly(tool_response, kind):
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and 'data' in tool_response else tool_response
+        if kind == 'query':
+            rows = body if isinstance(body, list) else None
+            if rows is None and isinstance(body, dict):
+                rows = body.get('result') if isinstance(body.get('result'), list) else body.get('documents')
+            if isinstance(rows, list):
+                docs = []
+                for r in rows:
+                    d = r.get('document') if isinstance(r, dict) and 'document' in r else r
+                    if isinstance(d, dict) and d.get('fields') is not None:
+                        docs.append(_fsw_doc(d))
+                return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
+        elif kind in ('create', 'patch'):
+            if isinstance(body, dict) and isinstance(body.get('fields'), dict) and body.get('name'):
+                d = _fsw_doc(body)
+                d['message'] = 'Recorded.' if kind == 'create' else 'Updated.'
+                return {"status": "success", "code": "OK", "data": d}
+        elif kind == 'delete':
+            if body in ({}, None, []) or (isinstance(body, dict) and not body):
+                return {"status": "success", "code": "OK", "data": {"deleted": True, "message": "Deleted."}}
+        blob = repr(tool_response)
+        if kind == 'create' and ('ALREADY_EXISTS' in blob or 'code=409' in blob or "'code': 409" in blob or 'already exists' in blob.lower()):
+            return {"status": "business_error", "code": "DUPLICATE_REQUEST", "data": {
+                "message": "This exact request was already submitted a moment ago, so it was not repeated. "
+                           "Tell the customer it is already recorded; do not retry."}}
+        if kind in ('patch', 'delete') and ('NOT_FOUND' in blob or 'code=404' in blob or "'code': 404" in blob):
+            return {"status": "business_error", "code": "NOT_FOUND", "data": {
+                "message": "That record does not exist (check the id). Nothing was changed."}}
+    except Exception:
+        pass
+    return tool_response
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -215,6 +278,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
 
     if tool_name in _TXN_TOOL_NAMES:
         tool_response = _friendly_txn_response(tool_response)
+
+    _fsw_kind = _FSW_KINDS.get(tool_name)
+    if _fsw_kind:
+        tool_response = _fsw_friendly(tool_response, _fsw_kind)
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
@@ -291,7 +358,7 @@ def _normalize_response(response: dict[str, Any]) -> dict:
         _code = ""
         if isinstance(_d, dict):
             _code = str(_d.get("errorCode") or _d.get("error") or "")
-        _code = _code or str(response.get("code") or "ERROR")
+        _code = _code or str(response.get("errorCode") or response.get("error") or response.get("code") or "ERROR")
         _kind = "system_error" if _code.upper() in {"INTERNAL", "UNAVAILABLE", "DEADLINE_EXCEEDED", "UNKNOWN"} else "business_error"
         return {"status": _kind, "code": _code[:80], "data": _d if isinstance(_d, dict) else response}
     # Map HTTP-style or raw responses
