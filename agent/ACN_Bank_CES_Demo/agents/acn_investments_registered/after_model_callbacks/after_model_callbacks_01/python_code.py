@@ -2,6 +2,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -51,6 +55,7 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
 _GIC_CLAIM = re.compile(r'\d+(?:\.\d+)?\s*%|\b\d\s*(?:to|-)\s*\d\s*years?\b|(?i:competitive|guaranteed (?:return|interest))')
+
 _GIC_NO_DATA_TEXT = ("I'm not able to show our current GIC rates and terms right now. I can connect you with a "
                      "representative or a branch who can help, or you can try again later. What would you prefer?")
 
@@ -121,12 +126,17 @@ def _update_counters(text: str, state: dict[str, Any]) -> None:
 # always include text with end_session.
 # ---------------------------------------------------------------------------
 _CSAT_PROMPT = "Before you go, how would you rate your experience today, from 1 to 5?"
+
 _CLOSING_TEXT = "Thanks for banking with ACN Bank. Take care!"
+
 _HANDOFF_TEXT = ("I'm going to connect you with a specialist who can help from here. "
                  "Thank you for your patience.")
+
 _HANDOFF_AUTH_TEXT = ("I wasn't able to verify your identity, so I'm going to connect you "
                       "with a specialist who can help from here. Thank you for your patience.")
+
 _AUTH_REASON_RE = re.compile(r'\b(pin|authenticat\w*|verif\w*|identity|identif\w*)\b', re.IGNORECASE)
+
 _ASKS_RATING_RE = re.compile(r'\b(rate|rating)\b|\b1\s*(to|-|–)\s*5\b|scale of', re.IGNORECASE)
 
 def _close_text(parts) -> str:
@@ -170,7 +180,7 @@ def _enforce_session_close(state, llm_response) -> Optional[object]:
             return None
         return LlmResponse.from_parts(parts=[Part.from_text(text=_CLOSING_TEXT)] + parts)
     except Exception:
-        return None  # never break the turn over a closing line
+        return None
 
 # --- A catalogue widget never goes out alone ---
 # On the web UI's live voice session the model sometimes calls a catalogue widget and ends the turn without a

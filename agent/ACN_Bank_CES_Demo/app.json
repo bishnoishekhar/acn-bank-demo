@@ -212,6 +212,13 @@
       "default": "{}"
     }
   }, {
+    "name": "customer_segment",
+    "description": "Customer value/behaviour segment (e.g. mass, affluent, student). Set by AT STATE_MAP from getCustomer.segment and getCustomerSegment.segment; read by the CIE context builder and as the fallback for spending_persona.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
     "name": "degraded_toolsets",
     "description": "JSON list of toolsets currently in degraded/read-only mode. Set by AT-7 on repeated system_error.",
     "schema": {
@@ -273,6 +280,13 @@
     "schema": {
       "type": "BOOLEAN",
       "default": false
+    }
+  }, {
+    "name": "fx_rate_available",
+    "description": "String flag \u0027true\u0027/\u0027false\u0027 recording whether the last FX rate lookup returned usable numeric rates. Set by the acn_foreign_exchange after_tool callback; read by the after_model guard that suppresses invented FX figures and by the before_tool quote gate.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
     }
   }, {
     "name": "identified_by",
@@ -352,6 +366,13 @@
       "default": ""
     }
   }, {
+    "name": "life_stage_signal",
+    "description": "Inferred customer life-stage signal (e.g. new_parent, retiring, first_home). Set by AT STATE_MAP from getCustomerSegment.life_stage/lifeStage; read by the CIE context builder to tailor nudges and offers.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
+    }
+  }, {
     "name": "live_agent_requested",
     "description": "True if customer has explicitly requested a live agent.",
     "schema": {
@@ -371,6 +392,13 @@
     "schema": {
       "type": "BOOLEAN",
       "default": false
+    }
+  }, {
+    "name": "nodata_gic",
+    "description": "String flag \u00271\u0027/\u00270\u0027 set by the after_tool no-data guard (state[\u0027nodata_\u0027 + slug]) when the GIC rate lookup returns no documents. Read by the acn_investments_registered after_model guard to block invented GIC terms or rates.",
+    "schema": {
+      "type": "STRING",
+      "default": ""
     }
   }, {
     "name": "nsf_reversal_eligible",
