@@ -865,6 +865,12 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
 
+    # Normalize GECX full resource path -> short name, exactly as before_tool does.
+    # The platform passes the full `projects/.../tools/<id>` form for system-triggered
+    # calls, which includes AgentTool invocations. Without this every name-keyed check
+    # below (AT-0, WIDGET_TOOLS, STATE_MAP) silently misses.
+    if '/' in tool_name:
+        tool_name = tool_name.split('/')[-1]
 
     # AT-0: harvest the identity hub's result into THIS session.
     #

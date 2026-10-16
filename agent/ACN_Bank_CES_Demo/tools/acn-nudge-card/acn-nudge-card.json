@@ -3,14 +3,14 @@
   "displayName": "acn-nudge-card",
   "widgetTool": {
     "name": "acn-nudge-card",
-    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: 'I have something that might interest you.'",
+    "description": "Emit a product or offer nudge card. Use at most once per session. Before calling this tool, speak a brief conversational pacing phrase: \u0027I have something that might interest you.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'acn-nudge-card'"
+          "description": "Required. Always output the exact string: \u0027acn-nudge-card\u0027"
         },
         "suggestions": {
           "type": "ARRAY",
@@ -32,7 +32,7 @@
               },
               "decline_label": {
                 "type": "STRING",
-                "description": "Defaults to 'Not now'."
+                "description": "Defaults to \u0027Not now\u0027."
               },
               "decline_value": {
                 "type": "STRING",
@@ -70,14 +70,10 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "suggestions"
-      ]
+      "required": ["type", "name", "suggestions"]
     }
   }
 }

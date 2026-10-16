@@ -3,7 +3,7 @@
   "displayName": "quick_actions",
   "widgetTool": {
     "name": "quick_actions",
-    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: 'Here are your options.'",
+    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here are your options.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -23,10 +23,7 @@
                 "type": "STRING"
               }
             },
-            "required": [
-              "content",
-              "utterance"
-            ]
+            "required": ["content", "utterance"]
           }
         },
         "summary": {
@@ -36,10 +33,7 @@
           "type": "STRING"
         }
       },
-      "required": [
-        "type",
-        "actions"
-      ]
+      "required": ["type", "actions"]
     }
   }
 }

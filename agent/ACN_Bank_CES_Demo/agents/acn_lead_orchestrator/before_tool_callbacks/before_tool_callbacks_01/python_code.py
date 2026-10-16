@@ -252,16 +252,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     # end_session is a GECX built-in that reads auth_level from session state — elevate
     # to satisfy its platform-level check before returning None to let it run.
     if tool_name in {'end_session', 'transfer_to_agent'}:
-        # Both skip the gates below. Only end_session gets the ELEVATION: it is a
-        # GECX built-in that reads auth_level from session state, so it needs L2 to
-        # satisfy its own platform-level check. transfer_to_agent needs no such
-        # thing — elevating on transfer meant every agent handoff silently granted
-        # L2, so a session reached "authenticated" from routing alone (observed:
-        # auth_state.level="2" alongside auth_mode="guest", authentication_status=
-        # false, pin_attempts="0"). That made auth_state.level useless as a
-        # security signal and masked the fact that auth had never happened.
-        if tool_name == 'end_session':
-            _set_auth(state, level=str(max(int(_auth(state).get("level", "0") or "0"), 2)))
+        _set_auth(state, level=str(max(int(_auth(state).get("level", "0") or "0"), 2)))
         return None
 
     # BT-9: Mock mode — compare as string; "false" must not evaluate as truthy
@@ -289,37 +280,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         'acn_faq_knowledge',                # call_faq — L0, no auth required
         'acn_customer_intelligence_engine', # call_cie — post-auth, safe to allow
     }:
-        # BT-1b: identity-retry loop breaker, the mirror of BT-3b below. BT-1
-        # returns before BT-3 is ever reached, so without its own strike count a
-        # tool blocked for a missing customer_id retries unboundedly, burns the
-        # per-minute model quota and surfaces as RESOURCE_EXHAUSTED. This is the
-        # loop that survives even when auth "succeeds": the identity hub runs as
-        # an AgentTool in its own sub-session, so its customer_id never reaches
-        # this session and every customer-data tool keeps failing here.
-        cnt = _cnt(state)
-        same = cnt.get("id_block_tool", "") == tool_name
-        strikes = (int(cnt.get("id_block_count", "0") or "0") + 1) if same else 1
-        _set_cnt(state, id_block_count=str(strikes), id_block_tool=tool_name)
-        logger.warning(
-            f"BT-1 BLOCKED: {tool_name} — customer_id not set (strike {strikes})"
-        )
-        if strikes >= AUTH_BLOCK_MAX:
-            logger.error(
-                f"BT-1b IDENTITY LOOP ABORTED: {tool_name} blocked {strikes}x "
-                f"with no customer_id in session"
-            )
-            if not state.get("escalation_reason"):
-                state["escalation_reason"] = "identity_loop"
-            return {
-                "error": "IDENTITY_LOOP_ABORTED",
-                "message": (
-                    f"'{tool_name}' has been blocked {strikes} times because no "
-                    f"customer is identified in this session. STOP calling this tool "
-                    f"and STOP re-requesting the phone number, PIN or OTP. Tell the "
-                    f"customer you cannot complete this step right now and offer a "
-                    f"live agent."
-                ),
-            }
+        logger.warning(f"BT-1 BLOCKED: {tool_name} — customer_id not set")
         return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
 
     # BT-10: Firestore query guard — check BEFORE overwriting customerId
@@ -366,8 +327,6 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         }
     if _cnt(state).get("auth_block_count", "0") not in ("", "0"):
         _set_cnt(state, auth_block_count="0", auth_block_tool="")
-    if _cnt(state).get("id_block_count", "0") not in ("", "0"):
-        _set_cnt(state, id_block_count="0", id_block_tool="")
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:

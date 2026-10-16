@@ -3,7 +3,7 @@
   "displayName": "mortgage_affordability",
   "widgetTool": {
     "name": "mortgage_affordability",
-    "description": "Emit the interactive mortgage affordability widget: income, down payment, debt and amortization sliders that compute a maximum purchase price live on the customer's screen. Prefill defaults with anything already known about the customer. Requires the financial advice disclaimer — the result is an estimate, not a pre-approval. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you what you could afford.'",
+    "description": "Emit the interactive mortgage affordability widget: income, down payment, debt and amortization sliders that compute a maximum purchase price live on the customer\u0027s screen. Prefill defaults with anything already known about the customer. Requires the financial advice disclaimer — the result is an estimate, not a pre-approval. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you what you could afford.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -72,11 +72,11 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'mortgage_affordability'"
+          "description": "Required. Always output the exact string: \u0027mortgage_affordability\u0027"
         },
         "submit_cta_label": {
           "type": "STRING",
-          "description": "Primary button label, e.g. 'Continue with this budget'."
+          "description": "Primary button label, e.g. \u0027Continue with this budget\u0027."
         },
         "submit_cta_value": {
           "type": "STRING",
@@ -88,19 +88,14 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Widget header, e.g. 'What could you afford?'."
+          "description": "Widget header, e.g. \u0027What could you afford?\u0027."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "defaults",
-        "submit_cta_value"
-      ]
+      "required": ["type", "name", "defaults", "submit_cta_value"]
     }
   }
 }

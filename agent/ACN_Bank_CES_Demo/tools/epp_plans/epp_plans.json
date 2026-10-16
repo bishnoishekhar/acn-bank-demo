@@ -3,22 +3,22 @@
   "displayName": "epp_plans",
   "widgetTool": {
     "name": "epp_plans",
-    "description": "Emit instalment plan options for a selected EPP-eligible purchase. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you the instalment options.'",
+    "description": "Emit instalment plan options for a selected EPP-eligible purchase. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you the instalment options.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
       "properties": {
         "confirm_cta_label": {
           "type": "STRING",
-          "description": "Label for the primary confirm button, e.g. 'Continue with 12 months'."
+          "description": "Label for the primary confirm button, e.g. \u0027Continue with 12 months\u0027."
         },
         "confirm_cta_value": {
           "type": "STRING",
-          "description": "Sent back to the agent on confirm, e.g. 'epp_plan_confirm:12'."
+          "description": "Sent back to the agent on confirm, e.g. \u0027epp_plan_confirm:12\u0027."
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'epp_plans'"
+          "description": "Required. Always output the exact string: \u0027epp_plans\u0027"
         },
         "plans": {
           "type": "ARRAY",
@@ -28,7 +28,7 @@
             "properties": {
               "interest_rate_pct": {
                 "type": "NUMBER",
-                "description": "Annual interest rate, e.g. 1.5. Displayed only inside the 'Plan details' disclosure, never in the primary chip."
+                "description": "Annual interest rate, e.g. 1.5. Displayed only inside the \u0027Plan details\u0027 disclosure, never in the primary chip."
               },
               "monthly_amount_cad": {
                 "type": "NUMBER",
@@ -44,7 +44,7 @@
               },
               "total_repayable_cad": {
                 "type": "NUMBER",
-                "description": "Sum of all monthly payments. Shown as a subtle grey figure in expanded 'Plan details'."
+                "description": "Sum of all monthly payments. Shown as a subtle grey figure in expanded \u0027Plan details\u0027."
               }
             }
           }
@@ -67,16 +67,10 @@
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "product_id",
-        "plans",
-        "confirm_cta_value"
-      ]
+      "required": ["type", "name", "product_id", "plans", "confirm_cta_value"]
     }
   }
 }

@@ -2,7 +2,6 @@
   "name": "f953331e-6dc5-4e60-90e4-41ad491c75a5",
   "pythonFunction": {
     "name": "mortgage_preapproval_check",
-    "description": "Run an illustrative Canadian mortgage pre-approval check for a given property price, down payment and income. Debt service is tested at the qualifying rate (the greater of the contract rate plus 2% and 5.25%), fixed rates compound semi-annually, and the CMHC premium is added to the principal below 20% down. This is a provisional estimate for the conversation, not a lending decision or a real pre-approval — never present it as approved. Args: property_price_cad and down_payment_cad (required), gross_annual_income_cad, monthly_debt_obligations_cad, tenure_years, interest_rate_pct, employment_status, years_employed, province, rate_type, payment_frequency, first_time_buyer, property_type. Before calling this tool, speak a brief conversational pacing phrase: 'Let me run those numbers for you.'",
     "pythonCode": "tools/mortgage_preapproval_check/python_function/python_code.py"
   },
   "executionType": "SYNCHRONOUS",

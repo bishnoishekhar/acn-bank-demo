@@ -3,18 +3,18 @@
   "displayName": "epp_carousel",
   "widgetTool": {
     "name": "epp_carousel",
-    "description": "Emit a catalogue of EPP-eligible purchases (max 6 items) for the customer to select. Before calling this tool, speak a brief conversational pacing phrase: 'Let me show you your eligible purchases.'",
+    "description": "Emit a catalogue of EPP-eligible purchases (max 6 items) for the customer to select. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your eligible purchases.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
       "properties": {
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'epp_carousel'"
+          "description": "Required. Always output the exact string: \u0027epp_carousel\u0027"
         },
         "products": {
           "type": "ARRAY",
-          "description": "Required. Ordered list of gadgets to display. The card frames the product image, name, and a 'From CAD X/mo' line. Retail price and interest live in the plan selector, not here.",
+          "description": "Required. Ordered list of gadgets to display. The card frames the product image, name, and a \u0027From CAD X/mo\u0027 line. Retail price and interest live in the plan selector, not here.",
           "items": {
             "type": "OBJECT",
             "properties": {
@@ -24,11 +24,11 @@
               },
               "cta_label": {
                 "type": "STRING",
-                "description": "Button label, e.g. 'Choose plan'."
+                "description": "Button label, e.g. \u0027Choose plan\u0027."
               },
               "cta_value": {
                 "type": "STRING",
-                "description": "Sent back to the agent on tap, e.g. 'epp_select:iphone-17-pro-256'."
+                "description": "Sent back to the agent on tap, e.g. \u0027epp_select:iphone-17-pro-256\u0027."
               },
               "from_monthly_cad": {
                 "type": "NUMBER",
@@ -44,7 +44,7 @@
               },
               "product_name": {
                 "type": "STRING",
-                "description": "Display name, e.g. 'iPhone 17 Pro'."
+                "description": "Display name, e.g. \u0027iPhone 17 Pro\u0027."
               },
               "retail_price_cad": {
                 "type": "NUMBER",
@@ -63,18 +63,14 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Widget header title, e.g. 'Own it sooner'."
+          "description": "Widget header title, e.g. \u0027Own it sooner\u0027."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "products"
-      ]
+      "required": ["type", "name", "products"]
     }
   }
 }

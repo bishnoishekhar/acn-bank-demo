@@ -3,7 +3,7 @@
   "displayName": "mortgage_kyc",
   "widgetTool": {
     "name": "mortgage_kyc",
-    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: 'I will need you to upload a document.'",
+    "description": "Emit a KYC document upload prompt for mortgage application. Follow with mobile_handoff if on mobile. Before calling this tool, speak a brief conversational pacing phrase: \u0027I will need you to upload a document.\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -38,7 +38,7 @@
               },
               "options": {
                 "type": "ARRAY",
-                "description": "For input_kind=select. Each item is a plain string.",
+                "description": "For input_kind\u003dselect. Each item is a plain string.",
                 "items": {
                   "type": "STRING"
                 }
@@ -55,11 +55,11 @@
         },
         "name": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'mortgage_kyc'"
+          "description": "Required. Always output the exact string: \u0027mortgage_kyc\u0027"
         },
         "submit_cta_label": {
           "type": "STRING",
-          "description": "Primary button label, e.g. 'See my pre-approval'."
+          "description": "Primary button label, e.g. \u0027See my pre-approval\u0027."
         },
         "submit_cta_value": {
           "type": "STRING",
@@ -71,19 +71,14 @@
         },
         "title": {
           "type": "STRING",
-          "description": "Form header, e.g. 'A few last details'."
+          "description": "Form header, e.g. \u0027A few last details\u0027."
         },
         "type": {
           "type": "STRING",
-          "description": "Required. Always output the exact string: 'custom_template'"
+          "description": "Required. Always output the exact string: \u0027custom_template\u0027"
         }
       },
-      "required": [
-        "type",
-        "name",
-        "fields",
-        "submit_cta_value"
-      ]
+      "required": ["type", "name", "fields", "submit_cta_value"]
     }
   }
 }

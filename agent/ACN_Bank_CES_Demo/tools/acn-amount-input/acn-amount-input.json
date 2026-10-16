@@ -3,7 +3,7 @@
   "displayName": "acn-amount-input",
   "widgetTool": {
     "name": "acn-amount-input",
-    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: 'How much would you like to send?'",
+    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: \u0027How much would you like to send?\u0027",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
@@ -33,12 +33,7 @@
           "type": "STRING"
         }
       },
-      "required": [
-        "name",
-        "title",
-        "min_amount",
-        "max_amount"
-      ]
+      "required": ["name", "title", "min_amount", "max_amount"]
     }
   }
 }
