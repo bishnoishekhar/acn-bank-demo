@@ -13,6 +13,8 @@ import json
 
 import hashlib
 
+from datetime import datetime, timezone
+
 import logging
 
 from typing import Any, Optional
@@ -222,6 +224,125 @@ def _first_nonempty(state, *keys):
 # ---------------------------------------------------------------------------
 # BT: before_tool_callback
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# createTransaction: turn the model's plain arguments into a Firestore document.
+#
+# The toolset talks to Firestore directly, which only accepts typed values
+# ({"fields": {"amount": {"doubleValue": 100}}}) and the document id as ?documentId=.
+# The model sends plain JSON, so every call was rejected (400 "Unknown name customerId")
+# and no transaction could ever be created. Also: the real tool name is
+# "<toolset>_<operationId>", so the BT-5..BT-8 guards below, which compare against the
+# bare name, never fired for it; the checks that matter for money are enforced here.
+# ---------------------------------------------------------------------------
+_TXN_TOOL_NAMES = {'createTransaction', 'new_transaction_api_db_createTransaction'}
+_TXN_TYPES = {'internal_transfer', 'e_transfer', 'bill_payment', 'wire', 'credit_card_payment', 'qr_pay'}
+_TXN_CATEGORY = {'internal_transfer': 'transfer', 'e_transfer': 'transfer',
+                 'bill_payment': 'bill_payment', 'wire': 'wire',
+                 'credit_card_payment': 'credit_card_payment', 'qr_pay': 'qr_pay'}
+# Names the payments instruction has used for the same things.
+_TXN_TYPE_ALIASES = {'interac': 'e_transfer', 'etransfer': 'e_transfer', 'e-transfer': 'e_transfer',
+                     'bill': 'bill_payment', 'credit_card': 'credit_card_payment',
+                     'transfer': 'internal_transfer', 'own_account': 'internal_transfer'}
+_TXN_RESERVED = {'fields', 'documentId', 'customerId', 'customer_id'}
+
+def _fs_value(v):
+    """Python value -> Firestore REST typed value."""
+    if v is None:
+        return {"nullValue": None}
+    if isinstance(v, bool):
+        return {"booleanValue": v}
+    if isinstance(v, int):
+        return {"integerValue": str(v)}
+    if isinstance(v, float):
+        return {"doubleValue": v}
+    if isinstance(v, dict):
+        return {"mapValue": {"fields": {str(k): _fs_value(x) for k, x in v.items()}}}
+    if isinstance(v, (list, tuple)):
+        return {"arrayValue": {"values": [_fs_value(x) for x in v]}}
+    return {"stringValue": str(v)}
+
+def _txn_plain_args(input_dict) -> dict:
+    """The model's transaction, whether it used `fields` or flat arguments."""
+    plain = {}
+    nested = input_dict.get('fields')
+    if isinstance(nested, dict):
+        plain.update(nested)
+    for k, v in input_dict.items():
+        if k not in _TXN_RESERVED:
+            plain.setdefault(k, v)
+    return plain
+
+def _prepare_create_transaction(state, input_dict, auth_level) -> Optional[dict]:
+    """Validate + rewrite a createTransaction call in place. Returns an error dict to block it."""
+    customer_id = str(state.get("customer_id", "") or "")
+    if not customer_id:
+        return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
+    plain = _txn_plain_args(input_dict)
+
+    txn_type = str(plain.get('type') or plain.get('transaction_type') or '').strip().lower()
+    txn_type = _TXN_TYPE_ALIASES.get(txn_type, txn_type)
+    if txn_type not in _TXN_TYPES:
+        return {"error": "INVALID_TRANSACTION_TYPE",
+                "message": "type must be one of internal_transfer, e_transfer, bill_payment, wire, credit_card_payment, qr_pay."}
+    try:
+        amount = float(str(plain.get('amount', '')).replace(',', '').replace('$', ''))
+    except (ValueError, TypeError):
+        amount = 0.0
+    if not (amount > 0) or amount != amount or amount == float('inf'):
+        return {"error": "INVALID_AMOUNT", "message": "amount must be a positive number."}
+    amount = round(amount, 2)
+    from_account = str(plain.get('fromAccountId') or plain.get('account_id') or '').strip()
+    if not from_account:
+        return {"error": "MISSING_FIELD", "message": "fromAccountId is required."}
+    destination = {k: str(plain[k]).strip() for k in ('toAccountId', 'toBeneficiaryId', 'toBillId') if plain.get(k)}
+    if len(destination) != 1:
+        return {"error": "MISSING_FIELD",
+                "message": "Provide exactly one of toAccountId, toBeneficiaryId or toBillId."}
+
+    # Step-up (TDD: wires ALWAYS need it; amounts >= HIGH_RISK_AMOUNT_THRESHOLD too).
+    reason = 'wire' if txn_type == 'wire' else ('threshold' if amount >= HIGH_RISK_AMOUNT_THRESHOLD else '')
+    if reason and auth_level < 3:
+        _set_auth(state, step_up_required=True, step_up_reason=reason)
+        return {"error": "STEP_UP_REQUIRED",
+                "message": "Additional verification required before this payment: " + reason + ".",
+                "step_up_reason": reason}
+
+    currency = str(plain.get('currency') or 'CAD').upper()[:3]
+    # Idempotency: the same payment re-submitted within 10 minutes gets the same document id,
+    # so Firestore answers 409 instead of creating a duplicate. A genuine repeat later is allowed.
+    seed = "|".join([customer_id, from_account, txn_type, "%.2f" % amount, currency,
+                     "|".join(sorted(destination.values())), str(int(datetime.now(timezone.utc).timestamp()) // 600)])
+    doc_id = "TXN-" + hashlib.sha256(seed.encode()).hexdigest()[:16].upper()
+
+    destination_label = (str(plain.get('counterpartyName') or '').strip()
+                         or next(iter(destination.values())))
+    doc = {
+        "transaction_id": doc_id,
+        "reference_no": doc_id,
+        "customer_id": customer_id,
+        "account_id": from_account,
+        "type": "debit",
+        "payment_type": txn_type,
+        "category": _TXN_CATEGORY[txn_type],
+        "amount": amount,
+        "currency": currency,
+        "status": "pending" if txn_type == 'wire' else "completed",
+        "counterparty_name": destination_label,
+        "description": str(plain.get('memo') or '').strip() or ("Transfer to " + destination_label),
+        "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
+        "source": "acn_assist",
+    }
+    for k, v in destination.items():
+        doc[{'toAccountId': 'to_account_id', 'toBeneficiaryId': 'beneficiary_id', 'toBillId': 'bill_id'}[k]] = v
+    if plain.get('scheduledDate'):
+        doc['scheduled_date'] = str(plain['scheduledDate'])
+
+    input_dict.clear()
+    input_dict['customerId'] = customer_id
+    input_dict['documentId'] = doc_id
+    input_dict['fields'] = {k: _fs_value(v) for k, v in doc.items()}
+    return None
+
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -339,6 +460,13 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         _set_cnt(state, auth_block_count="0", auth_block_tool="")
     if _cnt(state).get("id_block_count", "0") not in ("", "0"):
         _set_cnt(state, id_block_count="0", id_block_tool="")
+
+    # BT-TXN: createTransaction -> validated, step-up gated, Firestore-typed document
+    if tool_name in _TXN_TOOL_NAMES:
+        _txn_err = _prepare_create_transaction(state, input_dict, auth_level)
+        if _txn_err:
+            return _txn_err
+        return None
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:

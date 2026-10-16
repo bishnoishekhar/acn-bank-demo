@@ -38,7 +38,7 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
    for the amount. Only ask in text for anything no widget covers, or on voice.
 2. Read-back: "Just to confirm — you'd like to transfer [amount] from [account] to [payee] on [date]. Is that right?"
 3. Set awaiting_confirmation=true until customer confirms.
-4. On confirm: execute via new_transaction_api_db.createTransaction.
+4. On confirm: execute via new_transaction_api_db.createTransaction. Pass the payment as plain values in `fields`: fromAccountId, amount (a number), currency, type (internal_transfer | e_transfer | bill_payment | wire | credit_card_payment | qr_pay), counterpartyName (the payee's display name) and exactly ONE of toAccountId / toBeneficiaryId / toBillId. Never pass or invent a customerId or an idempotency key: they are applied for you.
 5. On success: provide reference number and timestamp.
 6. NEVER claim success if tool result status != success (AM-10 enforces this).
 
@@ -52,12 +52,12 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 ## PAY-04: Interac e-Transfer
 - New recipient: trigger step-up (auth_level 3), deliver [Social Engineering Warning Payee] Please review the applicable terms and conditions, regulatory requirements, and disclosures relevant to this product or service..
 - Request PIN step-up via acn_identity_security_hub. Do NOT send OTP.
-- Execute via createTransaction(type=interac).
+- Execute via createTransaction(type=e_transfer).
 
 </subtask>
 <subtask id="pay-05:_bill_payment">
 ## PAY-05: Bill Payment
-- getBills → select payee → collect amount → read-back → confirm → createTransaction(type=bill).
+- getBills → select payee → collect amount → read-back → confirm → createTransaction(type=bill_payment).
 - Provide confirmation number.
 
 </subtask>
@@ -90,7 +90,7 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 ## PAY-12: Credit Card Payment
 - getCards → present payment options: minimum, statement balance, full balance, other amount.
 - Webchat: use payment_carousel widget.
-- Execute via createTransaction(type=credit_card).
+- Execute via createTransaction(type=credit_card_payment).
 
 </subtask>
 <subtask id="pay-13:_e-transfer_cancellation">

@@ -6,12 +6,27 @@ info:
 servers:
   - url: $env_var
 paths:
-  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/transactions:
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers/{customerId}/transactions:
     post:
       operationId: createTransaction
-      summary: Create a new money movement transaction (transfer, payment, bill pay)
+      summary: Create a money movement transaction (internal transfer, e-transfer, bill payment, wire) in the customer's transaction history
+      description: >-
+        Pass the transaction as a PLAIN key/value map in `fields` (customerId, fromAccountId, amount, currency,
+        type, counterpartyName and ONE of toAccountId / toBeneficiaryId / toBillId, optional memo). customerId and
+        documentId are filled in for you. Do NOT format values for Firestore; that conversion is done for you.
       security:
         - GoogleBearerAuth: []
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: documentId
+          in: query
+          description: Set automatically (idempotency).
+          schema:
+            type: string
       requestBody:
         required: true
         content:
@@ -140,38 +155,14 @@ components:
   schemas:
     CreateTransactionRequest:
       type: object
-      required:
-        - customerId
-        - fromAccountId
-        - amount
-        - currency
-        - type
-        - idempotencyKey
       properties:
-        customerId:
-          type: string
-        fromAccountId:
-          type: string
-        toAccountId:
-          type: string
-        toBeneficiaryId:
-          type: string
-        toBillId:
-          type: string
-        amount:
-          type: number
-        currency:
-          type: string
-          default: CAD
-        type:
-          type: string
-          enum: [internal_transfer, e_transfer, bill_payment, wire]
-        memo:
-          type: string
-        scheduledDate:
-          type: string
-        idempotencyKey:
-          type: string
+        fields:
+          type: object
+          description: >-
+            Plain key/value map: customerId, fromAccountId, amount (number), currency (CAD), type
+            (internal_transfer | e_transfer | bill_payment | wire | credit_card_payment | qr_pay), counterpartyName, memo, and one of
+            toAccountId / toBeneficiaryId / toBillId.
+          additionalProperties: true
     UpdateTransactionRequest:
       type: object
       properties:

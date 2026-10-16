@@ -132,6 +132,53 @@ def _seed_identity_from_session(state) -> None:
 # ---------------------------------------------------------------------------
 # AT: after_tool_callback
 # ---------------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# createTransaction result: Firestore answers with a raw document ({name, fields: {...typed}}).
+# Hand the model a plain result it can read out and feed into the payment receipt, and make a
+# duplicate (409) a clear business answer instead of a scary error.
+# ---------------------------------------------------------------------------
+_TXN_TOOL_NAMES = {'createTransaction', 'new_transaction_api_db_createTransaction'}
+
+def _fs_plain(v):
+    if not isinstance(v, dict) or not v:
+        return None
+    k = next(iter(v))
+    x = v[k]
+    if k == 'integerValue':
+        try:
+            return int(x)
+        except (ValueError, TypeError):
+            return x
+    if k == 'mapValue':
+        return {a: _fs_plain(b) for a, b in (x or {}).get('fields', {}).items()}
+    if k == 'arrayValue':
+        return [_fs_plain(b) for b in (x or {}).get('values', [])]
+    if k == 'nullValue':
+        return None
+    return x
+
+def _friendly_txn_response(tool_response):
+    try:
+        body = tool_response.get('data') if isinstance(tool_response, dict) and isinstance(tool_response.get('data'), dict) else tool_response
+        if isinstance(body, dict) and isinstance(body.get('fields'), dict) and body.get('name'):
+            f = {k: _fs_plain(v) for k, v in body['fields'].items()}
+            return {"status": "success", "code": "OK", "data": {
+                "transactionId": f.get('transaction_id') or str(body['name']).split('/')[-1],
+                "referenceNo": f.get('reference_no') or f.get('transaction_id'),
+                "amount": f.get('amount'), "currency": f.get('currency'),
+                "type": f.get('payment_type') or f.get('type'),
+                "status": f.get('status'), "counterparty": f.get('counterparty_name'),
+                "fromAccountId": f.get('account_id'), "timestamp": f.get('timestamp'),
+                "message": "Transaction recorded."}}
+        blob = repr(tool_response)
+        if 'ALREADY_EXISTS' in blob or 'code=409' in blob or "'code': 409" in blob or 'already exists' in blob.lower():
+            return {"status": "business_error", "code": "DUPLICATE_TRANSACTION", "data": {
+                "message": "This exact payment was already submitted a moment ago, so it was not repeated. "
+                           "Tell the customer it is already in their activity; do not retry."}}
+    except Exception:
+        pass
+    return tool_response
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -165,6 +212,9 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    if tool_name in _TXN_TOOL_NAMES:
+        tool_response = _friendly_txn_response(tool_response)
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
@@ -215,7 +265,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
         state["pad_cancel_id"] = data.get("cancelId", "") if isinstance(data, dict) else ""
 
     # Reset idempotency key after successful write
-    WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
+    WRITE_TOOLS = {'createTransaction', 'new_transaction_api_db_createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
@@ -229,6 +279,21 @@ def _normalize_response(response: dict[str, Any]) -> dict:
     status = response.get("status", "")
     if status in {"success", "business_error", "validation_error", "system_error"}:
         return response
+    # A toolset failure arrives as {"data": {"error", "errorCode", "status": "error"}, "status": "error"}.
+    # "error" is not one of the statuses above, so it used to fall through to the generic branch
+    # below and be relabelled status="success" with the error buried inside: the model then
+    # reported success for writes that had failed. Report failures as failures.
+    _d = response.get("data")
+    if (status == "error"
+            or (isinstance(_d, dict) and _d.get("status") == "error")
+            or (isinstance(_d, dict) and _d.get("errorCode"))
+            or (isinstance(_d, dict) and "error" in _d and not any(k in _d for k in ("fields", "documents", "name")))):
+        _code = ""
+        if isinstance(_d, dict):
+            _code = str(_d.get("errorCode") or _d.get("error") or "")
+        _code = _code or str(response.get("code") or "ERROR")
+        _kind = "system_error" if _code.upper() in {"INTERNAL", "UNAVAILABLE", "DEADLINE_EXCEEDED", "UNKNOWN"} else "business_error"
+        return {"status": _kind, "code": _code[:80], "data": _d if isinstance(_d, dict) else response}
     # Map HTTP-style or raw responses
     if "error" in response:
         return {"status": "business_error", "code": response["error"], "data": response}
