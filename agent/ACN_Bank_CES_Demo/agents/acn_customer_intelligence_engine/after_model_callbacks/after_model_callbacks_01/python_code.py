@@ -50,6 +50,8 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # ---------------------------------------------------------------------------
 # AM: after_model_callback
 # ---------------------------------------------------------------------------
+_OTP_WORDING = re.compile(r'(?i)\bverif(?:y|ying) your (?:one-time |verification )?(?:code|passcode)\b')
+
 def after_model_callback_impl(callback_context, llm_response) -> Optional[object]:
     """
     AM-1 through AM-12 + social-eng + agent-name-strip.
@@ -81,6 +83,7 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
 
         # AM-agent-name-strip: Remove agent names
         text = AGENT_NAME_PATTERNS.sub('our team', text)
+        text = _OTP_WORDING.sub('Verifying your PIN', text)
 
         # AM-11: Counter updates
         _update_counters(text, state)
