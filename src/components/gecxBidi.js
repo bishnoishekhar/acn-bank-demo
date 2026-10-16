@@ -64,6 +64,22 @@ let _bidiActive = false;
 // utteranceId cannot double-render a turn.
 const _seenUtterances = new Set();
 
+/* How the SDK builds a voice reply (chat-messenger.js, the bidi TEXT handler):
+   the FIRST text chunk of a turn is addUtterance({utteranceId, text}); every
+   LATER chunk of the same turn — for example the sentence spoken after a tool
+   call such as the identity check — is updateUtterance() on the SAME utteranceId
+   with the CUMULATIVE text. The id only changes after turnCompleted or a widget.
+
+   So a reply is complete only once its updates have stopped. These track, per
+   utteranceId, the text already shown and the latest cumulative text, so the
+   remainder can be shown as soon as the stream goes quiet. */
+const UPDATE_SETTLE_MS = 600;
+const _shownText = new Map(); // utteranceId -> text already forwarded to the chat
+const _latestText = new Map(); // utteranceId -> latest cumulative text from the SDK
+const _settleTimers = new Map(); // utteranceId -> pending flush timer
+
+const SENTENCE_END = /[.!?…]["')\]]?\s*$/;
+
 /* True from the moment we hand over the mic until the caller explicitly closes
    the session.
 
@@ -226,6 +242,37 @@ function whenAuthorised() {
   });
 }
 
+function utteranceText(utterance) {
+  return (Array.isArray(utterance?.messages) ? utterance.messages : [])
+    .filter((m) => m?.type === 'text' && typeof m.text === 'string')
+    .map((m) => m.text)
+    .join('');
+}
+
+/* Forward whatever has been appended to an utterance since we last showed it.
+   Only a pure extension is forwarded; anything else (a rewrite) is left alone
+   rather than risk drawing the same sentence twice. */
+function flushUtteranceTail(id) {
+  _settleTimers.delete(id);
+  const shown = _shownText.get(id) ?? '';
+  const latest = _latestText.get(id) ?? '';
+  if (latest === shown) return;
+  if (!latest.startsWith(shown)) {
+    console.log(TAG, 'utterance update is not an extension of what was shown; ignored', id);
+    return;
+  }
+  _shownText.set(id, latest);
+  const tail = latest.slice(shown.length).trim();
+  if (!tail) return;
+  noteAgentSpeech(tail);
+  _onOutputs?.([{ text: tail, turnIndex: _turnIndex++ }]);
+}
+
+function scheduleUtteranceFlush(id) {
+  clearTimeout(_settleTimers.get(id));
+  _settleTimers.set(id, setTimeout(() => flushUtteranceTail(id), UPDATE_SETTLE_MS));
+}
+
 /* Reshape one SDK utterance into the `outputs` array ChatPanel.processOutputs
    already understands:
 
@@ -293,7 +340,12 @@ export function installUtteranceBridge() {
           if (_seenUtterances.has(id)) return;
           _seenUtterances.add(id);
           if (_seenUtterances.size > 200) {
-            _seenUtterances.delete(_seenUtterances.values().next().value);
+            const oldest = _seenUtterances.values().next().value;
+            _seenUtterances.delete(oldest);
+            clearTimeout(_settleTimers.get(oldest));
+            _settleTimers.delete(oldest);
+            _shownText.delete(oldest);
+            _latestText.delete(oldest);
           }
         }
 
@@ -316,6 +368,18 @@ export function installUtteranceBridge() {
           return;
         }
 
+        const text = utteranceText(utterance);
+        const textOnly = (utterance.messages || []).every((m) => m?.type === 'text');
+
+        // A text-only first chunk that stops mid-sentence is still streaming:
+        // hold it and show the whole sentence once the updates go quiet.
+        if (id && textOnly && text && !SENTENCE_END.test(text)) {
+          _shownText.set(id, '');
+          _latestText.set(id, text);
+          scheduleUtteranceFlush(id);
+          return;
+        }
+
         const outputs = utteranceToOutputs(utterance);
 
         // Everything the agent says goes into the echo memory, not just the
@@ -326,14 +390,39 @@ export function installUtteranceBridge() {
           if (o.text) noteAgentSpeech(o.text);
         });
 
+        if (id) {
+          _shownText.set(id, text);
+          _latestText.set(id, text);
+        }
         if (outputs.length) _onOutputs?.(outputs);
       });
     },
 
-    // Streaming text arrives as repeated updates on one utteranceId. Forwarding
-    // partials would spam the list with duplicate bubbles; the final version
-    // comes through addMessages.
-    updateMessages() {},
+    // Later chunks of a turn arrive here, on the SAME utteranceId, carrying the
+    // cumulative text (see the note at UPDATE_SETTLE_MS). Ignoring them dropped
+    // everything the agent said after its first chunk — typically the message
+    // spoken after a tool call, e.g. "Verifying your PIN now." was shown and the
+    // consent question that followed never was. They are not forwarded one by one
+    // (that would draw a bubble per word); the new tail is shown once the stream
+    // has been quiet for UPDATE_SETTLE_MS.
+    updateMessages(utterances = []) {
+      if (!_sessionIntended) return;
+
+      utterances.forEach((utterance) => {
+        const id = utterance?.utteranceId;
+        if (!id || utterance.isBot === false) return;
+
+        // Never saw it added (e.g. created before the bridge registered):
+        // treat it as a new utterance.
+        if (!_seenUtterances.has(id)) {
+          _consumer?.addMessages([utterance]);
+          return;
+        }
+
+        _latestText.set(id, utteranceText(utterance));
+        scheduleUtteranceFlush(id);
+      });
+    },
 
     getRenderedMessages() {
       return [];
@@ -497,5 +586,9 @@ export function resetBidiBridge() {
   _pendingSilentText = '';
   _pendingSilentUntil = 0;
   _seenUtterances.clear();
+  _settleTimers.forEach((timer) => clearTimeout(timer));
+  _settleTimers.clear();
+  _shownText.clear();
+  _latestText.clear();
   agentSpeech.length = 0;
 }
