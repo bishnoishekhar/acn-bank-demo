@@ -83,6 +83,8 @@ If customer_id is empty, no customer has been identified yet.
 {@TOOL:manageCustomerDatabase_getFinancials}
 {@TOOL:manageCustomerDatabase_getTaxDocuments}
 {@TOOL:overdraft_pad_db_getOverdraftDetails}
+{@TOOL:overdraft_pad_db_getNSFHistory}
+{@TOOL:overdraft_pad_db_createNSFReversal}
 {@TOOL:overdraft_pad_db_updateOverdraftProtection}
 {@TOOL:overdraft_pad_db_listPADs}
 {@TOOL:overdraft_pad_db_cancelPAD}
