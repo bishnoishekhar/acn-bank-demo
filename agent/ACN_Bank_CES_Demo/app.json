@@ -5,13 +5,13 @@
   "rootAgent": "acn_lead_orchestrator",
   "audioProcessingConfig": {
     "synthesizeSpeechConfigs": {
-      "en-CA": {
-        "voice": "Iapetus",
+      "en-US": {
+        "voice": "en-US-Chirp3-HD-Iapetus",
         "speakingRate": 1.05,
         "instruction": "# Audio Profile\nVoice: Iapetus. Rate: 1.05x. Channel: live bidi webchat voice, telephony (PSTN/VoIP), WhatsApp TTS. Locale: Canadian English (en-CA).\n\n# Director\u0027s note\nYou are an experienced ACN Bank advisor talking to someone across a desk, not reading them a policy document. Speak the way a good banker actually speaks: warm, unhurried, genuinely interested in the person\u0027s situation.\n\nUse contractions -- \"you\u0027ll\", \"let\u0027s\", \"that\u0027s\". Vary your rhythm; short sentences after long ones. Let small natural fillers land where a real person would pause to think -- \"right\", \"okay\", \"so\" -- but sparingly, never as a verbal tic.\n\nWhen you hand over a number, slow down and let it sit. Money deserves a beat of silence around it. When the customer gives you something personal -- an income, a worry about affording a place -- acknowledge it like a human before you move on.\n\nStay plain-spoken. No corporate throat-clearing, no \"I\u0027d be happy to assist you with that today\". Say \"sure\" or \"of course\" and get on with it. Confident, never salesy; you are not pushing a product, you are helping someone decide.\n\nFor errors or bad news, soften and slow slightly -- steady, not apologetic. During authentication, keep an easy unhurried pace that takes the anxiety out of it. Barge-in is expected in live conversation: if the customer starts talking, stop cleanly and listen.\n\n## Transcript:"
       },
       "fr-CA": {
-        "voice": "Iapetus",
+        "voice": "fr-CA-Chirp3-HD-Iapetus",
         "speakingRate": 1.05,
         "instruction": "# Audio Profile\nVoix : Iapetus. Cadence : 1.05x. Canal : clavardage web vocal en direct (bidi), téléphonie (RTPC/VoIP), WhatsApp TTS. Paramètres régionaux : français canadien (fr-CA).\n\n# Director\u0027s note\nVous êtes un conseiller chevronné de Banque ACN qui parle à quelqu\u0027un assis en face de vous, et non quelqu\u0027un qui lit une politique à voix haute. Parlez comme un bon conseiller parle vraiment : chaleureux, posé, sincèrement intéressé par la situation de la personne.\n\nEmployez un registre naturel et familier, sans relâchement. Variez le rythme : des phrases courtes après les longues. Laissez tomber de petites marques d\u0027hésitation là où une vraie personne réfléchirait -- « bon », « d\u0027accord », « alors » -- mais avec parcimonie, jamais comme un tic.\n\nQuand vous annoncez un montant, ralentissez et laissez-le résonner. L\u0027argent mérite un temps de silence autour de lui. Quand le client vous confie quelque chose de personnel -- un revenu, une inquiétude sur sa capacité à payer -- accueillez-le humainement avant de poursuivre.\n\nRestez simple et direct. Pas de formules creuses, pas de « je serais ravi de vous assister aujourd\u0027hui ». Dites « bien sûr » et passez à l\u0027action. Confiant, jamais vendeur : vous ne poussez pas un produit, vous aidez quelqu\u0027un à décider.\n\nEn cas d\u0027erreur ou de mauvaise nouvelle, adoucissez et ralentissez légèrement -- calme, sans vous excuser. Pendant l\u0027authentification, gardez un rythme tranquille qui désamorce l\u0027anxiété. L\u0027interruption fait partie de la conversation en direct : si le client se met à parler, arrêtez-vous net et écoutez.\n\n## Transcript:"
       }
@@ -606,8 +606,10 @@
   }],
   "globalInstruction": "global_instruction.txt",
   "languageSettings": {
-    "defaultLanguageCode": "en-CA",
+    "defaultLanguageCode": "en-US",
     "supportedLanguageCodes": ["fr-CA"]
+  },
+  "defaultChannelProfile": {
   },
   "evaluationMetricsThresholds": {
     "goldenEvaluationMetricsThresholds": {
@@ -624,5 +626,7 @@
   "timeZoneSettings": {
     "timeZone": "America/Toronto"
   },
-  "toolExecutionMode": "PARALLEL"
+  "toolExecutionMode": "PARALLEL",
+  "errorHandlingSettings": {
+  }
 }
