@@ -101,6 +101,32 @@ paths:
         schema:
           type: string
       description: Create a new account opening application
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/customers:
+    post:
+      operationId: createNewCustomer
+      summary: Save a NEW customer (an applicant who is not a customer yet) as a pending customer record
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNewCustomerRequest'
+      responses:
+        '200':
+          description: New customer saved
+          content:
+            application/json:
+              schema:
+                type: object
+      parameters:
+      - name: documentId
+        in: query
+        description: Set automatically (idempotency).
+        schema:
+          type: string
+      description: Save a new customer
 components:
   securitySchemes:
     GoogleBearerAuth:
@@ -122,6 +148,36 @@ components:
         - applicationData
         required:
         - productId
+        col: null
+    CreateNewCustomerRequest:
+      type: object
+      properties:
+        fields:
+          type: object
+          description: 'Plain key/value map with: legal_name, preferred_name, date_of_birth, email, registered_mobile, street_address, city, province, postal_code, employment_status, occupation, annual_income, sin_provided, sin_last_four, preferred_language (required: legal_name, date_of_birth, email, registered_mobile). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - legal_name
+        - preferred_name
+        - date_of_birth
+        - email
+        - registered_mobile
+        - street_address
+        - city
+        - province
+        - postal_code
+        - employment_status
+        - occupation
+        - annual_income
+        - sin_provided
+        - sin_last_four
+        - preferred_language
+        required:
+        - legal_name
+        - date_of_birth
+        - email
+        - registered_mobile
         col: null
     UpdateAccountApplicationRequest:
       type: object

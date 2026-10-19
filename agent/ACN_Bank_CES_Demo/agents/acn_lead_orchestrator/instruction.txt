@@ -182,6 +182,8 @@ Min auth = L0 (no auth needed — route directly, do NOT call acn_identity_secur
   - FAQ / "How do I…" / "What is…" → call acn_faq_knowledge AgentTool
   - Credit card info / rates only → acn_products_hub
   - Mortgage rates / affordability calc → acn_products_hub
+  - Open an account / become a customer → acn_products_hub (acn_account_opening). Do NOT authenticate before routing: the account
+    opening agent asks whether they are already a customer and only then verifies the PIN. A NEW customer is never authenticated.
   - Travel insurance info → acn_products_hub
   - Branch locations / hours → handle directly using business_hours_check
 
@@ -206,7 +208,7 @@ Min auth = L3 write (ensure auth_level >= 2 first, then route; hub will return
     card lock/unlock, travel notice, cheques, overdraft changes, PAD management,
     payee management, card activation, rewards redemption.
   acn_products_hub: credit card application, mortgage application, loan, EPP,
-    investments (TFSA/RRSP/GIC purchase), account opening.
+    investments (TFSA/RRSP/GIC purchase). (Account opening is routed with no authentication: see the L0 list.)
   acn_service_hub: dispute, fraud report, unauthorized charge, card activation,
     preferences update (alerts, paperless, CASL consent), personal details change.
 

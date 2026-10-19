@@ -20,7 +20,7 @@
   }],
   "toolsets": [{
     "toolset": "account_opening_db",
-    "toolIds": ["createAccountApplication", "getAccountApplicationStatus", "getAccountProducts"]
+    "toolIds": ["createAccountApplication", "createNewCustomer", "getAccountApplicationStatus", "getAccountProducts"]
   }, {
     "toolset": "kyc_request_tracking",
     "toolIds": ["createKycRequest", "getKycStatus", "writeKycRecord"]
@@ -30,5 +30,8 @@
   }, {
     "toolset": "send_application_email",
     "toolIds": ["executeACNBankApplicationEmail"]
+  }, {
+    "toolset": "update_customer_api_db",
+    "toolIds": ["updateProfile"]
   }]
 }
