@@ -127,6 +127,40 @@ export default function Dashboard({ onOpenChat }) {
         </div>
       </section>
 
+      {/* ── My QR + Live QR History (receive side, ACN QR Pay) ──
+           Displayed immediately below Hero when signed in (via Web or Chat) so
+           another user signed into the ACN Bank Flutter mobile app can scan and
+           transfer immediately. */}
+      {authState === 'authenticated' && customer?.customerId && customer.qrEnabled !== false && (
+        <section
+          id="my-qr-section"
+          style={{
+            maxWidth: 920,
+            margin: '28px auto 12px',
+            padding: '0 24px',
+          }}
+        >
+          <div style={{ textAlign: 'center', marginBottom: 16 }}>
+            <p className="section-label" style={{ marginBottom: 4 }}>ACN QR Pay · Receive Instant Transfers</p>
+            <p style={{ margin: 0, fontSize: 13, color: '#64748B' }}>
+              Signed in as <strong>{customer.legalName || customerName}</strong> — scan with the ACN Bank Mobile App to send money directly to this account.
+            </p>
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              alignItems: 'stretch',
+              gap: 24,
+            }}
+          >
+            <MyQrCard />
+            <QrHistoryCard />
+          </div>
+        </section>
+      )}
+
       {/* ── Products ── */}
       <section className="products" id="products">
         <p className="section-label">What the agent handles</p>
@@ -143,16 +177,6 @@ export default function Dashboard({ onOpenChat }) {
           ))}
         </div>
       </section>
-
-      {/* ── My QR + QR history (receive side, ACN QR Pay) ──
-           Both components render null for guests / when qr_enabled is false,
-           so it's safe to keep them mounted. Placed above CardsSection so
-           the user's own receive-QR sits between "what you can do" and
-           "your cards", matching the Flutter Scan → My QR entry point.
-           History lives directly below the QR so a payer can immediately
-           verify their previous QR payments landed. */}
-      <MyQrCard />
-      <QrHistoryCard />
 
       {/* ── Public card catalogue (guest-browsable, scenario 1) ── */}
       <CardsSection onOpenChat={onOpenChat} />

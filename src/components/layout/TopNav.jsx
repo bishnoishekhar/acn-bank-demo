@@ -25,6 +25,19 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
         {isAuth ? (
           <>
             <span className="nav-greeting">Hello, {customerName} 👋</span>
+            <button
+              type="button"
+              className="nav-btn nav-btn-ghost"
+              onClick={() => {
+                if (chatOpen) onOpenChat();
+                setTimeout(() => {
+                  document.getElementById('my-qr-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 80);
+              }}
+              title="Jump to your ACN QR Pay code"
+            >
+              ▦ My QR
+            </button>
             <button className="nav-btn nav-btn-ghost" onClick={onSignOut}>
               Sign out
             </button>

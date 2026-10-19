@@ -40,6 +40,8 @@
    flight, and clicking early fails quietly.
 ── */
 
+import { applyCesVariables } from './gecx';
+
 const TAG = '[ACN BIDI]';
 const AUTH_WAIT_MS = 15000;
 
@@ -446,6 +448,7 @@ function installBidiListeners() {
 
   messenger.addEventListener('chat-messenger-connect-bidi', () => {
     _bidiActive = true;
+    applyCesVariables();
     console.log(TAG, 'connected');
     _onStateChange?.({ connected: true, connecting: false });
   });
@@ -492,6 +495,7 @@ export async function connectBidi() {
 
   installBidiListeners();
   installUtteranceBridge();
+  applyCesVariables();
 
   // Read off the element when the session is created, so it must be set first.
   // Without it the agent talks over the customer instead of yielding.
@@ -516,6 +520,7 @@ export async function connectBidi() {
   _onStateChange?.({ connected: false, connecting: true });
 
   await whenAuthorised();
+  applyCesVariables();
   micButton.click();
   return true;
 }
@@ -550,6 +555,7 @@ export async function disconnectBidi() {
 export function sendVoiceText(text, { silent = false } = {}) {
   const presenter = messengerElement()?.presenter;
   if (typeof presenter?.sendQuery !== 'function') return false;
+  applyCesVariables();
   if (silent) {
     _pendingSilentText = text;
     _pendingSilentUntil = Date.now() + 8000;

@@ -6,6 +6,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,

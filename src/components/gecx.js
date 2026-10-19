@@ -153,7 +153,7 @@ function coerceCesVariables(vars) {
   return out;
 }
 
-function applyCesVariables() {
+export function applyCesVariables() {
   const messenger = getMessenger();
 
   if (
@@ -250,6 +250,8 @@ export function setCesVariables(vars) {
     authentication_status: _cesVars.authentication_status,
     auth_level: _cesVars.auth_level,
     customerId: _cesVars.customerId,
+    customer_id: _cesVars.customer_id,
+    pref_name: _cesVars.pref_name,
   });
 
   if (!applyCesVariables()) {
@@ -292,22 +294,21 @@ export function buildAuthenticatedCesVariables(customer) {
   }
 
   const variables = {
-    auth_mode: 'authenticated',
+    auth_mode: 'pin',
     authentication_status: true,
     auth_level: '2',
     is_existing_customer: true,
     customerId,
-    customer_id:
-      firstPresentValue(
-        customer?.customer_id,
-        customerId
-      ) || customerId,
+    customer_id: customerId,
+    identified_by: 'webchat_sso',
+    inject_preferred_name: 'true',
     web_channel: true,
   };
 
   addIfPresent(
     variables,
     'pref_name',
+    customer?.prefName,
     customer?.pref_name,
     customer?.preferred_name,
     customer?.first_name
@@ -315,7 +316,18 @@ export function buildAuthenticatedCesVariables(customer) {
 
   addIfPresent(
     variables,
+    'customer_display_name',
+    customer?.prefName,
+    customer?.pref_name,
+    customer?.preferred_name,
+    customer?.legalName,
+    customer?.customer_name
+  );
+
+  addIfPresent(
+    variables,
     'customer_name',
+    customer?.legalName,
     customer?.customer_name,
     customer?.full_name,
     customer?.name
@@ -324,20 +336,23 @@ export function buildAuthenticatedCesVariables(customer) {
   addIfPresent(
     variables,
     'customer_global_status',
+    customer?.globalStatus,
     customer?.customer_global_status,
     customer?.global_status,
-    'active'
+    'ACTIVE'
   );
 
   addIfPresent(
     variables,
     'annual_income',
+    customer?.annualIncome,
     customer?.annual_income
   );
 
   addIfPresent(
     variables,
     'credit_score_value',
+    customer?.creditScoreValue,
     customer?.credit_score_value,
     customer?.credit_score
   );
@@ -345,12 +360,14 @@ export function buildAuthenticatedCesVariables(customer) {
   addIfPresent(
     variables,
     'spending_persona',
+    customer?.spendingPersona,
     customer?.spending_persona
   );
 
   addIfPresent(
     variables,
     'kyc_expires_at',
+    customer?.kycExpiresAt,
     customer?.kyc_expires_at
   );
 
@@ -364,6 +381,7 @@ export function buildAuthenticatedCesVariables(customer) {
   addIfPresent(
     variables,
     'mobile_number',
+    customer?.registeredMobile,
     customer?.mobile_number,
     customer?.mobileNumber,
     customer?.phone_number,
@@ -417,9 +435,14 @@ export async function resumeGecxAfterSignIn(customer) {
       authentication_status: _cesVars.authentication_status,
       auth_level: _cesVars.auth_level,
       customerId: _cesVars.customerId,
+      customer_id: _cesVars.customer_id,
     });
 
     const messenger = await flushCesVariables();
+
+    if (isVoiceSessionOpen() && sendVoiceText(SIGN_IN_RESUME_MESSAGE)) {
+      return true;
+    }
 
     const result = messenger.sendRequest(
       'query',
@@ -538,15 +561,10 @@ export function resetGecx() {
    resumeGecxAfterSignIn(customer) instead.
 
    While a voice session is open this routes into the live stream instead of the
-   text endpoint. Two reasons, both of which bite otherwise:
-
-     - a unary turn comes back SILENT, so typing mid-conversation would get a
-       reply the customer never hears;
-     - it would also be delivered twice, once by the fetch interceptor and once
-       by the bidi message consumer, drawing every reply as a duplicate.
-
-   Routing through the session keeps one transport live at a time. */
+   text endpoint. */
 export function gecxSend(text) {
+  applyCesVariables();
+
   if (isVoiceSessionOpen() && sendVoiceText(text)) {
     return undefined;
   }
@@ -557,7 +575,6 @@ export function gecxSend(text) {
     messenger &&
     typeof messenger.sendRequest === 'function'
   ) {
-    applyCesVariables();
     return messenger.sendRequest('query', text);
   }
 

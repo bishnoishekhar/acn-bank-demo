@@ -241,8 +241,9 @@ def _deterministic_greeting(state, callback_context, user_text) -> Optional[obje
         display_name = (c.get("display_name", "") or state.get("customer_display_name", "")
                         or _first_nonempty(state, "customer_display_name", "pref_name", "customer_name", "customer_first_name"))
         inject_name = c.get("inject_preferred_name", "") or state.get("inject_preferred_name", "")
+        auth_lvl = int(_auth(state).get("level", "0") or state.get("auth_level", "0") or "0")
         opening = (f"Hello {display_name}, welcome to ACN Bank! "
-                   if inject_name == "true" and display_name
+                   if (inject_name == "true" or auth_lvl >= 1) and display_name
                    else "Hello and welcome to ACN Bank! ")
         if _is_voice_session(state):
             opening += "This call may be recorded for quality and training purposes. "
@@ -286,9 +287,17 @@ def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
         msg += f" | customer_display_name={display_name}"
     if inject_name == "true":
         msg += f" | GREET CUSTOMER AS '{display_name}' — address them by this name"
-    # When customer is already identified, make it explicit the model must not re-identify
-    if customer_id and int(auth_level_str or "0") >= 1:
-        msg += (f" | IDENTIFIED: name={display_name} id={customer_id}."
+    customer_id = customer_id or c.get("customer_id", "") or a.get("customer_id", "") or _first_nonempty(state, "customerId")
+    if customer_id and not state.get("customer_id"):
+        state["customer_id"] = customer_id
+    # When customer is already identified/authenticated, make it explicit the model must not re-identify
+    if customer_id and int(auth_level_str or "0") >= 2:
+        msg += (f" | AUTHENTICATED (L2): name={display_name} customer_id={customer_id}."
+                f" The customer is ALREADY signed in and verified at L2!"
+                f" NEVER ask for mobile number, account number, card digits, or PIN for L1/L2 requests,"
+                f" and DO NOT call call_identity_hub unless a tool explicitly returns STEP_UP_REQUIRED for L3.")
+    elif customer_id and int(auth_level_str or "0") == 1:
+        msg += (f" | IDENTIFIED (L1): name={display_name} customer_id={customer_id}."
                 f" NEVER ask for mobile number, account number, or card digits."
                 f" For L2 services: call call_identity_hub immediately.")
     _inject_instruction(llm_request, msg)

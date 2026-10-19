@@ -87,20 +87,32 @@ def _seed_identity_from_session(state) -> None:
     cust = _cust(state)
     auth = _auth(state)
 
+    cid = (_first_nonempty(state, "customer_id", "customerId")
+           or cust.get("customer_id", "")
+           or auth.get("customer_id", ""))
+    if cid:
+        state["customer_id"] = cid
+        state["customerId"] = cid
+
     first = _first_nonempty(state, "customer_first_name", "pref_name")
     if not first:
         full = _first_nonempty(state, "customer_display_name", "customer_name")
         first = full.split()[0] if full else ""
+    disp = _first_nonempty(state, "customer_display_name", "pref_name", "customer_name") or cust.get("display_name", "")
     updates = {
+        "customer_id":   cid,
         "first_name":    first,
         "last_name":     _first_nonempty(state, "customer_last_name"),
-        "display_name":  _first_nonempty(state, "customer_display_name", "pref_name", "customer_name"),
+        "display_name":  disp,
         "email_masked":  _first_nonempty(state, "customer_email_masked"),
         "phone_masked":  _first_nonempty(state, "customer_phone_masked"),
         "segment":       _first_nonempty(state, "customer_segment", "spending_persona"),
         "since_year":    _first_nonempty(state, "customer_since_year"),
-        "identified_by": _first_nonempty(state, "identified_by"),
+        "identified_by": _first_nonempty(state, "identified_by") or ("webchat_sso" if cid else ""),
     }
+    if disp and not state.get("inject_preferred_name"):
+        state["inject_preferred_name"] = "true"
+        updates["inject_preferred_name"] = "true"
     changed = {k: v for k, v in updates.items() if v and cust.get(k) != v}
     if changed:
         _set_cust(state, **changed)
@@ -110,13 +122,20 @@ def _seed_identity_from_session(state) -> None:
     # identify_customer. Never downgrade a level the session already earned --
     # expiry in BA-2/BA-3 is the only thing allowed to drop it.
     auth_changed = {}
+    if cid and auth.get("customer_id") != cid:
+        auth_changed["customer_id"] = cid
     flat_level = _first_nonempty(state, "auth_level")
+    saved_level = int(float(auth.get("level", "0") or "0"))
     if flat_level:
         try:
-            if int(float(flat_level)) > int(float(auth.get("level", "0") or "0")):
-                auth_changed["level"] = str(int(float(flat_level)))
+            flat_int = int(float(flat_level))
+            if flat_int > saved_level:
+                auth_changed["level"] = str(flat_int)
+                saved_level = flat_int
         except (TypeError, ValueError):
             pass
+    if saved_level > 0:
+        state["auth_level"] = str(saved_level)
     mode = _first_nonempty(state, "auth_mode")
     if mode and mode != "guest" and auth.get("mode") != mode:
         auth_changed["mode"] = mode
@@ -424,10 +443,11 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             'auth_mode':  'auth_state.mode',
         },
         'verify_pin': {
-            'authLevel':  'auth_state.level',
-            'auth_level': 'auth_state.level',
-            'authMode':   'auth_state.mode',
-            'auth_mode':  'auth_state.mode',
+            'customer_id': 'customer_id',
+            'authLevel':   'auth_state.level',
+            'auth_level':  'auth_state.level',
+            'authMode':    'auth_state.mode',
+            'auth_mode':   'auth_state.mode',
         },
         'authenticate': {
             'authLevel':  'auth_state.level',
@@ -647,6 +667,8 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
     if customer_id:
         state['customer_id'] = customer_id
         state['customerId'] = customer_id
+        _set_auth(state, customer_id=customer_id)
+        _set_cust(state, customer_id=customer_id)
 
     level = _hub_value(fields, 'auth_level')
     if level.isdigit():

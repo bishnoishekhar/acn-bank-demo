@@ -6,6 +6,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -105,8 +109,8 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         trailer = ""
         _m = _AUTH_TRAILER_RE.search(text)
         if _m:
-            trailer = _m.group(0)
-            text = text.replace(trailer, "")
+            text = text.replace(_m.group(0), "")
+            trailer = _hub_trailer(state) if _hub_state_val(state, "customer_id", "customerId") != "-" else _m.group(0)
 
         # AM-6: PII scrubber
         text = PAN_PATTERN.sub(lambda m: f"•••• {m.group(4)}", text)

@@ -6,6 +6,10 @@
 # CES uploads each callback as a standalone python_code string (no shared
 # imports), so the full module was duplicated into all 155 files. Regenerate
 # with scripts/prune_callbacks.py after editing the canonical module.
+# NOTE: pruned to the subset reachable from this file's entrypoint.
+# CES uploads each callback as a standalone python_code string (no shared
+# imports), so the full module was duplicated into all 155 files. Regenerate
+# with scripts/prune_callbacks.py after editing the canonical module.
 """
 ACN Bank CES Demo — Shared Callback Module
 All GECX callbacks delegate here. Platform globals (CallbackContext, Content, Part,
@@ -126,99 +130,6 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
-# --- Spoken summaries of data answers (so a widget-only reply is never silent or empty) ---
-_SS_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
-              'November', 'December']
-
-def _ss_plain(v):
-    if not isinstance(v, dict) or not v:
-        return v
-    k = next(iter(v)); x = v[k]
-    if k == 'integerValue':
-        try: return int(x)
-        except (ValueError, TypeError): return x
-    if k == 'mapValue':
-        return {a: _ss_plain(b) for a, b in (x or {}).get('fields', {}).items()}
-    if k == 'arrayValue':
-        return [_ss_plain(b) for b in (x or {}).get('values', [])]
-    if k == 'nullValue':
-        return None
-    return x
-
-def _ss_rows(response):
-    """Plain dict rows from a raw Firestore list answer or an already-plain one."""
-    body = response.get('data') if isinstance(response, dict) else None
-    rows = body.get('documents') if isinstance(body, dict) else (body if isinstance(body, list) else None)
-    out = []
-    for r in (rows or []):
-        d = r.get('document') if isinstance(r, dict) and 'document' in r else r
-        if isinstance(d, dict) and isinstance(d.get('fields'), dict):
-            out.append({a: _ss_plain(b) for a, b in d['fields'].items()})
-        elif isinstance(d, dict):
-            out.append(d)
-    return out
-
-def _ss_money(x):
-    return "$" + format(float(x), ",.2f")
-
-def _ss_num(x):
-    return isinstance(x, (int, float)) and not isinstance(x, bool)
-
-def _spoken_summary_for(tool_name, response):
-    rows = _ss_rows(response)
-    if not rows:
-        return ''
-    if tool_name.endswith('getAccounts'):
-        accts = [r for r in rows if _ss_num(r.get('balance')) and r.get('nickname')] or [r for r in rows if _ss_num(r.get('balance'))]
-        bits = []
-        for r in accts[:4]:
-            name = str(r.get('nickname') or r.get('type') or r.get('account_type') or 'account').strip()
-            last4 = str(r.get('last4') or '').strip()
-            head = "Your " + name + (" account" if 'account' not in name.lower() else "") + (" ending in " + last4 if last4 else "")
-            line = head + " has a balance of " + _ss_money(r['balance'])
-            if _ss_num(r.get('available_balance')) and abs(float(r['available_balance']) - float(r['balance'])) > 0.004:
-                line += ", with " + _ss_money(r['available_balance']) + " available"
-            bits.append(line + ".")
-        if not bits:
-            return ''
-        return " ".join(bits) + " CDIC protects eligible deposits at member institutions up to $100,000 per depositor per insured category."
-    if tool_name.endswith('listCustomerTransactions'):
-        tx = [r for r in rows if _ss_num(r.get('amount')) and r.get('timestamp')]
-        tx.sort(key=lambda r: str(r.get('timestamp')), reverse=True)
-        bits = []
-        for r in tx[:3]:
-            ts = str(r['timestamp'])
-            try:
-                when = _SS_MONTHS[int(ts[5:7]) - 1] + " " + str(int(ts[8:10]))
-            except Exception:
-                when = ts[:10]
-            what = str(r.get('description') or r.get('merchant') or r.get('counterparty_name') or 'a transaction').strip()
-            kind = 'credit' if str(r.get('type', '')).lower() == 'credit' else 'debit'
-            bits.append(when + ": " + what + ", " + _ss_money(r['amount']) + " " + kind)
-        return ("Your most recent transactions are: " + "; ".join(bits) + ".") if bits else ''
-    if tool_name.endswith('getBeneficiaries'):
-        names = []
-        for r in rows[:6]:
-            nm = str(r.get('name') or r.get('nickname') or '').strip()
-            if nm:
-                names.append(nm + (" at " + str(r['bank_name']) if r.get('bank_name') else ""))
-        return ("You have " + str(len(rows)) + " saved payee" + ("s" if len(rows) != 1 else "") + ": " + ", ".join(names) + ".") if names else ''
-    return ''
-
-def _remember_spoken_summary(tool_name, response, state):
-    """After a data tool answers, remember what to say; after_model uses it only if the model stays silent."""
-    try:
-        if tool_name.split('/')[-1].split('_')[-1] not in ('getAccounts', 'listCustomerTransactions', 'getBeneficiaries'):
-            return
-        if not isinstance(response, dict) or response.get('status') != 'success':
-            return
-        text = _spoken_summary_for(tool_name, response)
-        if text:
-            import time
-            state['spoken_summary'] = json.dumps({'text': text, 'ts': time.time()})
-    except Exception:
-        pass
-
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -311,7 +222,6 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
 
-    _remember_spoken_summary(tool_name, response, state)
     return response
 
 def _normalize_response(response: dict[str, Any]) -> dict:
@@ -391,10 +301,11 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             'auth_mode':  'auth_state.mode',
         },
         'verify_pin': {
-            'authLevel':  'auth_state.level',
-            'auth_level': 'auth_state.level',
-            'authMode':   'auth_state.mode',
-            'auth_mode':  'auth_state.mode',
+            'customer_id': 'customer_id',
+            'authLevel':   'auth_state.level',
+            'auth_level':  'auth_state.level',
+            'authMode':    'auth_state.mode',
+            'auth_mode':   'auth_state.mode',
         },
         'authenticate': {
             'authLevel':  'auth_state.level',
@@ -610,6 +521,8 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
     if customer_id:
         state['customer_id'] = customer_id
         state['customerId'] = customer_id
+        _set_auth(state, customer_id=customer_id)
+        _set_cust(state, customer_id=customer_id)
 
     level = _hub_value(fields, 'auth_level')
     if level.isdigit():

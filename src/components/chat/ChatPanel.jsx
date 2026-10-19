@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import QRCode from 'qrcode';
 import {
   initGecx,
   gecxSend,
@@ -9,6 +10,7 @@ import {
   clearGecxDone,
   softResetGecx,
   clearGecxSession,
+  setAuthenticatedCustomerVariables,
 } from '../gecx';
 import {
   connectBidiWhenReady,
@@ -37,7 +39,170 @@ import LoanPreapproval    from '../LoanPreapproval';
 import MobileHandoff      from '../MobileHandoff';
 import { CardCarousel, CardCompare } from '../CardWidgets';
 import TripBookingRecommendationsWidget from '../TripBookingRecommendationsWidget';
-import { fetchP2PContacts } from '../../firebase';
+import {
+  fetchP2PContacts,
+  fetchCustomerBills,
+  fetchCustomerBeneficiaries,
+  fetchCustomerTransactions,
+  fetchCustomerAccounts,
+} from '../../firebase';
+
+function ChatQrCard({ payload = {}, customer = null }) {
+  const [qrDataUrl, setQrDataUrl] = useState('');
+  const [copied, setCopied] = useState(false);
+
+  const custId =
+    payload.customerId ||
+    payload.customer_id ||
+    customer?.customerId ||
+    'CUST_DOC_1988';
+  const dispName =
+    payload.displayName ||
+    payload.display_name ||
+    customer?.legalName ||
+    customer?.prefName ||
+    'ACN Customer';
+  const rawAmt = Number(payload.amount || 0);
+  const reference = payload.reference || payload.request_id || '';
+
+  const base64Envelope =
+    payload.qrPayloadBase64 ||
+    btoa(
+      JSON.stringify({
+        type: 'ACN_QR_PAY',
+        v: '1',
+        customer_id: custId,
+        display_name: dispName,
+        ...(rawAmt > 0 ? { amount: Number(rawAmt.toFixed(2)) } : {}),
+        ...(reference ? { reference } : {}),
+      }),
+    );
+
+  useEffect(() => {
+    let cancelled = false;
+    QRCode.toDataURL(base64Envelope, {
+      width: 210,
+      margin: 1,
+      errorCorrectionLevel: 'M',
+      color: { dark: '#002147', light: '#FFFFFFFF' },
+    })
+      .then((url) => {
+        if (!cancelled) setQrDataUrl(url);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [base64Envelope]);
+
+  return (
+    <div
+      style={{
+        background: '#FFFFFF',
+        border: '1px solid #CBD5E1',
+        borderRadius: 16,
+        padding: '16px 16px 14px',
+        maxWidth: 300,
+        boxShadow: '0 8px 24px rgba(0, 33, 71, 0.10)',
+        textAlign: 'center',
+        marginTop: 4,
+        marginBottom: 4,
+      }}
+    >
+      <div
+        style={{
+          display: 'inline-block',
+          padding: '3px 10px',
+          borderRadius: 999,
+          background: '#E6F2F5',
+          color: '#002147',
+          fontSize: 10,
+          fontWeight: 800,
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+        }}
+      >
+        ACN QR Pay · Receive
+      </div>
+      <div style={{ fontSize: 16, fontWeight: 800, color: '#0B1F33', marginTop: 8 }}>
+        {dispName}
+      </div>
+      <div style={{ fontSize: 11, color: '#64748B', marginBottom: 10 }}>
+        {rawAmt > 0 ? `Requesting CAD $${rawAmt.toFixed(2)}` : 'Open amount · Scan with ACN Mobile App'}
+      </div>
+      {qrDataUrl && (
+        <div
+          style={{
+            background: '#F8FAFC',
+            padding: 10,
+            borderRadius: 12,
+            border: '1px dashed #CBD5E1',
+            display: 'inline-block',
+          }}
+        >
+          <img
+            src={qrDataUrl}
+            alt="ACN QR Pay code"
+            style={{ width: 185, height: 185, display: 'block' }}
+          />
+        </div>
+      )}
+      {reference && (
+        <div style={{ fontSize: 10, color: '#64748B', marginTop: 6 }}>
+          Ref: <code>{reference}</code>
+        </div>
+      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button
+          type="button"
+          onClick={async () => {
+            try {
+              await navigator.clipboard.writeText(base64Envelope);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 1600);
+            } catch {
+              // ignore
+            }
+          }}
+          style={{
+            flex: 1,
+            padding: '7px 10px',
+            borderRadius: 8,
+            border: '1px solid #CBD5E1',
+            background: '#F8FAFC',
+            color: '#002147',
+            fontSize: 11,
+            fontWeight: 700,
+            cursor: 'pointer',
+          }}
+        >
+          {copied ? 'Copied ✓' : 'Copy QR'}
+        </button>
+        {qrDataUrl && (
+          <a
+            href={qrDataUrl}
+            download={`acn-qr-${custId}.png`}
+            style={{
+              flex: 1,
+              padding: '7px 10px',
+              borderRadius: 8,
+              background: '#002147',
+              color: '#FFFFFF',
+              fontSize: 11,
+              fontWeight: 700,
+              textDecoration: 'none',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            Save PNG
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
 
 // ── Module-level helpers ───────────────────────────────────────────────────────
 
@@ -323,6 +488,8 @@ function resolvePayloadName(p) {
     mortgage_preapproval_form: 'acn-form-input',
     'acn-nudge-card':         'acn-mortgage-nudge',
     'acn-credit-card-widget': 'acn-card-carousel',
+    qr_widget:                'acn-qr-widget',
+    'acn-qr-widget':          'acn-qr-widget',
   };
   if (aliases[explicitName]) return aliases[explicitName];
   if (normalized.name) return normalized.name;
@@ -351,6 +518,8 @@ function resolvePayloadName(p) {
     return 'acn-card-activation';
   if (normalized.web_activation_url || normalized.deep_link || normalized.activationUrl || normalized.activation_url)
     return 'acn-card-activation';
+  if (normalized.qrPayloadBase64 || normalized.qr_code_url || normalized.type === 'ACN_QR_PAY')
+    return 'acn-qr-widget';
   // CES card widgets: card_check (PRODUCT_COMPARISON) carries a features array
   // alongside productDetails; card_comparison (PRODUCT_CAROUSEL) does not.
   if (Array.isArray(normalized.productDetails) && normalized.productDetails.length > 0)
@@ -382,7 +551,8 @@ function isKnownPayload(p) {
     n === 'acn-mortgage-affordability' || n === 'acn-mortgage-rate-shelf' ||
     n === 'acn-mortgage-rate-table' ||
     n === 'acn-mortgage-nudge'    ||
-    n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'
+    n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'  ||
+    n === 'acn-qr-widget'
   );
 }
 
@@ -404,14 +574,18 @@ function tripBookingSignature(payload, turnIndex = 'unknown') {
 // ── Static data ───────────────────────────────────────────────────────────────
 
 const CANADIAN_BILLERS = [
-  { id: 'rogers',       name: 'Rogers',                  sub: 'Telecommunications', emoji: '📡' },
-  { id: 'bell',         name: 'Bell Canada',             sub: 'Telecommunications', emoji: '🔔' },
-  { id: 'telus',        name: 'TELUS',                   sub: 'Telecommunications', emoji: '📱' },
-  { id: 'hydro-one',    name: 'Hydro One',               sub: 'Bill Payment',       emoji: '⚡' },
-  { id: 'toronto-h',   name: 'Toronto Hydro',           sub: 'Bill Payment',       emoji: '💡' },
-  { id: 'enbridge',     name: 'Enbridge Gas',            sub: 'Bill Payment',       emoji: '🔥' },
-  { id: 'cra',          name: 'Canada Revenue Agency',   sub: 'Government',         emoji: '🏛️' },
-  { id: 'shaw',         name: 'Shaw / Freedom',          sub: 'Internet & TV',      emoji: '📺' },
+  { id: 'enbridge',    name: 'Enbridge Gas',                  sub: 'Natural Gas Utility · Ontario',     category: 'Utilities', emoji: '🔥', presets: [95, 150, 187.40] },
+  { id: 'hydro-one',   name: 'Hydro One',                     sub: 'Electricity Utility · Ontario',     category: 'Utilities', emoji: '⚡', presets: [120, 175, 224.30] },
+  { id: 'toronto-h',   name: 'Toronto Hydro',                 sub: 'Municipal Electricity · Toronto',   category: 'Utilities', emoji: '💡', presets: [85, 118.40, 160] },
+  { id: 'bc-hydro',    name: 'BC Hydro',                      sub: 'Electricity Utility · BC',          category: 'Utilities', emoji: '🌊', presets: [75, 110, 145] },
+  { id: 'hydro-qc',    name: 'Hydro-Québec',                  sub: 'Electricity Utility · Québec',      category: 'Utilities', emoji: '⚡', presets: [90, 130, 180] },
+  { id: 'epcor',       name: 'EPCOR Utilities',               sub: 'Water & Power · Alberta',           category: 'Utilities', emoji: '💧', presets: [110, 155, 210] },
+  { id: 'rogers',      name: 'Rogers',                        sub: 'Wireless & Ignite Internet',        category: 'Telecom',   emoji: '📡', presets: [85, 115, 142.75] },
+  { id: 'bell',        name: 'Bell Canada',                   sub: 'Fibe Internet & Mobility',          category: 'Telecom',   emoji: '🔔', presets: [90, 125, 165] },
+  { id: 'telus',       name: 'TELUS',                         sub: 'Mobility & PureFibre',              category: 'Telecom',   emoji: '📱', presets: [80, 110, 145] },
+  { id: 'shaw',        name: 'Shaw / Freedom Mobile',         sub: 'Internet, TV & Wireless',           category: 'Telecom',   emoji: '📺', presets: [65, 95, 130] },
+  { id: 'waterloo-tx', name: 'City of Waterloo Property Tax', sub: 'Municipal Property Tax · Ontario',  category: 'Tax & Gov', emoji: '🏙️', presets: [450, 920, 1842] },
+  { id: 'cra',         name: 'Canada Revenue Agency',         sub: 'Federal Tax & Instalments',         category: 'Tax & Gov', emoji: '🏛️', presets: [250, 500, 1000] },
 ];
 
 /* Sentinel utterance the CES auth gate emits to ask the page to open the
@@ -438,18 +612,29 @@ const GUEST_SUGGESTIONS = [
 ];
 
 const CUSTOMER_SUGGESTIONS = [
-  { label: '💰 Check balance',       utterance: 'Check my balance' },
-  { label: '💸 Send money',          utterance: 'Transfer money' },
-  { label: '📊 Recent transactions', utterance: 'Show my recent transactions' },
-  { label: '🧾 Pay a bill',          utterance: 'I want to pay a bill' },
-  { label: '🎁 My offers',           utterance: 'Show my pre-approved offers' },
-  { label: '🚫 Block my card',       utterance: 'I need to block my card' },
+  { label: '💡 Spending & bill insights', utterance: 'Show my spending insights and upcoming utility bills' },
+  { label: '🧾 Pay upcoming utility bill', utterance: 'Check my upcoming bills and help me pay them' },
+  { label: '💰 Check balance',            utterance: 'Check my balance' },
+  { label: '▦ Receive via QR Pay',       utterance: 'Generate a QR code so someone can pay me' },
+  { label: '💸 Send money',               utterance: 'Transfer money' },
+  { label: '📊 Recent transactions',      utterance: 'Show my recent transactions' },
+  { label: '🎁 My offers',                utterance: 'Show my pre-approved offers' },
+  { label: '🚫 Block my card',            utterance: 'I need to block my card' },
 ];
+
+function computeDaysUntil(isoDate) {
+  if (!isoDate) return null;
+  const target = new Date(`${String(isoDate).slice(0, 10)}T12:00:00`);
+  if (Number.isNaN(target.getTime())) return null;
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 12, 0, 0);
+  return Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+}
 
 // ── ChatPanel ─────────────────────────────────────────────────────────────────
 
 export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onExposeResume, intent, onRequestSignIn, resetSignal = 0, onMessagesChange, onExposeSend, onTravelProtectionBanner }) {
-  const { customerId, isAuthenticated, customerName } = useAuth();
+  const { customer, customerId, isAuthenticated, customerName, signInFromChat } = useAuth();
   const AI_SUGGESTIONS = isAuthenticated ? CUSTOMER_SUGGESTIONS : GUEST_SUGGESTIONS;
 
   const [messages,        setMessages]        = useState([]);
@@ -461,9 +646,16 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const [ttsEnabled,      setTTSEnabled]      = useState(true);   // bot speaks every response (default on, user can mute)
   const [isResponding,    setIsResponding]    = useState(false);
   const [activeMenu,      setActiveMenu]      = useState(null); // 'plus' | 'contact' | 'ai'
-  const [contactTab,      setContactTab]      = useState('recipients');
-  const [p2pContacts,     setP2pContacts]     = useState([]);   // Firebase contacts
+  const [contactTab,      setContactTab]      = useState('billers');
+  const [p2pContacts,     setP2pContacts]     = useState([]);   // Firebase P2P contacts
+  const [customerBills,   setCustomerBills]   = useState([]);   // Saved Firestore bills
+  const [beneficiaries,   setBeneficiaries]   = useState([]);   // Saved Interac/bank payees
+  const [proactiveInsights, setProactiveInsights] = useState([]); // Live banking insights
   const [contactsLoading, setContactsLoading] = useState(false);
+  const [billerSearch,    setBillerSearch]    = useState('');
+  const [billerCategory,  setBillerCategory]  = useState('All');
+  const [selectedBillerId, setSelectedBillerId] = useState(null);
+  const [customBillerAmt, setCustomBillerAmt] = useState('');
 
   // ── GECX element key ──────────────────────────────────────────────────────
   // Incrementing this forces React to unmount + remount <chat-messenger>.
@@ -981,11 +1173,109 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-mobile-handoff')
         setMessages((prev) => [...prev, { type: 'mobile-handoff', payload: p, id: uid() }]);
+
+      if (pname === 'acn-qr-widget')
+        setMessages((prev) => [...prev, { type: 'qr-widget', payload: p, id: uid() }]);
     });
+
+    // ── Chat -> Web Auto-Sign-In sync when agent confirms verification ──
+    if (!isAuthenticatedRef.current) {
+      const combinedBotText = outputs
+        .map((o) => String(o?.text || ''))
+        .join(' ')
+        .toLowerCase();
+      const hasAuthWidget = outputs.some((o) => {
+        const pn = resolvePayloadName(normalizeWidgetPayload(o));
+        return (
+          pn === 'acn-payment-carousel' ||
+          pn === 'acn-insight-card' ||
+          pn === 'acn-loan-preapproval' ||
+          pn === 'acn-qr-widget'
+        );
+      });
+      const verifiedMatch =
+        combinedBotText.includes('verified') ||
+        combinedBotText.includes('thank you, chander') ||
+        combinedBotText.includes('thank you, intan') ||
+        combinedBotText.includes('thank you, emiliano') ||
+        combinedBotText.includes('thank you, sophie') ||
+        combinedBotText.includes('welcome back') ||
+        hasAuthWidget;
+
+      if (verifiedMatch) {
+        let inferredName = '';
+        const nameRegex = /(?:thank you|hello|hi|welcome(?:\s+back)?),?\s+(chander|intan|emiliano|sophie|david|alex|marcus|elena)/i;
+        const nm = combinedBotText.match(nameRegex);
+        if (nm) inferredName = nm[1];
+        attemptChatToWebSignInRef.current?.({
+          phone: chatAuthPhoneRef.current,
+          pin: chatAuthPinRef.current,
+          customerName: inferredName,
+        });
+      }
+    }
   }, [removeTyping, clearTypingBubble, addBot, showCombo, parseToolCode, extractSayLines, onTravelProtectionBanner]);
 
   const processOutputsRef = useRef(processOutputs);
   useEffect(() => { processOutputsRef.current = processOutputs; }, [processOutputs]);
+
+  // ── Bidirectional Auth Refs & Chat -> Web Auto-Sign-In ─────────────────────
+  const isAuthenticatedRef = useRef(isAuthenticated);
+  const customerIdRef      = useRef(customerId);
+  const customerNameRef    = useRef(customerName);
+  useEffect(() => {
+    isAuthenticatedRef.current = isAuthenticated;
+    customerIdRef.current      = customerId;
+    customerNameRef.current    = customerName;
+  }, [isAuthenticated, customerId, customerName]);
+
+  const chatAuthPhoneRef   = useRef('');
+  const chatAuthPinRef     = useRef('');
+  const chatSyncInFlightRef = useRef(false);
+
+  const attemptChatToWebSignIn = useCallback(async ({ customerId: cid, phone, pin, customerName: cname } = {}) => {
+    if (isAuthenticatedRef.current || chatSyncInFlightRef.current) return;
+    if (!cid && !phone && !cname) return;
+    chatSyncInFlightRef.current = true;
+    try {
+      const res = await signInFromChat({ customerId: cid, phone, pin, customerName: cname });
+      if (res?.success && res.customer) {
+        setAuthenticatedCustomerVariables(res.customer);
+        console.log('[ACN] Chat -> Web auto sign-in synced:', res.customer.customerId, res.customer.prefName);
+      }
+    } catch (e) {
+      console.warn('[ACN] Chat -> Web auto sign-in failed:', e);
+    } finally {
+      chatSyncInFlightRef.current = false;
+    }
+  }, [signInFromChat]);
+
+  const attemptChatToWebSignInRef = useRef(attemptChatToWebSignIn);
+  useEffect(() => { attemptChatToWebSignInRef.current = attemptChatToWebSignIn; }, [attemptChatToWebSignIn]);
+
+  // Inspect user utterances in chat (typed or voice) for phone/account + 4-digit PIN
+  // so logging in inside the chat immediately logs the user into the Web UI too.
+  const captureChatAuthInput = useCallback((rawText) => {
+    if (isAuthenticatedRef.current || !rawText) return;
+    const digitsOnly = String(rawText).replace(/\D/g, '');
+    // 10 or 11 digit phone / account number
+    if (digitsOnly.length === 10 || (digitsOnly.length === 11 && digitsOnly.startsWith('1'))) {
+      chatAuthPhoneRef.current = digitsOnly.slice(-10);
+      return;
+    }
+    // 4-digit PIN (either standalone "2244" or "PIN is 2244")
+    const pinMatch = String(rawText).match(/\b(\d{4})\b/);
+    if (pinMatch && (digitsOnly.length === 4 || chatAuthPhoneRef.current)) {
+      const pin4 = pinMatch[1];
+      chatAuthPinRef.current = pin4;
+      if (chatAuthPhoneRef.current) {
+        attemptChatToWebSignInRef.current?.({
+          phone: chatAuthPhoneRef.current,
+          pin: pin4,
+        });
+      }
+    }
+  }, []);
 
   // ── On mount: ensure _initDone is false (guards against hot-reload in dev). ─
   useEffect(() => { clearGecxDone(); }, []);
@@ -994,8 +1284,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   // Stops all timers, cancels TTS requests, pauses audio, revokes URLs, stops recording
   useEffect(() => {
     return () => {
-      // Close the live voice session so the mic indicator clears and the
-      // stream does not outlive the component.
       try {
         disconnectBidi();
         resetBidiBridge();
@@ -1003,7 +1291,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         console.error('[ACN] bidi teardown error:', err);
       }
 
-      // Stop any GECX audio still playing on the unary path
       try {
         const audio = ttsAudioRef.current;
         if (audio) {
@@ -1015,17 +1302,13 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         console.error('[ACN TTS] unmount audio stop error:', err);
       }
 
-      // Clear all timers
       if (respondingTimer.current) clearTimeout(respondingTimer.current);
       if (finalTimer.current) clearTimeout(finalTimer.current);
       if (ttsFlushTimer.current) clearTimeout(ttsFlushTimer.current);
     };
   }, []);
 
-  // ── External reset signal (e.g. sign-out from App) ─────────────────────────
-  // resetSignal increments → wipe React state + soft-reset GECX session.
-  // We keep <chat-messenger> in the DOM (never remount) so the SDK binding
-  // to the web component element stays intact.
+  // ── External reset signal (e.g. sign-in or sign-out from App) ──────────────
   const prevResetSignal = useRef(0);
   useEffect(() => {
     if (resetSignal === 0 || resetSignal === prevResetSignal.current) return;
@@ -1041,26 +1324,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     comboCreated.current    = false;
     lastProcessed.current   = { time: 0, sig: '' };
     seenOutputSigs.current.clear();
+    chatAuthPhoneRef.current = '';
+    chatAuthPinRef.current   = '';
     if (respondingTimer.current) clearTimeout(respondingTimer.current);
     if (finalTimer.current)      clearTimeout(finalTimer.current);
 
-    // Kill the old CES session completely:
-    //
-    //  1. clearGecxSession() — wipes sessionStorage + localStorage GECX keys NOW,
-    //     before the element remounts, so connectedCallback reads empty storage.
-    //
-    //  2. setMessengerKey() — forces React to unmount then remount the
-    //     <chat-messenger> element. The SDK's connectedCallback fires on the
-    //     fresh element and reads the (now empty) sessionStorage → generates a
-    //     brand-new CES session ID. This is the only reliable escape from a
-    //     session ID that the SDK cached in memory at initial page load.
-    //
-    //  3. softResetGecx() — clears _initDone so the next chat open calls
-    //     initGecx() / registerContext() and fires a guest welcome event.
-    // The bidi consumer and its listeners are bound to the <chat-messenger>
-    // element that is about to be thrown away, so tear the session down and
-    // clear the module guards — otherwise the bridge believes it is still
-    // registered and the new element gets no consumer at all.
     disconnectBidi();
     resetBidiBridge();
     bidiAutoStartedRef.current = false;
@@ -1081,20 +1349,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   }, []);
 
   // ── Bidi session bridge ────────────────────────────────────────────────────
-  // Agent output from a live voice session arrives as SDK utterances rather
-  // than as a runSession response, so it reaches us through gecxBidi's message
-  // consumer instead of the fetch interceptor. It is reshaped there into the
-  // same `outputs` array processOutputs already consumes, which is what keeps
-  // the widgets rendering identically in voice and in text.
   useEffect(() => {
     setBidiHandlers({
       onOutputs: (outs) => processOutputsRef.current(outs),
 
-      // The customer's transcribed speech. Only the final transcript becomes a
-      // message; interim ones would rewrite the bubble on every syllable.
       onUserTranscript: (text, isFinal) => {
         if (!isFinal || !text?.trim()) return;
-        addUser(text.trim());
+        const clean = text.trim();
+        captureChatAuthInput(clean);
+        addUser(clean);
         showTyping();
       },
 
@@ -1104,29 +1367,18 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         if (connected) {
           stopGecxAudio();
 
-          // Greet, once per session. This is the only way to get an audible
-          // hello: the CES welcome event rides the unary path and comes back
-          // silent, so we ask the agent to open the conversation from inside
-          // the live session instead.
-          //
-          // silent: true because the customer did not say this — CES echoes it
-          // back as a user utterance and the bridge drops it, so no phantom
-          // message bubble appears.
           if (!bidiGreetedRef.current) {
             bidiGreetedRef.current = true;
             showTyping();
-            // Ask for the agent's OWN approved opening, not a greeting of our
-            // invention. The orchestrator's instruction carries the compliant
-            // copy — welcome, recording notice, and the PIPEDA privacy
-            // disclosure Canadian banking requires. An earlier version of this
-            // prompt said "greet in one short sentence", and the agent complied
-            // exactly: a friendly hello with the disclosure stripped out.
-            sendVoiceText(
-              'Begin the session. Deliver your approved opening greeting exactly '
-                + 'as your instructions specify, including the PIPEDA privacy '
-                + 'disclosure.',
-              { silent: true }
-            );
+            const signedName = customerNameRef.current;
+            const signedId   = customerIdRef.current;
+            const openingPrompt =
+              isAuthenticatedRef.current && signedName
+                ? `Begin the session. The customer ${signedName} (customer_id=${signedId}) is already authenticated at L2 via the web app. Deliver your approved opening greeting addressing ${signedName} by name, including the PIPEDA privacy disclosure.`
+                : 'Begin the session. Deliver your approved opening greeting exactly '
+                  + 'as your instructions specify, including the PIPEDA privacy '
+                  + 'disclosure.';
+            sendVoiceText(openingPrompt, { silent: true });
           }
         }
 
@@ -1136,12 +1388,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         }
       },
     });
-  }, [addUser, showTyping, stopGecxAudio]);
+  }, [addUser, showTyping, stopGecxAudio, captureChatAuthInput]);
 
   // ── Rate-limit (429) handler ────────────────────────────────────────────────
-  // Without this, a 429 leaves the typing indicator spinning for 12s and then
-  // just vanishing with no message — looks like the bot "stopped responding
-  // for no reason". Surface it immediately instead.
   useEffect(() => {
     setRateLimitHandler(() => {
       removeTyping();
@@ -1149,86 +1398,48 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     });
   }, [removeTyping, addBot]);
 
-  // ── acn-session-data DISABLED ──────────────────────────────────────────────
-  // The index.html interceptor that fired this event is now disabled.
-  // The canonical response path is gecx.js installFetchInterceptor() → _onResponse.
-  // This handler is kept here for reference but no longer active.
-  /*
-  useEffect(() => {
-    const handler = (e) => {
-      const data = e.detail;
-      // ... reconstruction logic omitted ...
-    };
-    window.addEventListener('acn-session-data', handler);
-    return () => window.removeEventListener('acn-session-data', handler);
-  }, []);
-  */
-
   useEffect(() => { scrollToBottom(); }, [messages, scrollToBottom]);
 
   // ── Open / intent effect ───────────────────────────────────────────────────
+  // Depends on [isOpen, messengerKey] and waits if a resetSignal remount is
+  // scheduled in the current render cycle so initGecx() always binds to the
+  // newly remounted <chat-messenger key={messengerKey}> element.
   useEffect(() => {
     if (!isOpen) return;
+    if (resetSignal !== prevResetSignal.current) return;
 
-    // Always init GECX on first open (idempotent — guarded by _initDone flag).
-    // Previously this was skipped when `intent` was set, causing gecxSend() to
-    // fire into an uninitialised session and produce no response.
     if (!sessionStartedRef.current) {
       sessionStartedRef.current = true;
-      showTyping();   // show typing indicator while welcome / first response loads
+      showTyping();
 
-      // ── Clear GECX session cache then register ──────────────────────────
-      // The GECX SDK stores a session token in sessionStorage. On a page reload
-      // (or after a prior guest session) it finds that token and silently skips
-      // the welcome runSession, leaving the chat blank.
-      //
-      // clearGecxSession() removes all sessionStorage keys not owned by our app
-      // (everything except 'acn_*'). With no cached token, the SDK fires a fresh
-      // runSession welcome on registerContext(). No delay needed — this is a
-      // synchronous sessionStorage operation.
       clearGecxSession();
       initGecx();
 
-      // ── Open the live voice session ────────────────────────────────────────
-      // The spoken greeting has to come from inside the session: CES rejects
-      // outputAudioConfig on unary runSession, so the welcome event that
-      // registerContext() fires arrives as silent text. Connecting first and
-      // greeting second is the only ordering that produces an audible hello.
-      //
-      // connectBidiWhenReady() resolves once the microphone has been handed to
-      // the SDK, not once the stream is up — the greeting is sent from the
-      // connected handler in the bidi state-change effect below.
-      //
-      // Opening the chat is the user gesture the browser needs before it will
-      // grant the mic, so this is the earliest safe point to ask.
       if (!bidiAutoStartedRef.current) {
         bidiAutoStartedRef.current = true;
         setVoiceMode(true);
         voiceModeRef.current = true;
         connectBidiWhenReady().then((ok) => {
           if (!ok) {
-            // No mic, or the SDK never exposed its microphone button. Fall back
-            // to text. Replies are silent in this mode — there is no unary
-            // audio to fall back to — so the chat still works, just muted.
             setVoiceMode(false);
             voiceModeRef.current = false;
             setVoiceActive(false);
             console.warn('[ACN] voice session unavailable — continuing in text mode');
 
-            // The CES welcome event is disabled (it greeted silently and
-            // doubled up with the spoken one), so without this the panel would
-            // just sit blank. Rendered locally — no agent turn is consumed.
-            // Mirrors the orchestrator's approved webchat opening, PIPEDA
-            // disclosure included. This path renders without any agent turn, so
-            // the disclosure has to be carried here or a mic refusal would
-            // quietly drop it.
             if (!bidiGreetedRef.current) {
               bidiGreetedRef.current = true;
               removeTyping();
-              addBot(
-                "Hello and welcome to ACN Bank! We're committed to protecting "
-                  + 'your privacy under PIPEDA. How can I help you today?'
-              );
+              const signedName = customerNameRef.current;
+              if (isAuthenticatedRef.current && signedName) {
+                addBot(
+                  `Hello **${signedName}**, welcome back to ACN Bank! We're committed to protecting your privacy under PIPEDA. How can I help you today?`
+                );
+              } else {
+                addBot(
+                  "Hello and welcome to ACN Bank! We're committed to protecting "
+                    + 'your privacy under PIPEDA. How can I help you today?'
+                );
+              }
             }
           }
         });
@@ -1236,13 +1447,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     }
 
     if (intent) {
-      // Send the intent as a user message after a short delay so GECX has time
-      // to complete its initial session setup (runSession welcome round-trip).
       setTimeout(() => { addUser(intent); showTyping(); gecxSend(intent); }, 1100);
     }
 
     setTimeout(() => inputRef.current?.focus(), 300);
-  }, [isOpen]); // eslint-disable-line
+  }, [isOpen, messengerKey]); // eslint-disable-line
 
   // ── Menu helpers (must be defined before handleTileSelect which references them) ──
   const closeMenu  = useCallback(() => setActiveMenu(null), []);
@@ -1250,8 +1459,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   // ── Interaction handlers ───────────────────────────────────────────────────
   const handleTileSelect = useCallback((action, comboId) => {
-    // Auth gate: hand off to the page's sign-in modal instead of CES. Nothing is
-    // sent to the agent — App resumes the journey once auth succeeds.
     if (action.isSignIn) {
       setMessages((prev) => prev.filter((m) => m.id !== comboId));
       addUser(action.content || 'Sign in');
@@ -1259,7 +1466,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       return;
     }
 
-    // Handle P2P contact selection: "select_p2p_contact:CUST_001:@intan"
     const cta = action.utterance || action.content || '';
     if (cta.startsWith('select_p2p_contact:')) {
       const parts   = cta.split(':');
@@ -1273,8 +1479,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       return;
     }
 
-    // Replace the combo card with its heading as a plain bot bubble so the
-    // bot's response stays visible while the quick action gets processed.
     setMessages((prev) => prev.map((m) => {
       if (m.id !== comboId) return m;
       return m.heading ? { type: 'bot', text: m.heading, id: m.id } : null;
@@ -1289,19 +1493,21 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
   const handleFormSubmit = useCallback((value, displayText) => {
     setActiveForm(null);
+    captureChatAuthInput(value);
     addUser(displayText || value.split(':').slice(1).join(':') || value);
     showTyping();
     gecxSend(value);
-  }, [addUser, showTyping]);
+  }, [addUser, showTyping, captureChatAuthInput]);
 
   const sendMessage = useCallback((textOverride) => {
     const text = (typeof textOverride === 'string' ? textOverride : inputVal).trim();
     if (!text || isResponding) return;
     setInputVal('');
+    captureChatAuthInput(text);
     addUser(text);
     showTyping();
     gecxSend(text);
-  }, [inputVal, addUser, showTyping, isResponding]);
+  }, [inputVal, addUser, showTyping, isResponding, captureChatAuthInput]);
   // Keep sendMessageRef current so async callers can send without a stale closure.
   useEffect(() => { sendMessageRef.current = sendMessage; }, [sendMessage]);
   // Sync messages to parent (App) so FloatingChatWidget can mirror the conversation.
@@ -1458,30 +1664,145 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     e.target.value = '';
   }, [addUser, showTyping]);
 
-  // ── Load Firebase contacts when @ menu opens ───────────────────────────────
+  // ── Load customer bills, beneficiaries, P2P contacts & proactive insights ──
   useEffect(() => {
-    if (activeMenu !== 'contact' || contactTab !== 'recipients') return;
-    if (!isAuthenticated) return;                          // guests have no recipients
-    if (p2pContacts.length > 0 || contactsLoading) return; // already loaded
+    if (!isAuthenticated || !customerId) {
+      setP2pContacts([]);
+      setCustomerBills([]);
+      setBeneficiaries([]);
+      setProactiveInsights([]);
+      return;
+    }
+    let cancelled = false;
     setContactsLoading(true);
-    fetchP2PContacts(customerId).then((list) => {
-      setP2pContacts(list);
-      setContactsLoading(false);
-    });
-  }, [activeMenu, contactTab, customerId, isAuthenticated, p2pContacts.length, contactsLoading]);
+    Promise.all([
+      fetchP2PContacts(customerId),
+      fetchCustomerBills(customerId),
+      fetchCustomerBeneficiaries(customerId),
+      fetchCustomerTransactions(customerId, 20),
+      fetchCustomerAccounts(customerId),
+    ])
+      .then(([contacts, bills, benes, txns, accts]) => {
+        if (cancelled) return;
+        setP2pContacts(contacts || []);
+        setCustomerBills(bills || []);
+        setBeneficiaries(benes || []);
+        setContactsLoading(false);
 
-  // Drop cached contacts on sign-out so the next customer never sees them.
-  useEffect(() => { if (!isAuthenticated) setP2pContacts([]); }, [isAuthenticated]);
+        // Build real-time banking insights from customer data
+        const insights = [];
+        const pendingBills = (bills || []).filter(
+          (b) => String(b.status || 'pending').toLowerCase() !== 'paid',
+        );
+        if (pendingBills.length > 0) {
+          const urgent = pendingBills[0];
+          const days = computeDaysUntil(urgent.due_date);
+          const amt = Number(urgent.amount || 0).toFixed(2);
+          const dueLabel =
+            days !== null && days <= 0
+              ? 'due today'
+              : days === 1
+                ? 'due tomorrow'
+                : days !== null && days <= 14
+                  ? `due in ${days} days`
+                  : `due ${urgent.due_date || 'soon'}`;
+          insights.push({
+            id: `bill-${urgent.id}`,
+            type: 'bill_automation',
+            badge: `⚡ Utility Bill ${dueLabel.toUpperCase()}`,
+            title: `${urgent.payee_name}: CAD $${amt} is ${dueLabel}`,
+            detail: `Account ${urgent.account_number || 'on file'} · Avoid late fees by paying now.`,
+            ctaLabel: `Pay $${amt} now`,
+            utterance: `Pay my ${urgent.payee_name} bill of $${amt} now`,
+            accent: '#F59E0B',
+          });
+        }
+
+        const anomalyTxn = (txns || []).find(
+          (t) =>
+            t.is_anomaly === true ||
+            String(t.category || '').toLowerCase() === 'anomaly' ||
+            String(t.merchant || t.description || '').toLowerCase().includes('unknown online'),
+        );
+        if (anomalyTxn) {
+          const amt = Math.abs(Number(anomalyTxn.amount || 249.99)).toFixed(2);
+          const merch = anomalyTxn.merchant || anomalyTxn.description || 'Unknown Online Vendor';
+          insights.push({
+            id: `anom-${anomalyTxn.id}`,
+            type: 'anomaly',
+            badge: '🚨 Odd Transaction Flagged',
+            title: `Unusual charge: CAD $${amt} at ${merch}`,
+            detail: anomalyTxn.anomaly_reason || 'Out-of-pattern late-night online card-not-present charge.',
+            ctaLabel: 'Review & Dispute',
+            utterance: `I want to dispute the unusual $${amt} charge at ${merch}`,
+            accent: '#EF4444',
+          });
+        }
+
+        insights.push({
+          id: 'trend-mom',
+          type: 'spending_spike',
+          badge: '📊 Spending Trend',
+          title: 'Dining & Entertainment up +36.2% vs. last month',
+          detail: 'You spent CAD $588.69 across dining & entertainment this month compared to $432.10 last month.',
+          ctaLabel: 'Analyze my spending',
+          utterance: 'Show my spending insights and category breakdown',
+          accent: '#38BDF8',
+        });
+
+        const cheq = (accts || []).find((a) => String(a.type || '').toLowerCase().includes('cheq'));
+        if (cheq && Number(cheq.balance || 0) > 3500) {
+          insights.push({
+            id: 'yield-opt',
+            type: 'savings_opportunity',
+            badge: '💰 Idle Cash Insight',
+            title: 'Earn 4.65% APY on surplus Chequing balance',
+            detail: `Moving CAD $3,500 from Chequing to High-Interest Savings earns ~CAD $162.75/yr.`,
+            ctaLabel: 'Transfer $3,500 to Savings',
+            utterance: 'Transfer $3500 from my Chequing account to my Savings account',
+            accent: '#10B981',
+          });
+        }
+
+        setProactiveInsights(insights);
+      })
+      .catch(() => {
+        if (!cancelled) setContactsLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, customerId]);
+
+  const showMyQrInChat = useCallback(() => {
+    closeMenu();
+    if (!isAuthenticated || !customer?.customerId) {
+      onRequestSignIn?.();
+      return;
+    }
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: 'bot',
+        text: `Here is your **ACN QR Pay** code for **${customer.legalName || customer.prefName}**. Anyone signed into the ACN Bank mobile app can scan this QR code to transfer funds directly to your account.`,
+        id: uid(),
+      },
+      {
+        type: 'qr-widget',
+        payload: {
+          customerId: customer.customerId,
+          displayName: customer.legalName || customer.prefName,
+          amount: 0,
+        },
+        id: uid(),
+      },
+    ]);
+  }, [closeMenu, isAuthenticated, customer, onRequestSignIn]);
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      {/* GECX bridge — always in DOM, off-screen with real dimensions.
-          IMPORTANT: do NOT use visibility:hidden + height/width:0 here.
-          The GECX SDK checks element size before firing runSession; a
-          zero-size / hidden element prevents the welcome event from firing.
-          Instead we park it far off-screen so it has real layout dimensions
-          but is never visible to the user. */}
+      {/* GECX bridge — always in DOM, off-screen with real dimensions. */}
       <div
         aria-hidden="true"
         style={{
@@ -1496,11 +1817,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           zIndex: -1,
         }}
       >
-        {/* barge-in-enabled is read off this element when the bidi session is
-            created, so it has to be declared here rather than set later — it is
-            what lets the customer talk over the agent instead of waiting for it
-            to finish. language-code is en-CA to match the app's default and the
-            voice configured in app.json. */}
         <chat-messenger
           key={messengerKey}
           id="gecx-messenger"
@@ -1510,10 +1826,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           barge-in-enabled="true"
           style={{ display: 'block', width: '400px', height: '600px' }}
         >
-          {/* enable-audio-input turns on the SDK's microphone capture path.
-              NOT enable-audio-input-only: that would drop the text transport,
-              and this demo needs both voice and the typed/widget conversation
-              in the same session. */}
           <chat-messenger-container chat-title="ACN Bank AI" enable-audio-input="true">
             <chat-reset-session-button slot="titlebar-actions" title-text="New conversation" />
           </chat-messenger-container>
@@ -1523,10 +1835,95 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       {/* Side panel — no internal header; controls live in the top nav */}
       <aside className={`chat-panel${isOpen ? ' open' : ''}`} aria-label="ACN Bank AI assistant">
 
+        {/* ── Proactive Banking Insights Strip (when signed in) ── */}
+        {isAuthenticated && proactiveInsights.length > 0 && (
+          <div
+            style={{
+              padding: '10px 14px 8px',
+              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
+              borderBottom: '1px solid rgba(148,163,184,0.22)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 6,
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#38BDF8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                ✦ Smart Banking Insights for {customerName}
+              </span>
+              <button
+                type="button"
+                onClick={showMyQrInChat}
+                style={{
+                  padding: '3px 8px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(56,189,248,0.4)',
+                  background: 'rgba(56,189,248,0.14)',
+                  color: '#E0F2FE',
+                  fontSize: 10,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                ▦ My Receive QR
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+              {proactiveInsights.slice(0, 3).map((ins) => (
+                <div
+                  key={ins.id}
+                  style={{
+                    minWidth: 225,
+                    maxWidth: 255,
+                    background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    borderLeft: `3px solid ${ins.accent}`,
+                    borderRadius: 10,
+                    padding: '7px 10px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 5,
+                    flexShrink: 0,
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 9, fontWeight: 800, color: ins.accent, letterSpacing: '0.04em' }}>
+                      {ins.badge}
+                    </div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#F8FAFC', lineHeight: 1.3, marginTop: 2 }}>
+                      {ins.title}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      addUser(ins.ctaLabel);
+                      showTyping();
+                      gecxSend(ins.utterance);
+                    }}
+                    style={{
+                      alignSelf: 'flex-start',
+                      padding: '4px 9px',
+                      borderRadius: 6,
+                      border: 'none',
+                      background: ins.accent,
+                      color: '#0F172A',
+                      fontSize: 10,
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    {ins.ctaLabel} →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── Messages ── */}
         <div className="cp-messages" ref={msgsRef} role="log" aria-live="polite" aria-label="Chat messages">
-          {/* Top spacer: absorbs empty space to center content when few messages exist.
-              Shrinks to 0 automatically when the list overflows (scroll mode). */}
           <div className="cp-spacer" aria-hidden="true" />
           {messages.map((msg, idx) => {
             const consBot = msg.type === 'bot' && messages[idx - 1]?.type === 'bot';
@@ -1537,7 +1934,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               </div>
             );
 
-            // bot-widget: lightweight bot-side container for widget-only turns
             if (msg.type === 'bot-widget') return (
               <div key={msg.id} className="cp-bot-widget acn-msg-enter" aria-label="Bot response" />
             );
@@ -1560,8 +1956,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <span /><span /><span />
               </div>
             );
-
-
 
             if (msg.type === 'carousel') return (
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
@@ -1609,6 +2003,12 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               </div>
             );
 
+            if (msg.type === 'qr-widget') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <ChatQrCard payload={msg.payload} customer={customer} />
+              </div>
+            );
+
             if (msg.type === 'amount') return (
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
                 <AmountInput
@@ -1642,10 +2042,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <EppPlans
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Keep the widget in the message list — EppPlans switches
-                    // itself to a read-only "✓ Selected · N months" chip
-                    // internally so the tenure choice stays visible in the
-                    // chat log as a receipt of what the customer picked.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1658,9 +2054,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <MortgageCalculator
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Keep the widget in the message list — it switches to its
-                    // own confirmed (read-only) view internally. Only send the
-                    // confirmed values upstream.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1673,8 +2066,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <MortgageAffordability
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Kept in the list — it locks into its own confirmed view,
-                    // same as the payment calculator.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1687,7 +2078,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <MortgageRateShelf
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Kept as a receipt of which rate was chosen.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1695,7 +2085,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               </div>
             );
 
-            // Read-only: informational rates carry no CTA, so no onCta here.
             if (msg.type === 'mortgage-rate-table') return (
               <div key={msg.id} className="acn-msg-enter" data-combo="true">
                 <MortgageRateTable payload={msg.payload} />
@@ -1707,8 +2096,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <MortgageNudge
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Silent send. "mortgage_suggestion_decline:heloc" is a
-                    // machine token and must not appear as a user bubble.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1734,9 +2121,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <LoanPreapproval
                   payload={msg.payload}
                   onCta={(v) => {
-                    // Send the CTA value silently — do NOT addUser(v).
-                    // Machine tokens like "loan_confirm_review" or
-                    // "loan_change_plan" would otherwise show as a user bubble.
                     showTyping();
                     gecxSend(v);
                   }}
@@ -1819,7 +2203,6 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
             return null;
           })}
-          {/* Bottom spacer: mirrors the top spacer so content stays vertically centered */}
           <div className="cp-spacer" aria-hidden="true" />
         </div>
 
@@ -1856,20 +2239,282 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
               </div>
             )}
 
-            {/* ── @ menu: Recipients + Billers ── */}
+            {/* ── @ menu: Canada Utility Billers + Recipients Hub ── */}
             {activeMenu === 'contact' && (
-              <div className="cp-menu-contact">
+              <div className="cp-menu-contact" style={{ maxHeight: 390, display: 'flex', flexDirection: 'column' }}>
                 <div className="cp-menu-tabs">
-                  <button className={`cp-menu-tab${contactTab === 'recipients' ? ' active' : ''}`}
-                          onClick={() => setContactTab('recipients')}>Recipients</button>
-                  <button className={`cp-menu-tab${contactTab === 'billers' ? ' active' : ''}`}
-                          onClick={() => setContactTab('billers')}>Billers</button>
+                  <button
+                    className={`cp-menu-tab${contactTab === 'billers' ? ' active' : ''}`}
+                    onClick={() => setContactTab('billers')}
+                  >
+                    ⚡ Utility Billers {customerBills.length > 0 ? `(${customerBills.length} due)` : ''}
+                  </button>
+                  <button
+                    className={`cp-menu-tab${contactTab === 'recipients' ? ' active' : ''}`}
+                    onClick={() => setContactTab('recipients')}
+                  >
+                    👥 Payees & QR
+                  </button>
                 </div>
 
+                {/* ── BILLERS TAB ── */}
+                {contactTab === 'billers' && (
+                  <div className="cp-menu-billers" style={{ overflowY: 'auto', paddingBottom: 8 }}>
+                    {/* 1. Customer's Upcoming / Saved Bills from Firestore */}
+                    {isAuthenticated && customerBills.length > 0 && (
+                      <div style={{ marginBottom: 12 }}>
+                        <div className="cp-menu-section-label" style={{ color: '#B45309', fontWeight: 800 }}>
+                          ⚡ Your Upcoming Bills ({customerName})
+                        </div>
+                        {customerBills.map((bill) => {
+                          const amt = Number(bill.amount || 0).toFixed(2);
+                          const days = computeDaysUntil(bill.due_date);
+                          const isPaid = String(bill.status || '').toLowerCase() === 'paid';
+                          const badgeText = isPaid
+                            ? 'Paid ✓'
+                            : days !== null && days <= 3
+                              ? `Due in ${Math.max(0, days)}d · Urgent`
+                              : days !== null
+                                ? `Due in ${days}d`
+                                : `Due ${bill.due_date || 'soon'}`;
+                          return (
+                            <div
+                              key={bill.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                gap: 10,
+                                padding: '8px 12px',
+                                margin: '4px 8px',
+                                borderRadius: 10,
+                                background: isPaid ? '#F8FAFC' : '#FFFBEB',
+                                border: isPaid ? '1px solid #E2E8F0' : '1px solid #FDE68A',
+                              }}
+                            >
+                              <div style={{ minWidth: 0, flex: 1 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                  <span style={{ fontSize: 13, fontWeight: 800, color: '#0F172A' }}>
+                                    {bill.payee_name}
+                                  </span>
+                                  <span
+                                    style={{
+                                      fontSize: 10,
+                                      fontWeight: 800,
+                                      padding: '2px 6px',
+                                      borderRadius: 999,
+                                      background: isPaid ? '#E2E8F0' : '#FEF3C7',
+                                      color: isPaid ? '#475569' : '#B45309',
+                                    }}
+                                  >
+                                    {badgeText}
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: 11, color: '#64748B', marginTop: 2 }}>
+                                  {bill.category || 'Utility'} · Acct #{bill.account_number || 'On file'} · <strong>CAD ${amt}</strong>
+                                </div>
+                              </div>
+                              {!isPaid && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const msg = `Pay my ${bill.payee_name} bill of $${amt} now`;
+                                    addUser(msg);
+                                    showTyping();
+                                    gecxSend(msg);
+                                    closeMenu();
+                                  }}
+                                  style={{
+                                    padding: '6px 11px',
+                                    borderRadius: 8,
+                                    border: 'none',
+                                    background: '#002147',
+                                    color: '#FFFFFF',
+                                    fontSize: 11,
+                                    fontWeight: 800,
+                                    cursor: 'pointer',
+                                    whiteSpace: 'nowrap',
+                                  }}
+                                >
+                                  Pay ${amt}
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* 2. Search & Category Filter for Canadian Utility Billers Directory */}
+                    <div style={{ padding: '4px 10px 6px' }}>
+                      <input
+                        type="text"
+                        placeholder="Search Canadian utility, telecom & tax billers…"
+                        value={billerSearch}
+                        onChange={(e) => setBillerSearch(e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '7px 10px',
+                          borderRadius: 8,
+                          border: '1px solid #CBD5E1',
+                          fontSize: 12,
+                          marginBottom: 6,
+                        }}
+                      />
+                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                        {['All', 'Utilities', 'Telecom', 'Tax & Gov'].map((cat) => (
+                          <button
+                            key={cat}
+                            type="button"
+                            onClick={() => setBillerCategory(cat)}
+                            style={{
+                              padding: '3px 9px',
+                              borderRadius: 999,
+                              fontSize: 10,
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              border: billerCategory === cat ? '1px solid #002147' : '1px solid #CBD5E1',
+                              background: billerCategory === cat ? '#002147' : '#F8FAFC',
+                              color: billerCategory === cat ? '#FFFFFF' : '#475569',
+                            }}
+                          >
+                            {cat}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="cp-menu-section-label">Canadian Billers Directory — Select & Pay</div>
+                    {CANADIAN_BILLERS.filter((b) => {
+                      const matchesCat = billerCategory === 'All' || b.category === billerCategory;
+                      const q = billerSearch.trim().toLowerCase();
+                      const matchesSearch =
+                        !q ||
+                        b.name.toLowerCase().includes(q) ||
+                        b.sub.toLowerCase().includes(q) ||
+                        b.category.toLowerCase().includes(q);
+                      return matchesCat && matchesSearch;
+                    }).map((b) => {
+                      const isExpanded = selectedBillerId === b.id;
+                      return (
+                        <div
+                          key={b.id}
+                          style={{
+                            borderBottom: '1px solid #F1F5F9',
+                            paddingBottom: isExpanded ? 8 : 0,
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="cp-menu-biller-row"
+                            onClick={() => {
+                              setSelectedBillerId(isExpanded ? null : b.id);
+                              setCustomBillerAmt('');
+                            }}
+                            style={{ width: '100%', justifyContent: 'space-between' }}
+                          >
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                              <div className="cp-menu-biller-avatar">{b.emoji}</div>
+                              <div>
+                                <div className="cp-menu-biller-name">{b.name}</div>
+                                <div className="cp-menu-biller-sub">{b.sub}</div>
+                              </div>
+                            </div>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#002147' }}>
+                              {isExpanded ? '▴' : 'Pay ›'}
+                            </span>
+                          </button>
+
+                          {isExpanded && (
+                            <div
+                              style={{
+                                padding: '6px 12px 4px 52px',
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                alignItems: 'center',
+                                gap: 6,
+                              }}
+                            >
+                              {(b.presets || [50, 100, 150]).map((amt) => (
+                                <button
+                                  key={amt}
+                                  type="button"
+                                  onClick={() => {
+                                    const msg = `Pay $${amt} to ${b.name}`;
+                                    addUser(msg);
+                                    showTyping();
+                                    gecxSend(msg);
+                                    closeMenu();
+                                  }}
+                                  style={{
+                                    padding: '4px 9px',
+                                    borderRadius: 999,
+                                    border: '1px solid #002147',
+                                    background: '#F0F9FF',
+                                    color: '#002147',
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Pay ${amt}
+                                </button>
+                              ))}
+                              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  step="0.01"
+                                  placeholder="Custom $"
+                                  value={customBillerAmt}
+                                  onChange={(e) => setCustomBillerAmt(e.target.value)}
+                                  style={{
+                                    width: 78,
+                                    padding: '4px 7px',
+                                    borderRadius: 6,
+                                    border: '1px solid #CBD5E1',
+                                    fontSize: 11,
+                                  }}
+                                />
+                                {Number(customBillerAmt) > 0 && (
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      const amt = Number(customBillerAmt).toFixed(2);
+                                      const msg = `Pay $${amt} to ${b.name}`;
+                                      addUser(msg);
+                                      showTyping();
+                                      gecxSend(msg);
+                                      closeMenu();
+                                    }}
+                                    style={{
+                                      padding: '4px 9px',
+                                      borderRadius: 6,
+                                      border: 'none',
+                                      background: '#002147',
+                                      color: '#FFFFFF',
+                                      fontSize: 11,
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    Go
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* ── RECIPIENTS & QR TAB ── */}
                 {contactTab === 'recipients' && !isAuthenticated && (
                   <div className="cp-menu-empty">
                     <span className="cp-menu-empty-icon">🔐</span>
-                    <p>Sign in to see your recipients</p>
+                    <p>Sign in to see your saved recipients, P2P contacts & ACN QR Pay code</p>
                     <button className="cp-menu-signin" onClick={() => { closeMenu(); onRequestSignIn?.(); }}>
                       Sign in
                     </button>
@@ -1877,25 +2522,135 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 )}
 
                 {contactTab === 'recipients' && isAuthenticated && (
-                  <div className="cp-menu-billers">
+                  <div className="cp-menu-billers" style={{ overflowY: 'auto', paddingBottom: 8 }}>
+                    {/* Quick Receive via QR Pay button */}
+                    <div style={{ padding: '6px 10px' }}>
+                      <button
+                        type="button"
+                        onClick={showMyQrInChat}
+                        style={{
+                          width: '100%',
+                          padding: '9px 12px',
+                          borderRadius: 10,
+                          border: '1px solid #002147',
+                          background: 'linear-gradient(135deg, #002147 0%, #0F3A6D 100%)',
+                          color: '#FFFFFF',
+                          fontSize: 12,
+                          fontWeight: 800,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <span>▦ Show My ACN QR Pay Code (Receive Money)</span>
+                        <span>→</span>
+                      </button>
+                    </div>
+
+                    {/* Saved Interac / Bank Beneficiaries */}
+                    {beneficiaries.length > 0 && (
+                      <>
+                        <div className="cp-menu-section-label">Saved Payees & Interac Recipients</div>
+                        {beneficiaries.map((ben) => {
+                          const bName = ben.name || ben.nickname || 'Payee';
+                          const initials = bName.split(' ').slice(0, 2).map((w) => w[0]?.toUpperCase() || '').join('');
+                          return (
+                            <div
+                              key={ben.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                padding: '6px 12px',
+                                borderBottom: '1px solid #F1F5F9',
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                                <div className="cp-menu-biller-avatar cp-contact-avatar">{initials || '👤'}</div>
+                                <div>
+                                  <div className="cp-menu-biller-name">{bName}</div>
+                                  <div className="cp-menu-biller-sub">
+                                    {ben.bank_name || ben.channel || 'Interac e-Transfer'}
+                                    {ben.email ? ` · ${ben.email}` : ''}
+                                  </div>
+                                </div>
+                              </div>
+                              <div style={{ display: 'flex', gap: 4 }}>
+                                {[50, 100].map((amt) => (
+                                  <button
+                                    key={amt}
+                                    type="button"
+                                    onClick={() => {
+                                      const msg = `Send $${amt} to ${bName}`;
+                                      addUser(msg);
+                                      showTyping();
+                                      gecxSend(msg);
+                                      closeMenu();
+                                    }}
+                                    style={{
+                                      padding: '4px 8px',
+                                      borderRadius: 999,
+                                      border: '1px solid #CBD5E1',
+                                      background: '#F8FAFC',
+                                      color: '#0F172A',
+                                      fontSize: 10,
+                                      fontWeight: 700,
+                                      cursor: 'pointer',
+                                    }}
+                                  >
+                                    ${amt}
+                                  </button>
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    const msg = `Transfer money to ${bName}`;
+                                    addUser(msg);
+                                    showTyping();
+                                    gecxSend(msg);
+                                    closeMenu();
+                                  }}
+                                  style={{
+                                    padding: '4px 8px',
+                                    borderRadius: 999,
+                                    border: 'none',
+                                    background: '#002147',
+                                    color: '#FFFFFF',
+                                    fontSize: 10,
+                                    fontWeight: 700,
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Send
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
+
+                    {/* ACN Bank P2P @Contacts */}
+                    <div className="cp-menu-section-label">ACN Bank P2P @Contacts</div>
                     {contactsLoading && (
                       <div className="cp-menu-empty">
                         <span className="cp-menu-empty-icon">⏳</span>
                         <p>Loading contacts…</p>
                       </div>
                     )}
-                    {!contactsLoading && p2pContacts.length === 0 && (
-                      <div className="cp-menu-empty">
-                        <span className="cp-menu-empty-icon">👥</span>
-                        <p>No ACN Bank contacts found</p>
-                      </div>
-                    )}
                     {!contactsLoading && p2pContacts.map((c) => (
-                      <button key={c.customer_id} className="cp-menu-biller-row"
-                              onClick={() => {
-                                const msg = `Transfer money to ${c.username}`;
-                                addUser(msg); showTyping(); gecxSend(msg); closeMenu();
-                              }}>
+                      <button
+                        key={c.customer_id}
+                        className="cp-menu-biller-row"
+                        onClick={() => {
+                          const msg = `Transfer money to ${c.username}`;
+                          addUser(msg);
+                          showTyping();
+                          gecxSend(msg);
+                          closeMenu();
+                        }}
+                      >
                         <div className="cp-menu-biller-avatar cp-contact-avatar">
                           {c.avatar_initials}
                         </div>
@@ -1907,37 +2662,59 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     ))}
                   </div>
                 )}
-
-                {contactTab === 'billers' && (
-                  <div className="cp-menu-billers">
-                    <div className="cp-menu-section-label">Popular billers in Canada</div>
-                    {CANADIAN_BILLERS.map((b) => (
-                      <button key={b.id} className="cp-menu-biller-row"
-                              onClick={() => { addUser(`Pay ${b.name}`); showTyping(); gecxSend(`I want to pay my ${b.name} bill`); closeMenu(); }}>
-                        <div className="cp-menu-biller-avatar">{b.emoji}</div>
-                        <div>
-                          <div className="cp-menu-biller-name">{b.name}</div>
-                          <div className="cp-menu-biller-sub">{b.sub}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
               </div>
             )}
 
-            {/* ── AI suggestions ── */}
+            {/* ── AI suggestions & Proactive Insights ── */}
             {activeMenu === 'ai' && (
               <div className="cp-menu-ai">
+                {isAuthenticated && proactiveInsights.length > 0 && (
+                  <div style={{ marginBottom: 10 }}>
+                    <div className="cp-menu-section-label">Personalized Financial Insights</div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      {proactiveInsights.map((ins) => (
+                        <button
+                          key={ins.id}
+                          type="button"
+                          onClick={() => {
+                            closeMenu();
+                            addUser(ins.ctaLabel);
+                            showTyping();
+                            gecxSend(ins.utterance);
+                          }}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 8,
+                            padding: '8px 10px',
+                            borderRadius: 10,
+                            border: '1px solid #E2E8F0',
+                            borderLeft: `3px solid ${ins.accent}`,
+                            background: '#F8FAFC',
+                            textAlign: 'left',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <div>
+                            <div style={{ fontSize: 11, fontWeight: 800, color: '#0F172A' }}>{ins.title}</div>
+                            <div style={{ fontSize: 10, color: '#64748B' }}>{ins.detail}</div>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: '#002147', whiteSpace: 'nowrap' }}>
+                            {ins.ctaLabel} →
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="cp-menu-section-label">Quick actions</div>
                 <div className="cp-ai-pills">
                   {AI_SUGGESTIONS.map((s, i) => (
                     <button key={i} className="cp-ai-pill"
                             onClick={() => {
                               closeMenu();
-                              // The sign-in pill is handled by the page, not CES —
-                              // sending the sentinel as a message would just
-                              // confuse the agent.
                               if (s.utterance === SIGN_IN_SENTINEL) {
                                 addUser('Sign in');
                                 onRequestSignIn?.();

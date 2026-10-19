@@ -23,6 +23,6 @@
     "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
   }, {
     "toolset": "overdraft_pad_db",
-    "toolIds": ["cancelPAD", "createNSFReversal","createPADDispute", "getNSFHistory","getOverdraftDetails", "listPADs", "updateOverdraftProtection"]
+    "toolIds": ["cancelPAD", "createNSFReversal", "createPADDispute", "getNSFHistory", "getOverdraftDetails", "listPADs", "updateOverdraftProtection"]
   }]
 }

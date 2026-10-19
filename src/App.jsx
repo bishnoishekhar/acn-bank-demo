@@ -56,28 +56,30 @@ function guestVariables() {
 
 function customerVariables(c) {
   return {
-    auth_mode:             'authenticated',
-    authentication_status: true,
+    auth_mode:              'pin',
+    authentication_status:  true,
     // STRING, not the number 2: app.json declares auth_level as STRING and the
     // agent tools round-trip it as one (set_variable("auth_level", "1"),
     // int(get_variable("auth_level", "1"))). Sending a number makes CES reject
     // the whole setVariables payload with a 400 on runSession.
-    auth_level:            '2',
-    is_existing_customer:  true,
-    customerId:            c.customerId,
-    customer_id:           c.businessCustomerId,
-    pref_name:             c.prefName,
-    customer_name:         c.legalName,
-    // preferred_language is a CES PREDEFINED variable — it cannot be declared in
-    // app.json, so we do not write it from here either. The profile load
-    // (orchestrate_lookup) sets it from the same Firestore field.
-    kyc_expires_at:        c.kycExpiresAt,
-    customer_global_status: c.globalStatus,
-    spending_persona:      c.spendingPersona,
+    auth_level:             '2',
+    is_existing_customer:   true,
+    customerId:             c.customerId,
+    customer_id:            c.customerId,
+    pref_name:              c.prefName || '',
+    customer_display_name:  c.prefName || c.legalName || '',
+    customer_name:          c.legalName || c.prefName || '',
+    inject_preferred_name:  'true',
+    identified_by:          'webchat_sso',
+    mobile_number:          c.registeredMobile || '',
+    email:                  c.email || '',
+    kyc_expires_at:         c.kycExpiresAt || '',
+    customer_global_status: c.globalStatus || 'ACTIVE',
+    spending_persona:       c.spendingPersona || '',
     // Stringified for the same reason: this app declares STRING/BOOLEAN only.
-    credit_score_value:    c.creditScoreValue == null ? '' : String(c.creditScoreValue),
-    annual_income:         c.annualIncome     == null ? '' : String(c.annualIncome),
-    web_channel:           true,
+    credit_score_value:     c.creditScoreValue == null ? '' : String(c.creditScoreValue),
+    annual_income:          c.annualIncome     == null ? '' : String(c.annualIncome),
+    web_channel:            true,
   };
 }
 
@@ -160,20 +162,20 @@ function AppContent() {
     try { sessionStorage.removeItem('acnTravelProtectionBannerV1'); } catch { /* non-fatal */ }
   };
 
-  /* After a successful sign-in, the Chat origin needs the customer object
-     directly from the login call, not from React state (which updates asynchronously).
-     The auth effect that pushes variables to CES fires independently. */
-  const handleSignInSuccess = (customer) => {
+  /* After a successful sign-in, push the customer variables into CES
+     synchronously before ChatPanel resets/opens or resumes so the very first
+     turn of the session carries customer_id, auth_level='2', and pref_name. */
+  const handleSignInSuccess = (signedInCustomer) => {
+    if (signedInCustomer) {
+      setCesVariables(customerVariables(signedInCustomer));
+    }
     if (signInOrigin.current === 'chat') {
-      // The agent asked us to authenticate mid-flow. Keep the transcript and
-      // resume with the customer object passed from SignInModal (not from state).
-      // This avoids the race where React hasn't updated state yet.
-      chatResumeRef.current?.(customer);
+      chatResumeRef.current?.(signedInCustomer);
       setChatOpen(true);
       return;
     }
-    // Header sign-in: wipe the guest session so the agent greets us properly
-    // as a returning customer instead of continuing an anonymous thread.
+    // Header sign-in: wipe any guest session so the agent greets the customer
+    // by name as an authenticated L2 session.
     setResetSignal((n) => n + 1);
     openChat();
   };

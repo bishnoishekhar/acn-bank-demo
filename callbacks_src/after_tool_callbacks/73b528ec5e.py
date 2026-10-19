@@ -297,10 +297,11 @@ def _persist_state(tool_name: str, response: dict[str, Any], state: dict[str, An
             'auth_mode':  'auth_state.mode',
         },
         'verify_pin': {
-            'authLevel':  'auth_state.level',
-            'auth_level': 'auth_state.level',
-            'authMode':   'auth_state.mode',
-            'auth_mode':  'auth_state.mode',
+            'customer_id': 'customer_id',
+            'authLevel':   'auth_state.level',
+            'auth_level':  'auth_state.level',
+            'authMode':    'auth_state.mode',
+            'auth_mode':   'auth_state.mode',
         },
         'authenticate': {
             'authLevel':  'auth_state.level',
@@ -516,6 +517,8 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
     if customer_id:
         state['customer_id'] = customer_id
         state['customerId'] = customer_id
+        _set_auth(state, customer_id=customer_id)
+        _set_cust(state, customer_id=customer_id)
 
     level = _hub_value(fields, 'auth_level')
     if level.isdigit():

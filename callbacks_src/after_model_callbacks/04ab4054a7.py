@@ -105,8 +105,8 @@ def after_model_callback_impl(callback_context, llm_response) -> Optional[object
         trailer = ""
         _m = _AUTH_TRAILER_RE.search(text)
         if _m:
-            trailer = _m.group(0)
-            text = text.replace(trailer, "")
+            text = text.replace(_m.group(0), "")
+            trailer = _hub_trailer(state) if _hub_state_val(state, "customer_id", "customerId") != "-" else _m.group(0)
 
         # AM-6: PII scrubber
         text = PAN_PATTERN.sub(lambda m: f"•••• {m.group(4)}", text)

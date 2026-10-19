@@ -26,6 +26,7 @@ import { getFirestore,
          orderBy,
          getDoc,
          getDocs,
+         onSnapshot,
          limit }                from 'firebase/firestore';
 import { getAuth,
          signInAnonymously }    from 'firebase/auth';
@@ -76,18 +77,18 @@ export async function fetchP2PContacts(currentCustomerId = null) {
     );
     const snap = await getDocs(q);
     const contacts = [];
-    snap.forEach((doc) => {
-      const data = doc.data();
-      if (currentCustomerId && doc.id === currentCustomerId) return;
+    snap.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (currentCustomerId && docSnap.id === currentCustomerId) return;
       if (!data.username) return;
-      const name     = data.display_name || 'ACN Bank Customer';
+      const name     = data.display_name || data.legal_name || data.preferred_name || 'ACN Bank Customer';
       const initials = name
         .split(' ')
         .slice(0, 2)
         .map((w) => w[0]?.toUpperCase() ?? '')
         .join('');
       contacts.push({
-        customer_id:     doc.id,
+        customer_id:     docSnap.id,
         display_name:    name,
         username:        data.username.startsWith('@') ? data.username : `@${data.username}`,
         avatar_initials: initials || '?',
@@ -100,20 +101,90 @@ export async function fetchP2PContacts(currentCustomerId = null) {
   }
 }
 
-// ── Sign-in ──────────────────────────────────────────────────────────────────
+// ── Sign-in & Customer profile builder ───────────────────────────────────────
 // Last 10 digits are the comparison key. Stored numbers are E.164 with a +1
 // country code ("+12269274374"); users type them in any format they like.
 const last10 = (v) => String(v ?? '').replace(/\D/g, '').slice(-10);
 
+// Phone/account aliases matching identify_customer & SignInModal demo hints
+const DEMO_PHONE_ALIASES = {
+  '2269274374': ['CUST_DOC_1988'],
+  '2178582973': ['CUST_DOC_1988', 'CUST_DOC_7777'],
+  '4165551234': ['CUST_DOC_1988'],
+  '5195551234': ['6oq3lBNGOFWfqOamn9ob'],
+  '1234567890': ['6oq3lBNGOFWfqOamn9ob'],
+  '7744112233': ['CUST_DOC_7777'],
+  '4165550192': ['CUST-9921-X'],
+  '4165550144': ['CUST-PREMIUM-001'],
+  '6045550188': ['CUST-WEALTH-001'],
+  '4165550175': ['CUST-MORTGAGE-001'],
+  '4165550163': ['CUST-CARDAPP-001'],
+  '4165550131': ['CUST-DISPUTE-INELIGIBLE'],
+};
+
+const DEMO_PIN_FALLBACK = {
+  'CUST_DOC_1988':           '2244',
+  'CUST_DOC_7777':           '1234',
+  '6oq3lBNGOFWfqOamn9ob':    '1234',
+  'CUST-9921-X':             '1357',
+  'CUST-PREMIUM-001':        '9876',
+  'CUST-WEALTH-001':         '4321',
+  'CUST-MORTGAGE-001':       '1234',
+  'CUST-CARDAPP-001':        '1234',
+  'CUST-DISPUTE-INELIGIBLE': '1234',
+};
+
+async function buildCustomerObject(docId, c) {
+  let financials = {};
+  try {
+    const f = await getDoc(doc(db, 'customers', docId, 'financials', 'profile'));
+    if (f.exists()) financials = f.data();
+  } catch { /* non-fatal */ }
+
+  const legalName = c.legal_name || c.display_name || c.preferred_name || 'Customer';
+  const prefName  = c.preferred_name || legalName.split(' ')[0] || 'there';
+
+  return {
+    customerId:         docId,                       // Firestore doc id — what CES needs
+    businessCustomerId: c.customer_id ?? docId,
+    legalName,
+    prefName,
+    username:           c.username ?? '',
+    accountNumber:      c.account_number ?? '',
+    registeredMobile:   c.registered_mobile ?? '',
+    email:              c.email ?? '',
+    globalStatus:       c.global_status ?? 'ACTIVE',
+    preferredLanguage:  c.preferred_language ?? 'en',
+    kycExpiresAt:       c.kyc_expires_at ?? '',
+    qrEnabled:          c.qr_enabled !== false,
+    spendingPersona:    financials.spending_persona ?? '',
+    creditScoreValue:   financials.credit_score_value ?? '',
+    creditScoreBand:    financials.credit_score_band ?? '',
+    annualIncome:       financials.annual_income ?? '',
+    preApprovedOffers:  financials.pre_approved_offers ?? [],
+  };
+}
+
 /**
- * Verifies a customer by registered mobile + mobile PIN against Firestore.
- *
- * The customers collection is small (demo scale), so we scan and compare on
- * normalised digits rather than requiring callers to pre-format to the exact
- * E.164 string a `where` clause would need.
- *
- * Only customers with a `security/profile` document can sign in — the others
- * exist purely as P2P transfer contacts.
+ * Fetches a full customer profile directly by Firestore document ID.
+ */
+export async function fetchCustomerById(customerId) {
+  if (!customerId) return null;
+  try {
+    await ensureAnonAuth();
+    const snap = await getDoc(doc(db, 'customers', customerId));
+    if (!snap.exists()) return null;
+    return await buildCustomerObject(snap.id, snap.data());
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerById failed:', err.message);
+    return null;
+  }
+}
+
+/**
+ * Verifies a customer by registered mobile (or account number) + mobile PIN against Firestore.
+ * Supports shared demo phone numbers (e.g. +12178582973 shared by Chander PIN 2244 and Emiliano PIN 1234)
+ * by testing all candidate matches against their stored PIN.
  *
  * Returns { ok: true, customer } or { ok: false, reason }.
  *   reason: 'unknown_phone' | 'no_credentials' | 'bad_pin' | 'error'
@@ -125,50 +196,93 @@ export async function authenticateCustomer(phone, pin) {
 
   try {
     await ensureAnonAuth();
-    const snap  = await getDocs(query(collection(db, 'customers'), limit(50)));
-    const match = snap.docs.find((d) => last10(d.data().registered_mobile) === phoneKey);
-    if (!match) return { ok: false, reason: 'unknown_phone' };
+    const snap = await getDocs(query(collection(db, 'customers'), limit(50)));
+    const aliasIds = new Set(DEMO_PHONE_ALIASES[phoneKey] || []);
 
-    const securitySnap = await getDoc(doc(db, 'customers', match.id, 'security', 'profile'));
-    if (!securitySnap.exists()) return { ok: false, reason: 'no_credentials' };
+    const candidates = snap.docs.filter((d) => {
+      const data = d.data();
+      return (
+        aliasIds.has(d.id) ||
+        last10(data.registered_mobile) === phoneKey ||
+        last10(data.telephony_caller_id) === phoneKey ||
+        last10(data.account_number) === phoneKey
+      );
+    });
 
-    const storedPin = String(securitySnap.data().mobile_pin ?? '').replace(/\D/g, '');
-    if (!storedPin) return { ok: false, reason: 'no_credentials' };
-    if (storedPin !== pinKey) return { ok: false, reason: 'bad_pin' };
+    if (!candidates.length) return { ok: false, reason: 'unknown_phone' };
 
-    const c = match.data();
-    // financials is optional — a customer can authenticate without it.
-    let financials = {};
-    try {
-      const f = await getDoc(doc(db, 'customers', match.id, 'financials', 'profile'));
-      if (f.exists()) financials = f.data();
-    } catch { /* non-fatal */ }
+    let sawCredentials = false;
+    for (const candidate of candidates) {
+      let storedPin = '';
+      try {
+        const securitySnap = await getDoc(doc(db, 'customers', candidate.id, 'security', 'profile'));
+        if (securitySnap.exists()) {
+          storedPin = String(securitySnap.data().mobile_pin ?? '').replace(/\D/g, '');
+        }
+      } catch { /* ignore */ }
+      if (!storedPin && DEMO_PIN_FALLBACK[candidate.id]) {
+        storedPin = DEMO_PIN_FALLBACK[candidate.id];
+      }
+      if (storedPin) sawCredentials = true;
+      if (storedPin && storedPin === pinKey) {
+        const customer = await buildCustomerObject(candidate.id, candidate.data());
+        return { ok: true, customer };
+      }
+    }
 
-    return {
-      ok: true,
-      customer: {
-        customerId:        match.id,                       // Firestore doc id — what CES needs
-        businessCustomerId: c.customer_id ?? '',
-        legalName:         c.legal_name ?? '',
-        prefName:          c.preferred_name || (c.legal_name ?? '').split(' ')[0] || 'there',
-        registeredMobile:  c.registered_mobile ?? '',
-        email:             c.email ?? '',
-        globalStatus:      c.global_status ?? '',
-        preferredLanguage: c.preferred_language ?? 'en',
-        kycExpiresAt:      c.kyc_expires_at ?? '',
-        // ACN QR Pay opt-in. Default true when the field is missing so the
-        // demo works without running seedQrFields.mjs first. Set qr_enabled:
-        // false on a customer doc (or via the seed script) to hide MyQr.
-        qrEnabled:         c.qr_enabled !== false,
-        spendingPersona:   financials.spending_persona ?? '',
-        creditScoreValue:  financials.credit_score_value ?? '',
-        creditScoreBand:   financials.credit_score_band ?? '',
-        annualIncome:      financials.annual_income ?? '',
-        preApprovedOffers: financials.pre_approved_offers ?? [],
-      },
-    };
+    return { ok: false, reason: sawCredentials ? 'bad_pin' : 'no_credentials' };
   } catch (err) {
     console.warn('[Firebase] authenticateCustomer failed:', err.message);
+    return { ok: false, reason: 'error' };
+  }
+}
+
+/**
+ * Resolves a customer who authenticated inside the CES chat session so the
+ * Web UI (AuthContext) can auto-sign in without a separate login prompt.
+ */
+export async function authenticateCustomerFromChat({ customerId, phone, pin, customerName } = {}) {
+  try {
+    await ensureAnonAuth();
+    if (customerId) {
+      const customer = await fetchCustomerById(customerId);
+      if (customer) return { ok: true, customer };
+    }
+    if (phone && pin) {
+      const res = await authenticateCustomer(phone, pin);
+      if (res.ok) return res;
+    }
+    if (phone) {
+      const phoneKey = last10(phone);
+      const snap = await getDocs(query(collection(db, 'customers'), limit(50)));
+      const aliasIds = DEMO_PHONE_ALIASES[phoneKey] || [];
+      const match =
+        snap.docs.find((d) => aliasIds.includes(d.id)) ||
+        snap.docs.find(
+          (d) =>
+            last10(d.data().registered_mobile) === phoneKey ||
+            last10(d.data().account_number) === phoneKey,
+        );
+      if (match) {
+        return { ok: true, customer: await buildCustomerObject(match.id, match.data()) };
+      }
+    }
+    if (customerName) {
+      const norm = String(customerName).trim().toLowerCase();
+      const snap = await getDocs(query(collection(db, 'customers'), limit(50)));
+      const match = snap.docs.find((d) => {
+        const data = d.data();
+        const legal = String(data.legal_name || data.display_name || '').toLowerCase();
+        const pref  = String(data.preferred_name || '').toLowerCase();
+        return legal === norm || pref === norm || (norm.length >= 4 && legal.startsWith(norm));
+      });
+      if (match) {
+        return { ok: true, customer: await buildCustomerObject(match.id, match.data()) };
+      }
+    }
+    return { ok: false, reason: 'not_found' };
+  } catch (err) {
+    console.warn('[Firebase] authenticateCustomerFromChat failed:', err.message);
     return { ok: false, reason: 'error' };
   }
 }
@@ -333,50 +447,155 @@ export async function fetchApplicationStatus(applicationId, token) {
   }
 }
 
-// ── ACN QR Pay history ──────────────────────────────────────────────────────
+// ── ACN QR Pay history & live subscription ──────────────────────────────────
+function isQrTxn(data = {}) {
+  const cat = String(data.category || '').toLowerCase();
+  const desc = String(data.description || data.merchant || '').toLowerCase();
+  const ref = String(data.reference || '').toLowerCase();
+  return (
+    cat === 'qr_transfer' ||
+    cat === 'qr_credit' ||
+    cat === 'qr_payment' ||
+    desc.includes('qr ') ||
+    desc.includes('acn qr') ||
+    ref.startsWith('qr-')
+  );
+}
+
 /**
- * Returns the most recent transactions on this customer whose `category` is
- * one of the QR Pay categories the Fund Transfer Agent writes. Includes both
- * `qr_transfer` (debits sent as payer) and `qr_credit` (rare — kept for
- * forward compatibility if the credit-side category is ever renamed).
- *
- * Ordered by `timestamp` desc. Falls back to unsorted-then-client-sorted if
- * the composite index doesn't exist yet, so a missing index doesn't break
- * the card.
+ * Returns the most recent QR Pay transactions on this customer.
  */
 export async function fetchQrTransactions(customerId, max = 5) {
   if (!customerId) return [];
   try {
     await ensureAnonAuth();
     const col = collection(db, 'customers', customerId, 'transactions');
-    const qy = query(
-      col,
-      where('category', 'in', ['qr_transfer', 'qr_credit']),
-      orderBy('timestamp', 'desc'),
-      limit(max),
-    );
-    const snap = await getDocs(qy);
-    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    const snap = await getDocs(query(col, limit(40)));
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .filter((t) => isQrTxn(t))
+      .sort((a, b) => String(b.timestamp || b.date || '').localeCompare(String(a.timestamp || a.date || '')))
+      .slice(0, max);
   } catch (err) {
-    // Composite index not yet built — fall back to unordered filter and sort
-    // client-side. The console error tells you the exact URL to click to
-    // create the index; once created, the fast path kicks in on next load.
-    if (String(err?.message || '').includes('index')) {
-      const col = collection(db, 'customers', customerId, 'transactions');
-      const qy = query(
-        col,
-        where('category', 'in', ['qr_transfer', 'qr_credit']),
-        limit(max * 4),
-      );
-      const snap = await getDocs(qy);
-      return snap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => String(b.timestamp || '').localeCompare(String(a.timestamp || '')))
-        .slice(0, max);
-    }
     console.warn('[Firebase] fetchQrTransactions failed:', err.message);
     return [];
   }
 }
 
+/**
+ * Real-time listener on customers/{customerId}/transactions for QR Pay activity.
+ * Fires immediately with initial QR transactions and again whenever a mobile app
+ * user scans the QR code and completes a transfer.
+ */
+export function subscribeQrTransactions(customerId, onUpdate, max = 6) {
+  if (!customerId || typeof onUpdate !== 'function') return () => {};
+  let unsub = null;
+  let cancelled = false;
+
+  ensureAnonAuth().then(() => {
+    if (cancelled) return;
+    const col = collection(db, 'customers', customerId, 'transactions');
+    unsub = onSnapshot(
+      col,
+      (snap) => {
+        const items = snap.docs
+          .map((d) => ({ id: d.id, ...d.data() }))
+          .filter((t) => isQrTxn(t))
+          .sort((a, b) => String(b.timestamp || b.date || '').localeCompare(String(a.timestamp || a.date || '')))
+          .slice(0, max);
+        onUpdate(items);
+      },
+      (err) => {
+        console.warn('[Firebase] subscribeQrTransactions error:', err.message);
+      },
+    );
+  });
+
+  return () => {
+    cancelled = true;
+    if (unsub) unsub();
+  };
+}
+
+// ── Customer Accounts, Bills, Beneficiaries & Transactions ──────────────────
+export async function fetchCustomerAccounts(customerId) {
+  if (!customerId) return [];
+  try {
+    await ensureAnonAuth();
+    const snap = await getDocs(collection(db, 'customers', customerId, 'accounts'));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerAccounts failed:', err.message);
+    return [];
+  }
+}
+
+export function subscribeCustomerAccounts(customerId, onUpdate) {
+  if (!customerId || typeof onUpdate !== 'function') return () => {};
+  let unsub = null;
+  let cancelled = false;
+
+  ensureAnonAuth().then(() => {
+    if (cancelled) return;
+    const col = collection(db, 'customers', customerId, 'accounts');
+    unsub = onSnapshot(
+      col,
+      (snap) => {
+        const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        onUpdate(items);
+      },
+      (err) => {
+        console.warn('[Firebase] subscribeCustomerAccounts error:', err.message);
+      },
+    );
+  });
+
+  return () => {
+    cancelled = true;
+    if (unsub) unsub();
+  };
+}
+
+export async function fetchCustomerBills(customerId) {
+  if (!customerId) return [];
+  try {
+    await ensureAnonAuth();
+    const snap = await getDocs(collection(db, 'customers', customerId, 'bills'));
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => String(a.due_date || '9999').localeCompare(String(b.due_date || '9999')));
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerBills failed:', err.message);
+    return [];
+  }
+}
+
+export async function fetchCustomerBeneficiaries(customerId) {
+  if (!customerId) return [];
+  try {
+    await ensureAnonAuth();
+    const snap = await getDocs(collection(db, 'customers', customerId, 'beneficiaries'));
+    return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerBeneficiaries failed:', err.message);
+    return [];
+  }
+}
+
+export async function fetchCustomerTransactions(customerId, max = 25) {
+  if (!customerId) return [];
+  try {
+    await ensureAnonAuth();
+    const snap = await getDocs(query(collection(db, 'customers', customerId, 'transactions'), limit(max * 2)));
+    return snap.docs
+      .map((d) => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => String(b.timestamp || b.date || '').localeCompare(String(a.timestamp || a.date || '')))
+      .slice(0, max);
+  } catch (err) {
+    console.warn('[Firebase] fetchCustomerTransactions failed:', err.message);
+    return [];
+  }
+}
+
 export { db, auth };
+

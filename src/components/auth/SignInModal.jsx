@@ -4,6 +4,13 @@ import { useAuth } from '../../context/AuthContext';
 // Firestore stores a 4-digit mobile_pin (customers/{id}/security/profile).
 const PIN_LENGTH = 4;
 
+const DEMO_ACCOUNTS = [
+  { label: 'Chander',  phone: '+1 (226) 927-4374', rawPhone: '12269274374', pin: '2244', sub: '226-927-4374 · PIN 2244' },
+  { label: 'Intan',    phone: '+1 (519) 555-1234', rawPhone: '15195551234', pin: '1234', sub: '519-555-1234 · PIN 1234' },
+  { label: 'Emiliano', phone: '+1 (217) 858-2973', rawPhone: '12178582973', pin: '1234', sub: '217-858-2973 · PIN 1234' },
+  { label: 'Sophie',   phone: '+1 (416) 555-0144', rawPhone: '14165550144', pin: '9876', sub: '416-555-0144 · PIN 9876' },
+];
+
 export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav' }) {
   const { signIn, error, clearError } = useAuth();
   const [phone,   setPhone]   = useState('');
@@ -21,30 +28,53 @@ export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav
   }, [isOpen]); // eslint-disable-line
 
   const fmt = (val) => {
-    const d = val.replace(/\D/g, '').slice(0, 11);
-    if (d.length <= 1) return d;
+    let raw = val.replace(/\D/g, '');
+    if (!raw) return '';
+    // If user starts typing an area code (e.g. 226..., 416..., 519...) without
+    // a leading '1', prepend '1' automatically so the first digit is never lost.
+    if (raw[0] !== '1') {
+      raw = `1${raw}`;
+    }
+    const d = raw.slice(0, 11);
+    if (d.length <= 1) return '+1 ';
     if (d.length <= 4) return `+1 (${d.slice(1)}`;
     if (d.length <= 7) return `+1 (${d.slice(1, 4)}) ${d.slice(4)}`;
     return `+1 (${d.slice(1, 4)}) ${d.slice(4, 7)}-${d.slice(7)}`;
   };
 
-  const handleSubmit = async (e) => {
-    e?.preventDefault();
-    const digits = phone.replace(/\D/g, '');
-    if (digits.length < 11 || pin.length < PIN_LENGTH) return;
+  const getTenDigits = (val) => {
+    const d = val.replace(/\D/g, '');
+    if (d.length === 11 && d.startsWith('1')) return d.slice(1);
+    return d.slice(-10);
+  };
+
+  const performSignIn = async (phoneVal, pinVal) => {
+    const ten = getTenDigits(phoneVal);
+    if (ten.length < 10 || pinVal.length < PIN_LENGTH) return;
     setLoading(true);
-    const result = await signIn(`+${digits}`, pin);
+    const result = await signIn(`+1${ten}`, pinVal);
     setLoading(false);
     if (result.success) {
-      // Pass both the success flag and the customer object to the callback
       onSuccess?.(result.customer);
       onClose();
     }
   };
 
+  const handleSubmit = async (e) => {
+    e?.preventDefault();
+    await performSignIn(phone, pin);
+  };
+
+  const handleQuickDemo = async (acct) => {
+    clearError();
+    setPhone(acct.phone);
+    setPin(acct.pin);
+    await performSignIn(acct.rawPhone, acct.pin);
+  };
+
   if (!isOpen) return null;
 
-  const ready = phone.replace(/\D/g, '').length >= 11 && pin.length >= PIN_LENGTH;
+  const ready = getTenDigits(phone).length === 10 && pin.length >= PIN_LENGTH;
   // Explain *why* the modal appeared when the agent triggered it mid-conversation.
   const fromChat = context === 'chat';
 
@@ -69,19 +99,19 @@ export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav
         <p className="si-sub">
           {fromChat
             ? 'Sign in to continue — your assistant will pick up right where you left off.'
-            : 'Sign in to access your accounts'}
+            : 'Sign in to access your accounts & ACN QR Pay'}
         </p>
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="si-field">
-            <label className="si-label" htmlFor="si-phone">Phone number</label>
+            <label className="si-label" htmlFor="si-phone">Phone or Account number</label>
             <input
               id="si-phone"
               ref={phoneRef}
               className="si-input"
               type="tel"
               inputMode="tel"
-              placeholder="+1 (416) 555-0199"
+              placeholder="+1 (226) 927-4374"
               value={phone}
               onChange={(e) => setPhone(fmt(e.target.value))}
               autoComplete="tel"
@@ -121,12 +151,39 @@ export default function SignInModal({ isOpen, onClose, onSuccess, context = 'nav
           </button>
         </form>
 
-        {/* Live Firestore credentials (customers/{id}/security/profile.mobile_pin) */}
-        <p className="si-demo-hint">
-          <strong>Demo:</strong> +1 (226) 927-4374 · PIN 2244<br />
-          <span className="si-demo-alt">or +1 (217) 858-2973 · PIN 1234</span>
-        </p>
+        {/* Quick 1-click demo profiles */}
+        <div style={{ marginTop: 16, paddingTop: 12, borderTop: '1px solid rgba(148,163,184,0.22)' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8, textAlign: 'center' }}>
+            1-Click Demo Sign In
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+            {DEMO_ACCOUNTS.map((acct) => (
+              <button
+                key={acct.label}
+                type="button"
+                disabled={loading}
+                onClick={() => handleQuickDemo(acct)}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'flex-start',
+                  padding: '7px 10px',
+                  borderRadius: 8,
+                  border: '1px solid #E2E8F0',
+                  background: '#F8FAFC',
+                  cursor: loading ? 'wait' : 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span style={{ fontSize: 12, fontWeight: 700, color: '#0F172A' }}>{acct.label}</span>
+                <span style={{ fontSize: 10, color: '#64748B' }}>{acct.sub}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+

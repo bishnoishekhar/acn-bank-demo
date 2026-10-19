@@ -428,8 +428,18 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     # explicitly marks "0  # public rates" with AUTH_LEVEL_INSUFFICIENT. The
     # model then re-planned against a misleading error, costing extra ~19.5k-token
     # LLM round trips per turn and inventing tool arguments it was never given.
-    # BT-1: Trusted ID injection
-    customer_id = state.get("customer_id", "")
+    # BT-1: Trusted ID injection (also recover from customer_profile/auth_state/customerId if flat key was cleared)
+    customer_id = (state.get("customer_id", "")
+                   or _cust(state).get("customer_id", "")
+                   or _auth(state).get("customer_id", "")
+                   or _first_nonempty(state, "customerId"))
+    if customer_id and not state.get("customer_id"):
+        state["customer_id"] = customer_id
+    if tool_name in {'acn_identity_security_hub', 'call_identity_hub'} and customer_id:
+        req_str = str(input_dict.get("request", "") or "")
+        if customer_id not in req_str:
+            lvl_str = _auth(state).get("level", "") or state.get("auth_level", "0")
+            input_dict["request"] = f"[session customer_id={customer_id} auth_level={lvl_str}] {req_str}".strip()
     if not customer_id and TOOL_MIN_AUTH.get(tool_name, 2) > 0 and tool_name not in {
         'identify_customer', 'authenticate', 'authorize_step_up',
         # agent-tools that establish identity must run before customer_id exists

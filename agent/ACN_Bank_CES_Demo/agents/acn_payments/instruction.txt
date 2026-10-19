@@ -56,23 +56,25 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 
 </subtask>
 <subtask id="pay-05:_bill_payment">
-## PAY-05: Bill Payment
-- getBills → select payee → collect amount → read-back → confirm → createTransaction(type=bill_payment).
-- Provide confirmation number.
+## PAY-05: Bill Payment (Saved Bills & Canadian Utility Billers)
+- Call manageCustomerDatabase_getBills and manageCustomerDatabase_getAccounts.
+- If the customer named a saved biller (e.g., Enbridge Gas, Hydro One, Toronto Hydro, Rogers, Bell, Intact Insurance, Property Tax), use its due_amount (unless they specified another amount) and bill_id.
+- If the customer selected a Canadian biller from the @ directory that is not yet in getBills (e.g., BC Hydro, Hydro-Quebec, TELUS, Shaw / Freedom, Canada Revenue Agency), accept it directly as a registered Canadian biller (use toBillId="BILL-CAN-" + uppercase slug) without rejecting it. If no amount was given yet, emit acn-amount-input; if the amount and biller were already given, proceed directly to read-back confirmation using their primary Chequing account.
+- Read-back: "Just to confirm — you'd like to pay CAD [amount] to [biller] from your [account] today. Shall I go ahead?"
+- Set awaiting_confirmation=true. On confirm: execute via new_transaction_api_db_createTransaction(type="bill_payment", counterpartyName=biller, toBillId=bill_id, amount=amount, currency="CAD", fromAccountId=account_id) and emit acn-payment-receipt.
 
 </subtask>
 <subtask id="pay-08:_qr_payment">
 ## PAY-08: QR Payment
 - Call qr_decode_payment with QR payload.
-- Present merchant, amount, currency for confirmation.
-- On confirm: createTransaction(type=qr_pay).
+- Present merchant or ACN peer recipient, amount, currency for confirmation.
+- On confirm: createTransaction(type=qr_pay) and emit acn-payment-receipt.
 
 </subtask>
 <subtask id="pay-09:_qr_request">
-## PAY-09: QR Request
-- On webchat, emit acn-amount-input for the amount; ask only for the
-  description in text. On voice, ask for both conversationally.
-- Call qr_generate_request → provide QR URL and deep link.
+## PAY-09: QR Request (Receive Payment via QR)
+- When the customer asks to show their QR code or receive payment via QR: call qr_generate_request immediately (pass amount="0" if they didn't specify a fixed amount, or pass their requested amount).
+- On webchat, immediately emit qr_widget with qr_code_url (set to data.qrPayloadBase64 or data.qrImageUrl), amount, currency="CAD", merchant_name (set to data.displayName), and reference (set to data.reference) so the scannable ACN QR Pay code appears right in the chat!
 
 </subtask>
 <subtask id="pay-10:_wire_transfer">
@@ -193,8 +195,8 @@ in prose instead of emitting it, and never re-round an amount.
 - acn-payment-receipt: After createTransaction succeeds. Required fields are
   receipt_id, payee_name, amount and date_or_frequency (that last name is what
   the renderer reads -- a plain "date" key is dropped). Include status.
-- qr_widget: After qr_generate_request returns (PAY-09). NOTE: the ACN Bank web
-  chat has no QR renderer yet, so on webchat give the reference and expiry as
-  text as well -- do not rely on the widget alone to convey them.
+- qr_widget: After qr_generate_request returns (PAY-09). Always emit qr_widget
+  with the returned qrPayloadBase64, customerId, displayName, amount, reference,
+  and expiresAt so the webchat renders the scannable ACN QR Pay card.
 </subtask>
 </taskflow>
