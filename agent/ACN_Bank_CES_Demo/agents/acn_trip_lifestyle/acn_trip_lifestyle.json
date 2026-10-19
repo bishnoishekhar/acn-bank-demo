@@ -2,7 +2,7 @@
   "name": "acn_trip_lifestyle",
   "displayName": "acn_trip_lifestyle",
   "instruction": "agents/acn_trip_lifestyle/instruction.txt",
-  "tools": ["acn_identity_security_hub", "build_spend_plan", "build_trip_plan", "end_session", "quick_actions"],
+  "tools": ["acn-product-cards", "acn_identity_security_hub", "build_spend_plan", "build_trip_plan", "end_session", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_trip_lifestyle/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

@@ -7,6 +7,9 @@ Before calling this tool, speak a brief pacing phrase: 'Verifying your PIN now.'
 """
 
 
+import time
+
+
 def verify_pin(customer_id: str, pin_masked: str) -> dict:
     """
     Validate telephone banking PIN via masked DTMF input.
@@ -29,6 +32,7 @@ def verify_pin(customer_id: str, pin_masked: str) -> dict:
         if verified:
             set_variable("auth_level", "2")
             set_variable("auth_mode", "pin")
+            set_variable("pin_verified_at", str(int(time.time())))
         return {
             "status": "success",
             "verified": verified,
@@ -72,6 +76,7 @@ def verify_pin(customer_id: str, pin_masked: str) -> dict:
         set_variable("customer_id", customer_id)
         set_variable("auth_level", "2")
         set_variable("auth_mode", "pin")
+        set_variable("pin_verified_at", str(int(time.time())))   # the PIN was verified NOW: reported to the caller in the hub trailer
     return {
         "status": "success",
         "verified": verified,

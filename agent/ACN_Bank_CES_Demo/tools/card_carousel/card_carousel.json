@@ -57,7 +57,8 @@
           }
         },
         "name": {
-          "type": "STRING"
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'card_carousel'"
         },
         "title": {
           "type": "STRING"

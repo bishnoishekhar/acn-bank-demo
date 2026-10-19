@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # widget -- the tool fires, nothing renders, and nothing errors.
 WIDGET_TOOLS = frozenset({
     'acn-amount-input', 'acn-credit-card-widget', 'acn-form-input',
-    'acn-insight-card', 'acn-investment-card', 'acn-proactive-alert', 'acn-spending-dashboard', 'acn-transactions-widget', 'acn-nudge-card', 'acn-payee-selector',
+    'acn-insight-card', 'acn-investment-card', 'acn-proactive-alert', 'acn-spending-dashboard', 'acn-transactions-widget', 'acn-nudge-card', 'acn-product-cards', 'acn-payee-selector',
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',
@@ -163,7 +163,7 @@ def _seed_identity_from_session(state) -> None:
 # FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
 # a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
 # ---------------------------------------------------------------------------
-_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
+_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_createNewCustomer":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
 
 def _fsw_plain_value(v):
     if not isinstance(v, dict) or not v:
@@ -240,10 +240,89 @@ def _no_data_result(tool_response, state, slug, what):
         state['nodata_' + slug] = '0'
         return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
     state['nodata_' + slug] = '1'
+    try:
+        import time
+        state['spoken_summary'] = json.dumps({'text': "I'm not able to show our current " + what + " information right now."
+                                              " I can connect you with a representative or a branch, or you can try again later. What would you prefer?", 'ts': time.time()})
+    except Exception:
+        pass
     return {"status": "business_error", "code": "NO_DATA", "data": {
         "message": ("No " + what + " information is available right now. Do NOT state, estimate or recall any " + what +
                     ", terms, rates or times from memory. Tell the customer plainly that you cannot show it at the "
                     "moment and offer a representative, a branch, or trying again later.")}}
+
+_ST_WORDS = {'approved': 'approved', 'referred': 'with a specialist for review', 'under_review': 'under review',
+             'declined': 'not approved', 'in_progress': 'in progress', 'decision_pending': 'waiting for a decision',
+             'submitted': 'received', 'received': 'received'}
+_ST_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+def _st_when(ts):
+    ts = str(ts or '')
+    try:
+        return _ST_MONTHS[int(ts[5:7]) - 1] + " " + str(int(ts[8:10]))
+    except Exception:
+        return ts[:10]
+
+def _st_money(x):
+    try:
+        return "$" + format(float(x), ",.0f")
+    except Exception:
+        return ""
+
+def _st_docs(response):
+    body = response.get('data') if isinstance(response, dict) else None
+    rows = body.get('documents') if isinstance(body, dict) else (body if isinstance(body, list) else None)
+    docs = [r for r in (rows or []) if isinstance(r, dict)]
+    docs.sort(key=lambda d: str(d.get('createdAt', '')), reverse=True)
+    return docs
+
+def _status_summary_for(short, response):
+    docs = _st_docs(response)
+    if not docs:
+        return ''
+    if short == 'queryApplications':                       # credit cards
+        bits = []
+        for d in docs[:2]:
+            name = str(d.get('cardType') or 'credit card').replace('_', ' ').strip()
+            word = _ST_WORDS.get(str(d.get('status', '')).lower(), '')
+            line = "the " + name + " from " + _st_when(d.get('createdAt')) + (": " + word if word else "")
+            if str(d.get('status', '')).lower() == 'approved' and _st_money(d.get('approvedCreditLimit')):
+                line += " with a " + _st_money(d.get('approvedCreditLimit')) + " limit"
+            bits.append(line)
+        return ("Your most recent card application is " + bits[0] + "." +
+                ((" You also have " + bits[1] + ".") if len(bits) > 1 else ""))
+    if short == 'queryLoanApplications':                   # loans: the record has no decision field, so only say received
+        bits = []
+        for d in docs[:2]:
+            kind = str(d.get('type') or 'loan').replace('_', ' ')
+            bit = "a " + _st_money(d.get('amount')) + " " + kind
+            if d.get('term'):
+                try:
+                    bit += " over " + str(int(float(d['term']))) + " months"
+                except Exception:
+                    pass
+            bits.append(bit + " submitted " + _st_when(d.get('createdAt')))
+        return "We have received " + " and ".join(bits) + "."
+    if short == 'getAccountApplicationStatus':
+        d = docs[0]
+        word = _ST_WORDS.get(str(d.get('status', '')).lower(), '')
+        return ("Your account application from " + _st_when(d.get('createdAt')) + " is " + word + ".") if word else ''
+    return ''
+
+def _remember_status_summary(tool_name, response, state):
+    """After an application lookup, remember what to say, so a status answer is never chips or cards alone."""
+    try:
+        short = str(tool_name).split('/')[-1].split('_')[-1]
+        if short not in ('queryApplications', 'queryLoanApplications', 'getAccountApplicationStatus'):
+            return
+        if not isinstance(response, dict) or response.get('status') != 'success':
+            return
+        text = _status_summary_for(short, response)
+        if text:
+            import time
+            state['spoken_summary'] = json.dumps({'text': text, 'ts': time.time()})
+    except Exception:
+        pass
 
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
@@ -286,6 +365,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
         tool_response = _fsw_friendly(tool_response, _fsw_kind)
+        if tool_name.endswith('createNewCustomer') and isinstance(tool_response, dict) and tool_response.get('status') == 'success':
+            _nid = (tool_response.get('data') or {}).get('id')
+            if _nid:
+                state['applicant_id'] = str(_nid)           # the new applicant: later account-opening steps save against this id
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
@@ -341,6 +424,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
 
+    _remember_status_summary(tool_name, response, state)
     return response
 
 def _normalize_response(response: dict[str, Any]) -> dict:
@@ -658,6 +742,16 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
     if mode:
         _set_auth(state, mode=mode)
         state['auth_mode'] = mode
+
+    pin_at = _hub_value(fields, 'pin_verified_at')
+    if pin_at:
+        try:
+            import time
+            ts = float(pin_at)
+            if ts > float(state.get('pin_consumed_ts', 0) or 0) and time.time() - ts < 300:
+                state['pin_grant_ts'] = str(ts)      # a PIN was verified just now: it covers this request's account tools
+        except Exception:
+            pass
 
     identified_by = _hub_value(fields, 'identified_by')
     if identified_by:

@@ -2,7 +2,7 @@
   "name": "acn_credit_cards",
   "displayName": "acn_credit_cards",
   "instruction": "agents/acn_credit_cards/instruction.txt",
-  "tools": ["acn-credit-card-widget", "acn_identity_security_hub", "card_carousel", "card_widget", "end_session", "quick_actions"],
+  "tools": ["acn-credit-card-widget", "acn-product-cards", "acn_identity_security_hub", "card_carousel", "card_widget", "end_session", "quick_actions"],
   "childAgents": ["acn_cc_credit_decision", "acn_cc_kyc", "acn_cc_verification"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_credit_cards/before_agent_callbacks/before_agent_callbacks_01/python_code.py"

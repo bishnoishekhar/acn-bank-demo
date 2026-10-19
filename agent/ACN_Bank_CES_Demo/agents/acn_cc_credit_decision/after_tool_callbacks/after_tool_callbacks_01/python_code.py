@@ -71,7 +71,7 @@ def _set_cnt(state,  **kw): c=_cnt(state);  c.update(kw); state["session_counter
 # FSW results: Firestore answers with raw typed documents. Hand the model plain values, and make
 # a duplicate create (409) a clear answer. Operation kinds are GENERATED from the toolset specs.
 # ---------------------------------------------------------------------------
-_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
+_FSW_KINDS = json.loads('''{"account_opening_db_createAccountApplication":"create","account_opening_db_createNewCustomer":"create","account_opening_db_updateAccountApplication":"patch","addPayee":"create","appointments_db_cancelAppointment":"delete","appointments_db_createAppointment":"create","appointments_db_updateAppointment":"patch","cancelAppointment":"delete","cancelPAD":"patch","cancelRecurringSchedule":"delete","card_applications_createApplication":"create","card_applications_persistApprovedCreditCardApplication":"create","card_applications_queryApplications":"query","card_applications_updateApplication":"patch","cheque_services_db_createBankDraft":"create","cheque_services_db_createChequeBookOrder":"create","cheque_services_db_createStopPayment":"create","createAccountApplication":"create","createActivationRequest":"create","createApplication":"create","createAppointment":"create","createBankDraft":"create","createChequeBookOrder":"create","createDispute":"create","createFXDraft":"create","createFXOrder":"create","createKycRequest":"create","createLoanApplication":"create","createNSFReversal":"create","createRecurringSchedule":"create","createRedemption":"create","createStopPayment":"create","customer_intelligence_db_logNudgeShown":"create","deletePayee":"delete","digital_activation_db_createActivationRequest":"create","digital_activation_db_updateActivationRequest":"patch","disputes_db_createDispute":"create","disputes_db_createPADDispute":"create","disputes_db_updateDispute":"patch","executeACNBankApplicationEmail":"create","faq_knowledge_db_searchFAQs":"query","fx_db_createFXDraft":"create","fx_db_createFXOrder":"create","kyc_request_tracking_createKycRequest":"create","kyc_request_tracking_writeKycRecord":"patch","listRecurringSchedules":"query","loan_applications_createLoanApplication":"create","loan_applications_queryLoanApplications":"query","loan_applications_updateLoanApplication":"patch","logNudgeShown":"create","manageCustomerDatabase_queryCustomers":"query","new_transaction_api_db_cancelRecurringSchedule":"delete","new_transaction_api_db_createRecurringSchedule":"create","new_transaction_api_db_listRecurringSchedules":"query","new_transaction_api_db_updateRecurringSchedule":"patch","new_transaction_api_db_updateTransaction":"patch","overdraft_pad_db_cancelPAD":"patch","overdraft_pad_db_createNSFReversal":"create","overdraft_pad_db_createPADDispute":"create","overdraft_pad_db_updateOverdraftProtection":"patch","patchCreditCardApplication":"patch","persist_approved_credit_card_patchCreditCardApplication":"patch","persist_approved_credit_card_persistApprovedCreditCardApplication":"create","preferences_db_updateMarketingConsent":"patch","preferences_db_updateNotificationPreferences":"patch","preferences_db_updatePaperlessEnrollment":"patch","queryApplications":"query","queryCustomers":"query","queryLoanApplications":"query","rewards_loyalty_db_createRedemption":"create","searchFAQs":"query","send_application_email_executeACNBankApplicationEmail":"create","updateAccount":"patch","updateAccountApplication":"patch","updateActivationRequest":"patch","updateApplication":"patch","updateAppointment":"patch","updateBill":"patch","updateCard":"patch","updateDispute":"patch","updateKycRecord":"patch","updateLoanApplication":"patch","updateMarketingConsent":"patch","updateNotificationPreferences":"patch","updatePaperlessEnrollment":"patch","updatePayee":"patch","updateProfile":"patch","updateRecurringSchedule":"patch","updateTransaction":"patch","update_customer_api_db_addPayee":"create","update_customer_api_db_deletePayee":"delete","update_customer_api_db_updateAccount":"patch","update_customer_api_db_updateBill":"patch","update_customer_api_db_updateCard":"patch","update_customer_api_db_updateOverdraftProtection":"patch","update_customer_api_db_updatePayee":"patch","update_customer_api_db_updateProfile":"patch","writeKycRecord":"patch","writeKycToDb":"create","write_kyc_to_db_updateKycRecord":"patch","write_kyc_to_db_writeKycToDb":"create"}''')
 
 def _fsw_plain_value(v):
     if not isinstance(v, dict) or not v:
@@ -130,6 +130,34 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _persist_result(tool_response, input_dict, state):
+    """Approval is only real once the persistence write succeeded. Never leave the model to improvise on a failure."""
+    try:
+        blob = json.dumps(tool_response, default=str)
+    except Exception:
+        blob = str(tool_response)
+    # 409 = this application was already persisted (the API is idempotent): that is still an approved, saved application
+    already = ('ALREADY_EXISTS' in blob) or ('"code": 409' in blob) or ('code=409' in blob)
+    failed = ((not isinstance(tool_response, dict)) or ('errorCode' in blob) or ('"error"' in blob) or ("'error'" in blob)) and not already
+    if failed:
+        return {"status": "business_error", "code": "PERSIST_FAILED", "data": {
+            "message": ("The approval could NOT be saved. Do NOT tell the customer the card is approved. Say you hit a snag saving it "
+                        "and that a specialist will confirm shortly, and offer to connect them with a specialist.")}}
+    try:
+        # the sentence the text guard / the voice speak-first gate use if the model shows the card without saying it
+        f = (input_dict or {}).get('fields') or {}
+        limit = float(f.get('approvedCreditLimit'))
+        apr = float(f.get('interestRate'))
+        import time
+        state['spoken_summary'] = json.dumps({'text': "Great news, your application is approved with a credit limit of $" + format(limit, ",.0f") +
+                                              " and a purchase APR of " + format(apr, ".2f") + "%.", 'ts': time.time()})
+    except Exception:
+        pass
+    return {"status": "success", "code": "OK", "data": {
+        "persisted": True,
+        "message": ("The approval is recorded. Tell the customer the card name, approved limit and APR. Do NOT state any delivery, "
+                    "arrival or activation timeline: you have no such information.")}}
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -164,9 +192,17 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WIDGET_TOOLS:
         return tool_response
 
+    # AT-PERSIST: the approval counts only if it was saved
+    if tool_name.endswith('persistApprovedCreditCardApplication'):
+        return _persist_result(tool_response, input_dict, state)
+
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:
         tool_response = _fsw_friendly(tool_response, _fsw_kind)
+        if tool_name.endswith('createNewCustomer') and isinstance(tool_response, dict) and tool_response.get('status') == 'success':
+            _nid = (tool_response.get('data') or {}).get('id')
+            if _nid:
+                state['applicant_id'] = str(_nid)           # the new applicant: later account-opening steps save against this id
 
     # AT-1: Tri-state normalization
     response = _normalize_response(tool_response)
@@ -535,6 +571,16 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
     if mode:
         _set_auth(state, mode=mode)
         state['auth_mode'] = mode
+
+    pin_at = _hub_value(fields, 'pin_verified_at')
+    if pin_at:
+        try:
+            import time
+            ts = float(pin_at)
+            if ts > float(state.get('pin_consumed_ts', 0) or 0) and time.time() - ts < 300:
+                state['pin_grant_ts'] = str(ts)      # a PIN was verified just now: it covers this request's account tools
+        except Exception:
+            pass
 
     identified_by = _hub_value(fields, 'identified_by')
     if identified_by:

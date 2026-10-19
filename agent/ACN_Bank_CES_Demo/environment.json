@@ -152,6 +152,11 @@
     },
     "persist_approved_credit_card": {
       "openApiToolset": {
+        "apiAuthentication": {
+          "serviceAccountAuthConfig": {
+            "serviceAccount": "acn-bank-tool-auth@emvnzir-canada-song.iam.gserviceaccount.com"
+          }
+        },
         "url": "https://firestore.googleapis.com"
       }
     },

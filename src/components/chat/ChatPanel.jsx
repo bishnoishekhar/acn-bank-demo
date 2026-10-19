@@ -36,6 +36,7 @@ import MortgageRateTable  from '../MortgageRateTable';
 import MortgageNudge      from '../MortgageNudge';
 import MortgageKyc        from '../MortgageKyc';
 import LoanPreapproval    from '../LoanPreapproval';
+import ProductCards       from '../ProductCards';
 import MobileHandoff      from '../MobileHandoff';
 import { CardCarousel, CardCompare } from '../CardWidgets';
 import TripBookingRecommendationsWidget from '../TripBookingRecommendationsWidget';
@@ -457,6 +458,16 @@ function normalizeActionIdentity(action = {}) {
   return utterance ? `SEND_UTTERANCE:${utterance}` : '';
 }
 
+// Widget names the chat knows how to render (resolvePayloadName returns one of these, or null).
+const KNOWN_WIDGET_NAMES = new Set([
+  'quick_actions', 'acn-form-input', 'acn-payment-carousel', 'acn-payee-selector', 'acn-payment-receipt', 'acn-insight-card',
+  'acn-amount-input', 'acn-contact-selector', 'acn-card-carousel', 'acn-card-compare', 'acn-card-activation',
+  'trip_booking_recommendations', 'travel_protection_banner', 'acn-epp-carousel', 'acn-epp-plans', 'acn-mortgage-calculator',
+  'acn-mortgage-kyc', 'acn-mortgage-affordability', 'acn-mortgage-rate-shelf', 'acn-mortgage-rate-table', 'acn-mortgage-nudge',
+  'acn-loan-preapproval', 'acn-mobile-handoff', 'acn-qr-widget', 'acn-product-cards',
+  'acn-investment-card', 'acn-proactive-alert', 'acn-spending-dashboard', 'acn-transactions-widget',
+]);
+
 function resolvePayloadName(p) {
   const normalized = normalizeWidgetPayload(p);
   if (!normalized || typeof normalized !== 'object') return null;
@@ -479,6 +490,7 @@ function resolvePayloadName(p) {
     epp_carousel:         'acn-epp-carousel',
     epp_plans:            'acn-epp-plans',
     mobile_handoff:       'acn-mobile-handoff',
+    product_cards:        'acn-product-cards',
     // Widgets the new agent emits under its own names. Without these three the
     // payload falls through resolvePayloadName (which short-circuits on any
     // present `name`) and is dropped silently.
@@ -507,7 +519,10 @@ function resolvePayloadName(p) {
     transactions_widget:      'acn-transactions-widget',
   };
   if (aliases[explicitName]) return aliases[explicitName];
-  if (normalized.name) return normalized.name;
+  // A name the screen does not know (the model sometimes invents one, e.g. 'spending_insights') must not hide a
+  // payload that can still be recognised by its shape below.
+  if (normalized.name && KNOWN_WIDGET_NAMES.has(String(normalized.name))) return normalized.name;
+  const unrecognisedName = normalized.name || null;
   if (normalized.type === 'quick_actions') return 'quick_actions';
   if (Array.isArray(normalized.actions) && normalized.actions.length > 0 && normalized.actions[0]?.utterance !== undefined)
     return 'quick_actions';
@@ -549,6 +564,8 @@ function resolvePayloadName(p) {
     return Array.isArray(normalized.features) && normalized.features.length > 0
       ? 'acn-card-compare'
       : 'acn-card-carousel';
+  if (Array.isArray(normalized.items) && normalized.items.length > 0 &&
+      normalized.items.some((i) => i && (i.headline != null || i.details != null || i.badge != null))) return 'acn-product-cards';
   if (normalized.insight_type != null || normalized.headline != null) return 'acn-insight-card';
   if (Array.isArray(normalized.payments) || Array.isArray(normalized.payees)) return 'acn-payment-carousel';
   if (Array.isArray(normalized.contacts)) return 'acn-contact-selector';
@@ -557,7 +574,7 @@ function resolvePayloadName(p) {
       normalized.confirmation_number != null || normalized.confirmation_id != null ||
       normalized.transaction_id != null) return 'acn-payment-receipt';
   if (normalized.min_amount != null || normalized.max_amount != null) return 'acn-amount-input';
-  return null;
+  return unrecognisedName;
 }
 
 function isKnownPayload(p) {
@@ -577,7 +594,7 @@ function isKnownPayload(p) {
     n === 'acn-mortgage-rate-table' ||
     n === 'acn-mortgage-nudge'    ||
     n === 'acn-loan-preapproval'  || n === 'acn-mobile-handoff'  ||
-    n === 'acn-qr-widget'
+    n === 'acn-qr-widget' || n === 'acn-product-cards'
   );
 }
 
@@ -1132,6 +1149,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           const last = findInCurrentTurn(prev, 'insight');
           if (last && p.headline && last.payload?.headline === p.headline) return prev;
           return [...prev, { type: 'insight', payload: p, id: uid() }];
+        });
+      }
+
+      if (pname === 'acn-product-cards') {
+        setMessages((prev) => {
+          const sig  = `${p.title || ''}|${(p.items ?? []).map((i) => i?.title).join('|')}`;
+          const last = [...prev].reverse().find((m) => m.type === 'product-cards');
+          if (last && `${last.payload?.title || ''}|${(last.payload?.items ?? []).map((i) => i?.title).join('|')}` === sig) return prev;
+          return [...prev, { type: 'product-cards', payload: p, id: uid() }];
         });
       }
 
@@ -2052,6 +2078,15 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     showTyping();
                     gecxSend(v);
                   }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'product-cards') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <ProductCards
+                  payload={msg.payload}
+                  onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
                 />
               </div>
             );
