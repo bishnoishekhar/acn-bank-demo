@@ -1,0 +1,60 @@
+{
+  "name": "acn-investment-card",
+  "displayName": "acn-investment-card",
+  "widgetTool": {
+    "name": "acn-investment-card",
+    "description": "Emit an interactive GIC and Registered Account investment rate projector card with 5-year compounding growth graph. Requires financial advice disclaimer and CDIC notice. Before calling this tool, speak a brief conversational pacing phrase: 'Here are our current GIC and registered investment rates.'",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "cdic_notice": {
+          "type": "STRING"
+        },
+        "headline": {
+          "type": "STRING"
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'acn-investment-card'"
+        },
+        "principal": {
+          "type": "NUMBER",
+          "description": "Default principal amount in CAD to project returns (e.g., 25000)."
+        },
+        "rates": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "badge": {
+                "type": "STRING"
+              },
+              "id": {
+                "type": "STRING"
+              },
+              "minAmount": {
+                "type": "NUMBER"
+              },
+              "rate": {
+                "type": "NUMBER"
+              },
+              "term": {
+                "type": "STRING"
+              },
+              "type": {
+                "type": "STRING"
+              }
+            },
+            "required": ["term", "rate"]
+          }
+        },
+        "selected_term": {
+          "type": "STRING"
+        }
+      },
+      "required": ["name", "headline"]
+    }
+  }
+}
+

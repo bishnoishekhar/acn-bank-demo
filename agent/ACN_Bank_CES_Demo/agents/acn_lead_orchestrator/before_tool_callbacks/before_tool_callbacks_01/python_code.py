@@ -145,6 +145,10 @@ TOOL_MIN_AUTH = {
     'request_app_push_approval':       1,  # L3 step-up, needs L1
     'acn-form-input':                  0,  # widget render
     'acn-amount-input':                0,  # widget render
+    'acn-investment-card':                 0,  # widget render
+    'acn-proactive-alert':                 0,  # widget render
+    'acn-spending-dashboard':              0,  # widget render
+    'acn-transactions-widget':             0,  # widget render
     'acn-insight-card':                0,  # widget render
     'acn-nudge-card':                  0,  # widget render
     'acn-credit-card-widget':          0,  # widget render
@@ -554,7 +558,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
             input_dict.get('handoff_url', ''), customer_id)
 
     # BT-3: Auth level check
-    auth_level = int(_auth(state).get("level", "0") or "0")
+    auth_level = max(int(_auth(state).get("level", "0") or "0"), int(state.get("auth_level", "0") or "0"), (2 if customer_id and str(state.get("authentication_status", "")).lower() == "true" else 0))
     required = TOOL_MIN_AUTH.get(tool_name, 2)
     if auth_level < required:
         # BT-3b: auth-retry loop breaker. A blocked tool makes the model try to

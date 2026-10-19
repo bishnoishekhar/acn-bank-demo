@@ -2,7 +2,7 @@
   "name": "acn_accounts_insights",
   "displayName": "acn_accounts_insights",
   "instruction": "agents/acn_accounts_insights/instruction.txt",
-  "tools": ["acn-credit-card-widget", "acn-insight-card", "acn-payment-carousel", "acn_identity_security_hub", "compute_spending_insights", "end_session", "quick_actions"],
+  "tools": ["acn-credit-card-widget", "acn-insight-card", "acn-payment-carousel", "acn-proactive-alert", "acn-spending-dashboard", "acn-transactions-widget", "acn_identity_security_hub", "compute_spending_insights", "end_session", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_accounts_insights/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

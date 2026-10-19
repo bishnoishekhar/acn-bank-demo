@@ -40,6 +40,12 @@ import MobileHandoff      from '../MobileHandoff';
 import { CardCarousel, CardCompare } from '../CardWidgets';
 import TripBookingRecommendationsWidget from '../TripBookingRecommendationsWidget';
 import {
+  SpendingMiniWidgetsGrid,
+  InvestmentCardWidget,
+  ContextualProactiveAlert,
+  RecentTransactionsWidget,
+} from '../FinancialInsightsWidgets';
+import {
   fetchP2PContacts,
   fetchCustomerBills,
   fetchCustomerBeneficiaries,
@@ -490,6 +496,15 @@ function resolvePayloadName(p) {
     'acn-credit-card-widget': 'acn-card-carousel',
     qr_widget:                'acn-qr-widget',
     'acn-qr-widget':          'acn-qr-widget',
+    'acn-spending-dashboard': 'acn-spending-dashboard',
+    spending_dashboard:       'acn-spending-dashboard',
+    'acn-investment-card':    'acn-investment-card',
+    investment_card:          'acn-investment-card',
+    investments_summary:      'acn-investment-card',
+    'acn-proactive-alert':    'acn-proactive-alert',
+    proactive_alert:          'acn-proactive-alert',
+    'acn-transactions-widget': 'acn-transactions-widget',
+    transactions_widget:      'acn-transactions-widget',
   };
   if (aliases[explicitName]) return aliases[explicitName];
   if (normalized.name) return normalized.name;
@@ -520,6 +535,14 @@ function resolvePayloadName(p) {
     return 'acn-card-activation';
   if (normalized.qrPayloadBase64 || normalized.qr_code_url || normalized.type === 'ACN_QR_PAY')
     return 'acn-qr-widget';
+  if (Array.isArray(normalized.transactions) && normalized.transactions.length > 0)
+    return 'acn-transactions-widget';
+  if (Array.isArray(normalized.categories) || normalized.total_spend != null || normalized.saving_rate != null)
+    return 'acn-spending-dashboard';
+  if (normalized.current_month_amt != null && normalized.last_month_amt != null)
+    return 'acn-proactive-alert';
+  if (Array.isArray(normalized.rates) && (normalized.principal != null || normalized.cdic_notice != null))
+    return 'acn-investment-card';
   // CES card widgets: card_check (PRODUCT_COMPARISON) carries a features array
   // alongside productDetails; card_comparison (PRODUCT_CAROUSEL) does not.
   if (Array.isArray(normalized.productDetails) && normalized.productDetails.length > 0)
@@ -543,6 +566,8 @@ function isKnownPayload(p) {
     n === 'quick_actions'         || n === 'acn-form-input'      ||
     n === 'acn-payment-carousel'  || n === 'acn-payee-selector'  ||
     n === 'acn-payment-receipt'   || n === 'acn-insight-card'    ||
+    n === 'acn-spending-dashboard' || n === 'acn-investment-card' ||
+    n === 'acn-proactive-alert'   || n === 'acn-transactions-widget' ||
     n === 'acn-amount-input'      || n === 'acn-contact-selector' ||
     n === 'acn-card-carousel'     || n === 'acn-card-compare'    ||
     n === 'acn-card-activation'   || n === 'trip_booking_recommendations' || n === 'travel_protection_banner' ||
@@ -573,7 +598,7 @@ function tripBookingSignature(payload, turnIndex = 'unknown') {
 
 // ── Static data ───────────────────────────────────────────────────────────────
 
-const CANADIAN_BILLERS = [
+export const CANADIAN_BILLERS = [
   { id: 'enbridge',    name: 'Enbridge Gas',                  sub: 'Natural Gas Utility · Ontario',     category: 'Utilities', emoji: '🔥', presets: [95, 150, 187.40] },
   { id: 'hydro-one',   name: 'Hydro One',                     sub: 'Electricity Utility · Ontario',     category: 'Utilities', emoji: '⚡', presets: [120, 175, 224.30] },
   { id: 'toronto-h',   name: 'Toronto Hydro',                 sub: 'Municipal Electricity · Toronto',   category: 'Utilities', emoji: '💡', presets: [85, 118.40, 160] },
@@ -612,17 +637,17 @@ const GUEST_SUGGESTIONS = [
 ];
 
 const CUSTOMER_SUGGESTIONS = [
-  { label: '💡 Spending & bill insights', utterance: 'Show my spending insights and upcoming utility bills' },
+  { label: '💡 Spending & bill insights', utterance: 'Analyze my spending' },
   { label: '🧾 Pay upcoming utility bill', utterance: 'Check my upcoming bills and help me pay them' },
+  { label: '📈 GIC & investment rates',   utterance: 'Check GIC rates' },
   { label: '💰 Check balance',            utterance: 'Check my balance' },
   { label: '▦ Receive via QR Pay',       utterance: 'Generate a QR code so someone can pay me' },
   { label: '💸 Send money',               utterance: 'Transfer money' },
   { label: '📊 Recent transactions',      utterance: 'Show my recent transactions' },
   { label: '🎁 My offers',                utterance: 'Show my pre-approved offers' },
-  { label: '🚫 Block my card',            utterance: 'I need to block my card' },
 ];
 
-function computeDaysUntil(isoDate) {
+export function computeDaysUntil(isoDate) {
   if (!isoDate) return null;
   const target = new Date(`${String(isoDate).slice(0, 10)}T12:00:00`);
   if (Number.isNaN(target.getTime())) return null;
@@ -776,7 +801,10 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     }
   }, [scheduleTTSFlush]);
 
+  const lastUserQueryRef = useRef('');
+
   const addUser = useCallback((text) => {
+    lastUserQueryRef.current = String(text || '');
     setMessages((prev) => [...prev, { type: 'user', text, id: uid() }]);
   }, []);
 
@@ -1176,14 +1204,42 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-qr-widget')
         setMessages((prev) => [...prev, { type: 'qr-widget', payload: p, id: uid() }]);
+
+      if (pname === 'acn-spending-dashboard')
+        setMessages((prev) => {
+          const last = [...prev].reverse().find((m) => m.type === 'spending-dashboard');
+          if (last && p.headline && last.payload?.headline === p.headline) return prev;
+          return [...prev, { type: 'spending-dashboard', payload: p, id: uid() }];
+        });
+
+      if (pname === 'acn-investment-card')
+        setMessages((prev) => {
+          const last = [...prev].reverse().find((m) => m.type === 'investment-card');
+          if (last && p.headline && last.payload?.headline === p.headline) return prev;
+          return [...prev, { type: 'investment-card', payload: p, id: uid() }];
+        });
+
+      if (pname === 'acn-proactive-alert')
+        setMessages((prev) => {
+          const last = [...prev].reverse().find((m) => m.type === 'contextual-alert');
+          if (last && p.headline && last.payload?.headline === p.headline) return prev;
+          return [...prev, { type: 'contextual-alert', payload: p, id: uid() }];
+        });
+
+      if (pname === 'acn-transactions-widget')
+        setMessages((prev) => {
+          const last = [...prev].reverse().find((m) => m.type === 'transactions-widget');
+          if (last && p.headline && last.payload?.headline === p.headline && (last.payload?.transactions || []).length === (p.transactions || []).length) return prev;
+          return [...prev, { type: 'transactions-widget', payload: p, id: uid() }];
+        });
     });
+
+    const combinedBotTextRaw = outputs.map((o) => String(o?.text || '')).join(' ');
+    const combinedBotLower = combinedBotTextRaw.toLowerCase();
 
     // ── Chat -> Web Auto-Sign-In sync when agent confirms verification ──
     if (!isAuthenticatedRef.current) {
-      const combinedBotText = outputs
-        .map((o) => String(o?.text || ''))
-        .join(' ')
-        .toLowerCase();
+      const combinedBotText = combinedBotLower;
       const hasAuthWidget = outputs.some((o) => {
         const pn = resolvePayloadName(normalizeWidgetPayload(o));
         return (
@@ -1835,34 +1891,35 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       {/* Side panel — no internal header; controls live in the top nav */}
       <aside className={`chat-panel${isOpen ? ' open' : ''}`} aria-label="ACN Bank AI assistant">
 
-        {/* ── Proactive Banking Insights Strip (when signed in) ── */}
+        {/* ── Proactive Banking Insights Strip (Light Mode, when signed in) ── */}
         {isAuthenticated && proactiveInsights.length > 0 && (
           <div
             style={{
-              padding: '10px 14px 8px',
-              background: 'linear-gradient(135deg, #0F172A 0%, #1E293B 100%)',
-              borderBottom: '1px solid rgba(148,163,184,0.22)',
+              padding: '10px 14px 9px',
+              background: 'linear-gradient(180deg, #EFF6FF 0%, #F8FAFC 100%)',
+              borderBottom: '1px solid #DBEAFE',
               display: 'flex',
               flexDirection: 'column',
-              gap: 6,
+              gap: 7,
             }}
           >
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 10, fontWeight: 800, color: '#38BDF8', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+              <span style={{ fontSize: 10.5, fontWeight: 800, color: '#0056B3', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
                 ✦ Smart Banking Insights for {customerName}
               </span>
               <button
                 type="button"
                 onClick={showMyQrInChat}
                 style={{
-                  padding: '3px 8px',
+                  padding: '3px 9px',
                   borderRadius: 999,
-                  border: '1px solid rgba(56,189,248,0.4)',
-                  background: 'rgba(56,189,248,0.14)',
-                  color: '#E0F2FE',
+                  border: '1px solid #93C5FD',
+                  background: '#FFFFFF',
+                  color: '#002147',
                   fontSize: 10,
-                  fontWeight: 700,
+                  fontWeight: 800,
                   cursor: 'pointer',
+                  boxShadow: '0 1px 4px rgba(0, 33, 71, 0.06)',
                 }}
               >
                 ▦ My Receive QR
@@ -1875,23 +1932,24 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                   style={{
                     minWidth: 225,
                     maxWidth: 255,
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    borderLeft: `3px solid ${ins.accent}`,
-                    borderRadius: 10,
-                    padding: '7px 10px',
+                    background: '#FFFFFF',
+                    border: '1px solid #E2E8F0',
+                    borderLeft: `4px solid ${ins.accent}`,
+                    borderRadius: 11,
+                    padding: '8px 11px',
                     display: 'flex',
                     flexDirection: 'column',
                     justifyContent: 'space-between',
-                    gap: 5,
+                    gap: 6,
                     flexShrink: 0,
+                    boxShadow: '0 3px 10px rgba(15, 23, 42, 0.05)',
                   }}
                 >
                   <div>
-                    <div style={{ fontSize: 9, fontWeight: 800, color: ins.accent, letterSpacing: '0.04em' }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 800, color: ins.accent, letterSpacing: '0.04em' }}>
                       {ins.badge}
                     </div>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: '#F8FAFC', lineHeight: 1.3, marginTop: 2 }}>
+                    <div style={{ fontSize: 11.5, fontWeight: 800, color: '#0F172A', lineHeight: 1.35, marginTop: 2 }}>
                       {ins.title}
                     </div>
                   </div>
@@ -1904,11 +1962,11 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                     }}
                     style={{
                       alignSelf: 'flex-start',
-                      padding: '4px 9px',
-                      borderRadius: 6,
+                      padding: '4px 10px',
+                      borderRadius: 7,
                       border: 'none',
-                      background: ins.accent,
-                      color: '#0F172A',
+                      background: '#002147',
+                      color: '#FFFFFF',
                       fontSize: 10,
                       fontWeight: 800,
                       cursor: 'pointer',
@@ -1999,6 +2057,45 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 <InsightCard
                   payload={msg.payload}
                   onCta={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'investment-card') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <InvestmentCardWidget
+                  payload={msg.payload}
+                  onAction={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'spending-dashboard') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <SpendingMiniWidgetsGrid
+                  mode="chat"
+                  payload={msg.payload}
+                  customerName={customerName}
+                  bills={customerBills}
+                  onAction={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'contextual-alert') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <ContextualProactiveAlert
+                  payload={msg.payload}
+                  onAction={(v) => { addUser(v); showTyping(); gecxSend(v); }}
+                />
+              </div>
+            );
+
+            if (msg.type === 'transactions-widget') return (
+              <div key={msg.id} className="acn-msg-enter" data-combo="true">
+                <RecentTransactionsWidget
+                  payload={msg.payload}
+                  onAction={(v) => { addUser(v); showTyping(); gecxSend(v); }}
                 />
               </div>
             );
@@ -2240,14 +2337,18 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
             )}
 
             {/* ── @ menu: Canada Utility Billers + Recipients Hub ── */}
-            {activeMenu === 'contact' && (
-              <div className="cp-menu-contact" style={{ maxHeight: 390, display: 'flex', flexDirection: 'column' }}>
+            {activeMenu === 'contact' && (() => {
+              const unpaidBills = customerBills.filter(
+                (b) => !b.is_paid && String(b.status || '').toLowerCase() !== 'paid',
+              );
+              return (
+              <div className="cp-menu-contact" style={{ maxHeight: 400, display: 'flex', flexDirection: 'column' }}>
                 <div className="cp-menu-tabs">
                   <button
                     className={`cp-menu-tab${contactTab === 'billers' ? ' active' : ''}`}
                     onClick={() => setContactTab('billers')}
                   >
-                    ⚡ Utility Billers {customerBills.length > 0 ? `(${customerBills.length} due)` : ''}
+                    ⚡ Utility Billers {unpaidBills.length > 0 ? `(${unpaidBills.length} due)` : ''}
                   </button>
                   <button
                     className={`cp-menu-tab${contactTab === 'recipients' ? ' active' : ''}`}
@@ -2260,19 +2361,19 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                 {/* ── BILLERS TAB ── */}
                 {contactTab === 'billers' && (
                   <div className="cp-menu-billers" style={{ overflowY: 'auto', paddingBottom: 8 }}>
-                    {/* 1. Customer's Upcoming / Saved Bills from Firestore */}
-                    {isAuthenticated && customerBills.length > 0 && (
+                    {/* 1. Customer's Upcoming Unpaid Bills from Firestore (Tallies with header badge) */}
+                    {isAuthenticated && unpaidBills.length > 0 && (
                       <div style={{ marginBottom: 12 }}>
                         <div className="cp-menu-section-label" style={{ color: '#B45309', fontWeight: 800 }}>
-                          ⚡ Your Upcoming Bills ({customerName})
+                          ⚡ Your Upcoming Bills ({unpaidBills.length} due · CAD $
+                          {unpaidBills.reduce((s, b) => s + Number(b.amount || 0), 0).toFixed(2)} total)
                         </div>
-                        {customerBills.map((bill) => {
-                          const amt = Number(bill.amount || 0).toFixed(2);
+                        {unpaidBills.map((bill) => {
+                          const amt = Number(bill.amount || bill.amount_due || 0).toFixed(2);
+                          const billerTitle = bill.payee_name || bill.biller_name || 'Utility Bill';
                           const days = computeDaysUntil(bill.due_date);
-                          const isPaid = String(bill.status || '').toLowerCase() === 'paid';
-                          const badgeText = isPaid
-                            ? 'Paid ✓'
-                            : days !== null && days <= 3
+                          const badgeText =
+                            days !== null && days <= 3
                               ? `Due in ${Math.max(0, days)}d · Urgent`
                               : days !== null
                                 ? `Due in ${days}d`
@@ -2288,14 +2389,14 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                 padding: '8px 12px',
                                 margin: '4px 8px',
                                 borderRadius: 10,
-                                background: isPaid ? '#F8FAFC' : '#FFFBEB',
-                                border: isPaid ? '1px solid #E2E8F0' : '1px solid #FDE68A',
+                                background: '#FFFBEB',
+                                border: '1px solid #FDE68A',
                               }}
                             >
                               <div style={{ minWidth: 0, flex: 1 }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                   <span style={{ fontSize: 13, fontWeight: 800, color: '#0F172A' }}>
-                                    {bill.payee_name}
+                                    {billerTitle}
                                   </span>
                                   <span
                                     style={{
@@ -2303,8 +2404,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                       fontWeight: 800,
                                       padding: '2px 6px',
                                       borderRadius: 999,
-                                      background: isPaid ? '#E2E8F0' : '#FEF3C7',
-                                      color: isPaid ? '#475569' : '#B45309',
+                                      background: '#FEF3C7',
+                                      color: '#B45309',
                                     }}
                                   >
                                     {badgeText}
@@ -2314,31 +2415,29 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                   {bill.category || 'Utility'} · Acct #{bill.account_number || 'On file'} · <strong>CAD ${amt}</strong>
                                 </div>
                               </div>
-                              {!isPaid && (
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    const msg = `Pay my ${bill.payee_name} bill of $${amt} now`;
-                                    addUser(msg);
-                                    showTyping();
-                                    gecxSend(msg);
-                                    closeMenu();
-                                  }}
-                                  style={{
-                                    padding: '6px 11px',
-                                    borderRadius: 8,
-                                    border: 'none',
-                                    background: '#002147',
-                                    color: '#FFFFFF',
-                                    fontSize: 11,
-                                    fontWeight: 800,
-                                    cursor: 'pointer',
-                                    whiteSpace: 'nowrap',
-                                  }}
-                                >
-                                  Pay ${amt}
-                                </button>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const msg = `Pay my ${billerTitle} bill of $${amt} now`;
+                                  addUser(msg);
+                                  showTyping();
+                                  gecxSend(msg);
+                                  closeMenu();
+                                }}
+                                style={{
+                                  padding: '6px 11px',
+                                  borderRadius: 8,
+                                  border: 'none',
+                                  background: '#002147',
+                                  color: '#FFFFFF',
+                                  fontSize: 11,
+                                  fontWeight: 800,
+                                  cursor: 'pointer',
+                                  whiteSpace: 'nowrap',
+                                }}
+                              >
+                                Pay ${amt}
+                              </button>
                             </div>
                           );
                         })}
@@ -2663,7 +2762,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                   </div>
                 )}
               </div>
-            )}
+              );
+            })()}
 
             {/* ── AI suggestions & Proactive Insights ── */}
             {activeMenu === 'ai' && (

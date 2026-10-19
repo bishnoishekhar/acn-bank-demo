@@ -39,14 +39,15 @@ If customer_id is empty, no customer has been identified yet.
 ## ACC-02: Recent Transactions & Anomaly Spotter
 1. Call manageCustomerDatabase_listCustomerTransactions with pageSize=3 for voice, pageSize=10 for webchat.
    (The API only accepts pageSize: it has no account, date or category filters.)
-2. Proactive Anomaly Insight: If any transaction looks unusual or has anomaly_flag=true or merchant "Unknown Online Vendor", proactively point out the exact merchant and amount from the tool response ("I also noticed an unusual late-night charge at Unknown Online Vendor — do you recognize that, or would you like to dispute it?") and when widgets_enabled=True emit acn-insight-card (insight_type="anomaly", headline, body, cta_label, and cta_value populated from the flagged transaction).
-3. "I don't recognise this charge" or dispute request → IMMEDIATELY transfer back to acn_banking_hub for the dispute/fraud path (do NOT handle disputes here).
+2. Say one short conversational sentence introducing the transactions (do NOT write out a bullet list in text when widgets_enabled=True). If any transaction looks unusual or has anomaly_flag=true or merchant "Unknown Online Vendor", mention it briefly ("Here are your most recent transactions — I also noticed a CAD 249.99 charge from Unknown Online Vendor that is flagged for review.").
+3. When widgets_enabled=True: ALWAYS emit `acn-transactions-widget` with `name="acn-transactions-widget"`, `headline="Recent Account Activity"`, `account_label="Chequing & Credit Cards"`, and the `transactions` array copied from `listCustomerTransactions` (each item with `date`, `merchant`, `category`, `amount`, `direction` set to `"credit"` for deposits/payroll or `"debit"` for purchases/transfers/fees, `status` set to `"disputed"` or `"flagged"` if `anomaly_flag=true` or `"Unknown Online Vendor"` else `"posted"`, and `anomaly_flag`).
+4. "I don't recognise this charge" or dispute request → IMMEDIATELY transfer back to acn_banking_hub for the dispute/fraud path (do NOT handle disputes here).
 
 </subtask>
 <subtask id="acc-03:_transaction_search">
 ## ACC-03: Transaction Search
 1. Call manageCustomerDatabase_listCustomerTransactions (no filters exist: fetch the list, then filter by merchant/category/date yourself).
-2. Present matches naturally.
+2. Say one short sentence summarizing the matches, and when widgets_enabled=True emit `acn-transactions-widget` with the matching transactions.
 3. If customer says "I don't recognise this" → route to acn_banking_hub → acn_disputes.
 
 </subtask>
@@ -58,11 +59,10 @@ If customer_id is empty, no customer has been identified yet.
    - Upcoming Utility Bill Alert: Highlight the nearest upcoming bill from `upcomingBills` (such as Enbridge Gas, Toronto Hydro, or Rogers Wireless with its exact amount and `daysUntilDue`) and ask if they want to pay it now.
    - Odd Transaction Alert: Mention the flagged charge at Unknown Online Vendor from `anomalies` with its exact amount and offer to review or dispute it.
    - Idle Cash Tip: Mention the `idleCashInsight` recommendation to move surplus chequing cash to High-Interest Savings to earn extra interest.
-3. When widgets_enabled=True, emit acn-insight-card matching the customer's focus:
-   - If asking about bills due or general insights: insight_type="bill_automation" (headline, body, cta_label, cta_value from proactiveInsights[0]).
-   - If asking about odd/unusual transactions: insight_type="anomaly" (from proactiveInsights[1]).
-   - If asking about spending trends/categories: insight_type="spending_spike" (from proactiveInsights[2]).
-   - If asking about savings/idle cash: insight_type="savings_opportunity" (from proactiveInsights[3]).
+3. When widgets_enabled=True:
+   - For spending analysis, spending summary, or financial pulse ("Analyze my spending", "How much did I spend", category breakdown): ALWAYS emit `acn-spending-dashboard` with `name="acn-spending-dashboard"`, `headline="October Spending Breakdown & Financial Pulse"`, `total_spend` (from `totalSpend`), `mom_pct` (from `monthOverMonthPct`), `saving_rate=25`, `monthly_income=5400`, `top_category` (from `topCategory.name`), `categories` (from `categories`), `upcoming_bills` (from `upcomingBills`), `proactive_alert_headline` (from `proactiveInsights[0].headline`), `proactive_alert_cta_label` (from `proactiveInsights[0].cta_label`), and `proactive_alert_cta_value` (from `proactiveInsights[0].cta_value`).
+   - If the customer specifically asks why a category is higher than last month: emit `acn-proactive-alert` with `name="acn-proactive-alert"`, `badge="PROACTIVE SPENDING ALERT"`, `headline`, `detail`, `category_name`, `current_month_amt`, `last_month_amt`, `primary_cta_label`, and `primary_cta_utterance`.
+   - If the customer specifically asks only about upcoming bills due, odd transactions, or idle cash: emit `acn-insight-card` (`insight_type="bill_automation"`, `"anomaly"`, or `"savings_opportunity"`).
 4. If the customer chooses to pay a bill or transfer money, transfer immediately to acn_banking_hub.
 
 </subtask>
@@ -119,7 +119,10 @@ Always include CDIC protects eligible deposits at member institutions up to $100
 
 {@TOOL: quick_actions}
 {@TOOL: acn-payment-carousel}
+{@TOOL: acn-transactions-widget}
 {@TOOL: acn-insight-card}
+{@TOOL: acn-spending-dashboard}
+{@TOOL: acn-proactive-alert}
 {@TOOL: acn-credit-card-widget}
 </subtask>
 
@@ -139,8 +142,11 @@ the widget. Never call a widget as your only output.
 Only emit widgets when widgets_enabled is true (see WIDGET SWITCH below).
 
 - quick_actions: After every response that presents 2+ choices (balance, transactions, insights).
-- acn-payment-carousel: After getAccounts or listCustomerTransactions to show accounts or transactions.
-- acn-insight-card: After compute_spending_insights, getBills (when an upcoming bill is due), or listCustomerTransactions (when an anomaly is spotted) -- emit insight card with name="acn-insight-card", insight_type, headline, body, cta_label, and cta_value.
+- acn-payment-carousel: After getAccounts to show accounts.
+- acn-transactions-widget: After listCustomerTransactions when showing recent transactions or transaction search results -- ALWAYS emit with name="acn-transactions-widget", headline="Recent Account Activity", account_label="Chequing & Credit Cards", and the transactions array instead of listing transactions in text.
+- acn-spending-dashboard: After compute_spending_insights when presenting spending analysis, category breakdown pie chart, or financial pulse -- emit with name="acn-spending-dashboard", headline, total_spend, mom_pct, saving_rate, monthly_income, top_category, categories, and upcoming_bills.
+- acn-proactive-alert: When highlighting a specific category's month-over-month spending spike (e.g. Food & Dining or Utilities & Bills vs last month).
+- acn-insight-card: After getBills (when an upcoming bill is due), or for savings/idle cash nudges -- emit insight card with name="acn-insight-card", insight_type, headline, body, cta_label, and cta_value.
 - acn-credit-card-widget: When customer asks about credit card balances (after getCards).
 </subtask>
 </taskflow>

@@ -1,0 +1,67 @@
+{
+  "name": "acn-transactions-widget",
+  "displayName": "acn-transactions-widget",
+  "widgetTool": {
+    "name": "acn-transactions-widget",
+    "description": "Emit an interactive recent transactions activity widget with inflow/outflow summary, category badges, and anomaly dispute actions. Before calling this tool, speak a brief conversational pacing phrase: 'Here are your most recent transactions.'",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "account_label": {
+          "type": "STRING"
+        },
+        "headline": {
+          "type": "STRING"
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'acn-transactions-widget'"
+        },
+        "total_inflow": {
+          "type": "NUMBER"
+        },
+        "total_outflow": {
+          "type": "NUMBER"
+        },
+        "transactions": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "amount": {
+                "type": "NUMBER"
+              },
+              "anomaly_flag": {
+                "type": "BOOLEAN"
+              },
+              "category": {
+                "type": "STRING"
+              },
+              "date": {
+                "type": "STRING"
+              },
+              "direction": {
+                "type": "STRING",
+                "description": "Either 'debit' (outflow/purchase) or 'credit' (inflow/deposit)."
+              },
+              "id": {
+                "type": "STRING"
+              },
+              "merchant": {
+                "type": "STRING"
+              },
+              "status": {
+                "type": "STRING",
+                "description": "Status such as 'posted', 'flagged', 'disputed', or 'pending'."
+              }
+            },
+            "required": ["date", "merchant", "amount"]
+          }
+        }
+      },
+      "required": ["name", "headline", "transactions"]
+    }
+  }
+}
+

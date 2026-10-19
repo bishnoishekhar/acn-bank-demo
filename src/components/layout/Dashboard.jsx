@@ -1,7 +1,10 @@
+import { useEffect, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { fetchCustomerBills } from '../../firebase';
 import CardsSection from './CardsSection';
 import MyQrCard from '../MyQrCard';
 import QrHistoryCard from '../QrHistoryCard';
+import { SpendingMiniWidgetsGrid, InvestmentCardWidget } from '../FinancialInsightsWidgets';
 
 const PRODUCTS = [
   {
@@ -20,7 +23,13 @@ const PRODUCTS = [
     icon: '📊',
     title: 'Know your finances',
     desc:  'Check balances, review recent transactions, track spending patterns, and view your credit score — instantly.',
-    intent: 'I want to know my finances',
+    intent: 'Analyze my spending',
+  },
+  {
+    icon: '📈',
+    title: 'GICs & Registered Investing',
+    desc:  'Compare guaranteed GIC rates up to 3.80% and high-yield TFSA/RRSP options with interactive compounding projections.',
+    intent: 'Check GIC rates',
   },
   {
     icon: '📱',
@@ -37,14 +46,28 @@ const PRODUCTS = [
 ];
 
 export default function Dashboard({ onOpenChat }) {
-  const { authState, customerName, customer } = useAuth();
+  const { authState, customerName, customer, customerId } = useAuth();
+  const [customerBills, setCustomerBills] = useState([]);
+
   // Hero card art shows the real cardholder once signed in, a placeholder before.
   const cardHolder = customer?.legalName?.toUpperCase() || 'YOUR NAME HERE';
 
+  useEffect(() => {
+    if (authState !== 'authenticated' || !customerId) {
+      setCustomerBills([]);
+      return;
+    }
+    let cancelled = false;
+    fetchCustomerBills(customerId).then((bills) => {
+      if (!cancelled) setCustomerBills(bills || []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [authState, customerId]);
+
   return (
     <main className="dashboard">
-
-      {/* Auth/guest status is shown in the top nav — no separate banner needed */}
 
       {/* ── Hero ── */}
       <section className="hero" id="hero">
@@ -74,9 +97,9 @@ export default function Dashboard({ onOpenChat }) {
               </button>
               <button
                 className="btn-hero-ghost"
-                onClick={() => onOpenChat('Tell me about ACN Bank products')}
+                onClick={() => onOpenChat('Analyze my spending')}
               >
-                See what it can do
+                Explore financial insights
               </button>
             </div>
 
@@ -127,16 +150,13 @@ export default function Dashboard({ onOpenChat }) {
         </div>
       </section>
 
-      {/* ── My QR + Live QR History (receive side, ACN QR Pay) ──
-           Displayed immediately below Hero when signed in (via Web or Chat) so
-           another user signed into the ACN Bank Flutter mobile app can scan and
-           transfer immediately. */}
+      {/* ── My QR + Live QR History (receive side, ACN QR Pay) ── */}
       {authState === 'authenticated' && customer?.customerId && customer.qrEnabled !== false && (
         <section
           id="my-qr-section"
           style={{
-            maxWidth: 920,
-            margin: '28px auto 12px',
+            maxWidth: 1120,
+            margin: '16px auto 28px',
             padding: '0 24px',
           }}
         >
@@ -160,6 +180,39 @@ export default function Dashboard({ onOpenChat }) {
           </div>
         </section>
       )}
+
+      {/* ── Home Financial Insights & Spending Breakdown (Mini-2x2 Widgets + Pie Chart + GIC Projector) ── */}
+      <section
+        id="home-insights-section"
+        style={{
+          maxWidth: 1200,
+          margin: '0 auto 56px',
+          padding: '0 5%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 24,
+        }}
+      >
+        <div>
+          <p className="section-label" style={{ marginBottom: 6 }}>
+            Financial Intelligence & Interactive Insights
+          </p>
+          <p style={{ margin: '0 0 16px', fontSize: 13.5, color: '#64748B' }}>
+            Real-time category pie breakdown, spending trend pulse, upcoming utility bills, saving rate gauge, and GIC growth simulator.
+          </p>
+          <SpendingMiniWidgetsGrid
+            mode="dashboard"
+            customerName={authState === 'authenticated' ? (customer?.legalName || customerName) : 'ACN Demo Preview'}
+            bills={customerBills}
+            onAction={(utterance) => onOpenChat(utterance)}
+          />
+        </div>
+
+        <InvestmentCardWidget
+          payload={{ principal: 25000 }}
+          onAction={(utterance) => onOpenChat(utterance)}
+        />
+      </section>
 
       {/* ── Products ── */}
       <section className="products" id="products">

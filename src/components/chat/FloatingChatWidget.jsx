@@ -1,25 +1,38 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { SIGN_IN_SENTINEL } from './ChatPanel';
+import { SIGN_IN_SENTINEL, CANADIAN_BILLERS, computeDaysUntil } from './ChatPanel';
 import { connectBidiWhenReady, disconnectBidi, isBidiActive } from '../gecxBidi';
+import {
+  fetchCustomerBills,
+  fetchCustomerBeneficiaries,
+  fetchP2PContacts,
+} from '../../firebase';
+import InsightCard from '../Insightcard';
+import AccountCarousel from '../AccountCarousel';
+import {
+  SpendingMiniWidgetsGrid,
+  InvestmentCardWidget,
+  ContextualProactiveAlert,
+  RecentTransactionsWidget,
+} from '../FinancialInsightsWidgets';
 
 // ── Quick-action suggestions (mirrors ChatPanel) ───────────────────────────────
 const GUEST_SUGGESTIONS = [
   { label: '💳 Explore credit cards', utterance: 'Show me your credit cards' },
+  { label: '📈 GIC & investment rates', utterance: 'Check GIC rates' },
   { label: '⚖️ Compare cards',        utterance: 'Compare your credit cards' },
   { label: '✈️ Best card for travel', utterance: 'Which card is best for travel?' },
-  { label: '📝 Apply for a card',     utterance: 'I want to apply for a credit card' },
   { label: '🔐 Sign in',              utterance: SIGN_IN_SENTINEL },
   { label: '💡 What can you do?',     utterance: 'What can you help me with?' },
 ];
 
 const CUSTOMER_SUGGESTIONS = [
-  { label: '💰 Check balance',       utterance: 'Check my balance' },
-  { label: '💸 Send money',          utterance: 'Transfer money' },
-  { label: '📊 Recent transactions', utterance: 'Show my recent transactions' },
-  { label: '🧾 Pay a bill',          utterance: 'I want to pay a bill' },
-  { label: '🎁 My offers',           utterance: 'Show my pre-approved offers' },
-  { label: '🚫 Block my card',       utterance: 'I need to block my card' },
+  { label: '💡 Analyze my spending',   utterance: 'Analyze my spending' },
+  { label: '🧾 Pay upcoming bill',     utterance: 'Check my upcoming bills and help me pay them' },
+  { label: '📈 Check GIC rates',       utterance: 'Check GIC rates' },
+  { label: '💰 Check balance',         utterance: 'Check my balance' },
+  { label: '💸 Send money',            utterance: 'Transfer money' },
+  { label: '📊 Recent transactions',   utterance: 'Show my recent transactions' },
 ];
 
 // ── BotText — renders **bold** as <strong> ────────────────────────────────────
@@ -55,22 +68,62 @@ export default function FloatingChatWidget({
   onSend,
   onRequestSignIn,
 }) {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, customerId, customerName } = useAuth();
   const AI_SUGGESTIONS = isAuthenticated ? CUSTOMER_SUGGESTIONS : GUEST_SUGGESTIONS;
 
-  const [inputVal,        setInputVal]        = useState('');
-  const [unread,          setUnread]          = useState(0);
-  const [voiceActive,     setVoiceActive]     = useState(false);
-  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [inputVal,          setInputVal]          = useState('');
+  const [unread,            setUnread]            = useState(0);
+  const [voiceActive,       setVoiceActive]       = useState(false);
+  const [activePopover,     setActivePopover]     = useState(null); // 'contact' | 'suggestions' | null
+  const [contactTab,        setContactTab]        = useState('billers');
+  const [customerBills,     setCustomerBills]     = useState([]);
+  const [beneficiaries,     setBeneficiaries]     = useState([]);
+  const [p2pContacts,       setP2pContacts]       = useState([]);
+  const [billerSearch,      setBillerSearch]      = useState('');
+  const [billerCategory,    setBillerCategory]    = useState('All');
+  const [selectedBillerId,  setSelectedBillerId]  = useState(null);
+  const [customBillerAmt,   setCustomBillerAmt]   = useState('');
 
   const msgsRef         = useRef(null);
   const prevCountRef    = useRef(messages.length);
-  const recognitionRef  = useRef(null);
   const galleryInputRef = useRef(null);
-  const suggestionsRef  = useRef(null);
+  const popoverRef      = useRef(null);
 
   const isResponding = messages.some((m) => m.type === 'typing');
-  const hasContent   = messages.some((m) => m.type === 'bot' || m.type === 'user' || m.type === 'combo');
+  const hasContent   = messages.some(
+    (m) =>
+      m.type === 'bot' ||
+      m.type === 'user' ||
+      m.type === 'combo' ||
+      m.type === 'insight' ||
+      m.type === 'investment-card' ||
+      m.type === 'spending-dashboard' ||
+      m.type === 'transactions-widget',
+  );
+
+  // Load customer bills, beneficiaries, and P2P contacts when signed in
+  useEffect(() => {
+    if (!isAuthenticated || !customerId) {
+      setCustomerBills([]);
+      setBeneficiaries([]);
+      setP2pContacts([]);
+      return;
+    }
+    let cancelled = false;
+    Promise.all([
+      fetchCustomerBills(customerId),
+      fetchCustomerBeneficiaries(customerId),
+      fetchP2PContacts(customerId),
+    ]).then(([bills, benes, contacts]) => {
+      if (cancelled) return;
+      setCustomerBills(bills || []);
+      setBeneficiaries(benes || []);
+      setP2pContacts(contacts || []);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isAuthenticated, customerId]);
 
   // ── Scroll + unread badge ──────────────────────────────────────────────────
   useEffect(() => {
@@ -86,42 +139,34 @@ export default function FloatingChatWidget({
 
   useEffect(() => { if (isOpen) setUnread(0); }, [isOpen]);
 
-  // Close suggestions when clicking outside
+  // Close popover when clicking outside
   useEffect(() => {
-    if (!showSuggestions) return;
+    if (!activePopover) return;
     const handler = (e) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(e.target)) {
-        setShowSuggestions(false);
+      if (popoverRef.current && !popoverRef.current.contains(e.target)) {
+        setActivePopover(null);
       }
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
-  }, [showSuggestions]);
+  }, [activePopover]);
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const handleSend = (text) => {
     const msg = (text ?? inputVal).trim();
     if (!msg || isResponding) return;
     setInputVal('');
-    setShowSuggestions(false);
+    setActivePopover(null);
     if (msg === SIGN_IN_SENTINEL) { onRequestSignIn?.(); return; }
     onSend?.(msg);
   };
 
   const handleSuggestion = (s) => {
-    setShowSuggestions(false);
+    setActivePopover(null);
     if (s.utterance === SIGN_IN_SENTINEL) { onRequestSignIn?.(); return; }
     onSend?.(s.utterance);
   };
 
-  // ── Voice (mic) ────────────────────────────────────────────────────────────
-  // This widget mirrors ChatPanel's thread, so it must drive the same single
-  // bidi session rather than opening a second one — two sessions would mean two
-  // microphones competing and two transcripts of the same sentence.
-  //
-  // Browser SpeechRecognition used to live here. It was removed with the rest
-  // of the Web Speech path: recognition now happens on the platform, in the
-  // same engine that produces the agent's replies.
   const toggleVoice = useCallback(() => {
     if (isBidiActive()) {
       disconnectBidi();
@@ -138,12 +183,14 @@ export default function FloatingChatWidget({
     });
   }, []);
 
-  // Keep the mic indicator in step with the session, including when it is
-  // started or stopped from the main ChatPanel.
   useEffect(() => {
     const sync = setInterval(() => setVoiceActive(isBidiActive()), 500);
     return () => clearInterval(sync);
   }, []);
+
+  const unpaidBills = customerBills.filter(
+    (b) => !b.is_paid && String(b.status || '').toLowerCase() !== 'paid',
+  );
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -155,12 +202,31 @@ export default function FloatingChatWidget({
           <div className="fc-header">
             <div className="fc-avatar">A</div>
             <div className="fc-info">
-              <div className="fc-title">ACN Bank AI</div>
+              <div className="fc-title">
+                ACN Bank AI {isAuthenticated && customerName ? `· ${customerName}` : ''}
+              </div>
               <div className="fc-status">
                 <span className="fc-status-dot" />
                 {isResponding ? 'Typing…' : 'Online'}
               </div>
             </div>
+            <button
+              type="button"
+              onClick={() => setActivePopover((p) => (p === 'contact' ? null : 'contact'))}
+              style={{
+                padding: '4px 9px',
+                borderRadius: 999,
+                border: '1px solid #BFDBFE',
+                background: activePopover === 'contact' ? '#002147' : '#EFF6FF',
+                color: activePopover === 'contact' ? '#FFFFFF' : '#002147',
+                fontSize: 10.5,
+                fontWeight: 800,
+                cursor: 'pointer',
+              }}
+              title="Open Canadian Utility Billers & Payees"
+            >
+              @ Billers {unpaidBills.length > 0 ? `(${unpaidBills.length})` : ''}
+            </button>
             <button className="fc-close" onClick={onClose} aria-label="Minimise chat">✕</button>
           </div>
 
@@ -169,7 +235,7 @@ export default function FloatingChatWidget({
             {!hasContent && !isResponding && (
               <div className="fc-empty">
                 <div className="fc-empty-icon">💬</div>
-                <p>Your conversation will appear here</p>
+                <p>Ask anything or tap <strong>@</strong> below to pay utility bills</p>
               </div>
             )}
 
@@ -190,10 +256,67 @@ export default function FloatingChatWidget({
                 </div>
               );
 
-              // Combo card — show heading + actual action pill buttons (resized)
-              if (msg.type === 'combo' && msg.heading) return (
-                <div key={msg.id} className="fc-bot-bubble">
-                  <FcBotText text={msg.heading} />
+              if (msg.type === 'insight') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <InsightCard
+                    payload={msg.payload}
+                    onCta={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              if (msg.type === 'investment-card') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <InvestmentCardWidget
+                    payload={msg.payload}
+                    onAction={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              if (msg.type === 'spending-dashboard') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <SpendingMiniWidgetsGrid
+                    mode="chat"
+                    payload={msg.payload}
+                    customerName={customerName}
+                    bills={customerBills}
+                    onAction={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              if (msg.type === 'contextual-alert') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <ContextualProactiveAlert
+                    payload={msg.payload}
+                    onAction={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              if (msg.type === 'transactions-widget') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <RecentTransactionsWidget
+                    payload={msg.payload}
+                    onAction={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              if (msg.type === 'carousel') return (
+                <div key={msg.id} style={{ width: '100%' }}>
+                  <AccountCarousel
+                    payload={msg.payload}
+                    onCta={(v) => handleSend(v)}
+                  />
+                </div>
+              );
+
+              // Combo card — show heading + actual action pill buttons
+              if (msg.type === 'combo' && (msg.heading || msg.actions?.length > 0)) return (
+                <div key={msg.id} className="fc-bot-bubble" style={{ maxWidth: '94%' }}>
+                  {msg.heading && <FcBotText text={msg.heading} />}
                   {msg.actions?.length > 0 && (
                     <div className="fc-combo-actions">
                       {msg.actions.map((action, i) => {
@@ -227,9 +350,325 @@ export default function FloatingChatWidget({
             })}
           </div>
 
+          {/* ── @ Utility Billers & Payees Popover Sheet ── */}
+          {activePopover === 'contact' && (
+            <div
+              ref={popoverRef}
+              style={{
+                background: '#FFFFFF',
+                borderTop: '1px solid #CBD5E1',
+                maxHeight: 315,
+                display: 'flex',
+                flexDirection: 'column',
+                boxShadow: '0 -8px 24px rgba(15, 23, 42, 0.08)',
+              }}
+            >
+              <div className="cp-menu-tabs">
+                <button
+                  type="button"
+                  className={`cp-menu-tab${contactTab === 'billers' ? ' active' : ''}`}
+                  onClick={() => setContactTab('billers')}
+                >
+                  ⚡ Utility Billers {unpaidBills.length > 0 ? `(${unpaidBills.length} due)` : ''}
+                </button>
+                <button
+                  type="button"
+                  className={`cp-menu-tab${contactTab === 'recipients' ? ' active' : ''}`}
+                  onClick={() => setContactTab('recipients')}
+                >
+                  👥 Payees & QR
+                </button>
+              </div>
+
+              {contactTab === 'billers' && (
+                <div style={{ overflowY: 'auto', paddingBottom: 8 }}>
+                  {/* 1. Upcoming unpaid bills */}
+                  {isAuthenticated && unpaidBills.length > 0 && (
+                    <div style={{ marginBottom: 8 }}>
+                      <div className="cp-menu-section-label" style={{ color: '#B45309', fontWeight: 800 }}>
+                        ⚡ Your Upcoming Bills ({unpaidBills.length} due)
+                      </div>
+                      {unpaidBills.map((bill) => {
+                        const amt = Number(bill.amount || bill.amount_due || 0).toFixed(2);
+                        const billerTitle = bill.payee_name || bill.biller_name || 'Utility Bill';
+                        const days = computeDaysUntil(bill.due_date);
+                        const badgeText =
+                          days !== null && days <= 3
+                            ? `Due in ${Math.max(0, days)}d · Urgent`
+                            : days !== null
+                              ? `Due in ${days}d`
+                              : `Due soon`;
+                        return (
+                          <div
+                            key={bill.id}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: 8,
+                              padding: '7px 10px',
+                              margin: '4px 8px',
+                              borderRadius: 10,
+                              background: '#FFFBEB',
+                              border: '1px solid #FDE68A',
+                            }}
+                          >
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <span style={{ fontSize: 12, fontWeight: 800, color: '#0F172A' }}>
+                                  {billerTitle}
+                                </span>
+                                <span
+                                  style={{
+                                    fontSize: 9.5,
+                                    fontWeight: 800,
+                                    padding: '1px 6px',
+                                    borderRadius: 999,
+                                    background: '#FEF3C7',
+                                    color: '#B45309',
+                                  }}
+                                >
+                                  {badgeText}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: 10.5, color: '#64748B', marginTop: 1 }}>
+                                Acct #{bill.account_number || 'On file'} · <strong>CAD ${amt}</strong>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleSend(`Pay my ${billerTitle} bill of $${amt} now`)}
+                              style={{
+                                padding: '5px 10px',
+                                borderRadius: 8,
+                                border: 'none',
+                                background: '#002147',
+                                color: '#FFFFFF',
+                                fontSize: 10.5,
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                whiteSpace: 'nowrap',
+                              }}
+                            >
+                              Pay ${amt}
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* 2. Search & Category Filter */}
+                  <div style={{ padding: '4px 10px 6px' }}>
+                    <input
+                      type="text"
+                      placeholder="Search Canadian utility, telecom & tax billers…"
+                      value={billerSearch}
+                      onChange={(e) => setBillerSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '6px 9px',
+                        borderRadius: 8,
+                        border: '1px solid #CBD5E1',
+                        fontSize: 11.5,
+                        marginBottom: 5,
+                      }}
+                    />
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {['All', 'Utilities', 'Telecom', 'Tax & Gov'].map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setBillerCategory(cat)}
+                          style={{
+                            padding: '3px 8px',
+                            borderRadius: 999,
+                            fontSize: 10,
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            border: billerCategory === cat ? '1px solid #002147' : '1px solid #CBD5E1',
+                            background: billerCategory === cat ? '#002147' : '#F8FAFC',
+                            color: billerCategory === cat ? '#FFFFFF' : '#475569',
+                          }}
+                        >
+                          {cat}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="cp-menu-section-label">Canadian Billers Directory</div>
+                  {CANADIAN_BILLERS.filter((b) => {
+                    const matchesCat = billerCategory === 'All' || b.category === billerCategory;
+                    const q = billerSearch.trim().toLowerCase();
+                    const matchesSearch =
+                      !q ||
+                      b.name.toLowerCase().includes(q) ||
+                      b.sub.toLowerCase().includes(q);
+                    return matchesCat && matchesSearch;
+                  }).map((b) => {
+                    const isExpanded = selectedBillerId === b.id;
+                    return (
+                      <div key={b.id} style={{ borderBottom: '1px solid #F1F5F9', paddingBottom: isExpanded ? 6 : 0 }}>
+                        <button
+                          type="button"
+                          className="cp-menu-biller-row"
+                          onClick={() => {
+                            setSelectedBillerId(isExpanded ? null : b.id);
+                            setCustomBillerAmt('');
+                          }}
+                          style={{ width: '100%', justifyContent: 'space-between' }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
+                            <div className="cp-menu-biller-avatar">{b.emoji}</div>
+                            <div>
+                              <div className="cp-menu-biller-name">{b.name}</div>
+                              <div className="cp-menu-biller-sub">{b.sub}</div>
+                            </div>
+                          </div>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#002147' }}>
+                            {isExpanded ? '▴' : 'Pay ›'}
+                          </span>
+                        </button>
+
+                        {isExpanded && (
+                          <div style={{ padding: '4px 10px 4px 48px', display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+                            {(b.presets || [50, 100, 150]).map((amt) => (
+                              <button
+                                key={amt}
+                                type="button"
+                                onClick={() => handleSend(`Pay $${amt} to ${b.name}`)}
+                                style={{
+                                  padding: '3px 8px',
+                                  borderRadius: 999,
+                                  border: '1px solid #002147',
+                                  background: '#F0F9FF',
+                                  color: '#002147',
+                                  fontSize: 10.5,
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Pay ${amt}
+                              </button>
+                            ))}
+                            <input
+                              type="number"
+                              min="1"
+                              step="0.01"
+                              placeholder="Custom $"
+                              value={customBillerAmt}
+                              onChange={(e) => setCustomBillerAmt(e.target.value)}
+                              style={{
+                                width: 68,
+                                padding: '3px 6px',
+                                borderRadius: 6,
+                                border: '1px solid #CBD5E1',
+                                fontSize: 10.5,
+                              }}
+                            />
+                            {Number(customBillerAmt) > 0 && (
+                              <button
+                                type="button"
+                                onClick={() => handleSend(`Pay $${Number(customBillerAmt).toFixed(2)} to ${b.name}`)}
+                                style={{
+                                  padding: '3px 8px',
+                                  borderRadius: 6,
+                                  border: 'none',
+                                  background: '#002147',
+                                  color: '#FFFFFF',
+                                  fontSize: 10.5,
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Go
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {contactTab === 'recipients' && (
+                <div style={{ overflowY: 'auto', paddingBottom: 8 }}>
+                  {!isAuthenticated ? (
+                    <div className="cp-menu-empty">
+                      <span className="cp-menu-empty-icon">🔐</span>
+                      <p>Sign in to view saved payees & P2P contacts</p>
+                      <button className="cp-menu-signin" onClick={() => { setActivePopover(null); onRequestSignIn?.(); }}>
+                        Sign in
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={{ padding: '6px 10px' }}>
+                        <button
+                          type="button"
+                          onClick={() => handleSend('Generate a QR code so someone can pay me')}
+                          style={{
+                            width: '100%',
+                            padding: '8px 11px',
+                            borderRadius: 9,
+                            border: 'none',
+                            background: '#002147',
+                            color: '#FFFFFF',
+                            fontSize: 11.5,
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          ▦ Generate My ACN QR Pay Code →
+                        </button>
+                      </div>
+                      {beneficiaries.map((ben) => {
+                        const bName = ben.name || ben.nickname || 'Payee';
+                        return (
+                          <button
+                            key={ben.id}
+                            type="button"
+                            className="cp-menu-biller-row"
+                            onClick={() => handleSend(`Transfer money to ${bName}`)}
+                          >
+                            <div className="cp-menu-biller-avatar cp-contact-avatar">
+                              {bName.slice(0, 2).toUpperCase()}
+                            </div>
+                            <div>
+                              <div className="cp-menu-biller-name">{bName}</div>
+                              <div className="cp-menu-biller-sub">{ben.bank_name || 'Interac e-Transfer'}</div>
+                            </div>
+                          </button>
+                        );
+                      })}
+                      {p2pContacts.map((c) => (
+                        <button
+                          key={c.customer_id}
+                          type="button"
+                          className="cp-menu-biller-row"
+                          onClick={() => handleSend(`Transfer money to ${c.username}`)}
+                        >
+                          <div className="cp-menu-biller-avatar cp-contact-avatar">
+                            {c.avatar_initials}
+                          </div>
+                          <div>
+                            <div className="cp-menu-biller-name">{c.display_name}</div>
+                            <div className="cp-menu-biller-sub">{c.username}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ── AI suggestions popover ── */}
-          {showSuggestions && (
-            <div className="fc-suggestions-tray" ref={suggestionsRef}>
+          {activePopover === 'suggestions' && (
+            <div className="fc-suggestions-tray" ref={popoverRef}>
               {AI_SUGGESTIONS.map((s) => (
                 <button
                   key={s.utterance}
@@ -253,7 +692,7 @@ export default function FloatingChatWidget({
                 title="Attach image"
                 aria-label="Attach image"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
                   <circle cx="8.5" cy="8.5" r="1.5"/>
@@ -274,28 +713,25 @@ export default function FloatingChatWidget({
                 }}
               />
 
-              {/* @ alias */}
+              {/* @ Billers & Recipients Hub */}
               <button
-                className="fc-icon-btn"
-                onClick={() => setInputVal((v) => v + '@')}
-                title="Mention / alias"
-                aria-label="Mention"
+                className={`fc-icon-btn${activePopover === 'contact' ? ' active' : ''}`}
+                onClick={() => setActivePopover((v) => (v === 'contact' ? null : 'contact'))}
+                title="Canadian Utility Billers & Payees (@)"
+                aria-label="Utility Billers and Payees"
+                style={{ fontWeight: 800, fontSize: 15 }}
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
-                     stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="4"/>
-                  <path d="M16 8v5a3 3 0 0 0 6 0v-1a10 10 0 1 0-3.92 7.94"/>
-                </svg>
+                @
               </button>
 
               {/* AI suggestions / sparkle */}
               <button
-                className={`fc-icon-btn${showSuggestions ? ' active' : ''}`}
-                onClick={() => setShowSuggestions((v) => !v)}
+                className={`fc-icon-btn${activePopover === 'suggestions' ? ' active' : ''}`}
+                onClick={() => setActivePopover((v) => (v === 'suggestions' ? null : 'suggestions'))}
                 title="Quick suggestions"
                 aria-label="AI suggestions"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
                 </svg>
@@ -324,12 +760,10 @@ export default function FloatingChatWidget({
               aria-label={voiceActive ? 'Stop voice input' : 'Voice input'}
             >
               {voiceActive ? (
-                /* Stop / square icon when listening */
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" stroke="none">
                   <rect x="4" y="4" width="16" height="16" rx="2"/>
                 </svg>
               ) : (
-                /* Mic icon */
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
