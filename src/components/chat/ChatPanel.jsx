@@ -313,6 +313,14 @@ function resolvePayloadName(p) {
     // present `name`) and is dropped silently.
     mortgage_affordability:   'acn-mortgage-affordability',
     mortgage_nudge:           'acn-mortgage-nudge',
+    // The pre-approval form arrives under its RECIPE name (the instruction's
+    // mortgage_preapproval_form), not under the tool name acn-form-input.
+    // resolvePayloadName short-circuits on any present `name` two lines below,
+    // so without this alias the payload never reaches the
+    // `fields -> acn-form-input` heuristic further down: isKnownPayload rejects
+    // it and it is dropped with no error. The agent then says "fill in the form
+    // above" about a form the customer cannot see.
+    mortgage_preapproval_form: 'acn-form-input',
     'acn-nudge-card':         'acn-mortgage-nudge',
     'acn-credit-card-widget': 'acn-card-carousel',
   };
@@ -483,6 +491,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   const pendingSubtitle = useRef(null);
   const comboCreated    = useRef(false);
   const lastProcessed   = useRef({ time: 0, sig: '' });
+  // Visible-content signatures already rendered for the CURRENT turn, so the
+  // unary and bidi transports cannot both render the same agent line.
+  const seenOutputSigs  = useRef(new Set());
   // Voice conversation refs — readable from async callbacks without stale closures
   const voiceModeRef   = useRef(false);   // mirrors voiceMode state
   const ttsEnabledRef  = useRef(true);    // mirrors ttsEnabled state (auto-speak bot responses)
@@ -578,6 +589,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   }, []);
 
   const showTyping = useCallback(() => {
+    seenOutputSigs.current.clear();   // new turn: the previous turn's lines may legitimately repeat
     pendingHeading.current  = null;
     pendingSubtitle.current = null;
     comboCreated.current    = false;
@@ -735,8 +747,29 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
   // as visible bot messages, not as orphaned widgets.
   const processOutputs = useCallback((outputs) => {
     const now = Date.now();
-    const sig = JSON.stringify(outputs);
-    if (now - lastProcessed.current.time < 800 && sig === lastProcessed.current.sig) return;
+
+    /* One agent turn can reach us TWICE: once through the fetch interceptor
+       (unary) and once through gecxBidi's message consumer (voice). The
+       platform transcript proves the agent only ever said it once -- the
+       duplicate bubbles were ours.
+       The old guard missed it on both counts: an 800 ms window is far shorter
+       than the gap between the two transports, and JSON.stringify(outputs)
+       differs whenever the two paths shape the object even slightly
+       differently. So compare on what the customer would actually SEE, and
+       remember it for the whole turn rather than for 800 ms. showTyping()
+       clears the set when the next turn begins, which is what keeps a
+       genuinely repeated line (the same pacing phrase on a later turn) from
+       being swallowed. */
+    const sig = normalizeResponseOutputs(outputs)
+      .map((o) => {
+        const p = normalizeWidgetPayload(o);
+        return `${o?.text || ''}|${(p && resolvePayloadName(p)) || ''}`;
+      })
+      .join('||');
+
+    if (seenOutputSigs.current.has(sig)) return;
+    if (seenOutputSigs.current.size > 50) seenOutputSigs.current.clear();
+    seenOutputSigs.current.add(sig);
     lastProcessed.current = { time: now, sig };
     outputs = normalizeResponseOutputs(outputs);
 
@@ -1007,6 +1040,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
     pendingSubtitle.current = null;
     comboCreated.current    = false;
     lastProcessed.current   = { time: 0, sig: '' };
+    seenOutputSigs.current.clear();
     if (respondingTimer.current) clearTimeout(respondingTimer.current);
     if (finalTimer.current)      clearTimeout(finalTimer.current);
 

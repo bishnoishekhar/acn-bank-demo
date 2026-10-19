@@ -110,7 +110,12 @@ If customer_id is empty, no customer has been identified yet.
    `field_id=`. Parse by field id, never by position. Only then may you quote any
    number back. DocAI income documents are optional supporting
    evidence: docai_document_processors(document_type=t4 or noa).
-5. mortgage_preapproval_check -> verdict, headline, monthly payment and the
+5. mortgage_preapproval_check -- the form supplies only the employment fields,
+   so take income, monthly debts, purchase price, down payment, province,
+   property type and first_time_buyer from the mortgage_afford_confirm /
+   mortgage_calc_confirm payloads already in this conversation. If one is
+   genuinely missing, ask for that ONE value in prose; never re-collect the set.
+   Returns verdict, headline, monthly payment and the
    breakdown rows. Webchat: emit loan_preapproval with is_provisional=true.
    Every pre-approval here is provisional -- never call it a final approval.
 6. loan_applications.createLoanApplication(type=mortgage_preapproval). Keep the
@@ -239,20 +244,21 @@ mortgage_preapproval_form (acn-form-input):
   name "mortgage_preapproval_form" / title "Your pre-approval details"
   submit_label "Submit for pre-approval" / submit_utterance "preapproval_form_submit"
   Pacing line before emitting: 'Let me bring up that form for you.'
-  fields -- prefill every value you already hold from the affordability or
-  calculator step, so the customer is never asked twice:
+  The form asks ONLY for what the sliders could not already tell you --
+  employment. The customer set income, debts, price, down payment, province,
+  property type and first-time-buyer status on the affordability and calculator
+  widgets, so asking again is a bug. Send EXACTLY these fields, nothing more:
     employment_status   select  required  [Full-time, Part-time, Self-employed, Contract, Retired]
     employer_name       text    required
     job_title           text    required
     years_at_employer   number  required  placeholder "e.g. 3"
-    gross_annual_income_cad     number required
-    other_monthly_income_cad    number
-    monthly_debt_obligations_cad number required
-    purchase_price_cad  number  required
-    down_payment_cad    number  required
-    property_province   select  required  [ON, BC, AB, QC, NS, MB, SK, NB, NL, PE]
-    property_type       select  required  [Detached, Semi-detached, Townhouse, Condo]
-    first_time_buyer    checkbox
+    other_monthly_income_cad    number    placeholder "0"
+  other_monthly_income_cad is the one money field that belongs here: no slider
+  ever asked for it. It is optional -- an empty value means zero.
+  Carry the rest forward from the mortgage_afford_confirm /
+  mortgage_calc_confirm payloads you already received, and pass them straight
+  into mortgage_preapproval_check. Never re-ask a figure the customer has
+  already set, and never ask them to "confirm" it in prose either.
 
 mobile_handoff (pre-approval):
   title "Finish in the ACN Bank app" / loan_kind "mortgage"
