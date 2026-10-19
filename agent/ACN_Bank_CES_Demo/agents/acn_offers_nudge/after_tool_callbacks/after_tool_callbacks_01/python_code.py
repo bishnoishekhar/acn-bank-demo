@@ -222,6 +222,27 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+_NO_DATA_LINES = {
+    'getRewardsBalance': "I couldn't find a rewards balance on your profile yet. I can show you how to earn points, or what you could redeem them for. What would you like?",
+    'getNextBestActions': "I don't have any personalised offers for you right now. I can show you our credit cards, mortgages or accounts instead. What interests you?",
+    'listPADs': "You don't have any pre-authorized debits set up right now. Would you like to set one up, or dispute a charge?",
+}
+
+def _remember_no_data_line(tool_name, response, state):
+    """An empty or missing lookup becomes an honest spoken line the model (voice gate) or the text guard can use."""
+    try:
+        line = _NO_DATA_LINES.get(str(tool_name).split('/')[-1].split('_')[-1])
+        if not line or not isinstance(response, dict):
+            return
+        body = response.get('data')
+        empty = (response.get('code') == 'NOT_FOUND') or (response.get('status') == 'success' and (
+            not body or (isinstance(body, dict) and 'documents' in body and not body.get('documents'))))
+        if empty:
+            import time
+            state['spoken_summary'] = json.dumps({'text': line, 'ts': time.time()})
+    except Exception:
+        pass
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -314,6 +335,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
 
+    _remember_no_data_line(tool_name, response, state)
     return response
 
 def _normalize_response(response: dict[str, Any]) -> dict:

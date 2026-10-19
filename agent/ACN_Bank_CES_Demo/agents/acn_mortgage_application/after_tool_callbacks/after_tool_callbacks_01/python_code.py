@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 # data, so there is nothing to mask, own or gate.
 WIDGET_TOOLS = frozenset({
     'acn-amount-input', 'acn-credit-card-widget', 'acn-form-input',
-    'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector',
+    'acn-insight-card', 'acn-nudge-card', 'acn-product-cards', 'acn-payee-selector',
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',

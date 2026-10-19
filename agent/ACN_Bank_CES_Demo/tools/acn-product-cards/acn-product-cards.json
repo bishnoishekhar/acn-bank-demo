@@ -1,0 +1,104 @@
+{
+  "name": "bf30ff75-37ad-4854-8e5f-acd1011c4b03",
+  "displayName": "acn-product-cards",
+  "widgetTool": {
+    "name": "acn-product-cards",
+    "description": "Emit a row of information cards the customer can scroll and tap: account products and GIC terms, an account or investment summary, an application status tracker, a trip readiness checklist, or a shelf of things to explore. Each card has an optional badge, a big headline figure, a few key details and an optional button that sends a message back to you. Use real data only: never put a number on a card that did not come from a tool in this conversation. Before calling this tool, say your answer out loud in one or two sentences and ask one short question; never call it without speaking first.",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'acn-product-cards'"
+        },
+        "title": {
+          "type": "STRING",
+          "description": "Heading above the cards, e.g. 'Everyday accounts' or 'GIC rates'."
+        },
+        "subtitle": {
+          "type": "STRING",
+          "description": "One short line under the heading."
+        },
+        "variant": {
+          "type": "STRING",
+          "description": "One of: rates, summary, status, checklist, shelf."
+        },
+        "footnote": {
+          "type": "STRING",
+          "description": "Small print under the cards, e.g. the CDIC notice."
+        },
+        "items": {
+          "type": "ARRAY",
+          "description": "The cards, 2 to 6 of them.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "title": {
+                "type": "STRING",
+                "description": "Card name, e.g. 'High-Interest Savings' or '1 year'."
+              },
+              "badge": {
+                "type": "STRING",
+                "description": "Short tag, e.g. 'Most popular', 'Approved', '60% ready'."
+              },
+              "tone": {
+                "type": "STRING",
+                "description": "Colour of the badge and card edge: positive, info, warning or negative."
+              },
+              "headline": {
+                "type": "STRING",
+                "description": "The big figure, e.g. '4.50%' or '$41,800.00'."
+              },
+              "headline_label": {
+                "type": "STRING",
+                "description": "What the headline figure is, e.g. 'per year' or 'balance'."
+              },
+              "description": {
+                "type": "STRING",
+                "description": "One short sentence."
+              },
+              "details": {
+                "type": "ARRAY",
+                "description": "Up to 6 key facts. For a checklist give done=true or false instead of a value.",
+                "items": {
+                  "type": "OBJECT",
+                  "properties": {
+                    "label": {
+                      "type": "STRING"
+                    },
+                    "value": {
+                      "type": "STRING"
+                    },
+                    "done": {
+                      "type": "BOOLEAN"
+                    }
+                  },
+                  "required": [
+                    "label"
+                  ]
+                }
+              },
+              "cta_label": {
+                "type": "STRING",
+                "description": "Button text, e.g. 'Open this account'."
+              },
+              "cta_value": {
+                "type": "STRING",
+                "description": "The message sent to you when the button is tapped, written as the customer would say it."
+              }
+            },
+            "required": [
+              "title"
+            ]
+          }
+        }
+      },
+      "required": [
+        "name",
+        "title",
+        "items"
+      ]
+    }
+  }
+}

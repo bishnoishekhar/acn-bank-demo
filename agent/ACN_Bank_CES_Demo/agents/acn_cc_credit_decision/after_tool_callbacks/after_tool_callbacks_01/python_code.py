@@ -130,6 +130,34 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _persist_result(tool_response, input_dict, state):
+    """Approval is only real once the persistence write succeeded. Never leave the model to improvise on a failure."""
+    try:
+        blob = json.dumps(tool_response, default=str)
+    except Exception:
+        blob = str(tool_response)
+    # 409 = this application was already persisted (the API is idempotent): that is still an approved, saved application
+    already = ('ALREADY_EXISTS' in blob) or ('"code": 409' in blob) or ('code=409' in blob)
+    failed = ((not isinstance(tool_response, dict)) or ('errorCode' in blob) or ('"error"' in blob) or ("'error'" in blob)) and not already
+    if failed:
+        return {"status": "business_error", "code": "PERSIST_FAILED", "data": {
+            "message": ("The approval could NOT be saved. Do NOT tell the customer the card is approved. Say you hit a snag saving it "
+                        "and that a specialist will confirm shortly, and offer to connect them with a specialist.")}}
+    try:
+        # the sentence the text guard / the voice speak-first gate use if the model shows the card without saying it
+        f = (input_dict or {}).get('fields') or {}
+        limit = float(f.get('approvedCreditLimit'))
+        apr = float(f.get('interestRate'))
+        import time
+        state['spoken_summary'] = json.dumps({'text': "Great news, your application is approved with a credit limit of $" + format(limit, ",.0f") +
+                                              " and a purchase APR of " + format(apr, ".2f") + "%.", 'ts': time.time()})
+    except Exception:
+        pass
+    return {"status": "success", "code": "OK", "data": {
+        "persisted": True,
+        "message": ("The approval is recorded. Tell the customer the card name, approved limit and APR. Do NOT state any delivery, "
+                    "arrival or activation timeline: you have no such information.")}}
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -163,6 +191,10 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # destroy the shape the client renders -- see WIDGET_TOOLS.
     if tool_name in WIDGET_TOOLS:
         return tool_response
+
+    # AT-PERSIST: the approval counts only if it was saved
+    if tool_name.endswith('persistApprovedCreditCardApplication'):
+        return _persist_result(tool_response, input_dict, state)
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:

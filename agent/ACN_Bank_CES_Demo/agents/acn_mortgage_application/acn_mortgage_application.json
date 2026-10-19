@@ -2,7 +2,7 @@
   "name": "acn_mortgage_application",
   "displayName": "acn_mortgage_application",
   "instruction": "agents/acn_mortgage_application/instruction.txt",
-  "tools": ["acn-amount-input", "acn-form-input", "acn_identity_security_hub", "calculate_affordability", "calculate_mortgage_payment", "docai_document_processors", "end_session", "loan_preapproval", "mobile_handoff", "mortgage_affordability", "mortgage_affordability_estimate", "mortgage_calculator", "mortgage_kyc", "mortgage_next_best_action", "mortgage_nudge", "mortgage_payment_estimate", "mortgage_preapproval_check", "mortgage_rate_board", "mortgage_rate_shelf", "mortgage_rate_table", "quick_actions"],
+  "tools": ["acn-amount-input", "acn-form-input", "acn-product-cards", "acn_identity_security_hub", "calculate_affordability", "calculate_mortgage_payment", "docai_document_processors", "end_session", "loan_preapproval", "mobile_handoff", "mortgage_affordability", "mortgage_affordability_estimate", "mortgage_calculator", "mortgage_kyc", "mortgage_next_best_action", "mortgage_nudge", "mortgage_payment_estimate", "mortgage_preapproval_check", "mortgage_rate_board", "mortgage_rate_shelf", "mortgage_rate_table", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_mortgage_application/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

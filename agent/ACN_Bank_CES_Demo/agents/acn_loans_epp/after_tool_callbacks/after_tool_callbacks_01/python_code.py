@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # widget -- the tool fires, nothing renders, and nothing errors.
 WIDGET_TOOLS = frozenset({
     'acn-amount-input', 'acn-credit-card-widget', 'acn-form-input',
-    'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector',
+    'acn-insight-card', 'acn-nudge-card', 'acn-product-cards', 'acn-payee-selector',
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',
@@ -222,6 +222,79 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+_ST_WORDS = {'approved': 'approved', 'referred': 'with a specialist for review', 'under_review': 'under review',
+             'declined': 'not approved', 'in_progress': 'in progress', 'decision_pending': 'waiting for a decision',
+             'submitted': 'received', 'received': 'received'}
+_ST_MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+
+def _st_when(ts):
+    ts = str(ts or '')
+    try:
+        return _ST_MONTHS[int(ts[5:7]) - 1] + " " + str(int(ts[8:10]))
+    except Exception:
+        return ts[:10]
+
+def _st_money(x):
+    try:
+        return "$" + format(float(x), ",.0f")
+    except Exception:
+        return ""
+
+def _st_docs(response):
+    body = response.get('data') if isinstance(response, dict) else None
+    rows = body.get('documents') if isinstance(body, dict) else (body if isinstance(body, list) else None)
+    docs = [r for r in (rows or []) if isinstance(r, dict)]
+    docs.sort(key=lambda d: str(d.get('createdAt', '')), reverse=True)
+    return docs
+
+def _status_summary_for(short, response):
+    docs = _st_docs(response)
+    if not docs:
+        return ''
+    if short == 'queryApplications':                       # credit cards
+        bits = []
+        for d in docs[:2]:
+            name = str(d.get('cardType') or 'credit card').replace('_', ' ').strip()
+            word = _ST_WORDS.get(str(d.get('status', '')).lower(), '')
+            line = "the " + name + " from " + _st_when(d.get('createdAt')) + (": " + word if word else "")
+            if str(d.get('status', '')).lower() == 'approved' and _st_money(d.get('approvedCreditLimit')):
+                line += " with a " + _st_money(d.get('approvedCreditLimit')) + " limit"
+            bits.append(line)
+        return ("Your most recent card application is " + bits[0] + "." +
+                ((" You also have " + bits[1] + ".") if len(bits) > 1 else ""))
+    if short == 'queryLoanApplications':                   # loans: the record has no decision field, so only say received
+        bits = []
+        for d in docs[:2]:
+            kind = str(d.get('type') or 'loan').replace('_', ' ')
+            bit = "a " + _st_money(d.get('amount')) + " " + kind
+            if d.get('term'):
+                try:
+                    bit += " over " + str(int(float(d['term']))) + " months"
+                except Exception:
+                    pass
+            bits.append(bit + " submitted " + _st_when(d.get('createdAt')))
+        return "We have received " + " and ".join(bits) + "."
+    if short == 'getAccountApplicationStatus':
+        d = docs[0]
+        word = _ST_WORDS.get(str(d.get('status', '')).lower(), '')
+        return ("Your account application from " + _st_when(d.get('createdAt')) + " is " + word + ".") if word else ''
+    return ''
+
+def _remember_status_summary(tool_name, response, state):
+    """After an application lookup, remember what to say, so a status answer is never chips or cards alone."""
+    try:
+        short = str(tool_name).split('/')[-1].split('_')[-1]
+        if short not in ('queryApplications', 'queryLoanApplications', 'getAccountApplicationStatus'):
+            return
+        if not isinstance(response, dict) or response.get('status') != 'success':
+            return
+        text = _status_summary_for(short, response)
+        if text:
+            import time
+            state['spoken_summary'] = json.dumps({'text': text, 'ts': time.time()})
+    except Exception:
+        pass
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -314,6 +387,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
 
+    _remember_status_summary(tool_name, response, state)
     return response
 
 def _normalize_response(response: dict[str, Any]) -> dict:

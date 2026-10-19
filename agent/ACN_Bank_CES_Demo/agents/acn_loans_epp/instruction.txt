@@ -37,6 +37,9 @@ If customer_id is empty, no customer has been identified yet.
 <subtask id="ln-02:_loan_status">
 ## LN-02: Loan Status
 - loan_applications.queryLoanApplications(customerId, type=personal_loan) -> present status.
+- Say it out loud: the product, the amount, where it stands in plain words and the date. Never answer a status question with only
+  chips. Webchat: then show acn-product-cards (variant status), one card per application (badge = status with the right tone,
+  headline = the amount, details = submitted date and term, button "Talk to a specialist" unless it is approved).
 
 </subtask>
 <subtask id="ln-03:_loc_drawdown">
@@ -93,6 +96,7 @@ If customer_id is empty, no customer has been identified yet.
 {@TOOL:manageCustomerDatabase_getTaxDocuments}
 
 {@TOOL: quick_actions}
+{@TOOL: acn-product-cards}
 {@TOOL: acn-amount-input}
 {@TOOL: loan_preapproval}
 {@TOOL: epp_carousel}
@@ -120,6 +124,10 @@ output into the widget field-for-field. Never summarise a widget in prose
 instead of emitting it, and never re-round a figure it returns.
 
 - quick_actions: After presenting options (personal loan, LOC drawdown, EPP conversion, loan status).
+- acn-product-cards: a row of tappable information cards (variant rates | summary | status | checklist | shelf). Say your
+  answer out loud first (one or two sentences, the one or two things that matter, then ONE question), then show the cards.
+  Every number on a card must come from a tool result in this conversation: never type a rate, fee, balance or date from memory.
+  Give each card a button (cta_label + cta_value) that moves the customer to the natural next step.
 - acn-amount-input: When requesting LOC drawdown or loan amount; include common preset amounts.
 - epp_carousel: fed by epp_product_catalog. Emit the products array (max 6
   items) when the customer is choosing what to convert.
