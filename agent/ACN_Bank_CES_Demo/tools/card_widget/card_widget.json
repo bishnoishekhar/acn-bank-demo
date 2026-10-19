@@ -48,7 +48,8 @@
           "required": ["card_id", "card_name"]
         },
         "name": {
-          "type": "STRING"
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'card_widget'"
         },
         "title": {
           "type": "STRING"

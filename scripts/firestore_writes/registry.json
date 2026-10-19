@@ -5,6 +5,7 @@
    "productId",
    "applicationData"
   ],
+  "applicant": true,
   "col": "account_applications",
   "cust_field": true,
   "cust_path": false,
@@ -18,12 +19,55 @@
   "stepup": false,
   "ts": "account_opening_db"
  },
+ "account_opening_db_createNewCustomer": {
+  "allow": [
+   "legal_name",
+   "preferred_name",
+   "date_of_birth",
+   "email",
+   "registered_mobile",
+   "street_address",
+   "city",
+   "province",
+   "postal_code",
+   "employment_status",
+   "occupation",
+   "annual_income",
+   "sin_provided",
+   "sin_last_four",
+   "preferred_language"
+  ],
+  "applicant": "new",
+  "col": "customers",
+  "cust_field": false,
+  "cust_path": false,
+  "kind": "create",
+  "op": "createNewCustomer",
+  "path": [],
+  "required": [
+   "legal_name",
+   "date_of_birth",
+   "email",
+   "registered_mobile"
+  ],
+  "set": {
+   "customer_tier": "mass_market",
+   "customer_type": "new_customer",
+   "global_status": "PENDING_ONBOARDING",
+   "identity_verified": false,
+   "kyc_status": "pending",
+   "onboarding_channel": "account_opening_assistant"
+  },
+  "stepup": false,
+  "ts": "account_opening_db"
+ },
  "account_opening_db_updateAccountApplication": {
   "allow": [
    "status",
    "decisionReason",
    "applicationData"
   ],
+  "applicant": true,
   "col": "account_applications",
   "cust_field": false,
   "cust_path": false,
@@ -445,6 +489,7 @@
    "documentType",
    "purpose"
   ],
+  "applicant": true,
   "col": "kyc_requests",
   "cust_field": true,
   "cust_path": false,
@@ -466,6 +511,7 @@
    "outcome",
    "failureReason"
   ],
+  "applicant": true,
   "col": "kyc_requests",
   "cust_field": false,
   "cust_path": false,
@@ -884,6 +930,7 @@
    "recipientEmail",
    "templateData"
   ],
+  "applicant": true,
   "col": "email_queue",
   "cust_field": true,
   "cust_path": false,

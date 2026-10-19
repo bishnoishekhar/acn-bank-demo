@@ -2,7 +2,7 @@
   "name": "acn_investments_registered",
   "displayName": "acn_investments_registered",
   "instruction": "agents/acn_investments_registered/instruction.txt",
-  "tools": ["acn-investment-card", "acn_identity_security_hub", "end_session", "quick_actions"],
+  "tools": ["acn-investment-card", "acn-product-cards", "acn_identity_security_hub", "end_session", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_investments_registered/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

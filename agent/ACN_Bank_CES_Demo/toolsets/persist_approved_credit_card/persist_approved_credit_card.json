@@ -4,7 +4,8 @@
   "openApiToolset": {
     "openApiSchema": "toolsets/persist_approved_credit_card/open_api_toolset/open_api_schema.yaml",
     "apiAuthentication": {
-      "serviceAgentIdTokenAuthConfig": {
+      "serviceAccountAuthConfig": {
+        "serviceAccount": "$env_var"
       }
     }
   },

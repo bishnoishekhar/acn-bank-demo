@@ -76,7 +76,8 @@ def _hub_trailer(state) -> str:
     return ("[[AUTH_RESULT customer_id=" + _hub_state_val(state, "customer_id", "customerId")
             + " auth_level=" + level
             + " auth_mode=" + _hub_state_val(state, "auth_mode")
-            + " identified_by=" + _hub_state_val(state, "identified_by") + "]]")
+            + " identified_by=" + _hub_state_val(state, "identified_by")
+            + " pin_verified_at=" + _hub_state_val(state, "pin_verified_at") + "]]")
 
 def _cnt(state):   return json.loads(state.get("session_counters",    "{}") or "{}")
 

@@ -94,11 +94,46 @@ def _fsw_query(cfg, customer_id, plain):
         sq["where"] = {"compositeFilter": {"op": "AND", "filters": parts}}
     return sq, None
 
+def _fsw_clean_new_customer(data):
+    """A new applicant's details: normalise the phone, keep only the last four SIN digits, refuse nonsense. Returns an error dict or None."""
+    import re as _re
+    digits = ''.join(ch for ch in str(data.get('registered_mobile', '')) if ch.isdigit())
+    if len(digits) == 11 and digits.startswith('1'):
+        digits = digits[1:]
+    if len(digits) != 10:
+        return {"error": "INVALID_FIELD", "message": "registered_mobile must be a 10-digit Canadian phone number."}
+    data['registered_mobile'] = '+1' + digits
+    dob = str(data.get('date_of_birth', '')).strip()
+    if not _re.match(r'^\d{4}-\d{2}-\d{2}$', dob):
+        return {"error": "INVALID_FIELD", "message": "date_of_birth must be written YYYY-MM-DD."}
+    try:
+        born = datetime.strptime(dob, '%Y-%m-%d')
+        today = datetime.now(timezone.utc)
+        age = today.year - born.year - ((today.month, today.day) < (born.month, born.day))
+    except ValueError:
+        return {"error": "INVALID_FIELD", "message": "date_of_birth is not a real date."}
+    if age < 16 or age > 120:
+        return {"error": "NOT_ELIGIBLE", "message": "Applicants must be at least 16 years old (18 for most accounts)."}
+    if not _re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', str(data.get('email', '')).strip()):
+        return {"error": "INVALID_FIELD", "message": "email does not look like an email address."}
+    if 'sin_last_four' in data:
+        last4 = ''.join(ch for ch in str(data['sin_last_four']) if ch.isdigit())[-4:]
+        if last4:
+            data['sin_last_four'] = last4
+            data['sin_provided'] = True
+        else:
+            data.pop('sin_last_four')
+    data.setdefault('sin_provided', False)
+    return None
+
 def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
     """Validate and rewrite a toolset write/query call in place. Returns an error dict to block it."""
     customer_id = str(state.get("customer_id", "") or "")
+    applicant = cfg.get('applicant')
+    if not customer_id and applicant:
+        customer_id = str(state.get("applicant_id", "") or "")     # a new applicant: the id saved by createNewCustomer
     public_query = cfg['kind'] == 'query' and not cfg.get('cust_field') and cfg['op'] != 'queryCustomers'
-    if not customer_id and not public_query:
+    if not customer_id and not public_query and applicant != 'new':
         return {"error": "AUTH_LEVEL_INSUFFICIENT", "message": "Please identify yourself first."}
     if cfg['stepup'] and auth_level < 3:
         reason = _FSW_STEPUP_REASON.get(cfg['op'], 'threshold')
@@ -136,6 +171,10 @@ def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
         input_dict['structuredQuery'] = sq
         return None
     data = {k: plain[k] for k in cfg['allow'] if k in plain and plain[k] is not None and plain[k] != ''}
+    if cfg['op'] == 'createNewCustomer':
+        _bad = _fsw_clean_new_customer(data)
+        if _bad:
+            return _bad
     if cfg.get('cust_field'):
         data['customerId'] = customer_id
     missing = [r for r in cfg['required'] if r not in data]

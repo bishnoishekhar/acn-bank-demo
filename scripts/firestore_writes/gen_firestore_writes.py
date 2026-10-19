@@ -22,7 +22,11 @@ MOVE_UNDER_CUSTOMER = {
     ("new_transaction_api_db", "updateTransaction"):        "/customers/{customerId}/transactions/{transactionId}",
 }
 STEP_UP = {"addPayee", "updatePayee", "deletePayee", "updateProfile", "createFXOrder", "createFXDraft"}
-SET_ON_WRITE = {"cancelPAD": {"status": "cancelled"}}                             # fixed fields an op always sets
+SET_ON_WRITE = {"cancelPAD": {"status": "cancelled"},
+                "createNewCustomer": {"customer_tier": "mass_market", "customer_type": "new_customer", "global_status": "PENDING_ONBOARDING", "identity_verified": False, "kyc_status": "pending", "onboarding_channel": "account_opening_assistant"}}                             # fixed fields an op always sets
+# ops a person who is not a customer yet may use (account opening): they run on the applicant id saved by createNewCustomer
+APPLICANT_OPS = {"createNewCustomer": "new", "createAccountApplication": True, "updateAccountApplication": True,
+                 "createKycRequest": True, "writeKycRecord": True, "executeACNBankApplicationEmail": True}
 QUERY_COLLECTION = {"queryCustomers": "customers"}                                  # runQuery at the database root
 
 def toolset_display_name(ts_dir):
@@ -126,6 +130,8 @@ for spec_path in sorted(glob.glob(os.path.join(root, "toolsets", "*", "open_api_
                 "col": collection, "stepup": opid in STEP_UP, "set": SET_ON_WRITE.get(opid, {}),
                 "cust_path": "customerId" in pp_all, "cust_field": "customerId" in allow,
             }
+            if opid in APPLICANT_OPS:
+                registry[ts + "_" + opid]["applicant"] = APPLICANT_OPS[opid]
             if new_path != path or True:
                 changed = True
     # carry over untouched paths (reads, skipped ops); keep order roughly: rebuilt dict
