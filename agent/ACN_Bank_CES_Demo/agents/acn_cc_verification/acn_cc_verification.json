@@ -2,7 +2,7 @@
   "name": "acn_cc_verification",
   "displayName": "acn_cc_verification",
   "instruction": "agents/acn_cc_verification/instruction.txt",
-  "tools": ["end_session"],
+  "tools": ["acn_identity_security_hub", "end_session"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_cc_verification/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

@@ -340,6 +340,23 @@ def _ensure_spoken_with_widget(state, llm_response) -> Optional[object]:
         return None
 
 # --- Entry point ---
+def _consume_pin_grant(state, llm_response):
+    """One PIN covers ONE request: when the reply is final (no more tool work) the grant is spent, used or not."""
+    try:
+        if not state.get('pin_grant_ts'):
+            return
+        for p in list(getattr(getattr(llm_response, 'content', None), 'parts', None) or []):
+            fc = getattr(p, 'function_call', None)
+            if fc is None:
+                continue
+            name = str(getattr(fc, 'name', '') or '').split('/')[-1]
+            if name not in _WIDGET_TOOL_NAMES and name != 'end_session':
+                return                               # still working on the request (a tool call, a hand-over)
+        state['pin_consumed_ts'] = state.get('pin_grant_ts')
+        state['pin_grant_used'] = ''
+    except Exception:
+        pass
+
 def after_model_callback(callback_context: CallbackContext, llm_response: LlmResponse) -> Optional[LlmResponse]:
     result = after_model_callback_impl(callback_context, llm_response)
     _arm_speak_first(callback_context.state, result if result is not None else llm_response)
@@ -347,5 +364,6 @@ def after_model_callback(callback_context: CallbackContext, llm_response: LlmRes
     if spoken is not None:
         result = spoken
     _note_rating_asked(callback_context.state, result if result is not None else llm_response)
+    _consume_pin_grant(callback_context.state, result if result is not None else llm_response)
     closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
     return closed if closed is not None else result

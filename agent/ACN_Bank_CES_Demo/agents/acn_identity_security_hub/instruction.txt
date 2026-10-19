@@ -76,6 +76,8 @@ On entry, check in this order:
      ONLY the masked form means a real spoken or typed PIN never matches ANY
      pattern here, and you fall through with nothing to do. That is the single
      most common way this hub goes silent or deflects instead of verifying.
+   - "Re-verify PIN" in request: go to reauth_pin. A run of digits in the request is the PIN (verify it); with no digits,
+     prompt for it. This applies even when the customer is already signed in or verified earlier.
    - "step-up" or "L3" in request: go to l3_step_up (PIN challenge).
    - "authenticate to L2" or "please authenticate" or "L2 required" or
      "authenticate" or "authentication" or "verify" in request (and auth_level < 2):
@@ -276,6 +278,25 @@ masked, pass the digits straight through):
    after 3 failures set auth_locked=true and return.
 </subtask>
 
+<subtask id="reauth_pin">
+## Fresh PIN for this request (reauth_pin)
+
+Every request that touches the customer's accounts needs a PIN verified FOR THAT REQUEST, even if the customer is signed in on
+the website or verified a minute ago. M0 or a specialist asks for it with "Re-verify PIN for this request."
+
+Turn 1, no digits in the request: ask for the PIN and STOP.
+- Voice: say "For your security, please enter your 4-digit PIN on your keypad now, or say it." and set dtmf_enabled=true.
+- Chat and WhatsApp: say "To keep your accounts safe, please type your 4-digit PIN."
+
+Turn 2, the request contains the PIN (a run of 3-6 digits, or masked ****): call verify_pin(customer_id=customer_id,
+pin_masked=<the digits exactly as given>).
+- On success: say "Thanks, you're verified." and STOP. Do not call authorize_step_up and do not ask anything else.
+- On failure: say "That PIN didn't match. Please try again." It counts as one attempt; after 3 failed attempts set auth_locked=true,
+  say "I wasn't able to verify your identity. A specialist will help you from here." and STOP.
+
+Never repeat the PIN back and never write it anywhere.
+
+</subtask>
 <subtask id="security_rules">
 ## Security Rules
 - Never store, repeat, log, or echo PIN, OTP codes, SIN, CVV, or card numbers.

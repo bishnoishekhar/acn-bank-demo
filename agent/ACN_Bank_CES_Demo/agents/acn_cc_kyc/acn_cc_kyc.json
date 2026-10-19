@@ -2,7 +2,7 @@
   "name": "acn_cc_kyc",
   "displayName": "acn_cc_kyc",
   "instruction": "agents/acn_cc_kyc/instruction.txt",
-  "tools": ["docai_document_processors", "docai_drivers_license", "end_session", "mobile_handoff", "mortgage_kyc"],
+  "tools": ["acn_identity_security_hub", "docai_document_processors", "docai_drivers_license", "end_session", "mobile_handoff", "mortgage_kyc"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_cc_kyc/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

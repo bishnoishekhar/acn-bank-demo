@@ -296,10 +296,11 @@ def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
         state["customer_id"] = customer_id
     # When customer is already identified/authenticated, make it explicit the model must not re-identify
     if customer_id and int(auth_level_str or "0") >= 2:
-        msg += (f" | AUTHENTICATED (L2): name={display_name} customer_id={customer_id}."
-                f" The customer is ALREADY signed in and verified at L2!"
-                f" NEVER ask for mobile number, account number, card digits, or PIN for L1/L2 requests,"
-                f" and DO NOT call call_identity_hub unless a tool explicitly returns STEP_UP_REQUIRED for L3.")
+        msg += (f" | SIGNED IN (L2): name={display_name} customer_id={customer_id}."
+                f" The customer is signed in. NEVER ask for a mobile number, account number or card digits again."
+                f" Signed in is NOT verified for this request: every request that touches the customer's accounts needs a fresh"
+                f" 4-digit PIN. A specialist tool returns REAUTH_REQUIRED until the PIN is verified for the request, and then the"
+                f" agent re-verifies it with the identity hub. Never tell the customer they are already verified.")
     elif customer_id and int(auth_level_str or "0") == 1:
         msg += (f" | IDENTIFIED (L1): name={display_name} customer_id={customer_id}."
                 f" NEVER ask for mobile number, account number, or card digits."

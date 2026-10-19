@@ -706,6 +706,16 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
         _set_auth(state, mode=mode)
         state['auth_mode'] = mode
 
+    pin_at = _hub_value(fields, 'pin_verified_at')
+    if pin_at:
+        try:
+            import time
+            ts = float(pin_at)
+            if ts > float(state.get('pin_consumed_ts', 0) or 0) and time.time() - ts < 300:
+                state['pin_grant_ts'] = str(ts)      # a PIN was verified just now: it covers this request's account tools
+        except Exception:
+            pass
+
     identified_by = _hub_value(fields, 'identified_by')
     if identified_by:
         _set_cust(state, identified_by=identified_by)

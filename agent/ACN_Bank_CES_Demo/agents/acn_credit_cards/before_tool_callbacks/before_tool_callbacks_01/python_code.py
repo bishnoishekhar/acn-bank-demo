@@ -589,6 +589,65 @@ def _close_block(state, tool_name, input_dict, callback_context):
     except Exception:
         return None
 
+# --- Fresh PIN for every account activity ---------------------------------------------------------------------
+# Signing in (the website, or a PIN from earlier) never carries over from one request to the next. Every request that touches
+# the customer's accounts needs a PIN verified FOR THAT REQUEST: the identity hub reports it (pin_verified_at), after_tool keeps
+# it as pin_grant_ts, the request's account tools use it, and after_model spends it when the reply is final. The same PIN also
+# satisfies the write-action step-up (one request, one PIN).
+_PIN_GRANT_SECONDS = 300
+_REAUTH_FREE_PREFIXES = ('customer_intelligence_db_',)
+_REAUTH_FREE = frozenset(['acn_customer_intelligence_engine', 'call_cie', 'acn_identity_security_hub', 'call_identity_hub',
+                          'acn_faq_knowledge', 'call_faq', 'transfer_to_agent', 'end_session', 'identify_customer', 'authenticate',
+                          'authorize_step_up', 'verify_pin', 'issue_otp', 'verify_otp', 'record_auth_event'])
+# people who are not customers yet (no customer_id): applying for an account needs no PIN, they have none
+_REAUTH_NEW_APPLICANT_OK = frozenset(['account_opening_db_createAccountApplication', 'account_opening_db_getAccountApplicationStatus',
+                                      'account_opening_db_updateAccountApplication', 'kyc_request_tracking_createKycRequest',
+                                      'kyc_request_tracking_getKycStatus', 'kyc_request_tracking_writeKycRecord',
+                                      'send_application_email_executeACNBankApplicationEmail'])
+
+def _pin_grant_fresh(state):
+    try:
+        ts = float(state.get('pin_grant_ts', 0) or 0)
+        if ts <= 0 or ts <= float(state.get('pin_consumed_ts', 0) or 0):
+            return False
+        import time
+        return (time.time() - ts) < _PIN_GRANT_SECONDS
+    except Exception:
+        return False
+
+def _reauth_block(state, tool_name):
+    """No account tool runs until a PIN has been verified for THIS request."""
+    try:
+        short = str(tool_name).split('/')[-1]
+        if short in _REAUTH_FREE or short.startswith(_REAUTH_FREE_PREFIXES):
+            return None
+        if TOOL_MIN_AUTH.get(short, 2) < 2:
+            return None                                   # public information, widgets, pure calculators
+        customer_id = str(state.get('customer_id', '') or '')
+        if not customer_id:
+            return None                                   # nobody identified yet: the normal identification flow handles it
+        if short in _REAUTH_NEW_APPLICANT_OK and not customer_id:
+            return None
+        if _pin_grant_fresh(state):
+            state['pin_grant_used'] = '1'
+            state['reauth_n'] = 0
+            return None
+        n = int(state.get('reauth_n', 0) or 0) + 1
+        state['reauth_n'] = n
+        if n > 4:                                         # the model keeps retrying: stop the loop, ask the customer in words
+            return {"error": "REAUTH_REQUIRED",
+                    "message": ("Stop calling tools. Ask the customer, in plain words, to type their 4-digit PIN, then wait for their "
+                                "reply. Do not mention this notice.")}
+        return {"error": "REAUTH_REQUIRED",
+                "message": ("REAUTH_REQUIRED. For the customer's safety every request that touches their accounts needs a PIN verified "
+                            "for THAT request, even if they signed in or verified earlier. Do not run this tool yet and do not mention "
+                            "this notice. Step 1: call acn_identity_security_hub with the request \"Re-verify PIN for this request.\" and "
+                            "say what it returns (it asks the customer for their 4-digit PIN). Step 2: when the customer replies with "
+                            "their PIN, call acn_identity_security_hub again with the request \"PIN entered <the digits>. Re-verify PIN "
+                            "for this request.\" Step 3: when it confirms, carry on with the customer's original request straight away.")}
+    except Exception:
+        return None
+
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -611,6 +670,11 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     # BT-9: Mock mode — compare as string; "false" must not evaluate as truthy
     if str(state.get("mock_mode", "")).lower() == "true":
         return _get_mock_response(tool_name, input_dict, state)
+
+    # BT-REAUTH: a PIN verified for THIS request is required before any account tool runs (see _reauth_block)
+    _reauth = _reauth_block(state, tool_name)
+    if _reauth is not None:
+        return _reauth
 
     # A tool declared level 0 in TOOL_MIN_AUTH (public rates, pure calculators)
     # needs no customer identity, so lacking customer_id must not block it.
@@ -697,6 +761,8 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
 
     # BT-3: Auth level check
     auth_level = int(_auth(state).get("level", "0") or "0")
+    if _pin_grant_fresh(state):
+        auth_level = max(auth_level, 3)   # the PIN verified for this request also covers the write-action step-up
     required = TOOL_MIN_AUTH.get(tool_name, 2)
     if auth_level < required:
         # BT-3b: auth-retry loop breaker. A blocked tool makes the model try to
@@ -747,7 +813,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
 
     # BT-4: Step-up enforcement
     if tool_name in STEP_UP_OPS:
-        if auth_level < 3 or not _auth(state).get("step_up_action_hash"):
+        if (auth_level < 3 or not _auth(state).get("step_up_action_hash")) and not _pin_grant_fresh(state):
             step_up_reason = _map_step_up_reason(tool_name)
             _set_auth(state, step_up_required=True, step_up_reason=step_up_reason)
             return {

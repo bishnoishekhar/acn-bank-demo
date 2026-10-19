@@ -2,7 +2,7 @@
   "name": "acn_cc_credit_decision",
   "displayName": "acn_cc_credit_decision",
   "instruction": "agents/acn_cc_credit_decision/instruction.txt",
-  "tools": ["acn-insight-card", "end_session", "evaluate_credit_policy", "quick_actions"],
+  "tools": ["acn-insight-card", "acn_identity_security_hub", "end_session", "evaluate_credit_policy", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_cc_credit_decision/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

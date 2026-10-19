@@ -209,10 +209,11 @@ def _inject_auth_context(state: dict[str, Any], llm_request) -> None:
         _identified = bool(_cid)
     if _identified:
         if _lvl_int >= 2:
-            msg += (f" | AUTHENTICATED (L2): customer_id={_cid}. The customer is ALREADY signed in and verified at L2, "
-                    f"and customer-data tools apply this id automatically (customerId={_cid}). "
-                    f"Never look the customer up by phone number, never ask for an id or PIN for L1/L2 tools, "
-                    f"and DO NOT call the identity hub unless a tool returns STEP_UP_REQUIRED for L3.")
+            msg += (f" | SIGNED IN (L2): customer_id={_cid}. The customer is signed in, and customer-data tools apply this id "
+                    f"automatically (customerId={_cid}). Never look the customer up by phone number and never ask for an id. "
+                    f"Signed in is NOT verified for this request: every request that touches the customer's accounts needs a "
+                    f"fresh 4-digit PIN. When a tool returns REAUTH_REQUIRED, follow its steps (re-verify the PIN with the "
+                    f"identity hub), then continue with the original request.")
         else:
             msg += (f" | IDENTIFIED: customer_id={_cid}. The customer is already identified and "
                     f"customer-data tools apply this id automatically (customerId={_cid}). "
