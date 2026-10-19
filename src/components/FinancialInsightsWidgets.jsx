@@ -826,7 +826,7 @@ export function InvestmentCardWidget({ payload = {}, onAction }) {
         marginBottom: 6,
       }}
     >
-      <CesWidgetProvenanceBar toolName="acn-investment-card" payload={payload} />
+    
       {/* Top Badge & Title */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
         <div>
@@ -1133,7 +1133,7 @@ export function ContextualProactiveAlert({ payload = {}, onAction }) {
         width: '100%',
       }}
     >
-      <CesWidgetProvenanceBar toolName="acn-proactive-alert" payload={payload} />
+      
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span
           style={{
@@ -1487,7 +1487,7 @@ export function RecentTransactionsWidget({ payload = {}, onAction }) {
         marginBottom: 6,
       }}
     >
-      <CesWidgetProvenanceBar toolName="acn-transactions-widget" payload={payload} />
+      
       {/* Header Banner */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
         <div>
