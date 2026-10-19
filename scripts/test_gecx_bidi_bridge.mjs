@@ -18,7 +18,17 @@ const messenger = {
 globalThis.window = { chatSdk: { getContext: () => ({ state: { accessToken: 'x' } }) } };
 globalThis.document = { querySelector: (sel) => (sel === 'chat-messenger' ? messenger : null) };
 
-const bridge = await import('../src/components/gecxBidi.js');
+// gecxBidi.js imports './gecx' without an extension (fine for Vite, not for plain Node) and calls applyCesVariables():
+// load a copy with that one import stubbed out, so the test only exercises the bridge itself.
+import { readFileSync, writeFileSync, mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { pathToFileURL } from 'node:url';
+const bridgeSrc = readFileSync(new URL('../src/components/gecxBidi.js', import.meta.url), 'utf8')
+  .replace(/import\s*\{\s*applyCesVariables\s*\}\s*from\s*['"]\.\/gecx['"];?/, 'const applyCesVariables = () => {};');
+const bridgeFile = join(mkdtempSync(join(tmpdir(), 'gecxbidi-')), 'gecxBidi.mjs');
+writeFileSync(bridgeFile, bridgeSrc);
+const bridge = await import(pathToFileURL(bridgeFile).href);
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 let out = [];

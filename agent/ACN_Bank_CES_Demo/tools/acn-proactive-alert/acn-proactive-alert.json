@@ -1,0 +1,50 @@
+{
+  "name": "acn-proactive-alert",
+  "displayName": "acn-proactive-alert",
+  "widgetTool": {
+    "name": "acn-proactive-alert",
+    "description": "Emit a query-driven proactive spending alert card comparing the current month's spending in a transaction category against the previous month (e.g. after paying a utility bill or reviewing transactions). Before calling this tool, speak a brief conversational pacing phrase: 'By the way, here is a quick heads-up on your spending in this category.'",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "badge": {
+          "type": "STRING"
+        },
+        "category_name": {
+          "type": "STRING"
+        },
+        "current_month_amt": {
+          "type": "NUMBER"
+        },
+        "detail": {
+          "type": "STRING"
+        },
+        "headline": {
+          "type": "STRING"
+        },
+        "last_month_amt": {
+          "type": "NUMBER"
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'acn-proactive-alert'"
+        },
+        "primary_cta_label": {
+          "type": "STRING"
+        },
+        "primary_cta_utterance": {
+          "type": "STRING"
+        },
+        "secondary_cta_label": {
+          "type": "STRING"
+        },
+        "secondary_cta_utterance": {
+          "type": "STRING"
+        }
+      },
+      "required": ["name", "headline", "category_name", "current_month_amt", "last_month_amt"]
+    }
+  }
+}
+

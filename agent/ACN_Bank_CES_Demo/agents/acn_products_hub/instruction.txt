@@ -100,6 +100,7 @@ to re-authenticate before retrying. Retain conversation control — do NOT trans
 {@TOOL: acn-product-cards}
 {@TOOL: card_carousel}
 {@TOOL: mortgage_rate_shelf}
+{@TOOL: acn-investment-card}
 </subtask>
 
 <subtask id="webchat_widgets">
@@ -124,5 +125,6 @@ Only emit widgets when widgets_enabled is true (see WIDGET SWITCH below).
   Give each card a button (cta_label + cta_value) that moves the customer to the natural next step.
 - card_carousel: When customer shows interest in credit cards -- emit card comparison carousel as preview.
 - mortgage_rate_shelf: When customer asks about mortgages -- emit current rate shelf before routing.
+- acn-investment-card: When customer asks about GICs or registered investments -- route to acn_investments_registered or emit acn-investment-card preview.
 </subtask>
 </taskflow>

@@ -62,8 +62,11 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 - Call manageCustomerDatabase_getBills and manageCustomerDatabase_getAccounts.
 - If the customer named a saved biller (e.g., Enbridge Gas, Hydro One, Toronto Hydro, Rogers, Bell, Intact Insurance, Property Tax), use its due_amount (unless they specified another amount) and bill_id.
 - If the customer selected a Canadian biller from the @ directory that is not yet in getBills (e.g., BC Hydro, Hydro-Quebec, TELUS, Shaw / Freedom, Canada Revenue Agency), accept it directly as a registered Canadian biller (use toBillId="BILL-CAN-" + uppercase slug) without rejecting it. If no amount was given yet, emit acn-amount-input; if the amount and biller were already given, proceed directly to read-back confirmation using their primary Chequing account.
-- Read-back: "Just to confirm — you'd like to pay CAD [amount] to [biller] from your [account] today. Shall I go ahead?"
+- Read-back: "Just to confirm — you'd like to pay CAD [amount] to [biller] from your [account] today. Shall I go ahead?" Also proactively note: "By the way, with this payment, your Utilities & Bills spending this month reaches CAD 412.75 — 18.4% higher than last month (CAD 348.50)."
+- When widgets_enabled=True and both biller and amount are already known on the read-back turn (so acn-amount-input is not needed), emit acn-proactive-alert with name="acn-proactive-alert", badge="PROACTIVE SPENDING ALERT · UTILITIES", headline="Utilities & Bills spending is 18.4% higher than last month", detail="Including this bill payment, your Utilities & Bills total is CAD 412.75 vs. CAD 348.50 last month (+CAD 64.25).", category_name="Utilities & Bills", current_month_amt=412.75, last_month_amt=348.50, primary_cta_label="Yes, Confirm & Pay Now", primary_cta_utterance="Yes, please go ahead and pay it", secondary_cta_label="Analyze Utilities Breakdown", secondary_cta_utterance="Analyze my spending".
 - Set awaiting_confirmation=true. On confirm: execute via new_transaction_api_db_createTransaction(type="bill_payment", counterpartyName=biller, toBillId=bill_id, amount=amount, currency="CAD", fromAccountId=account_id) and emit acn-payment-receipt.
+- If the customer asks to "Analyze my spending", "spending breakdown and financial pulse", or clicks "Analyze Utilities Breakdown" while in acn_payments: call compute_spending_insights(customer_id=customer_id, period_months=1), say one short sentence, and ALWAYS emit `acn-spending-dashboard` with `name="acn-spending-dashboard"`, `headline="October Spending Breakdown & Financial Pulse"`, `total_spend`, `mom_pct`, `saving_rate=25`, `monthly_income=5400`, `top_category`, `categories`, and `upcoming_bills`. NEVER say "Here is your spending breakdown and financial pulse." without calling `acn-spending-dashboard` in the same turn.
+- If the customer asks to "Show my recent transactions" while in acn_payments: call manageCustomerDatabase_listCustomerTransactions(pageSize=10), say one short sentence, and ALWAYS emit `acn-transactions-widget` with `name="acn-transactions-widget"`, `headline="Recent Account Activity"`, `account_label="Chequing & Credit Cards"`, and the `transactions` array.
 
 </subtask>
 <subtask id="pay-08:_qr_payment">
@@ -128,6 +131,7 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 <subtask id="tools">
 ## Tools
 {@TOOL: acn_identity_security_hub}
+{@TOOL: compute_spending_insights}
 {@TOOL: fintrac_precheck}
 {@TOOL: qr_decode_payment}
 {@TOOL: qr_generate_request}
@@ -162,6 +166,9 @@ All payment journeys require auth_level >= 2. New payee requires auth_level 3 (s
 {@TOOL: acn-payment-carousel}
 {@TOOL: acn-payee-selector}
 {@TOOL: acn-payment-receipt}
+{@TOOL: acn-proactive-alert}
+{@TOOL: acn-spending-dashboard}
+{@TOOL: acn-transactions-widget}
 {@TOOL: acn-amount-input}
 {@TOOL: acn-credit-card-widget}
 {@TOOL: qr_widget}
@@ -192,6 +199,7 @@ in prose instead of emitting it, and never re-round an amount.
 - acn-payee-selector: After getBeneficiaries, in the payees array.
 - acn-amount-input: When requesting the transfer or payment amount.
 - acn-form-input: When collecting all fields for a payment or wire in a single structured form.
+- acn-proactive-alert: On the bill payment read-back turn when both biller and amount are already known, to show a proactive Month-over-Month category spending comparison alert (e.g. Utilities & Bills vs last month) with confirmation/breakdown CTA buttons.
 - acn-credit-card-widget: When showing the credit card being paid (PAY-12).
   Cards go in productDetails, each with productId, title and imageUris.
 - acn-payment-receipt: After createTransaction succeeds. Required fields are

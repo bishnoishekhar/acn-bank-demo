@@ -38,7 +38,7 @@ logger = logging.getLogger(__name__)
 # widget -- the tool fires, nothing renders, and nothing errors.
 WIDGET_TOOLS = frozenset({
     'acn-amount-input', 'acn-credit-card-widget', 'acn-form-input',
-    'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector',
+    'acn-insight-card', 'acn-investment-card', 'acn-proactive-alert', 'acn-spending-dashboard', 'acn-transactions-widget', 'acn-nudge-card', 'acn-payee-selector',
     'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel',
     'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval',
     'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator',

@@ -154,6 +154,10 @@ TOOL_MIN_AUTH = {
     'acn-amount-input':                 0,  # widget render
     'acn-insight-card':                 0,  # widget render
     'acn-nudge-card':                   0,  # widget render
+    'acn-investment-card':                 0,  # widget render
+    'acn-proactive-alert':                 0,  # widget render
+    'acn-spending-dashboard':              0,  # widget render
+    'acn-transactions-widget':             0,  # widget render
     'acn-credit-card-widget':           0,  # widget render
     'acn-payee-selector':               0,  # widget render
     'acn-payment-carousel':             0,  # widget render
@@ -790,7 +794,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
             input_dict.get('handoff_url', ''), customer_id)
 
     # BT-3: Auth level check
-    auth_level = int(_auth(state).get("level", "0") or "0")
+    auth_level = max(int(_auth(state).get("level", "0") or "0"), int(state.get("auth_level", "0") or "0"), (2 if customer_id and str(state.get("authentication_status", "")).lower() == "true" else 0))
     if _pin_grant_fresh(state):
         auth_level = max(auth_level, 3)   # the PIN verified for this request also covers the write-action step-up
     required = TOOL_MIN_AUTH.get(tool_name, 2)

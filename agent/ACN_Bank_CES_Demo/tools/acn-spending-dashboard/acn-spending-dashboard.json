@@ -1,0 +1,92 @@
+{
+  "name": "acn-spending-dashboard",
+  "displayName": "acn-spending-dashboard",
+  "widgetTool": {
+    "name": "acn-spending-dashboard",
+    "description": "Emit a rich 2x2 spending insights dashboard and transaction category pie/donut chart widget. Before calling this tool, speak a brief conversational pacing phrase: 'Here is your spending breakdown and financial pulse.'",
+    "widgetType": "CUSTOM",
+    "parameters": {
+      "type": "OBJECT",
+      "properties": {
+        "categories": {
+          "type": "ARRAY",
+          "description": "Breakdown of spending by transaction category for the pie/donut chart.",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "amount": {
+                "type": "NUMBER"
+              },
+              "count": {
+                "type": "NUMBER"
+              },
+              "name": {
+                "type": "STRING"
+              },
+              "pct": {
+                "type": "NUMBER"
+              },
+              "vsLastMonthPct": {
+                "type": "NUMBER"
+              }
+            },
+            "required": ["name", "amount"]
+          }
+        },
+        "headline": {
+          "type": "STRING"
+        },
+        "mom_pct": {
+          "type": "NUMBER",
+          "description": "Month-over-month percentage change in total spending."
+        },
+        "monthly_income": {
+          "type": "NUMBER"
+        },
+        "name": {
+          "type": "STRING",
+          "description": "Required. Always output the exact string: 'acn-spending-dashboard'"
+        },
+        "proactive_alert_cta_label": {
+          "type": "STRING"
+        },
+        "proactive_alert_cta_value": {
+          "type": "STRING"
+        },
+        "proactive_alert_headline": {
+          "type": "STRING"
+        },
+        "saving_rate": {
+          "type": "NUMBER",
+          "description": "Saving rate percentage (0-100)."
+        },
+        "top_category": {
+          "type": "STRING"
+        },
+        "total_spend": {
+          "type": "NUMBER"
+        },
+        "upcoming_bills": {
+          "type": "ARRAY",
+          "items": {
+            "type": "OBJECT",
+            "properties": {
+              "amount": {
+                "type": "NUMBER"
+              },
+              "due_date": {
+                "type": "STRING"
+              },
+              "payee_name": {
+                "type": "STRING"
+              }
+            },
+            "required": ["payee_name", "amount"]
+          }
+        }
+      },
+      "required": ["name", "headline", "total_spend"]
+    }
+  }
+}
+

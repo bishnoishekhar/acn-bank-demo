@@ -51,6 +51,11 @@ check('card list without a name', custom({ productDetails: [{ title: 'x' }] }), 
 // widgets other people added keep rendering by their exact name
 check('QR widget, exact name', custom({ name: 'acn-qr-widget', qr_code_url: 'https://x/y.png', amount: 5 }), 'acn-qr-widget');
 
+check('investment card, exact name', custom({ name: 'acn-investment-card', principal: 25000 }), 'acn-investment-card');
+check('spending dashboard, exact name', custom({ name: 'acn-spending-dashboard', total: 100 }), 'acn-spending-dashboard');
+check('proactive alert, exact name', custom({ name: 'acn-proactive-alert', headline: 'x' }), 'acn-proactive-alert');
+check('transactions widget, exact name', custom({ name: 'acn-transactions-widget', transactions: [] }), 'acn-transactions-widget');
+
 // product cards (accounts, GIC terms, summaries, application status, checklists)
 const cards = [{ title: 'High-Interest Savings', headline: '4.50%', details: [{ label: 'Monthly fee', value: '$0' }] }];
 check('product cards, exact name', custom({ name: 'acn-product-cards', title: 'Accounts', items: cards }), 'acn-product-cards');

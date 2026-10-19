@@ -2,7 +2,7 @@
   "name": "acn_products_hub",
   "displayName": "acn_products_hub",
   "instruction": "agents/acn_products_hub/instruction.txt",
-  "tools": ["acn-product-cards", "acn_identity_security_hub", "card_carousel", "end_session", "mortgage_rate_shelf", "quick_actions"],
+  "tools": ["acn-investment-card", "acn-product-cards", "acn_identity_security_hub", "card_carousel", "end_session", "mortgage_rate_shelf", "quick_actions"],
   "childAgents": ["acn_account_opening", "acn_credit_cards", "acn_investments_registered", "acn_loans_epp", "acn_mortgage_application", "acn_trip_lifestyle"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_products_hub/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
