@@ -217,6 +217,12 @@ def _no_data_result(tool_response, state, slug, what):
         state['nodata_' + slug] = '0'
         return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
     state['nodata_' + slug] = '1'
+    try:
+        import time
+        state['spoken_summary'] = json.dumps({'text': "I'm not able to show our current " + what + " information right now."
+                                              " I can connect you with a representative or a branch, or you can try again later. What would you prefer?", 'ts': time.time()})
+    except Exception:
+        pass
     return {"status": "business_error", "code": "NO_DATA", "data": {
         "message": ("No " + what + " information is available right now. Do NOT state, estimate or recall any " + what +
                     ", terms, rates or times from memory. Tell the customer plainly that you cannot show it at the "

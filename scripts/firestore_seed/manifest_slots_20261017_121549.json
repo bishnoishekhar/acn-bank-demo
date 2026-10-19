@@ -1,0 +1,26 @@
+{
+ "created": [
+  "appointment_slots/SLOT-BR-TOR-001-20261019-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261019-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261027-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261027-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261028-1400",
+  "appointment_slots/SLOT-BR-MIS-001-20261028-1000",
+  "appointment_slots/SLOT-BR-TOR-001-20261029-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261029-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261030-1400",
+  "appointment_slots/SLOT-BR-MIS-001-20261030-1000"
+ ],
+ "deleted": [
+  "appointment_slots/SLOT-BR-TOR-001-20261023-1400",
+  "appointment_slots/SLOT-BR-MIS-001-20261020-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261021-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261026-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261022-1400",
+  "appointment_slots/SLOT-BR-TOR-001-20261020-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261023-1000",
+  "appointment_slots/SLOT-BR-TOR-001-20261022-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261021-1000",
+  "appointment_slots/SLOT-BR-MIS-001-20261026-1400"
+ ]
+}

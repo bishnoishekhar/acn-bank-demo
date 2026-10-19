@@ -535,6 +535,181 @@ def _repair_handoff_url(raw, customer_id):
         kept.append('customer_id=' + customer_id)
     return base + '?' + '&'.join(kept)
 
+# --- VOICE speak-first gate (armed by after_model) ---
+_GATED_WIDGETS = frozenset(['acn-amount-input', 'acn-credit-card-widget', 'acn-form-input', 'acn-insight-card', 'acn-nudge-card', 'acn-payee-selector', 'acn-payment-carousel', 'acn-payment-receipt', 'card_carousel', 'card_widget', 'epp_carousel', 'epp_plans', 'loan_preapproval', 'mobile_handoff', 'mortgage_affordability', 'mortgage_calculator', 'mortgage_kyc', 'mortgage_nudge', 'mortgage_rate_shelf', 'mortgage_rate_table', 'qr_widget', 'quick_actions'])
+
+def _gate_fresh_summary(state):
+    try:
+        import time
+        raw = state.get('spoken_summary', '') or ''
+        if raw:
+            item = json.loads(raw)
+            if time.time() - float(item.get('ts', 0)) <= 90:
+                return str(item.get('text', '') or '')
+    except Exception:
+        pass
+    return ''
+
+def _speak_first_block(state, tool_name):
+    """Return a blocking dict if this widget call must be preceded by speech (voice sessions only)."""
+    try:
+        gate = str(state.get('speak_gate', '') or '')
+        short = str(tool_name).split('/')[-1]
+        if not gate or short not in _GATED_WIDGETS:
+            return None
+        if int(state.get('speak_gate_n', 0) or 0) >= 2:      # never loop: after two nudges let it through
+            state['speak_gate'] = ''
+            return None
+        state['speak_gate'] = ''
+        state['speak_gate_n'] = int(state.get('speak_gate_n', 0) or 0) + 1
+        kind = gate.split(':', 1)[0]
+        if kind == 'silent':
+            data = _gate_fresh_summary(state) if short in ('quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card') else ''
+            if data:
+                state['spoken_summary'] = ''
+                say = ("Say this to the customer, word for word: \"" + data + "\" Then call the widget again.")
+            elif short in ('card_carousel', 'card_widget', 'mortgage_rate_table', 'mortgage_rate_shelf'):
+                say = ("Start with: \"I can provide information but not personalized financial advice. Please consider consulting a "
+                       "financial advisor for your specific situation.\" then one short sentence about what is on the screen and one "
+                       "short question that moves the customer forward. Then call the widget again.")
+            else:
+                say = "Say one or two short sentences answering the customer and ending with a question, then call the widget again."
+                opts = str(state.get('speak_gate_opts', '') or '')
+                if opts and short == 'quick_actions':
+                    say = ("Say one or two short sentences answering the customer and naming these choices naturally: " + opts +
+                           ". End with a question, then call quick_actions again.")
+            return {"error": "SPEAK_FIRST",
+                    "message": ("STOP. You called a widget without telling the customer what it shows. In a voice conversation nothing can be said after "
+                                "a widget, so the customer would hear silence. Speak your reply NOW, in this response, before the "
+                                "widget call. " + say + " Do not mention this notice.")}
+        return {"error": "SPEAK_FIRST",
+                "message": ("You told the customer what you are showing but asked nothing, and nothing can be said after a widget, "
+                            "so the conversation would stall. Do NOT repeat what you already said. Add ONE short question that moves "
+                            "them forward (cards: whether they want more details on one of them or an eligibility check; rates: "
+                            "whether they are buying, renewing or want to see what they could afford; plans: which plan), then call "
+                            "the widget again. Do not mention this notice.")}
+    except Exception:
+        return None
+
+# --- Session close: recap + rating question + farewell, said by the model (works in voice AND text) ---
+_CLOSE_PHRASES = (
+    ('getAccounts', 'checked your account balances'), ('listCustomerTransactions', 'reviewed your recent transactions'),
+    ('getCards', 'looked over your cards'), ('getBeneficiaries', 'went through your saved payees'),
+    ('getBills', 'checked your bills'), ('createTransaction', 'sent your payment'),
+    ('addPayee', 'added a new payee'), ('updatePayee', 'updated a payee'), ('deletePayee', 'removed a payee'),
+    ('updateCard', 'updated your card settings'), ('updateAccount', 'updated your account'),
+    ('updateProfile', 'updated your profile'), ('updateBill', 'updated a bill'),
+    ('createDispute', 'opened a dispute for you'), ('createAppointment', 'booked your branch appointment'),
+    ('updateAppointment', 'changed your appointment'), ('cancelAppointment', 'cancelled your appointment'),
+    ('getAvailableSlots', 'checked appointment times'), ('createChequeBookOrder', 'ordered your cheques'),
+    ('createStopPayment', 'placed a stop payment'), ('createFXOrder', 'set up your currency exchange'),
+    ('getExchangeRate', 'checked the exchange rate'), ('getGICRates', 'looked at our GIC rates'),
+    ('createRedemption', 'processed your rewards redemption'), ('getRewardsBalance', 'checked your rewards balance'),
+    ('createNSFReversal', 'requested your NSF fee reversal'), ('getOverdraftDetails', 'reviewed your overdraft details'),
+    ('cancelPAD', 'cancelled a pre-authorized debit'), ('createPADDispute', 'raised a pre-authorized debit dispute'),
+    ('listPADs', 'reviewed your pre-authorized debits'), ('createRecurringSchedule', 'set up a recurring payment'),
+    ('createApplication', 'started your application'), ('createLoanApplication', 'started your loan application'),
+    ('createAccountApplication', 'started your account application'),
+    ('persistApprovedCreditCardApplication', 'saved your credit card application'),
+    ('updateNotificationPreferences', 'updated your notification preferences'),
+    ('updatePaperlessEnrollment', 'updated your paperless settings'), ('updateMarketingConsent', 'updated your consent choices'),
+    ('calculate_mortgage_payment', 'estimated a mortgage payment'), ('mortgage_payment_estimate', 'estimated a mortgage payment'),
+    ('calculate_affordability', 'estimated what you could afford'), ('mortgage_affordability_estimate', 'estimated what you could afford'),
+    ('calculate_loan_payment', 'estimated a loan payment'), ('calculate_epp_plans', 'compared payment plans'),
+    ('epp_plan_calculator', 'compared payment plans'), ('build_trip_plan', 'built your trip plan'),
+    ('build_spend_plan', 'planned your trip spending'), ('searchFAQs', 'answered your questions'),
+    ('getInvestmentAccounts', 'reviewed your investment accounts'), ('getContributionRoom', 'checked your contribution room'),
+    ('createActivationRequest', 'started your card activation'),
+)
+
+def _close_recap(state):
+    """One honest sentence about what actually happened today, built from the tools that succeeded."""
+    try:
+        done = json.loads(state.get('completed_actions', '[]') or '[]')
+    except Exception:
+        done = []
+    phrases = []
+    for item in done:
+        tool = str(item.get('tool', '') if isinstance(item, dict) else item).split('/')[-1]
+        for key, phrase in _CLOSE_PHRASES:
+            if tool.endswith(key) and phrase not in phrases:
+                phrases.append(phrase)
+    phrases = phrases[:4]
+    if not phrases:
+        return ''
+    body = phrases[0] if len(phrases) == 1 else ", ".join(phrases[:-1]) + " and " + phrases[-1]
+    return "Today I " + body + "."
+
+def _close_rating_from(callback_context, input_dict):
+    try:
+        params = (input_dict or {}).get('params') or {}
+        if isinstance(params, dict) and str(params.get('csat_rating', '')).strip()[:1] in ('1', '2', '3', '4', '5'):
+            return int(str(params.get('csat_rating')).strip()[:1])
+    except Exception:
+        pass
+    import re
+    try:
+        uc = getattr(callback_context, 'user_content', None)
+        said = " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or []))
+        m = re.search(r'\b([1-5])\b', said)
+        if m:
+            return int(m.group(1))
+        words = {'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5}
+        m = re.search(r'\b(one|two|three|four|five)\b', said, re.IGNORECASE)
+        if m:
+            return words[m.group(1).lower()]
+    except Exception:
+        pass
+    return 0
+
+def _close_block(state, tool_name, input_dict, callback_context):
+    """end_session with no recap/rating/farewell: send the model back to say them (once each, never a loop)."""
+    try:
+        if str(tool_name).split('/')[-1] != 'end_session':
+            return None
+        args = input_dict or {}
+        if str(args.get('session_escalated', '')).strip().lower() in ('true', '1', 'yes'):
+            return None
+        csat = json.loads(state.get('csat', '{}') or '{}')
+        n = int(csat.get('gate_n', 0) or 0)
+        if n >= 3:
+            return None
+        params = args.get('params') or {}
+        rated = isinstance(params, dict) and params.get('csat_rating') not in (None, '')
+        if not rated and not csat.get('offered'):
+            csat['offered'] = True
+            csat['gate_n'] = n + 1
+            state['csat'] = json.dumps(csat)
+            say = (_close_recap(state) + " " if _close_recap(state) else "") + "Before you go, how would you rate your experience today, from 1 to 5?"
+            return {"error": "CLOSE_RATING",
+                    "message": ("Do not end the session yet. In THIS response, say to the customer, word for word: \"" + say + "\" "
+                                "Then, if you have the quick_actions tool, call it once with type quick_actions, summary Rate your experience, "
+                                "and these five actions as content / utterance: 1 - Poor / 1, 2 - Fair / 2, 3 - Okay / 3, 4 - Good / 4, "
+                                "5 - Excellent / 5. Do NOT say goodbye, take care or have a nice day in this response: the farewell comes "
+                                "after they answer. End your reply with the question: do not add Here are your options or any other line after it. Do not mention this notice.")}
+        if str(state.get('close_spoken', '')) != '1':
+            rating = _close_rating_from(callback_context, args)
+            if rating >= 4:
+                lead = "Thank you for the " + str(rating) + ", I'm glad I could help."
+            elif rating == 3:
+                lead = "Thanks for the feedback, we'll keep working to make it better."
+            elif rating in (1, 2):
+                lead = "I'm sorry we fell short today, and thank you for telling me."
+            else:
+                lead = "Thank you for your feedback."
+            name = str(state.get('customer_display_name', '') or state.get('pref_name', '') or '').strip()
+            farewell = (lead + " I'm here whenever you need me, or you can call us any time at 1-800-ACN-BANK. Take care" +
+                        (", " + name if name else "") + "!")
+            csat['gate_n'] = n + 1
+            state['csat'] = json.dumps(csat)
+            state['close_spoken'] = '1'
+            return {"error": "CLOSE_FAREWELL",
+                    "message": ("You are ending the session without saying anything. Say this to the customer, word for word: \"" + farewell +
+                                "\" and then call end_session again in the same response. Do not mention this notice.")}
+        return None
+    except Exception:
+        return None
+
 def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context) -> Optional[dict[str, Any]]:
     """
     BT-1 through BT-11.
@@ -543,6 +718,16 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
     """
     state = callback_context.state
     tool_name = tool.name if hasattr(tool, 'name') else str(tool)
+
+    # BT-CLOSE: ending the session: recap + rating + farewell first (said by the model, so voice speaks them)
+    _close_gate = _close_block(state, tool_name, input_dict, callback_context)
+    if _close_gate is not None:
+        return _close_gate
+
+    # BT-VOICE: in a voice session send the model back to speak before a silent / question-less widget
+    _gate_block = _speak_first_block(state, tool_name)
+    if _gate_block is not None:
+        return _gate_block
 
     # BT-9: Mock mode — compare as string; "false" must not evaluate as truthy
     if str(state.get("mock_mode", "")).lower() == "true":
