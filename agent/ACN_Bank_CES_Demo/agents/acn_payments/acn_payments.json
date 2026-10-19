@@ -2,7 +2,7 @@
   "name": "acn_payments",
   "displayName": "acn_payments",
   "instruction": "agents/acn_payments/instruction.txt",
-  "tools": ["acn-amount-input", "acn-credit-card-widget", "acn-form-input", "acn-payee-selector", "acn-payment-carousel", "acn-payment-receipt", "acn-proactive-alert", "acn_identity_security_hub", "end_session", "fintrac_precheck", "qr_decode_payment", "qr_generate_request", "qr_widget", "quick_actions"],
+  "tools": ["acn-amount-input", "acn-credit-card-widget", "acn-form-input", "acn-payee-selector", "acn-payment-carousel", "acn-payment-receipt", "acn-proactive-alert", "acn-spending-dashboard", "acn-transactions-widget", "acn_identity_security_hub", "compute_spending_insights", "end_session", "fintrac_precheck", "qr_decode_payment", "qr_generate_request", "qr_widget", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_payments/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

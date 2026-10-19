@@ -19,6 +19,85 @@ export const GIC_RATES = [
   { id: 'tfsa', label: 'TFSA Promo', years: 1, rate: 4.65, tag: 'Tax-Free Promo' },
 ];
 
+// ── Live CES Widget Provenance & Payload Inspector Bar (For Demo Verification) ──
+export function CesWidgetProvenanceBar({ toolName, payload }) {
+  const [showJson, setShowJson] = useState(false);
+  const resolvedTool = payload?.name || toolName || 'custom-widget';
+  return (
+    <div style={{ marginBottom: 8 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 6,
+          padding: '4px 9px',
+          borderRadius: 8,
+          background: '#F0FDF4',
+          border: '1px solid #BBF7D0',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span
+            style={{
+              width: 7,
+              height: 7,
+              borderRadius: '50%',
+              background: '#16A34A',
+              display: 'inline-block',
+              boxShadow: '0 0 0 2px #DCFCE7',
+            }}
+          />
+          <span
+            style={{
+              fontSize: 9.5,
+              fontWeight: 800,
+              color: '#166534',
+              letterSpacing: '0.03em',
+            }}
+          >
+            CES Custom Widget · <code>{resolvedTool}</code>
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setShowJson((v) => !v)}
+          style={{
+            padding: '2px 7px',
+            borderRadius: 6,
+            border: '1px solid #86EFAC',
+            background: showJson ? '#166534' : '#FFFFFF',
+            color: showJson ? '#FFFFFF' : '#166534',
+            fontSize: 9,
+            fontWeight: 800,
+            cursor: 'pointer',
+          }}
+        >
+          {showJson ? 'Hide CES JSON ▲' : '{ } View CES Payload'}
+        </button>
+      </div>
+      {showJson && (
+        <pre
+          style={{
+            marginTop: 6,
+            padding: '8px 10px',
+            borderRadius: 8,
+            background: '#0F172A',
+            color: '#E2E8F0',
+            fontSize: 10,
+            lineHeight: 1.4,
+            maxHeight: 170,
+            overflow: 'auto',
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+          }}
+        >
+          {JSON.stringify(payload, null, 2)}
+        </pre>
+      )}
+    </div>
+  );
+}
+
 // ── SVG Multi-Segment Donut / Pie Chart ──────────────────────────────────────
 export function SpendingDonutChart({
   categories = DEFAULT_SPENDING_CATEGORIES,
@@ -235,6 +314,7 @@ export function SpendingMiniWidgetsGrid({
         color: '#0F172A',
       }}
     >
+      {isChat && <CesWidgetProvenanceBar toolName="acn-spending-dashboard" payload={payload} />}
       {/* Header */}
       <div
         style={{
@@ -746,6 +826,7 @@ export function InvestmentCardWidget({ payload = {}, onAction }) {
         marginBottom: 6,
       }}
     >
+      <CesWidgetProvenanceBar toolName="acn-investment-card" payload={payload} />
       {/* Top Badge & Title */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 10 }}>
         <div>
@@ -1052,6 +1133,7 @@ export function ContextualProactiveAlert({ payload = {}, onAction }) {
         width: '100%',
       }}
     >
+      <CesWidgetProvenanceBar toolName="acn-proactive-alert" payload={payload} />
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <span
           style={{
@@ -1405,6 +1487,7 @@ export function RecentTransactionsWidget({ payload = {}, onAction }) {
         marginBottom: 6,
       }}
     >
+      <CesWidgetProvenanceBar toolName="acn-transactions-widget" payload={payload} />
       {/* Header Banner */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 12 }}>
         <div>

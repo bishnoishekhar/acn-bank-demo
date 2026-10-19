@@ -1111,9 +1111,17 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
         setMessages((prev) => prev.map((m) => (m.type === 'combo' ? { ...m, compact: true } : m)));
       }
 
+      const findInCurrentTurn = (list, type) => {
+        for (let i = list.length - 1; i >= 0; i--) {
+          if (list[i].type === 'user') return null;
+          if (list[i].type === type) return list[i];
+        }
+        return null;
+      };
+
       if (pname === 'acn-payment-carousel' || pname === 'acn-payee-selector') {
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'carousel');
+          const last = findInCurrentTurn(prev, 'carousel');
           if (last && p.title && last.payload?.title === p.title) return prev;
           return [...prev, { type: 'carousel', payload: p, id: uid() }];
         });
@@ -1121,7 +1129,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-insight-card') {
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'insight');
+          const last = findInCurrentTurn(prev, 'insight');
           if (last && p.headline && last.payload?.headline === p.headline) return prev;
           return [...prev, { type: 'insight', payload: p, id: uid() }];
         });
@@ -1133,7 +1141,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
           // CES sometimes re-emits the same widget within one turn; de-dupe on
           // the product set so the transcript does not stack identical tables.
           const sig  = (p.productDetails ?? []).map((d) => d.productId).join('|');
-          const last = [...prev].reverse().find((m) => m.type === kind);
+          const last = findInCurrentTurn(prev, kind);
           if (last && (last.payload?.productDetails ?? []).map((d) => d.productId).join('|') === sig)
             return prev;
           return [...prev, { type: kind, payload: p, id: uid() }];
@@ -1143,7 +1151,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       if (pname === 'acn-card-activation') {
         setMessages((prev) => {
           const key = `${p.cardId || ''}|${p.action?.url || ''}`;
-          const last = [...prev].reverse().find((m) => m.type === 'card-activation');
+          const last = findInCurrentTurn(prev, 'card-activation');
           if (last && `${last.payload?.cardId || ''}|${last.payload?.action?.url || ''}` === key) return prev;
           return [...prev, { type: 'card-activation', payload: p, id: uid() }];
         });
@@ -1186,7 +1194,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
       if (pname === 'acn-mortgage-nudge')
         setMessages((prev) => {
           const key = (p.suggestions || []).map((s) => s?.suggestion_id || '').join('|');
-          const last = [...prev].reverse().find((m) => m.type === 'mortgage-nudge');
+          const last = findInCurrentTurn(prev, 'mortgage-nudge');
           if (last && (last.payload?.suggestions || []).map((s) => s?.suggestion_id || '').join('|') === key) {
             return prev;
           }
@@ -1207,35 +1215,55 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
 
       if (pname === 'acn-spending-dashboard')
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'spending-dashboard');
+          const last = findInCurrentTurn(prev, 'spending-dashboard');
           if (last && p.headline && last.payload?.headline === p.headline) return prev;
-          return [...prev, { type: 'spending-dashboard', payload: p, id: uid() }];
+          return [...prev, { type: 'spending-dashboard', payload: { ...p, name: p.name || 'acn-spending-dashboard' }, id: uid() }];
         });
 
       if (pname === 'acn-investment-card')
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'investment-card');
+          const last = findInCurrentTurn(prev, 'investment-card');
           if (last && p.headline && last.payload?.headline === p.headline) return prev;
-          return [...prev, { type: 'investment-card', payload: p, id: uid() }];
+          return [...prev, { type: 'investment-card', payload: { ...p, name: p.name || 'acn-investment-card' }, id: uid() }];
         });
 
       if (pname === 'acn-proactive-alert')
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'contextual-alert');
+          const last = findInCurrentTurn(prev, 'contextual-alert');
           if (last && p.headline && last.payload?.headline === p.headline) return prev;
-          return [...prev, { type: 'contextual-alert', payload: p, id: uid() }];
+          return [...prev, { type: 'contextual-alert', payload: { ...p, name: p.name || 'acn-proactive-alert' }, id: uid() }];
         });
 
       if (pname === 'acn-transactions-widget')
         setMessages((prev) => {
-          const last = [...prev].reverse().find((m) => m.type === 'transactions-widget');
+          const last = findInCurrentTurn(prev, 'transactions-widget');
           if (last && p.headline && last.payload?.headline === p.headline && (last.payload?.transactions || []).length === (p.transactions || []).length) return prev;
-          return [...prev, { type: 'transactions-widget', payload: p, id: uid() }];
+          return [...prev, { type: 'transactions-widget', payload: { ...p, name: p.name || 'acn-transactions-widget' }, id: uid() }];
         });
     });
 
     const combinedBotTextRaw = outputs.map((o) => String(o?.text || '')).join(' ');
     const combinedBotLower = combinedBotTextRaw.toLowerCase();
+
+    // If CES repeats its bridge phrase ("Here is your spending breakdown and financial pulse.")
+    // on a subsequent turn in the same session and a CES spending-dashboard payload was already
+    // received earlier in the session, re-attach that CES payload if not already in the current turn.
+    if (
+      combinedBotLower.includes('spending breakdown and financial pulse') &&
+      !outputs.some((o) => resolvePayloadName(normalizeWidgetPayload(o)) === 'acn-spending-dashboard')
+    ) {
+      setMessages((prev) => {
+        for (let i = prev.length - 1; i >= 0; i--) {
+          if (prev[i].type === 'user') break;
+          if (prev[i].type === 'spending-dashboard') return prev;
+        }
+        const priorCesWidget = [...prev].reverse().find((m) => m.type === 'spending-dashboard');
+        if (priorCesWidget?.payload) {
+          return [...prev, { type: 'spending-dashboard', payload: priorCesWidget.payload, id: uid() }];
+        }
+        return prev;
+      });
+    }
 
     // ── Chat -> Web Auto-Sign-In sync when agent confirms verification ──
     if (!isAuthenticatedRef.current) {
