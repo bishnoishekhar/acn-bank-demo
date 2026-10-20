@@ -593,6 +593,38 @@ export function gecxSend(text) {
    audio-request hook here.
 ── */
 
+/* Quota (429) retry: wait, then send the same runSession request again (3 tries, about 19 s in total).
+   The retried answer goes through the same path as a normal one. After the last try the customer is told. */
+const RATE_LIMIT_RETRY_DELAYS_MS = [3000, 6000, 10000];
+
+export function retryAfterRateLimit(originalFetch, url, options, attempt = 0) {
+  const reusable = typeof url === 'string' || (typeof URL !== 'undefined' && url instanceof URL);
+  if (!reusable || attempt >= RATE_LIMIT_RETRY_DELAYS_MS.length) {
+    if (_onRateLimited) _onRateLimited();
+    return;
+  }
+  setTimeout(() => {
+    originalFetch(url, options)
+      .then((res) => {
+        if (res.status === 429) {
+          retryAfterRateLimit(originalFetch, url, options, attempt + 1);
+          return undefined;
+        }
+        if (!res.ok) {
+          console.warn('[ACN] runSession retry failed:', res.status);
+          return undefined;
+        }
+        return res.json().then((data) => {
+          if (_onResponse && data?.outputs) _onResponse(data.outputs);
+        });
+      })
+      .catch((error) => {
+        console.warn('[ACN] runSession retry error:', error);
+        retryAfterRateLimit(originalFetch, url, options, attempt + 1);
+      });
+  }, RATE_LIMIT_RETRY_DELAYS_MS[attempt]);
+}
+
 let _interceptorInstalled = false;
 
 /* Fetch interceptor: catches runSession responses. */
@@ -619,9 +651,9 @@ export function installFetchInterceptor() {
               '[ACN] runSession rate-limited (429). CES project quota exhausted.'
             );
 
-            if (_onRateLimited) {
-              _onRateLimited();
-            }
+            // A 429 means the turn never ran, so sending the same request again is safe. Retry quietly
+            // (the customer just sees the typing indicator a little longer) and only say so after the last try.
+            retryAfterRateLimit(originalFetch, url, options, 0);
 
             return;
           }
