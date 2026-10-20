@@ -215,7 +215,7 @@ _WIDGET_SPOKEN = {
     'acn-product-cards': "Here are the details on your screen. Which one would you like to know more about?",
     'acn-payee-selector': "Here are your saved payees on your screen. Who would you like to send money to?",
     'acn-payment-carousel': "Here is what I found on your screen.",
-    'acn-amount-input': "How much would you like to send? You can enter it on your screen.",
+    'acn-amount-input': "Please enter the amount on your screen.",
     'acn-form-input': "Please fill in the details on your screen.",
     'acn-payment-receipt': "Here is your receipt on your screen.",
     'acn-insight-card': "Here is a quick insight on your screen.",

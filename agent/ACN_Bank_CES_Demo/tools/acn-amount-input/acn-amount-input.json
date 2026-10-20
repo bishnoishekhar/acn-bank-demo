@@ -3,7 +3,7 @@
   "displayName": "acn-amount-input",
   "widgetTool": {
     "name": "acn-amount-input",
-    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, speak a brief conversational pacing phrase: \u0027How much would you like to send?\u0027",
+    "description": "Emit a numeric amount entry widget with optional preset buttons for transfers or payments. Before calling this tool, ask for the amount in words that match what it is for (send, borrow, deposit, pay): \u0027How much would you like to borrow?\u0027 for a loan, \u0027How much would you like to send?\u0027 only for a payment.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

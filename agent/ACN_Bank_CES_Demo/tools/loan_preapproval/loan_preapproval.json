@@ -3,7 +3,7 @@
   "displayName": "loan_preapproval",
   "widgetTool": {
     "name": "loan_preapproval",
-    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. Before calling this tool, speak a brief conversational pacing phrase: \u0027Let me show you your pre-approval result.\u0027",
+    "description": "Emit a mortgage or loan pre-approval result with decision, rate, and monthly payment. Requires financial advice disclaimer. The card ends your turn, so BEFORE calling this tool say the result in words: the decision, the monthly payment, the rate and the term.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",

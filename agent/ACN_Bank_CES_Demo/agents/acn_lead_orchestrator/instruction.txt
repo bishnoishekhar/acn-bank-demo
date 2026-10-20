@@ -189,8 +189,10 @@ Min auth = L0 (no auth needed — route directly, do NOT call acn_identity_secur
 
 Min auth = L2 view only (call acn_identity_security_hub if auth_level < 2, then route):
   acn_banking_hub: balance inquiry, transaction history, statements, account details,
-    card info, rewards balance, investment balances, overdraft status.
+    card info, rewards balance, overdraft status. (Investment balances are NOT banking: see acn_products_hub.)
   acn_products_hub: product information for authenticated customers, contribution room,
+    INVESTMENTS: "my investments", "investment balance", "holdings", "TFSA / RRSP / FHSA / GIC" balance or rates (never answer these
+    with chequing or savings balances),
     mortgage details (view only), application status (card, loan, account), and TRIP PLANNING
     ("help me plan a trip", trip readiness checklist, which card to use abroad, trip budget / spend plan, travel insurance).
     Trip planning is IN SCOPE: never deflect it as out-of-scope or as "general travel planning".

@@ -3,7 +3,7 @@
   "displayName": "quick_actions",
   "widgetTool": {
     "name": "quick_actions",
-    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, speak a brief conversational pacing phrase: \u0027Here are your options.\u0027",
+    "description": "Emit quick-action chips for the user to tap. Use after every response that presents choices on webchat. Before calling this tool, say the sentence or question the chips answer (for example the question you are asking). Never say \u0027Here are your options.\u0027 and never add a line after your question.",
     "widgetType": "CUSTOM",
     "parameters": {
       "type": "OBJECT",
