@@ -230,6 +230,15 @@ _WIDGET_SPOKEN = {
     'qr_widget': "Here is your QR code on your screen. It's valid until the expiry shown, and the payer can scan it with their banking app.",
 }
 _SUMMARY_WIDGETS = frozenset({'quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card', 'acn-product-cards'})
+# loan / mortgage result cards: the numbers on the card must also be said, in words (after_tool builds the sentence)
+_RESULT_WIDGETS = frozenset({'loan_preapproval', 'mortgage_affordability', 'mortgage_calculator'})
+_RESULT_NEXT = {'loan_preapproval': "Would you like to continue in the ACN Bank app?",
+                'mortgage_affordability': "Would you like to see today's rates, or start a pre-approval?",
+                'mortgage_calculator': "Would you like to see today's rates, or start a pre-approval?"}
+
+def _says_figures(spoken):
+    import re as _re
+    return bool(_re.search(r'\$\s?\d', str(spoken or '')))
 
 def _is_voice_state(state):
     try:
@@ -296,7 +305,8 @@ def _arm_speak_first(state, llm_response):
         if not spoken:
             state['speak_gate'] = 'silent:' + widget
             state['speak_gate_opts'] = '; '.join(_chip_labels(llm_response)) if widget == 'quick_actions' else ''
-        elif widget in ('acn-payment-carousel', 'acn-payee-selector', 'acn-product-cards') and not any(ch.isdigit() for ch in spoken) and _fresh_spoken_summary(state):
+        elif ((widget in ('acn-payment-carousel', 'acn-payee-selector', 'acn-product-cards') and not any(ch.isdigit() for ch in spoken)) or
+              (widget in _RESULT_WIDGETS and not _says_figures(spoken))) and _fresh_spoken_summary(state):
             state['speak_gate'] = 'silent:' + widget      # a pacing phrase alone: the data the carousel shows was never said
             state['speak_gate_opts'] = ''
         elif widget in _FOLLOWUP_WIDGETS and '?' not in spoken:
@@ -313,6 +323,13 @@ def _ensure_spoken_with_widget(state, llm_response) -> Optional[object]:
         if _is_voice_state(state):
             return None  # voice: handled by the speak-first gate (text added here would never be spoken)
         parts, widget, spoken = _first_widget_and_text(llm_response)
+        if widget in _RESULT_WIDGETS and not _says_figures(spoken):
+            said = _fresh_spoken_summary(state)
+            if said:
+                state['spoken_summary'] = ''
+                if not spoken:       # the model said nothing at all: the figures, then the usual next question
+                    said = said + ' ' + _RESULT_NEXT.get(widget, '')
+                return LlmResponse.from_parts(parts=[Part.from_text(text=said.strip() + ('\n\n' if spoken else ''))] + parts)
         if spoken or not widget:
             return None
         text = ''

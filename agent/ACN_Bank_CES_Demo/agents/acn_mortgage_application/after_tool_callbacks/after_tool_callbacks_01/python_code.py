@@ -227,6 +227,90 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
+def _rs_money(v, cents=False):
+    try:
+        x = float(v)
+        return ("$" + format(round(x, 2), ",.2f")) if cents else ("$" + format(int(round(x)), ","))
+    except Exception:
+        return ''
+
+def _rs_about(v):
+    """A big amount, to the nearest thousand: it is said out loud, so '$571,000' and not '$571,034'."""
+    try:
+        return "$" + format(int(round(float(v) / 1000.0)) * 1000, ",")
+    except Exception:
+        return ''
+
+def _rs_pct(v):
+    try:
+        return format(float(v), "g") + "%"
+    except Exception:
+        return ''
+
+def _result_summary_for(short, inp, d):
+    """One or two sentences with the numbers a loan / mortgage card shows, built from the tool's own result (never invented)."""
+    inp = inp if isinstance(inp, dict) else {}
+    if short == 'calculate_loan_payment':
+        pay, interest = _rs_money(d.get('monthly_payment'), True), _rs_money(d.get('total_interest'))
+        principal, term = _rs_money(inp.get('principal')), int(float(inp.get('term_months') or 0))
+        if not (pay and principal and term):
+            return ''
+        rate = float(inp.get('annual_rate') or 0)
+        return ("A " + principal + " loan over " + str(term) + " months " + (("at " + _rs_pct(rate) + " ") if rate else "with no interest ") +
+                "works out to about " + pay + " a month" + ((", with about " + interest + " in total interest") if (interest and rate) else "") + ".")
+    if short == 'mortgage_affordability_estimate':
+        if d.get('affordable') is False:
+            return ("On that income and those monthly debts, a mortgage is not within reach yet. A larger down payment or fewer monthly debts "
+                    "would change that. This is an estimate, not an approval.")
+        price = _rs_about(d.get('max_purchase_price_cad'))
+        if not price:
+            return ''
+        income = _rs_about(float(d.get('gross_monthly_income_cad') or 0) * 12) if d.get('gross_monthly_income_cad') else ''
+        text = ("With " + ((income + " a year in income and ") if income else "") + (_rs_about(d.get('down_payment_cad')) + " down, " if d.get('down_payment_cad') else "") +
+                "you could afford a home up to about " + price + ".")
+        pay = _rs_money(d.get('contract_payment_cad'))
+        if pay:
+            text += " That is a mortgage payment of about " + pay + " a month" + ((" at " + _rs_pct(d.get('contract_rate_pct'))) if d.get('contract_rate_pct') else "") + "."
+        if d.get('qualifying_rate_pct') and d.get('stress_test_gap_cad'):
+            text += " You are tested at " + _rs_pct(d.get('qualifying_rate_pct')) + ", which is about " + _rs_money(d.get('stress_test_gap_cad')) + " a month more."
+        return text + " This is an estimate, not an approval."
+    if short == 'mortgage_payment_estimate':
+        pay = _rs_money(d.get('payment_per_period_cad'), True)
+        if not pay:
+            return ''
+        label = str(d.get('payment_frequency_label') or 'Monthly').lower()
+        price = _rs_about(inp.get('property_price_cad'))
+        text = (("On a " + price + " home") if price else "On this home") + ((" with " + _rs_about(d.get('down_payment_cad')) + " down") if d.get('down_payment_cad') else "")
+        text += ((" at " + _rs_pct(d.get('interest_rate_pct'))) if d.get('interest_rate_pct') else "") + ", your " + label + " payment would be about " + pay
+        if d.get('total_mortgage_cad'):
+            text += ", on a mortgage of about " + _rs_about(d.get('total_mortgage_cad'))
+        years = d.get('amortization_years_actual') or d.get('amortization_years_requested')
+        if years:
+            text += " over " + format(float(years), "g") + " years"
+        text += "."
+        if d.get('total_interest_cad'):
+            text += " Over that time you would pay about " + _rs_about(d.get('total_interest_cad')) + " in interest."
+        return text + " This is an estimate."
+    return ''
+
+def _remember_result_summary(tool_name, input_dict, response, state):
+    """After a loan / mortgage calculator, remember what to say, so the card is never shown with only 'let me show you'."""
+    try:
+        short = str(tool_name).split('/')[-1]
+        if short not in ('calculate_loan_payment', 'mortgage_affordability_estimate', 'mortgage_payment_estimate'):
+            return
+        if not isinstance(response, dict):
+            return
+        d = response.get('data') if isinstance(response.get('data'), dict) and response.get('data') else response
+        if str(response.get('status', 'success')) != 'success' or str(d.get('status', 'success')) != 'success':
+            return
+        text = _result_summary_for(short, input_dict, d)
+        if text:
+            import time
+            state['spoken_summary'] = json.dumps({'text': text, 'ts': time.time()})
+    except Exception:
+        pass
+
 def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context, tool_response: dict[str, Any]) -> Optional[dict[str, Any]]:
     """
     AT-1 through AT-10 + AT-PAD-rights.
@@ -371,6 +455,8 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
+
+    _remember_result_summary(tool_name, input_dict, response, state)
 
     return response
 

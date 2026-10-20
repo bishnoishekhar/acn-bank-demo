@@ -538,7 +538,7 @@ def _speak_first_block(state, tool_name):
         state['speak_gate_n'] = int(state.get('speak_gate_n', 0) or 0) + 1
         kind = gate.split(':', 1)[0]
         if kind == 'silent':
-            data = _gate_fresh_summary(state) if short in ('quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card', 'acn-product-cards') else ''
+            data = _gate_fresh_summary(state) if short in ('quick_actions', 'acn-payment-carousel', 'acn-payee-selector', 'acn-insight-card', 'acn-product-cards', 'loan_preapproval', 'mortgage_affordability', 'mortgage_calculator') else ''
             if data:
                 state['spoken_summary'] = ''
                 say = ("Say this to the customer, word for word: \"" + data + "\" Then call the widget again.")
