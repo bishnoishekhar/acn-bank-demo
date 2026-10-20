@@ -126,6 +126,50 @@ def _fsw_clean_new_customer(data):
     data.setdefault('sin_provided', False)
     return None
 
+def _confirm_block(cfg, state, input_dict, callback_context) -> Optional[dict]:
+    """A field the customer must confirm in their own words (a travel notice) is held back: the first call is turned back with a
+    read-back request, and the write goes through only when the same details come again after a LATER customer message that says yes."""
+    fields = cfg.get('confirm_fields') or []
+    if not fields:
+        return None
+    import re as _re
+    import time
+    nested = input_dict.get('fields') if isinstance(input_dict.get('fields'), dict) else {}
+    plain = dict(nested)
+    for k, v in input_dict.items():
+        if k not in _FSW_RESERVED:
+            plain.setdefault(k, v)
+    if not any(plain.get(f) not in (None, '') for f in fields):
+        return None
+    sig = hashlib.sha256(json.dumps(plain, sort_keys=True, default=str).lower().encode()).hexdigest()[:16]
+    try:
+        uc = getattr(callback_context, 'user_content', None)
+        said = " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or [])).strip()
+    except Exception:
+        said = ''
+    said_h = hashlib.sha256(said.lower().encode()).hexdigest()[:10] if said else ''
+    now = time.time()
+    try:
+        pend = json.loads(state.get('confirm_pending', '') or '{}')
+    except Exception:
+        pend = {}
+    if pend.get('sig') == sig and now - float(pend.get('ts', 0) or 0) < 900:
+        if said:
+            said_yes = bool(_re.search(r"\b(yes|yeah|yep|yup|sure|ok|okay|confirm|confirmed|go ahead|please do|do it|proceed|correct|that'?s right|that is right|sounds good|set it|submit it)\b", said, _re.I))
+            said_no = bool(_re.search(r"\b(no|nope|don'?t|do not|cancel|stop|wait|not yet|hold on|change|wrong|incorrect)\b", said, _re.I))
+            allowed = said_yes and not said_no and said_h != pend.get('said')
+        else:
+            allowed = now - float(pend.get('ts', 0) or 0) >= 5          # a voice turn with no transcript: only a later turn counts
+        if allowed:
+            state['confirm_pending'] = ''
+            return None
+    else:
+        state['confirm_pending'] = json.dumps({'sig': sig, 'said': said_h, 'ts': now})
+    return {"error": "CONFIRMATION_REQUIRED",
+            "message": "Not saved yet. Read the details back to the customer in one sentence (where and which dates), ask \"Shall I set this?\" "
+                       "and WAIT for their reply. Only when they clearly say yes, call this tool again with exactly the same details. "
+                       "Do not mention this notice."}
+
 def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
     """Validate and rewrite a toolset write/query call in place. Returns an error dict to block it."""
     customer_id = str(state.get("customer_id", "") or "")

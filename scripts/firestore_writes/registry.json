@@ -1034,6 +1034,9 @@
    "controls"
   ],
   "col": "cards",
+  "confirm_fields": [
+   "travelNotice"
+  ],
   "cust_field": false,
   "cust_path": true,
   "kind": "patch",

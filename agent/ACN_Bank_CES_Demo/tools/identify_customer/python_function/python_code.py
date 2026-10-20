@@ -76,21 +76,21 @@ Called silently during initial caller lookup. Do NOT speak any pacing phrase bef
     }
 
     customer_id = ""
+    shared_phone = False
     if identifier_type == "caller_id":
-        customer_id = CALLER_ID_MAP.get(identifier_value, "CUST_DOC_1988")
+        shared_phone = str(identifier_value).strip() == "+12178582973"
+        customer_id = CALLER_ID_MAP.get(str(identifier_value).strip(), "")
     elif identifier_type == "phone":
         digits = "".join(ch for ch in str(identifier_value) if ch.isdigit())
         if len(digits) == 11 and digits.startswith("1"):
             digits = digits[1:]
-        customer_id = PHONE_MAP.get(digits, "CUST_DOC_1988")
+        customer_id = PHONE_MAP.get(digits, "")
+        shared_phone = digits == "2178582973"
     elif identifier_type in {"email", "wa_id", "webchat_sso"}:
         val_clean = str(identifier_value).strip()
-        if val_clean in DEMO_EMAIL_OR_ID_MAP:
-            customer_id = DEMO_EMAIL_OR_ID_MAP[val_clean]
-        else:
-            customer_id = "CUST_DOC_1988"
-    elif identifier_type == "card_dob_postal":
-        customer_id = "CUST_DOC_1988"
+        customer_id = DEMO_EMAIL_OR_ID_MAP.get(val_clean) or {k.lower(): v for k, v in DEMO_EMAIL_OR_ID_MAP.items()}.get(val_clean.lower(), "")
+    # card_dob_postal: there is no card/date-of-birth lookup behind this demo tool, so it never identifies anyone.
+    # An unknown identifier is never guessed into a customer: it is CUSTOMER_NOT_FOUND and the identity hub asks again.
 
     if not customer_id:
         return {
@@ -100,6 +100,8 @@ Called silently during initial caller lookup. Do NOT speak any pacing phrase bef
         }
 
     set_variable("customer_id", customer_id)
+    # the one mobile number two demo customers share: verify_pin may use the PIN to tell them apart, for this number only
+    set_variable("identified_shared_phone", "true" if shared_phone else "false")
     set_variable("auth_level", "1")
     set_variable("identified_by", identifier_type)
     set_variable("inject_preferred_name", "true")
