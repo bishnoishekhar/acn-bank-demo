@@ -336,6 +336,9 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # Reset idempotency key after successful write
     WRITE_TOOLS = {'createTransaction', 'createRedemption', 'createFXOrder', 'createStopPayment',
                    'createBankDraft', 'createNSFReversal', 'cancelPAD'}
+    if response.get("status") == "success" and (tool_name in WRITE_TOOLS or _fsw_kind in ('create', 'patch', 'delete')):
+        state['pin_flow_done'] = '1'      # the journey's write went through: the PIN is spent at the end of this reply
+        state['pin_flow_open'] = ''
     if tool_name in WRITE_TOOLS and response.get("status") == "success":
         _set_txn(state, idempotency_key="", awaiting_confirmation=False)
 
@@ -659,12 +662,16 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
         state['auth_mode'] = mode
 
     pin_at = _hub_value(fields, 'pin_verified_at')
+    _fresh_pin = False
     if pin_at:
         try:
             import time
             ts = float(pin_at)
             if ts > float(state.get('pin_consumed_ts', 0) or 0) and time.time() - ts < 300:
                 state['pin_grant_ts'] = str(ts)      # a PIN was verified just now: it covers this request's account tools
+                state['pin_flow_open'] = ''           # a new journey starts with this PIN
+                state['pin_flow_done'] = ''
+                _fresh_pin = True
         except Exception:
             pass
 
@@ -684,4 +691,8 @@ def _harvest_identity_hub(tool_response: dict[str, Any], state: dict[str, Any], 
         effective_cid = customer_id or str(state.get('customer_id', '') or '')
         effective_level = int(_auth(state).get('level', '0') or '0')
         cleaned = _hub_status_text(request, effective_cid, effective_level)
+    if _fresh_pin and state.get('reauth_request'):
+        cleaned += (' The request that needed this PIN was: "' + str(state.get('reauth_request')) + '". Carry on with it straight away: '
+                    'call the tools it needs, then answer it. Do not stop after this message.')
+        state['reauth_request'] = ''
     return _put_hub_text(tool_response, cleaned)

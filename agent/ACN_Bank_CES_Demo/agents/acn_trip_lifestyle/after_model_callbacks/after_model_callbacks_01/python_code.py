@@ -328,8 +328,41 @@ def _ensure_spoken_with_widget(state, llm_response) -> Optional[object]:
         return None
 
 # --- Entry point ---
-def _consume_pin_grant(state, llm_response):
-    """One PIN covers ONE request: when the reply is final (no more tool work) the grant is spent, used or not."""
+_PIN_JOURNEY_AGENT = False     # this agent runs multi-turn journeys: a reply that ends with a question means the journey goes on
+_PIN_FLOW_WIDGETS = frozenset(['acn-payee-selector', 'acn-amount-input', 'acn-form-input'])
+_CONFIRM_ASK = ("is that right", "is this correct", "shall i", "should i", "do you want me to", "would you like me to", "can you confirm",
+                "please confirm", "ready to submit", "go ahead")
+_CANCEL_WORDS = ("cancel", "never mind", "nevermind", "forget it", "stop", "no thanks", "no thank you", "not now", "don't", "do not", "that's all", "thats all")
+
+def _customer_said(callback_context):
+    try:
+        uc = getattr(callback_context, 'user_content', None)
+        return " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or [])).strip().lower()
+    except Exception:
+        return ''
+
+def _pin_journey_continues(state, llm_response, callback_context=None):
+    """True when this reply is a step in the MIDDLE of a journey (pick a payee, enter an amount, confirm, answer a question), not its end."""
+    try:
+        if state.get('pin_flow_done'):
+            return False                             # the journey's write already went through: this reply closes it
+        said = _customer_said(callback_context)
+        if said and (said in ('no', 'nope') or any(w in said for w in _CANCEL_WORDS)):
+            return False                             # the customer walked away from it
+        parts, widget, spoken = _first_widget_and_text(llm_response)
+        low = (spoken or '').lower()
+        if widget in _PIN_FLOW_WIDGETS:
+            return True
+        if any(c in low for c in _CONFIRM_ASK) and low.rstrip().endswith('?'):
+            return True
+        if state.get('pin_flow_open') and widget == 'quick_actions':
+            return True
+        return bool(_PIN_JOURNEY_AGENT and low.rstrip().endswith('?'))
+    except Exception:
+        return False
+
+def _consume_pin_grant(state, llm_response, callback_context=None):
+    """One PIN covers ONE journey: a reply that is only a step in the middle of it keeps the PIN; the final reply spends it, used or not."""
     try:
         if not state.get('pin_grant_ts'):
             return
@@ -340,8 +373,15 @@ def _consume_pin_grant(state, llm_response):
             name = str(getattr(fc, 'name', '') or '').split('/')[-1]
             if name not in _WIDGET_TOOL_NAMES and name != 'end_session':
                 return                               # still working on the request (a tool call, a hand-over)
+        if _pin_journey_continues(state, llm_response, callback_context):
+            import time
+            state['pin_flow_open'] = '1'
+            state['pin_flow_ts'] = str(time.time())
+            return
         state['pin_consumed_ts'] = state.get('pin_grant_ts')
         state['pin_grant_used'] = ''
+        state['pin_flow_open'] = ''
+        state['pin_flow_done'] = ''
     except Exception:
         pass
 
@@ -352,6 +392,6 @@ def after_model_callback(callback_context: CallbackContext, llm_response: LlmRes
     if spoken is not None:
         result = spoken
     _note_rating_asked(callback_context.state, result if result is not None else llm_response)
-    _consume_pin_grant(callback_context.state, result if result is not None else llm_response)
+    _consume_pin_grant(callback_context.state, result if result is not None else llm_response, callback_context)
     closed = _enforce_session_close(callback_context.state, result if result is not None else llm_response)
     return closed if closed is not None else result

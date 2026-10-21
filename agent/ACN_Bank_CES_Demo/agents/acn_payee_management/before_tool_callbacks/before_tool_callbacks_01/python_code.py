@@ -815,6 +815,8 @@ def _close_block(state, tool_name, input_dict, callback_context):
 # it as pin_grant_ts, the request's account tools use it, and after_model spends it when the reply is final. The same PIN also
 # satisfies the write-action step-up (one request, one PIN).
 _PIN_GRANT_SECONDS = 300
+_PIN_FLOW_IDLE_SECONDS = 180      # a journey in progress: how long the customer may pause between steps
+_PIN_FLOW_MAX_SECONDS = 900       # and the longest one PIN ever covers
 _REAUTH_FREE_PREFIXES = ('customer_intelligence_db_',)
 _REAUTH_FREE = frozenset(['acn_customer_intelligence_engine', 'call_cie', 'acn_identity_security_hub', 'call_identity_hub',
                           'acn_faq_knowledge', 'call_faq', 'transfer_to_agent', 'end_session', 'identify_customer', 'authenticate',
@@ -831,11 +833,27 @@ def _pin_grant_fresh(state):
         if ts <= 0 or ts <= float(state.get('pin_consumed_ts', 0) or 0):
             return False
         import time
-        return (time.time() - ts) < _PIN_GRANT_SECONDS
+        now = time.time()
+        if (now - ts) < _PIN_GRANT_SECONDS:
+            return True
+        # a journey in progress (payee picked, amount entered, waiting for the customer's yes): the PIN stays good while they keep going
+        if state.get('pin_flow_open') and not state.get('pin_flow_done'):
+            return (now - float(state.get('pin_flow_ts', 0) or 0)) < _PIN_FLOW_IDLE_SECONDS and (now - ts) < _PIN_FLOW_MAX_SECONDS
+        return False
     except Exception:
         return False
 
-def _reauth_block(state, tool_name):
+def _reauth_remember_request(state, callback_context):
+    """The customer's own words that needed the PIN: handed back to the model once the PIN is verified, so it carries on instead of stopping."""
+    try:
+        uc = getattr(callback_context, 'user_content', None)
+        said = " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or [])).strip()
+        if len(said) > 3 and not said.replace(' ', '').isdigit():
+            state['reauth_request'] = said[:240]
+    except Exception:
+        pass
+
+def _reauth_block(state, tool_name, callback_context=None):
     """No account tool runs until a PIN has been verified for THIS request."""
     try:
         short = str(tool_name).split('/')[-1]
@@ -849,9 +867,13 @@ def _reauth_block(state, tool_name):
         if _pin_grant_fresh(state):
             state['pin_grant_used'] = '1'
             state['reauth_n'] = 0
+            if state.get('pin_flow_open'):
+                import time
+                state['pin_flow_ts'] = str(time.time())
             return None
         n = int(state.get('reauth_n', 0) or 0) + 1
         state['reauth_n'] = n
+        _reauth_remember_request(state, callback_context)
         if n > 4:                                         # the model keeps retrying: stop the loop, ask the customer in words
             return {"error": "REAUTH_REQUIRED",
                     "message": ("Stop calling tools. Ask the customer, in plain words, to type their 4-digit PIN, then wait for their "
@@ -891,7 +913,7 @@ def before_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context
         return _get_mock_response(tool_name, input_dict, state)
 
     # BT-REAUTH: a PIN verified for THIS request is required before any account tool runs (see _reauth_block)
-    _reauth = _reauth_block(state, tool_name)
+    _reauth = _reauth_block(state, tool_name, callback_context)
     if _reauth is not None:
         return _reauth
 
