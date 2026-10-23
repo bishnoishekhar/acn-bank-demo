@@ -181,6 +181,22 @@ st = signed_in(pin_flow_open="1", pin_flow_done="1", pin_flow_ts=str(time.time()
 at["_harvest_identity_hub"]({"data": {"response": f"x [[AUTH_RESULT customer_id=CUST_DOC_1988 auth_level=2 pin_verified_at={time.time()}]]"}}, st, "x")
 chk("flags reset when a new PIN is verified", not st.get("pin_flow_open") and not st.get("pin_flow_done"), st)
 
+print("== a cancel plus a NEW request in one message does not reuse the journey's PIN")
+bt = load("acn_payments", "before_tool")
+for said in ("Actually, I've changed my mind. I'd like to cancel that transfer, please. Could you just show me my account balance one more time instead?",
+             "cancel that and show my balance", "never mind, what's my balance", "no thanks, show me my accounts instead"):
+    st = with_pin(pin_flow_open="1", pin_flow_ts=str(time.time()))
+    r = bt["_reauth_block"](st, "manageCustomerDatabase_getAccounts", ctx(said, st))
+    chk(f"'{said[:48]}...' -> the balance needs a NEW PIN", isinstance(r, dict) and r.get("error") == "REAUTH_REQUIRED", r)
+    chk("   ...and the journey is closed", not st.get("pin_flow_open") and bool(st.get("pin_consumed_ts")), st)
+for said in ("send 25", "Transfer to Raj Bishnoi", "Yes, set it", "I don't mind the fee, send 25"):
+    st = with_pin(pin_flow_open="1", pin_flow_ts=str(time.time()))
+    r = bt["_reauth_block"](st, "manageCustomerDatabase_getBeneficiaries", ctx(said, st))
+    chk(f"'{said}' keeps the journey's PIN", r is None, r)
+st = with_pin()
+r = bt["_reauth_block"](st, "manageCustomerDatabase_getAccounts", ctx("cancel", st))
+chk("no journey open: the plain one-request PIN is unaffected by the word cancel", r is None, r)
+
 print("== every agent that has the PIN gate carries the new logic")
 bad, journey = [], []
 for f in sorted(glob.glob(f"{ROOT}/agents/*/after_model_callbacks/*/python_code.py")):

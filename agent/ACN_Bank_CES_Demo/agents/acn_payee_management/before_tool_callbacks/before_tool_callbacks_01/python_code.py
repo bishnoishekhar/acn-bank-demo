@@ -843,6 +843,17 @@ def _pin_grant_fresh(state):
     except Exception:
         return False
 
+_REAUTH_WALKED_AWAY = ("cancel", "never mind", "nevermind", "forget it", "no thanks", "no thank you", "not now", "instead", "changed my mind", "that's all", "thats all")
+
+def _customer_walked_away(callback_context):
+    """The customer's message drops the journey in progress (cancel, never mind, 'show my balance instead')."""
+    try:
+        uc = getattr(callback_context, 'user_content', None)
+        said = " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or [])).strip().lower()
+        return bool(said) and (said in ('no', 'nope') or any(w in said for w in _REAUTH_WALKED_AWAY))
+    except Exception:
+        return False
+
 def _reauth_remember_request(state, callback_context):
     """The customer's own words that needed the PIN: handed back to the model once the PIN is verified, so it carries on instead of stopping."""
     try:
@@ -864,6 +875,10 @@ def _reauth_block(state, tool_name, callback_context=None):
             return None                                   # nobody identified yet (a guest or a new applicant): the normal flow handles it
         if short not in _REAUTH_NEW_APPLICANT_OK and TOOL_MIN_AUTH.get(short, 2) < 2:
             return None                                   # public information, widgets, pure calculators
+        if state.get('pin_flow_open') and _customer_walked_away(callback_context):
+            state['pin_consumed_ts'] = state.get('pin_grant_ts') or state.get('pin_consumed_ts')     # the journey is over: a new request needs a new PIN
+            state['pin_flow_open'] = ''
+            state['pin_flow_done'] = ''
         if _pin_grant_fresh(state):
             state['pin_grant_used'] = '1'
             state['reauth_n'] = 0
