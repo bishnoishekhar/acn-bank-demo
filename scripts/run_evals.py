@@ -27,6 +27,7 @@ APPS = {
     "sandbox": "projects/emvnzir-canada-song/locations/us/apps/ee1b7258-c8b9-4eb3-bba5-4a13e2c723c5",
     "live": "projects/emvnzir-canada-song/locations/us/apps/e29e31ff-b686-46c8-8f02-f431f1422f1d",
 }
+LIVE_DEPLOYMENT = "b2abf514-25c0-4beb-9a04-87ccb714e213"      # the deployment the web UI uses
 DEFAULT_LIMIT = 25      # more than this needs an explicit --max: each test is a whole conversation on the shared LLM quota
 BATCH = 10              # tests per run request
 
@@ -124,6 +125,8 @@ def main():
     ap.add_argument("--golden-run-method", choices=["STABLE", "NAIVE"], default="STABLE")
     ap.add_argument("--max", type=int, default=DEFAULT_LIMIT, help=f"most tests to run in one go (default {DEFAULT_LIMIT})")
     ap.add_argument("--run-count", type=int, default=1, help="how many times to run each test (the platform's own default is 5 per scenario)")
+    ap.add_argument("--version", help="run against a saved VERSION instead of the draft: a version id, a full version name, or 'deployed' "
+                    "(the version the live web deployment serves, i.e. what customers get)")
     ap.add_argument("--list", action="store_true", help="only list what would run")
     ap.add_argument("--report", help="write the full results to this JSON file")
     ap.add_argument("--strict", action="store_true", help="use the platform's own verdict for scenarios too (it also needs the simulated customer to finish its task)")
@@ -163,12 +166,22 @@ def main():
             print(("  invalid " if e.invalid else "          ") + e.display_name)
         return 0
 
+    version = ""
+    if a.version:
+        if a.version == "deployed":
+            from cxas_scrapi.core.deployments import Deployments
+            version = Deployments(app_name=APPS["live"]).get_deployment(LIVE_DEPLOYMENT).app_version
+        else:
+            version = a.version if a.version.startswith("projects/") else f"{app}/versions/{a.version}"
+        print("running against version:", version.split("/")[-1], "(not the draft)")
     rows, started = [], time.time()
     for i in range(0, len(chosen), BATCH):
         part = chosen[i:i + BATCH]
         req = ces.types.RunEvaluationRequest(app=app, evaluations=[e.name for e in part])
         req.golden_run_method = getattr(ces.types.GoldenRunMethod, a.golden_run_method)
         req.run_count = a.run_count
+        if version:
+            req.app_version = version
         if a.modality == "audio":
             req.config.evaluation_channel = ces.types.EvaluationConfig.EvaluationChannel.AUDIO
         print(f"running {len(part)} test(s) [{i + 1}-{i + len(part)}] ...")
@@ -193,7 +206,7 @@ def main():
         if verdict(r, a.strict) != r.evaluation_status.name:
             note = (note + " ").lstrip() + f"(platform says {r.evaluation_status.name}: all rules passed but the simulated customer did not finish its task)"
         print(f"{verdict(r, a.strict):8} {(e.display_name if e else '?')[:62]:62} {note}")
-    print(f"\n{passed}/{len(rows)} passed in {int(time.time() - started)}s  (app draft, modality {a.modality}, {a.golden_run_method})")
+    print(f"\n{passed}/{len(rows)} passed in {int(time.time() - started)}s  ({'version ' + version.split('/')[-1][:8] if version else 'app draft'}, modality {a.modality}, {a.golden_run_method})")
 
     shown = 0
     for e, r in rows:

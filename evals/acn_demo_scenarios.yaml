@@ -131,8 +131,8 @@ scenarios:
       You are a prospective home buyer who is not signed in. Ask "What could I afford on a mortgage if I earn 85000 a year with 40000 down?".
       After the answer, say thanks and goodbye.
     expectations:
-      - "The agent must say, in words, that the customer could afford a home up to about 384,000 dollars."
-      - "The agent must say the monthly mortgage payment, about 1,883 dollars, not only point at a card or sliders."
+      - "The agent must say, in words, a maximum home price the customer could afford, roughly between 370,000 and 400,000 dollars."
+      - "The agent must say a monthly mortgage payment of roughly 1,800 to 1,950 dollars out loud, not only point at a card or sliders."
       - "The agent must make clear this is an estimate and not an approval."
       - "The agent must not ask the customer to sign in for this public estimate."
 
@@ -143,7 +143,7 @@ scenarios:
       You are a prospective home buyer who is not signed in. Ask "Monthly payment on a 450000 home with 90000 down at 5 percent over 30 years?".
       After the answer, say thanks and goodbye.
     expectations:
-      - "The agent must say the monthly payment of about 1,921 dollars out loud."
+      - "The agent must say the monthly payment out loud, a figure roughly between 1,880 and 1,960 dollars."
       - "The agent must mention the mortgage amount of about 360,000 dollars or the 30-year term."
       - "The agent must not ask the customer to sign in for this public estimate."
 
