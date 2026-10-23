@@ -27,6 +27,8 @@ SET_ON_WRITE = {"cancelPAD": {"status": "cancelled"},
 # ops a person who is not a customer yet may use (account opening): they run on the applicant id saved by createNewCustomer
 APPLICANT_OPS = {"createNewCustomer": "new", "createAccountApplication": True, "updateAccountApplication": True,
                  "createKycRequest": True, "writeKycRecord": True, "executeACNBankApplicationEmail": True}
+# fields the customer must confirm in their own words (read-back, then a yes in a LATER message) before the write goes through
+CONFIRM_FIELDS = {"updateCard": ["travelNotice"], "createLoanApplication": ["amount"]}
 QUERY_COLLECTION = {"queryCustomers": "customers"}                                  # runQuery at the database root
 
 def toolset_display_name(ts_dir):
@@ -132,6 +134,8 @@ for spec_path in sorted(glob.glob(os.path.join(root, "toolsets", "*", "open_api_
             }
             if opid in APPLICANT_OPS:
                 registry[ts + "_" + opid]["applicant"] = APPLICANT_OPS[opid]
+            if opid in CONFIRM_FIELDS:
+                registry[ts + "_" + opid]["confirm_fields"] = CONFIRM_FIELDS[opid]
             if new_path != path or True:
                 changed = True
     # carry over untouched paths (reads, skipped ops); keep order roughly: rebuilt dict

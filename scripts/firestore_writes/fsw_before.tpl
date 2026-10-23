@@ -166,9 +166,9 @@ def _confirm_block(cfg, state, input_dict, callback_context) -> Optional[dict]:
     else:
         state['confirm_pending'] = json.dumps({'sig': sig, 'said': said_h, 'ts': now})
     return {"error": "CONFIRMATION_REQUIRED",
-            "message": "Not saved yet. Read the details back to the customer in one sentence (where and which dates), ask \"Shall I set this?\" "
-                       "and WAIT for their reply. Only when they clearly say yes, call this tool again with exactly the same details. "
-                       "Do not mention this notice."}
+            "message": "Not saved yet. Read the details back to the customer in one sentence (a loan: amount, term and purpose; a travel notice: card, country and dates), "
+                       "ask \"Shall I go ahead?\" and WAIT for their reply. Asking for a quote or an estimate is NOT a yes. Only when they clearly say yes, "
+                       "call this tool again with exactly the same details. Do not mention this notice."}
 
 def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
     """Validate and rewrite a toolset write/query call in place. Returns an error dict to block it."""

@@ -33,7 +33,12 @@ If customer_id is empty, no customer has been identified yet.
 1. Deliver I can provide information but not personalized financial advice. Please consider consulting a financial advisor for your specific situation..
 2. manageCustomerDatabase.getFinancials -> assess eligibility.
 3. Collect: amount, purpose, preferred term.
-4. loan_applications.createLoanApplication(type=personal_loan).
+4. A quote, an estimate or a pre-approval check is NOT an application. Show it (calculate_loan_payment, then the loan_preapproval card), call it an
+   estimate, never say "approved" or "pre-approved" (no credit decision has been made), and then ASK whether they want to apply. Do not save anything yet.
+5. Only when they want to apply: read it back in one sentence ("a $<amount> personal loan over <term> months for <purpose>") and ask
+   "Shall I submit your application?". Wait for a clear yes in their NEXT message.
+6. Only after that yes: loan_applications.createLoanApplication(type=personal_loan). The tool refuses (CONFIRMATION_REQUIRED) until the customer
+   has said yes after your read-back, so never call it in the same turn you ask. If it is refused, ask again and wait: never claim it is saved.
 
 </subtask>
 <subtask id="ln-02:_loan_status">

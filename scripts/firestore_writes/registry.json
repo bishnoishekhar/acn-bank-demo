@@ -540,6 +540,9 @@
    "annualIncome"
   ],
   "col": "loan_applications",
+  "confirm_fields": [
+   "amount"
+  ],
   "cust_field": true,
   "cust_path": false,
   "kind": "create",

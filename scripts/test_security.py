@@ -135,5 +135,39 @@ st3 = fresh()
 r6 = run(impl, "update_customer_api_db_updateCard", {"customerId": "CUST_DOC_1988", "cardId": "CARD-1988-001", "status": "locked"}, st3, "lock my card")
 chk("locking a card is not held back by the travel-notice gate", not (isinstance(r6, dict) and r6.get("error") == "CONFIRMATION_REQUIRED"), r6)
 
+print("== a loan application needs a spoken yes after a read-back (a quote is not a yes)")
+bad = []
+for f in files:
+    reg = json.loads(re.search(r"_FSW_REGISTRY = json\.loads\('''(.*?)'''\)", open(f, encoding="utf-8").read(), re.S).group(1))
+    if reg["loan_applications_createLoanApplication"].get("confirm_fields") != ["amount"]:
+        bad.append(f.replace("\\", "/").split("agents/")[1].split("/")[0])
+chk(f"all {len(files)} before_tool files gate createLoanApplication", not bad, bad)
+LOAN = {"type": "personal_loan", "amount": 15000, "term": 36, "purpose": "car"}
+for agent in ("acn_loans_epp", "acn_mortgage_application"):
+    ns = dict(G)
+    exec(open(f"{ROOT}/agents/{agent}/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+    impl2 = ns["before_tool_callback_impl"]
+    name = "loan_applications_createLoanApplication"
+    st = fresh()
+    r1 = run(impl2, name, dict(LOAN), st, "Check if I'm pre-approved for 15000 over 36 months")
+    chk(f"{agent}: saving right after a quote request is held back (CONFIRMATION_REQUIRED)", isinstance(r1, dict) and r1.get("error") == "CONFIRMATION_REQUIRED", r1)
+    chk(f"{agent}:    and the message talks about a loan, not about dates", "amount, term and purpose" in r1.get("message", "") and "Shall I go ahead" in r1.get("message", ""), r1)
+    r2 = run(impl2, name, dict(LOAN), st, "Check if I'm pre-approved for 15000 over 36 months")
+    chk(f"{agent}: the same call in the same turn (no new customer message) is still held back", isinstance(r2, dict) and r2.get("error") == "CONFIRMATION_REQUIRED", r2)
+    r3 = run(impl2, name, dict(LOAN), st, "No, not yet, I want to think about it")
+    chk(f"{agent}: a 'no' keeps it held back", isinstance(r3, dict) and r3.get("error") == "CONFIRMATION_REQUIRED", r3)
+    r4 = run(impl2, name, dict(LOAN), st, "Yes, submit it")
+    chk(f"{agent}: after a later 'yes' the same application goes through the gate", not (isinstance(r4, dict) and r4.get("error") == "CONFIRMATION_REQUIRED"), r4)
+    st2 = fresh()
+    run(impl2, name, dict(LOAN), st2, "I want a loan of 15000")
+    r5 = run(impl2, name, dict(LOAN, amount=25000), st2, "yes")
+    chk(f"{agent}: a 'yes' does not carry over to a DIFFERENT amount", isinstance(r5, dict) and r5.get("error") == "CONFIRMATION_REQUIRED", r5)
+ns = dict(G)
+exec(open(f"{ROOT}/agents/acn_mortgage_application/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+r6 = run(ns["before_tool_callback_impl"], "loan_applications_createLoanApplication", {"type": "mortgage_preapproval", "amount": 624000, "term": 25, "downPayment": 480000}, fresh(), "go on")
+chk("a mortgage pre-approval request is held back the same way", isinstance(r6, dict) and r6.get("error") == "CONFIRMATION_REQUIRED", r6)
+r7 = run(ns["before_tool_callback_impl"], "mortgage_payment_estimate", {"property_price_cad": 600000, "down_payment_cad": 120000, "interest_rate_pct": 4.5}, fresh(), "monthly payment?")
+chk("the calculators are not held back", not (isinstance(r7, dict) and r7.get("error") == "CONFIRMATION_REQUIRED"), r7)
+
 print("\nALL PASS" if ok else "\nSOME FAILED")
 sys.exit(0 if ok else 1)
