@@ -341,7 +341,12 @@ _PIN_JOURNEY_AGENT = False     # this agent runs multi-turn journeys: a reply th
 _PIN_FLOW_WIDGETS = frozenset(['acn-payee-selector', 'acn-amount-input', 'acn-form-input'])
 _CONFIRM_ASK = ("is that right", "is this correct", "shall i", "should i", "do you want me to", "would you like me to", "can you confirm",
                 "please confirm", "ready to submit", "go ahead")
-_CANCEL_WORDS = ("cancel", "never mind", "nevermind", "forget it", "stop", "no thanks", "no thank you", "not now", "don't", "do not", "that's all", "thats all")
+_CANCEL_WORDS = ("cancel", "never mind", "nevermind", "forget it", "stop", "no thanks", "no thank you", "not now", "don't", "do not", "that's all", "thats all",
+                 "changed my mind", "instead")
+
+def _plain_words(said):
+    """The customer's words without punctuation or capitals: 'No.' / 'NO!' -> 'no'."""
+    return ''.join(ch for ch in str(said or '').lower() if ch.isalpha() or ch in " '").strip()
 
 def _customer_said(callback_context):
     try:
@@ -356,7 +361,7 @@ def _pin_journey_continues(state, llm_response, callback_context=None):
         if state.get('pin_flow_done'):
             return False                             # the journey's write already went through: this reply closes it
         said = _customer_said(callback_context)
-        if said and (said in ('no', 'nope') or any(w in said for w in _CANCEL_WORDS)):
+        if said and (_plain_words(said) in ('no', 'nope', 'nah', 'no thanks', 'no thank you') or any(w in said for w in _CANCEL_WORDS)):
             return False                             # the customer walked away from it
         parts, widget, spoken = _first_widget_and_text(llm_response)
         low = (spoken or '').lower()

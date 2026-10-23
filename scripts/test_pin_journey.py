@@ -197,6 +197,20 @@ st = with_pin()
 r = bt["_reauth_block"](st, "manageCustomerDatabase_getAccounts", ctx("cancel", st))
 chk("no journey open: the plain one-request PIN is unaffected by the word cancel", r is None, r)
 
+print("== 'No.' with punctuation or capitals ends a journey too (found by a simulated customer who typed exactly that)")
+bt, am = load("acn_payments", "before_tool"), load("acn_payments", "after_model")
+for said in ("No.", "NO!", "no", "No, thanks.", "Nope.", "No thank you!"):
+    st = with_pin(pin_flow_open="1", pin_flow_ts=str(time.time()))
+    am["_consume_pin_grant"](st, reply("No problem, I've cancelled that transfer. What else can I help you with today?"), ctx(said, st))
+    chk(f"customer says '{said}' -> the journey's PIN is spent at the end of the reply", bool(st.get("pin_consumed_ts")) and not st.get("pin_flow_open"), st)
+    st = with_pin(pin_flow_open="1", pin_flow_ts=str(time.time()))
+    r = bt["_reauth_block"](st, "manageCustomerDatabase_getAccounts", ctx(said, st))
+    chk(f"   '{said}' + an account tool in the same turn -> a new PIN is required", isinstance(r, dict) and r.get("error") == "REAUTH_REQUIRED", r)
+for said in ("Yes.", "Nothing changed, send 25.", "Notable question: send 25", "Norah Bishnoi"):
+    st = with_pin(pin_flow_open="1", pin_flow_ts=str(time.time()))
+    am["_consume_pin_grant"](st, reply("Just to confirm, CAD 25 to Raj. Is that right?", "quick_actions"), ctx(said, st))
+    chk(f"customer says '{said}' -> the journey continues", st.get("pin_flow_open") == "1" and not st.get("pin_consumed_ts"), st)
+
 print("== every agent that has the PIN gate carries the new logic")
 bad, journey = [], []
 for f in sorted(glob.glob(f"{ROOT}/agents/*/after_model_callbacks/*/python_code.py")):

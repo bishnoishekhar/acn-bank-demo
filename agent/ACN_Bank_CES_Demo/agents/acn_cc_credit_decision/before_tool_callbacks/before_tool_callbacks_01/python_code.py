@@ -704,12 +704,16 @@ def _pin_grant_fresh(state):
 
 _REAUTH_WALKED_AWAY = ("cancel", "never mind", "nevermind", "forget it", "no thanks", "no thank you", "not now", "instead", "changed my mind", "that's all", "thats all")
 
+def _plain_words(said):
+    """The customer's words without punctuation or capitals: 'No.' / 'NO!' -> 'no'."""
+    return ''.join(ch for ch in str(said or '').lower() if ch.isalpha() or ch in " '").strip()
+
 def _customer_walked_away(callback_context):
     """The customer's message drops the journey in progress (cancel, never mind, 'show my balance instead')."""
     try:
         uc = getattr(callback_context, 'user_content', None)
         said = " ".join((getattr(p, 'text', '') or '') for p in (getattr(uc, 'parts', None) or [])).strip().lower()
-        return bool(said) and (said in ('no', 'nope') or any(w in said for w in _REAUTH_WALKED_AWAY))
+        return bool(said) and (_plain_words(said) in ('no', 'nope', 'nah', 'no thanks', 'no thank you') or any(w in said for w in _REAUTH_WALKED_AWAY))
     except Exception:
         return False
 
