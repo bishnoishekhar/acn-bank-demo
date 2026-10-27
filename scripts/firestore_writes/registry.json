@@ -84,6 +84,9 @@
  "appointments_db_cancelAppointment": {
   "allow": [],
   "col": "appointments",
+  "confirm_fields": [
+   "appointmentId"
+  ],
   "cust_field": false,
   "cust_path": false,
   "kind": "delete",
@@ -106,6 +109,9 @@
    "sendConfirmationEmail"
   ],
   "col": "appointments",
+  "confirm_fields": [
+   "slotId"
+  ],
   "cust_field": true,
   "cust_path": false,
   "kind": "create",
@@ -127,6 +133,10 @@
    "status"
   ],
   "col": "appointments",
+  "confirm_fields": [
+   "slotId",
+   "status"
+  ],
   "cust_field": false,
   "cust_path": false,
   "kind": "patch",
@@ -315,9 +325,14 @@
    "activationType",
    "cardId",
    "channel",
-   "deviceInfo"
+   "deviceInfo",
+   "requestedAmount",
+   "details"
   ],
   "col": "activation_requests",
+  "confirm_fields": [
+   "activationType"
+  ],
   "cust_field": true,
   "cust_path": false,
   "kind": "create",
@@ -358,6 +373,9 @@
    "description"
   ],
   "col": "disputes",
+  "confirm_fields": [
+   "transactionId"
+  ],
   "cust_field": true,
   "cust_path": false,
   "kind": "create",
@@ -391,6 +409,23 @@
    "amount",
    "reason"
   ],
+  "set": {},
+  "stepup": false,
+  "ts": "disputes_db"
+ },
+ "disputes_db_queryDisputes": {
+  "allow": [
+   "customerId",
+   "status",
+   "type"
+  ],
+  "col": "disputes",
+  "cust_field": true,
+  "cust_path": false,
+  "kind": "query",
+  "op": "queryDisputes",
+  "path": [],
+  "required": [],
   "set": {},
   "stepup": false,
   "ts": "disputes_db"
@@ -848,6 +883,11 @@
    "consentSource"
   ],
   "col": "marketing_consent",
+  "confirm_fields": [
+   "email",
+   "phone",
+   "mail"
+  ],
   "cust_field": false,
   "cust_path": true,
   "kind": "patch",
@@ -873,6 +913,15 @@
    "lowBalanceThreshold"
   ],
   "col": "notifications",
+  "confirm_fields": [
+   "emailEnabled",
+   "smsEnabled",
+   "pushEnabled",
+   "lowBalanceAlert",
+   "transactionAlert",
+   "securityAlert",
+   "lowBalanceThreshold"
+  ],
   "cust_field": false,
   "cust_path": true,
   "kind": "patch",
@@ -892,6 +941,11 @@
    "noticesEnabled"
   ],
   "col": "paperless",
+  "confirm_fields": [
+   "statementsEnabled",
+   "taxDocumentsEnabled",
+   "noticesEnabled"
+  ],
   "cust_field": false,
   "cust_path": true,
   "kind": "patch",
@@ -1103,6 +1157,12 @@
    "address"
   ],
   "col": "customers",
+  "confirm_fields": [
+   "email",
+   "phone",
+   "address",
+   "preferredName"
+  ],
   "cust_field": false,
   "cust_path": true,
   "kind": "patch",

@@ -1,10 +1,11 @@
 """Roll the demo appointment slots forward.
 
-The agent's getAvailableSlots lists the collection and Firestore returns only the first 20 documents, so the window is
-exactly 20 slots: 2 branches x the next 10 weekdays, one slot per branch per day (morning and afternoon alternate by
-day so every weekday offers both a morning and an afternoon somewhere).
+The agent's getAvailableSlots now asks Firestore for up to 300 documents (it used to get only the first 20, which is why the window was
+small), and the after-tool callback hides slots that are in the past or not 'available'. The window is the next 30 weekdays: 2 branches,
+one slot per branch per day (morning and afternoon alternate by day so every weekday offers both a morning and an afternoon somewhere).
+Run it again every few weeks to roll the window forward.
 
-  python refresh_appointment_slots.py [--start YYYY-MM-DD]            dry run (default start: tomorrow)
+  python refresh_appointment_slots.py [--start YYYY-MM-DD] [--days N]   dry run (default start: tomorrow)
   python refresh_appointment_slots.py [--start YYYY-MM-DD] --apply    creates the missing slots, then deletes the OLD seeded
                                                                       slots (only documents tagged demo_seed=true) that are
                                                                       not part of the new window. Writes a manifest.
@@ -41,9 +42,9 @@ def enc(v):
     if isinstance(v, list): return {"arrayValue": {"values": [enc(x) for x in v]}}
     raise TypeError(type(v))
 
-def window(start):
+def window(start, n=30):
     days, d = [], start
-    while len(days) < 10:
+    while len(days) < n:
         if d.weekday() < 5: days.append(d)
         d += datetime.timedelta(days=1)
     out = []
@@ -59,7 +60,7 @@ def window(start):
 args = sys.argv[1:]
 start = datetime.date.fromisoformat(args[args.index("--start") + 1]) if "--start" in args else datetime.date.today() + datetime.timedelta(days=1)
 apply = "--apply" in args
-new = window(start)
+new = window(start, int(args[args.index('--days') + 1]) if '--days' in args else 30)
 new_ids = {sid for sid, _ in new}
 s, r = http("GET", f"{BASE}/appointment_slots?pageSize=300")
 cur = (r or {}).get("documents", []) if s == 200 else []

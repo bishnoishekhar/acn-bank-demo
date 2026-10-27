@@ -222,7 +222,26 @@ def _fsw_friendly(tool_response, kind):
         pass
     return tool_response
 
-def _no_data_result(tool_response, state, slug, what):
+def _slot_still_open(d):
+    """An appointment slot the customer can still book: marked available and not in the past (Toronto time)."""
+    try:
+        if str(d.get('status', 'available')).lower() not in ('available', 'open', ''):
+            return False
+        day = str(d.get('date', ''))[:10]
+        if not day:
+            return True
+        try:
+            import zoneinfo
+            from datetime import datetime as _dt
+            today = _dt.now(zoneinfo.ZoneInfo('America/Toronto')).strftime('%Y-%m-%d')
+        except Exception:
+            from datetime import datetime as _dt, timezone as _tz
+            today = _dt.now(_tz.utc).strftime('%Y-%m-%d')
+        return day >= today
+    except Exception:
+        return True
+
+def _no_data_result(tool_response, state, slug, what, keep=None):
     """Public lookup -> plain documents, or NO_DATA when the collection is empty / the call failed."""
     docs = []
     try:
@@ -236,6 +255,9 @@ def _no_data_result(tool_response, state, slug, what):
                 docs.append(d)
     except Exception:
         docs = []
+    if keep is not None:
+        docs = [d for d in docs if keep(d)]
+        docs.sort(key=lambda d: (str(d.get('date', '')), str(d.get('start_time', ''))))
     if docs:
         state['nodata_' + slug] = '0'
         return {"status": "success", "code": "OK", "data": {"documents": docs, "count": len(docs)}}
@@ -287,7 +309,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
 
     # AT-NODATA: this public collection can be empty; never let the model fill the gap
     if tool_name in ('appointments_db_getAvailableSlots', 'getAvailableSlots'):
-        return _no_data_result(tool_response, state, 'slots', 'appointment time')
+        return _no_data_result(tool_response, state, 'slots', 'appointment time', keep=_slot_still_open)
 
     _fsw_kind = _FSW_KINDS.get(tool_name)
     if _fsw_kind:

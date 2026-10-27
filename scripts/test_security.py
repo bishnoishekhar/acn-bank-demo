@@ -169,5 +169,93 @@ chk("a mortgage pre-approval request is held back the same way", isinstance(r6, 
 r7 = run(ns["before_tool_callback_impl"], "mortgage_payment_estimate", {"property_price_cad": 600000, "down_payment_cad": 120000, "interest_rate_pct": 4.5}, fresh(), "monthly payment?")
 chk("the calculators are not held back", not (isinstance(r7, dict) and r7.get("error") == "CONFIRMATION_REQUIRED"), r7)
 
+
+print("== service hub: every customer-facing write needs a read-back and a spoken yes")
+GATED = {
+    "disputes_db_createDispute": ["transactionId"],
+    "digital_activation_db_createActivationRequest": ["activationType"],
+    "update_customer_api_db_updateProfile": ["email", "phone", "address", "preferredName"],
+    "appointments_db_createAppointment": ["slotId"],
+    "appointments_db_updateAppointment": ["slotId", "status"],
+    "appointments_db_cancelAppointment": ["appointmentId"],
+    "preferences_db_updateNotificationPreferences": ["emailEnabled", "smsEnabled", "pushEnabled", "lowBalanceAlert", "transactionAlert", "securityAlert", "lowBalanceThreshold"],
+    "preferences_db_updatePaperlessEnrollment": ["statementsEnabled", "taxDocumentsEnabled", "noticesEnabled"],
+    "preferences_db_updateMarketingConsent": ["email", "phone", "mail"],
+}
+bad = []
+for f in files:
+    reg = json.loads(re.search(r"_FSW_REGISTRY = json\.loads\('''(.*?)'''\)", open(f, encoding="utf-8").read(), re.S).group(1))
+    for op, fields in GATED.items():
+        if reg[op].get("confirm_fields") != fields:
+            bad.append((f.replace("\\", "/").split("agents/")[1].split("/")[0], op))
+    if "disputes_db_queryDisputes" not in reg:
+        bad.append((f, "queryDisputes missing"))
+chk(f"all {len(files)} before_tool files gate the 9 service writes (and know queryDisputes)", not bad, bad[:4])
+CASES = [
+    ("acn_disputes", "disputes_db_createDispute", {"customerId": "CUST_DOC_1988", "transactionId": "TXN-1988-ANOMALY-01", "type": "unauthorized", "amount": 249.99}),
+    ("acn_digital_activation", "digital_activation_db_createActivationRequest", {"customerId": "CUST_DOC_1988", "activationType": "password_reset"}),
+    ("acn_digital_activation", "update_customer_api_db_updateProfile", {"customerId": "CUST_DOC_1988", "email": "new@example.com"}),
+    ("acn_branch_appointments", "appointments_db_createAppointment", {"customerId": "CUST_DOC_1988", "branchId": "BR-TOR-001", "slotId": "SLOT-X", "serviceType": "mortgage"}),
+    ("acn_branch_appointments", "appointments_db_cancelAppointment", {"customerId": "CUST_DOC_1988", "appointmentId": "APPT-1"}),
+    ("acn_customer_preferences", "preferences_db_updateMarketingConsent", {"customerId": "CUST_DOC_1988", "email": False, "phone": False, "mail": False}),
+    ("acn_customer_preferences", "preferences_db_updatePaperlessEnrollment", {"customerId": "CUST_DOC_1988", "statementsEnabled": True}),
+]
+for agent, name, args in CASES:
+    ns = dict(G)
+    exec(open(f"{ROOT}/agents/{agent}/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+    im = ns["before_tool_callback_impl"]
+    st = fresh()
+    a = run(im, name, dict(args), st, "please do that")
+    chk(f"{name}: held back on the first call", isinstance(a, dict) and a.get("error") == "CONFIRMATION_REQUIRED", a)
+    b = run(im, name, dict(args), st, "please do that")
+    chk(f"{name}:   and still held back in the same turn", isinstance(b, dict) and b.get("error") == "CONFIRMATION_REQUIRED", b)
+    c = run(im, name, dict(args), st, "no wait, cancel")
+    chk(f"{name}:   and by a 'no'", isinstance(c, dict) and c.get("error") == "CONFIRMATION_REQUIRED", c)
+    d = run(im, name, dict(args), st, "Yes, go ahead")
+    chk(f"{name}:   but goes through after a later yes", not (isinstance(d, dict) and d.get("error") == "CONFIRMATION_REQUIRED"), d)
+ns = dict(G)
+exec(open(f"{ROOT}/agents/acn_disputes/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+r = run(ns["before_tool_callback_impl"], "update_customer_api_db_updateCard", {"customerId": "CUST_DOC_1988", "cardId": "CARD-1988-001", "status": "suspended"}, fresh(), "freeze my card")
+chk("freezing a card (disputes agent) is not held back by the gate: the customer asked for it and it protects them", not (isinstance(r, dict) and r.get("error") == "CONFIRMATION_REQUIRED"), r)
+
+print("== service hub: the safety keywords catch the ways people really say it")
+sp = {}
+src = open(f"{ROOT}/agents/acn_service_hub/before_model_callbacks/before_model_callbacks_01/python_code.py", encoding="utf-8").read()
+a, b = src.index("FRAUD_PATTERNS = re.compile("), src.index("INJECTION_PATTERNS = re.compile(")
+exec("import re\n" + src[a:b], sp)
+for kind, pat, phrases in [
+    ("self-harm", "SELF_HARM_PATTERNS", ["I want to kill myself", "I want to end it all", "I don't see the point anymore", "I want to die", "I can't go on", "I'm thinking about suicide", "I want to take my own life", "I don't want to be alive"]),
+    ("lost/stolen", "LOST_PATTERNS", ["I lost my card", "Someone stole my card", "my wallet was stolen", "I can't find my card", "my credit card got stolen"]),
+    ("fraud", "FRAUD_PATTERNS", ["There's a charge I don't recognize", "someone used my card without permission", "I think I've been scammed", "I was defrauded", "I got a phishing text", "my account was hacked", "unauthorised transaction", "identity theft"]),
+]:
+    miss = [x for x in phrases if not sp[pat].search(x)]
+    chk(f"{kind}: all {len(phrases)} phrasings caught", not miss, miss)
+quiet = ["What's my balance?", "I want to book an appointment", "What are your mortgage rates", "How do I reset my password", "I'd like to end my session now", "I lost track of time"]
+hit = [x for x in quiet if any(sp[p].search(x) for p in ("FRAUD_PATTERNS", "LOST_PATTERNS", "SELF_HARM_PATTERNS"))]
+chk("ordinary requests do not trigger a safety path", not hit, hit)
+import hashlib
+sums = set()
+for f in sorted(glob.glob(f"{ROOT}/agents/*/before_model_callbacks/*/python_code.py")):
+    t2 = open(f, encoding="utf-8").read().replace("\r\n", "\n")
+    sums.add(hashlib.md5(t2[t2.index("FRAUD_PATTERNS = re.compile("):t2.index("INJECTION_PATTERNS = re.compile(")].encode()).hexdigest())
+chk("all 31 agents carry the same safety keywords", len(sums) == 1, sums)
+
+print("== appointment slots: past and booked slots are never offered")
+an = dict(G)
+exec(open(f"{ROOT}/agents/acn_branch_appointments/after_tool_callbacks/after_tool_callbacks_01/python_code.py", encoding="utf-8").read(), an)
+import datetime
+today = datetime.date.today()
+mk = lambda d, st="available": {"fields": {"date": {"stringValue": d.isoformat()}, "status": {"stringValue": st}, "start_time": {"stringValue": "10:00"}, "branch_id": {"stringValue": "BR-TOR-001"}}, "name": "x/appointment_slots/S-" + d.isoformat() + st}
+resp = {"documents": [mk(today - datetime.timedelta(days=3)), mk(today + datetime.timedelta(days=2)), mk(today + datetime.timedelta(days=1), "booked"), mk(today + datetime.timedelta(days=5))]}
+out = an["_no_data_result"](resp, {}, "slots", "appointment time", keep=an["_slot_still_open"])
+days = [d.get("date") for d in (out.get("data") or {}).get("documents", [])]
+chk("only the two future open slots are returned, earliest first", days == [(today + datetime.timedelta(days=2)).isoformat(), (today + datetime.timedelta(days=5)).isoformat()], out)
+out2 = an["_no_data_result"]({"documents": [mk(today - datetime.timedelta(days=3))]}, {}, "slots", "appointment time", keep=an["_slot_still_open"])
+chk("when every slot is in the past the customer gets the honest NO_DATA answer", out2.get("code") == "NO_DATA", out2)
+bt = dict(G)
+exec(open(f"{ROOT}/agents/acn_branch_appointments/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), bt)
+inp = {}
+run(bt["before_tool_callback_impl"], "appointments_db_getAvailableSlots", inp, fresh(), "book")
+chk("the slot lookup asks Firestore for up to 300 documents, not the default 20", inp.get("pageSize") == 300, inp)
 print("\nALL PASS" if ok else "\nSOME FAILED")
 sys.exit(0 if ok else 1)

@@ -27,19 +27,23 @@ from typing import Any, Optional
 # Constants
 # ---------------------------------------------------------------------------
 FRAUD_PATTERNS = re.compile(
-    r'\b(fraud|scam|unauthorized|hacked|stolen funds?|someone took|wire fraud|'
-    r'I was scammed|my account was compromised|suspicious transaction)\b',
+    r"\b(fraud|fraudulent|defrauded|scam|scammed|unauthori[sz]ed|hacked|stolen funds?|someone took|wire fraud|"
+    r"I was scammed|(my )?(account|card|identity) (was|got|has been|is) (compromised|hacked|stolen)|suspicious (transaction|charge|activity)|"
+    r"(don'?t|do not|didn'?t|did not) (recogni[sz]e|make|authori[sz]e)|unrecogni[sz]ed|phishing|identity theft|"
+    r"someone (used|has used|is using|got into) my (card|account)|without my (permission|knowledge|consent))\b",
     re.IGNORECASE
 )
 
 LOST_PATTERNS = re.compile(
-    r'\b(lost (my )?card|stolen (my )?card|card (is |was )?(lost|stolen|missing)|'
-    r'I lost my card|my card was stolen)\b',
+    r"\b(lost (my )?(card|wallet|purse)|stole(n)? (my )?(card|wallet|purse)|(my )?(credit |debit )?card (is |was |got |has been )?(lost|stolen|missing)|"
+    r"I lost my card|my card was stolen|(my )?(wallet|purse) (is |was |got |has been )?(lost|stolen|missing)|(can'?t|cannot|can not) find my (card|wallet))\b",
     re.IGNORECASE
 )
 
 SELF_HARM_PATTERNS = re.compile(
-    r'\b(kill myself|end my life|suicide|self.harm|hurt myself|no reason to live)\b',
+    r"\b(kill myself|end my life|end it all|take my own life|suicide|suicidal|self.harm|hurt myself|no reason to live|"
+    r"(want|wish|going|plan(ning)?) to die|(don'?t|do not) want to (be alive|live|go on|be here)|"
+    r"no point (in )?(living|going on|anymore)|(don'?t|do not) see the point( anymore| of (living|going on))?|can'?t go on|better off (dead|without me))\b",
     re.IGNORECASE
 )
 

@@ -28,7 +28,19 @@ SET_ON_WRITE = {"cancelPAD": {"status": "cancelled"},
 APPLICANT_OPS = {"createNewCustomer": "new", "createAccountApplication": True, "updateAccountApplication": True,
                  "createKycRequest": True, "writeKycRecord": True, "executeACNBankApplicationEmail": True}
 # fields the customer must confirm in their own words (read-back, then a yes in a LATER message) before the write goes through
-CONFIRM_FIELDS = {"updateCard": ["travelNotice"], "createLoanApplication": ["amount"]}
+CONFIRM_FIELDS = {
+    "updateCard": ["travelNotice"],
+    "createLoanApplication": ["amount"],
+    "createDispute": ["transactionId"],
+    "createActivationRequest": ["activationType"],
+    "updateProfile": ["email", "phone", "address", "preferredName"],
+    "createAppointment": ["slotId"],
+    "updateAppointment": ["slotId", "status"],
+    "cancelAppointment": ["appointmentId"],
+    "updateNotificationPreferences": ["emailEnabled", "smsEnabled", "pushEnabled", "lowBalanceAlert", "transactionAlert", "securityAlert", "lowBalanceThreshold"],
+    "updatePaperlessEnrollment": ["statementsEnabled", "taxDocumentsEnabled", "noticesEnabled"],
+    "updateMarketingConsent": ["email", "phone", "mail"],
+}
 QUERY_COLLECTION = {"queryCustomers": "customers"}                                  # runQuery at the database root
 
 def toolset_display_name(ts_dir):

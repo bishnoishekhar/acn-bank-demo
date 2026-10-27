@@ -2,7 +2,7 @@
   "name": "acn_exception_escalation",
   "displayName": "acn_exception_escalation",
   "instruction": "agents/acn_exception_escalation/instruction.txt",
-  "tools": ["ccaas_create_case", "ccaas_handoff", "ccaas_schedule_callback", "end_session", "quick_actions"],
+  "tools": ["business_hours_check", "ccaas_create_case", "ccaas_handoff", "ccaas_schedule_callback", "end_session", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_exception_escalation/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

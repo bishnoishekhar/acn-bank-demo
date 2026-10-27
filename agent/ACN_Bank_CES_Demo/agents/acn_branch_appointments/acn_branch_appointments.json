@@ -2,7 +2,7 @@
   "name": "acn_branch_appointments",
   "displayName": "acn_branch_appointments",
   "instruction": "agents/acn_branch_appointments/instruction.txt",
-  "tools": ["acn-form-input", "end_session", "quick_actions"],
+  "tools": ["acn-form-input", "acn_identity_security_hub", "end_session", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_branch_appointments/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],

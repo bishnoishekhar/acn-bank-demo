@@ -34,24 +34,24 @@ available times right now and offer a representative or trying again later.
 <subtask id="brn-01:_branch/atm_locator">
 ## BRN-01: Branch/ATM Locator
 1. Collect: postal code or city.
-2. manageCustomerDatabase.getConfig(configKey=branches) -> present nearest branches.
-3. Webchat: use branch_locator widget (W-24).
+2. manageCustomerDatabase.getConfig(configKey=branches) -> say the branches that match (name, street, city, phone) in one or two plain sentences. Use ONLY what the tool returned: never state a distance, a travel time or an address of your own. If none match the city, say so and give the closest ones listed.
+3. No markdown, links or lists in what you say.
 
 </subtask>
 <subtask id="brn-02:_appointment_booking">
 ## BRN-02: Appointment Booking
 1. If arriving from INV-06 (book advisor): use pre-filled context (GB-35) -- do NOT re-ask questions already answered.
-2. Collect: service type, preferred branch, date preference.
-3. appointments_db.getAvailableSlots(branchId, serviceType) -> present options.
-4. Webchat: use appointment_scheduler widget (W-25).
-5. appointments_db.createAppointment(customerId, branchId, slotId, serviceType).
-6. send_application_email.executeACNBankApplicationEmail(templateId=appointment_confirmation).
-7. Write appointment_id to session state.
+2. Collect: service type, preferred branch, date preference (one question at a time).
+3. appointments_db.getAvailableSlots(branchId, serviceType) -> offer the two or three nearest times that match, in a sentence ("Tuesday at ten, or Wednesday at two"). Never offer a time that is not in the tool result.
+4. When the customer picks one, read it back: "I'll book a <service> appointment at <branch> on <day> at <time>. Shall I confirm it?" and wait for a clear yes in the NEXT message (the tool refuses until then; do not mention that notice).
+5. Only after the yes: appointments_db.createAppointment(branchId, slotId, serviceType).
+6. When it succeeded, say it is booked (day, time, branch). Then send_application_email.executeACNBankApplicationEmail(templateId=appointment_confirmation, recipientEmail=<email on file from getCustomer>, templateData={branch, date, time, service}).
 
 </subtask>
 <subtask id="brn-03:_appointment_management">
 ## BRN-03: Appointment Management
-- appointments_db.getAppointment / appointments_db.updateAppointment / appointments_db.cancelAppointment.
+- appointments_db.getAppointment lists the customer's appointments: say them in a sentence. If there are none, say so and offer to book one.
+- To change or cancel: say exactly which appointment ("your mortgage appointment at the Toronto branch on Tuesday at ten"), ask "Shall I cancel it?" (or "Shall I move it to <new time>?") and wait for a clear yes in the NEXT message. Only then appointments_db.updateAppointment / appointments_db.cancelAppointment. Say it is done only after the tool succeeded.
 
 </subtask>
 <subtask id="brn-04:_branch_services">
@@ -71,6 +71,7 @@ available times right now and offer a representative or trying again later.
 </subtask>
 <subtask id="tools">
 ## Tools
+{@TOOL: acn_identity_security_hub}
 {@TOOL:appointments_db_getAvailableSlots}
 {@TOOL:appointments_db_createAppointment}
 {@TOOL:appointments_db_getAppointment}
@@ -108,7 +109,7 @@ the widget. Never call a widget as your only output.
 
 Only emit widgets when widgets_enabled is true (see WIDGET SWITCH below).
 
-- quick_actions: After presenting options (book, modify, cancel, branch locator).
+- quick_actions: After offering fixed choices (book, modify, cancel). Never right after an open question (which branch, which day).
 - acn-form-input: When collecting appointment details (branch, date/time, reason) as a single form.
 </subtask>
 </taskflow>

@@ -100,7 +100,7 @@ components:
       properties:
         fields:
           type: object
-          description: 'Plain key/value map with: customerId, activationType, cardId, channel, deviceInfo (required: activationType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
+          description: 'Plain key/value map with: customerId, activationType, cardId, channel, deviceInfo, requestedAmount, details (required: activationType). Do NOT format values for Firestore; that is done for you. customerId and ids in the path are filled in automatically.'
           additionalProperties: true
       x-acn-fields:
         allow:
@@ -109,6 +109,8 @@ components:
         - cardId
         - channel
         - deviceInfo
+        - requestedAmount
+        - details
         required:
         - activationType
         col: null

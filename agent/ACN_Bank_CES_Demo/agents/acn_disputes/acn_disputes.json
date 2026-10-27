@@ -20,7 +20,10 @@
   }],
   "toolsets": [{
     "toolset": "disputes_db",
-    "toolIds": ["createDispute", "getDispute", "updateDispute"]
+    "toolIds": ["createDispute", "getDispute", "queryDisputes", "updateDispute"]
+  }, {
+    "toolset": "update_customer_api_db",
+    "toolIds": ["updateCard"]
   }, {
     "toolset": "manageCustomerDatabase",
     "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]

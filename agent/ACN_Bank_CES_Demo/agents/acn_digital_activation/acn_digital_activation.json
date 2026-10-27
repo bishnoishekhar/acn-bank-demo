@@ -2,7 +2,7 @@
   "name": "acn_digital_activation",
   "displayName": "acn_digital_activation",
   "instruction": "agents/acn_digital_activation/instruction.txt",
-  "tools": ["acn_identity_security_hub", "end_session", "mobile_handoff", "mortgage_kyc", "quick_actions"],
+  "tools": ["acn_identity_security_hub", "end_session", "mobile_handoff", "quick_actions"],
   "beforeAgentCallbacks": [{
     "pythonCode": "agents/acn_digital_activation/before_agent_callbacks/before_agent_callbacks_01/python_code.py"
   }],
@@ -26,6 +26,9 @@
     "toolIds": ["getAccounts", "getBeneficiaries", "getBills", "getCards", "getConfig", "getCustomer", "getFinancials", "getSecurity", "getTaxDocuments", "listCustomerTransactions", "queryCustomers"]
   }, {
     "toolset": "update_customer_api_db",
-    "toolIds": ["addPayee", "deletePayee", "updateAccount", "updateBill", "updateCard", "updatePayee", "updateProfile"]
+    "toolIds": ["updateProfile"]
+  }, {
+    "toolset": "send_application_email",
+    "toolIds": ["executeACNBankApplicationEmail"]
   }]
 }

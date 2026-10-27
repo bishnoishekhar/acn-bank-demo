@@ -166,7 +166,7 @@ def _confirm_block(cfg, state, input_dict, callback_context) -> Optional[dict]:
     else:
         state['confirm_pending'] = json.dumps({'sig': sig, 'said': said_h, 'ts': now})
     return {"error": "CONFIRMATION_REQUIRED",
-            "message": "Not saved yet. Read the details back to the customer in one sentence (a loan: amount, term and purpose; a travel notice: card, country and dates), "
+            "message": "Not saved yet. Read the details back to the customer in one sentence (a loan: amount, term and purpose; a travel notice: card, country and dates; a dispute: the charge and amount; an appointment: branch, day and time; a profile change: what changes to what; a preference: which setting changes), "
                        "ask \"Shall I go ahead?\" and WAIT for their reply. Asking for a quote or an estimate is NOT a yes. Only when they clearly say yes, "
                        "call this tool again with exactly the same details. Do not mention this notice."}
 

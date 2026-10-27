@@ -62,6 +62,26 @@ paths:
               schema:
                 type: object
       description: Update an existing dispute
+  /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents:runQuery:
+    post:
+      operationId: queryDisputes
+      summary: List the customer's disputes (by status or type)
+      security:
+      - GoogleBearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QueryDisputesRequest'
+      responses:
+        '200':
+          description: List of disputes
+          content:
+            application/json:
+              schema:
+                type: object
+      description: List the customer's disputes (by status or type)
   /v1/projects/emvnzir-canada-song/databases/acn-bank-fs-db/documents/disputes:
     post:
       operationId: createDispute
@@ -121,6 +141,20 @@ components:
       scheme: bearer
       bearerFormat: OAuth 2.0 access token
   schemas:
+    QueryDisputesRequest:
+      type: object
+      properties:
+        structuredQuery:
+          type: object
+          description: Do NOT build this yourself. Pass the filters as plain arguments (customerId, status, type) and the Firestore query is built for you.
+          additionalProperties: true
+      x-acn-fields:
+        allow:
+        - customerId
+        - status
+        - type
+        required: []
+        col: disputes
     CreateDisputeRequest:
       type: object
       properties:
