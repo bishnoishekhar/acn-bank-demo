@@ -327,7 +327,7 @@ def _ensure_spoken_with_widget(state, llm_response) -> Optional[object]:
         return None
 
 # --- Entry point ---
-_PIN_JOURNEY_AGENT = False     # this agent runs multi-turn journeys: a reply that ends with a question means the journey goes on
+_PIN_JOURNEY_AGENT = True     # this agent runs multi-turn journeys: a reply that ends with a question means the journey goes on
 _PIN_FLOW_WIDGETS = frozenset(['acn-payee-selector', 'acn-amount-input', 'acn-form-input'])
 _CONFIRM_ASK = ("is that right", "is this correct", "shall i", "should i", "do you want me to", "would you like me to", "can you confirm",
                 "please confirm", "ready to submit", "go ahead")

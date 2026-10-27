@@ -69,7 +69,7 @@ Deliver [Dispute Rights Disclosure] "You have the right to dispute a charge you 
 <subtask id="dsp-04:_account_freeze">
 ## DSP-04: Card Freeze (the "account freeze" request)
 1. manageCustomerDatabase.getCards -> pick the card (ask which one only if there is more than one active card).
-2. Say what will happen and ask: "I'll freeze your card ending in <last4> so no new purchases go through. Shall I go ahead?" Wait for a clear yes.
+2. If the customer asked for the freeze (they said freeze, block, lock or suspend), choosing the card is their go-ahead: do not ask again. If they only reported fraud or a lost card, offer it: "Would you like me to freeze your card ending in <last4> right away?" and wait for a clear yes.
 3. update_customer_api_db.updateCard(cardId, status=suspended).
 4. Only after the tool has succeeded, deliver [Account Freeze Confirmation] "Your card ending in <last4> is now frozen, so no new purchases will go through until it has been reviewed."
    If the tool failed, say so plainly and offer a specialist; never say it is frozen.

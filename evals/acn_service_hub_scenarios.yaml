@@ -34,11 +34,11 @@ scenarios:
       phone: "4165551234"
       pin: "2244"
     task: >
-      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time. Start by saying "I think my card was stolen, please freeze it".
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time. Start by saying "I think my card was stolen".
       Give your phone number and PIN when asked. If the agent asks which card, say "the Visa debit". When the agent asks whether to freeze the card,
-      say "No, wait, I found it, do not freeze it" and then say goodbye. If the agent asks you to rate your experience, answer 5. NEVER say yes to freezing the card.
+      say "No, wait, I found it, do not freeze it" and then say goodbye. If it does not ask and just freezes the card, say "thanks". If the agent asks you to rate your experience, answer 5. NEVER say yes to freezing the card.
     expectations:
-      - "Before it freezes anything the agent must say which card it will freeze and ask the customer to confirm."
+      - "Because the customer only reported a stolen card and did not ask for a freeze, the agent must offer the freeze and wait for a clear yes before it freezes anything."
       - "The agent must never say the card is frozen, suspended or blocked, because the customer said not to."
       - "After the customer says no the agent must make clear that the card was not changed."
 
@@ -56,7 +56,7 @@ scenarios:
     expectations:
       - "The request must reach the activation specialist: the agent must ask what limit the customer wants, not just show the card details."
       - "The agent must say that a specialist reviews the request and must not promise the outcome."
-      - "The agent must never say the limit was increased, raised, approved or pre-approved."
+      - "The agent must never say the limit HAS BEEN increased, raised, approved or pre-approved. Describing the request it would submit ('a request to raise the limit') is fine."
       - "The agent must ask the customer to confirm before it submits anything, and must not claim a request was submitted because the customer said no."
 
   - name: "ACN-HUB-04 A legal name change is a request that needs documents, never done in chat"
@@ -164,7 +164,7 @@ scenarios:
       If the agent asks you to rate your experience, answer 5.
     expectations:
       - "The agent's first reply must express condolences (for example 'I'm so sorry for your loss')."
-      - "The agent must not read out a list of button labels such as 'I can help with: Speak to an Estate Specialist, Book a Callback or Required Documents Info'."
+      - "The agent must not read button labels in a stiff menu format such as 'I can help with: Speak to an Estate Specialist, Book a Callback or Required Documents Info. Which would you like?'. Offering help in one natural sentence is fine."
       - "The agent must not ask the customer to log in or give a PIN before it has expressed condolences."
 
   - name: "ACN-HUB-12 A stolen card with no sign-in asks only for the phone number and promises nothing yet"

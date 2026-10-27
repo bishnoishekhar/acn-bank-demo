@@ -2,6 +2,6 @@
   "name": "2365181d-6f1f-4706-887e-f6696c616138",
   "displayName": "eval_exp_91a14a3c",
   "llmCriteria": {
-    "prompt": "account_freeze_confirmation copy key must be delivered before updateAccount freeze is called (DSP-04)."
+    "prompt": "The agent must ask the customer to confirm the card freeze before it calls updateCard, and must only say the card is frozen after the tool succeeded (DSP-04)."
   }
 }

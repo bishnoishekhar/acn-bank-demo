@@ -309,6 +309,8 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
 
     # AT-NODATA: this public collection can be empty; never let the model fill the gap
     if tool_name in ('appointments_db_getAvailableSlots', 'getAvailableSlots'):
+        if isinstance(tool_response, dict) and tool_response.get('error') in ('AUTH_LEVEL_INSUFFICIENT', 'REAUTH_REQUIRED', 'STEP_UP_REQUIRED'):
+            return tool_response                      # not 'no data': the customer must identify / verify first
         return _no_data_result(tool_response, state, 'slots', 'appointment time', keep=_slot_still_open)
 
     _fsw_kind = _FSW_KINDS.get(tool_name)

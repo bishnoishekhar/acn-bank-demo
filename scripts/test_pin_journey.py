@@ -226,7 +226,8 @@ for f in sorted(glob.glob(f"{ROOT}/agents/*/after_model_callbacks/*/python_code.
         journey.append(agent)
 chk("28 agents carry the journey logic", not bad, bad)
 chk("only the multi-turn agents treat a question as 'journey goes on'", sorted(journey) == sorted(["acn_payments", "acn_payee_management", "acn_account_opening", "acn_card_management", "acn_loans_epp",
-    "acn_mortgage_application", "acn_credit_cards", "acn_cc_credit_decision", "acn_cc_kyc", "acn_cc_verification", "acn_cheque_services", "acn_pad_management", "acn_foreign_exchange"]), journey)
+    "acn_mortgage_application", "acn_credit_cards", "acn_cc_credit_decision", "acn_cc_kyc", "acn_cc_verification", "acn_cheque_services", "acn_pad_management", "acn_foreign_exchange",
+    "acn_disputes", "acn_digital_activation", "acn_branch_appointments", "acn_customer_preferences"]), journey)
 
 print("\nALL PASS" if ok else "\nSOME FAILED")
 sys.exit(0 if ok else 1)
