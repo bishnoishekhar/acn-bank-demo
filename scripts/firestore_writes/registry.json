@@ -900,7 +900,8 @@
   ],
   "set": {},
   "stepup": false,
-  "ts": "preferences_db"
+  "ts": "preferences_db",
+  "upsert": true
  },
  "preferences_db_updateNotificationPreferences": {
   "allow": [
@@ -932,7 +933,8 @@
   "required": [],
   "set": {},
   "stepup": false,
-  "ts": "preferences_db"
+  "ts": "preferences_db",
+  "upsert": true
  },
  "preferences_db_updatePaperlessEnrollment": {
   "allow": [
@@ -956,7 +958,8 @@
   "required": [],
   "set": {},
   "stepup": false,
-  "ts": "preferences_db"
+  "ts": "preferences_db",
+  "upsert": true
  },
  "rewards_loyalty_db_createRedemption": {
   "allow": [

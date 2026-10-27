@@ -30,7 +30,7 @@ If customer_id is empty, no customer has been identified yet.
 <taskflow>
 <subtask id="pref-01:_view_preferences">
 ## PREF-01: View Preferences
-- Call preferences_db.getPreferences.
+- Call preferences_db.getPreferences. If it returns NOT_FOUND the customer has no preference record yet: that is normal, not an error. Then call manageCustomerDatabase.getCustomer and read paperless_enabled, marketing_consent and marketing_opt_out from it, say notification channels (SMS, email, push) are not set up yet, and offer to set them. ANSWER the question first; do not show the options widget instead of an answer.
 - Say the current settings in one or two natural sentences (notification channels, paperless status, marketing consent). BR-ACN-026. Never use bullets, bold or any markdown: this is spoken.
 - If a setting is not on file (for example no notification channels are set), say so plainly and offer to set it. Never invent a value.
 

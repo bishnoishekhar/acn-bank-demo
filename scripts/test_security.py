@@ -257,5 +257,28 @@ exec(open(f"{ROOT}/agents/acn_branch_appointments/before_tool_callbacks/before_t
 inp = {}
 run(bt["before_tool_callback_impl"], "appointments_db_getAvailableSlots", inp, fresh(), "book")
 chk("the slot lookup asks Firestore for up to 300 documents, not the default 20", inp.get("pageSize") == 300, inp)
+
+print("== preference updates create their document when it does not exist yet")
+for agent in ("acn_customer_preferences",):
+    ns = dict(G)
+    exec(open(f"{ROOT}/agents/{agent}/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+    im = ns["before_tool_callback_impl"]
+    for name, args in [("preferences_db_updateMarketingConsent", {"customerId": "CUST_DOC_1988", "email": False, "phone": False, "mail": False}),
+                       ("preferences_db_updatePaperlessEnrollment", {"customerId": "CUST_DOC_1988", "statementsEnabled": True}),
+                       ("preferences_db_updateNotificationPreferences", {"customerId": "CUST_DOC_1988", "smsEnabled": False})]:
+        st = fresh()
+        run(im, name, dict(args), st, "do it")
+        inp = dict(args)
+        r = run(im, name, inp, st, "Yes, go ahead")
+        chk(f"{name}: prepared as an upsert (no 'document must exist' condition)", r is None and "currentDocument.exists" not in inp and "updateMask.fieldPaths" in inp, (r, inp))
+ns = dict(G)
+exec(open(f"{ROOT}/agents/acn_digital_activation/before_tool_callbacks/before_tool_callbacks_01/python_code.py", encoding="utf-8").read(), ns)
+st = fresh()
+inp = {"customerId": "CUST_DOC_1988", "phone": "4165559999"}
+st["auth_state"] = json.dumps({"level": "3", "customer_id": "CUST_DOC_1988", "step_up_action_hash": "x"}); st["auth_level"] = "3"
+ns["before_tool_callback_impl"](types.SimpleNamespace(name="update_customer_api_db_updateProfile"), dict(inp), ctx(st, "change it"))
+inp2 = dict(inp)
+r = ns["before_tool_callback_impl"](types.SimpleNamespace(name="update_customer_api_db_updateProfile"), inp2, ctx(st, "Yes go ahead"))
+chk("an ordinary profile patch still requires the document to exist", r is None and inp2.get("currentDocument.exists") is True, (r, inp2))
 print("\nALL PASS" if ok else "\nSOME FAILED")
 sys.exit(0 if ok else 1)

@@ -238,7 +238,8 @@ def _fsw_prepare(cfg, state, input_dict, auth_level) -> Optional[dict]:
         input_dict['documentId'] = prefix + "-" + hashlib.sha256(seed.encode()).hexdigest()[:16].upper()
     else:
         input_dict['updateMask.fieldPaths'] = list(data.keys())
-        input_dict['currentDocument.exists'] = True
+        if not cfg.get('upsert'):                       # a preference document is created on the first write
+            input_dict['currentDocument.exists'] = True
     input_dict['fields'] = {k: _fsw_value(v) for k, v in data.items()}
     return None
 

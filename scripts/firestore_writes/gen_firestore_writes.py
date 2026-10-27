@@ -41,6 +41,8 @@ CONFIRM_FIELDS = {
     "updatePaperlessEnrollment": ["statementsEnabled", "taxDocumentsEnabled", "noticesEnabled"],
     "updateMarketingConsent": ["email", "phone", "mail"],
 }
+# updates that create the document when it does not exist yet (the demo customer has no preference documents)
+UPSERT_OPS = {"updateNotificationPreferences", "updatePaperlessEnrollment", "updateMarketingConsent"}
 QUERY_COLLECTION = {"queryCustomers": "customers"}                                  # runQuery at the database root
 
 def toolset_display_name(ts_dir):
@@ -146,6 +148,8 @@ for spec_path in sorted(glob.glob(os.path.join(root, "toolsets", "*", "open_api_
             }
             if opid in APPLICANT_OPS:
                 registry[ts + "_" + opid]["applicant"] = APPLICANT_OPS[opid]
+            if opid in UPSERT_OPS:
+                registry[ts + "_" + opid]["upsert"] = True
             if opid in CONFIRM_FIELDS:
                 registry[ts + "_" + opid]["confirm_fields"] = CONFIRM_FIELDS[opid]
             if new_path != path or True:
