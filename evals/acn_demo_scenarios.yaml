@@ -1,0 +1,219 @@
+# ACN Bank demo: scenario tests for what we built (a PIN for every request / journey, account opening, product figures, trip, close).
+#
+# Each scenario is a SIMULATED CUSTOMER (the `task`, who knows the `user_facts`) talking to the agent for up to `max_turns` turns.
+# What decides pass or fail is the list of plain-English `expectations` (judged by an LLM over the whole conversation).
+# Unlike recorded "golden" tests there is no script to match, so the lead -> hub -> specialist hand-overs and the exact wording
+# of each reply do not matter.
+#
+# HOW TO USE
+#   python scripts/push_evals.py --app sandbox --apply          adds the 13 scenarios to the app (touches nothing else)
+#   then, in the console: Evaluate > Start a run > pick the tests tagged acn_demo_scenarios      (or from the terminal:)
+#   python scripts/run_evals.py  --app sandbox --tags acn_demo_scenarios
+#
+# NOTHING HERE SHOULD WRITE DATA: every task tells the simulated customer to answer NO to anything that would send money, submit an
+# application or set a notice. Demo customer: phone 4165551234, PIN 2244 (CUST_DOC_1988).
+
+scenarios:
+
+  - name: "ACN-SIM-01 PIN is asked again for every account request"
+    tags: [acn_demo_scenarios, P0, security, auth-per-request]
+    max_turns: 16
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. Start by asking "What's my chequing balance?". Answer the agent's questions with your phone number and
+      your PIN (see your facts) when it asks for them. Once you have seen your balance, say "Now pay 20 dollars to Alex". If the agent asks for
+      your PIN again, say "Never mind, cancel that" and then say goodbye. If the agent asks you to rate your experience, answer 5. NEVER confirm, approve or say yes to sending any money.
+    expectations:
+      - "The agent must ask for the customer's registered phone number and then their 4-digit PIN before it shows any balance."
+      - "After the correct PIN the agent must give the Everyday Chequing balance of $3,842.17."
+      - "When the customer then asks to make a payment, the agent must ask for the 4-digit PIN again before it shows payees or moves money, even though the customer was verified a moment ago."
+      - "The agent must never say the customer is already verified or skip the PIN for the payment request."
+      - "The agent must never offer, mention or ask for a one-time code, OTP or SMS code."
+
+  - name: "ACN-SIM-02 Three wrong PINs hand the customer to a specialist"
+    tags: [acn_demo_scenarios, P0, security, pin-lockout]
+    max_turns: 10
+    user_facts:
+      phone: "4165551234"
+      wrong_pin_1: "0000"
+      wrong_pin_2: "1111"
+      wrong_pin_3: "2222"
+    task: >
+      You are an ACN Bank customer who has forgotten your PIN. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it.  Ask "Show my accounts". Give your phone number when asked. When asked for
+      your PIN, give wrong_pin_1; if it is refused give wrong_pin_2; if refused again give wrong_pin_3. Never give any other PIN. If the agent
+      says a specialist will help, thank it and say goodbye. If the agent asks you to rate your experience, answer 5.
+    expectations:
+      - "The agent must not show any account balance or account detail at any point in this conversation."
+      - "After the third wrong PIN the agent must stop asking for the PIN and say a specialist will help from here."
+      - "The agent must tell the customer a PIN did not match after each of the first two wrong tries, without revealing what the correct PIN is."
+
+  - name: "ACN-SIM-03 An unknown phone number is never turned into a customer"
+    tags: [acn_demo_scenarios, P0, security, login]
+    max_turns: 8
+    user_facts:
+      unknown_phone: "6475550000"
+      some_pin: "2244"
+    task: >
+      You are someone who is not an ACN Bank customer. Say "Show my balance". When asked for a phone number give unknown_phone. If the agent
+      says it cannot find an account, type some_pin as if it were your PIN. If it still cannot find you, say goodbye. If the agent asks you to rate your experience, answer 5.
+    expectations:
+      - "The agent must tell the customer it could not find an account for the phone number given."
+      - "The agent must never show any balance, account or customer detail in this conversation."
+      - "Typing a PIN after an unknown phone number must NOT log the customer in; the agent must ask for the phone number again or hand over."
+
+  - name: "ACN-SIM-04 A transfer needs the PIN once, then the next request needs it again"
+    tags: [acn_demo_scenarios, P0, security, pin-journey, payments]
+    user_goal_behavior: USER_GOAL_IGNORED     # the customer deliberately says no at the end: the rules decide, not 'goal reached'
+    max_turns: 26
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. First say "Check my balance" and give your phone number and PIN when asked. Then say "I want to make a transfer
+      to my brother". Give your PIN if asked. When the agent shows your payees choose Raj Bishnoi. When asked how much, say "send 25". When the agent
+      asks you to confirm the transfer, say "No, cancel that". Finally ask "What is my balance?" and when the agent asks for the PIN say
+      "Never mind" and say goodbye. If the agent asks you to rate your experience, answer 5. NEVER confirm or say yes to sending money.
+    expectations:
+      - "When the customer asks for the transfer the agent must ask for the PIN."
+      - "Between the PIN for the transfer and the confirmation question the agent must NOT ask for the PIN again: choosing the payee, entering the amount and confirming are all covered by that one PIN."
+      - "The agent must read back the amount (25 dollars) and the payee (Raj Bishnoi) and ask the customer to confirm before sending anything."
+      - "The agent must not complete the transfer: the customer cancelled, so no money moves and no receipt is shown."
+      - "When the customer then asks for the balance, the agent must ask for the PIN again."
+
+  - name: "ACN-SIM-05 New customer opens an account: no PIN, nothing submitted without a yes"
+    tags: [acn_demo_scenarios, P0, account-opening, new-customer]
+    user_goal_behavior: USER_GOAL_IGNORED     # the customer deliberately says no at the end: the rules decide, not 'goal reached'
+    max_turns: 10
+    user_facts:
+      legal_name: "ZZ Eval Tester"
+      date_of_birth: "1992-03-14"
+      email: "zz.eval.tester@example.com"
+      mobile: "6475550199"
+      address: "10 Test Lane, Toronto, ON, M5V 2T6"
+      employment: "employed, software tester"
+    task: >
+      You are a NEW customer who has never banked with ACN Bank. Say "I want to open a savings account". When asked, say you are a new customer and
+      choose the High-Interest Savings Account. Give your details from your facts when asked (you do not want to give a Social Insurance Number). When
+      the agent reads your details back and asks whether to submit the application, say "No, don't submit it" and then say goodbye. If the agent asks you to rate your experience, answer 5. NEVER say yes to
+      submitting anything.
+    expectations:
+      - "The agent must NOT ask a new customer for a PIN, a phone number to look them up, or an account number."
+      - "If a Social Insurance Number comes up, the agent must say that providing it is optional, and must never ask for the full number."
+      - "The agent must read the key details back (at least the name and the account) and ask whether to submit the application before saving anything."
+      - "The agent must not say the account is open, approved or ready to use, and must not give a timeline for approval."
+      - "After the customer says no, the agent must not submit the application and must not give an application reference number."
+
+  - name: "ACN-SIM-06 Existing customer opens an account: phone first, one PIN, no re-asking"
+    tags: [acn_demo_scenarios, P0, account-opening, existing-customer, pin-journey]
+    user_goal_behavior: USER_GOAL_IGNORED     # the customer deliberately says no at the end: the rules decide, not 'goal reached'
+    max_turns: 20
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an existing ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it.  Say "I want to open a savings account". When asked whether you are already a customer say "I'm already a
+      customer". Give your phone number and PIN when asked. When the agent asks whether anything has changed on your details say "nothing has changed".
+      Choose the High-Interest Savings Account, say it is for an emergency fund with no opening deposit. When the agent asks whether to submit the
+      application say "No, don't submit it" and say goodbye. If the agent asks you to rate your experience, answer 5. NEVER say yes to submitting.
+    expectations:
+      - "When the customer says they are already a customer, the agent must ask for their registered phone number before it tries to verify them, and must not say it had trouble connecting."
+      - "The agent must ask for the PIN after the phone number."
+      - "After the PIN the agent must say it already has the mobile, email and address on file and ask only whether anything changed; it must not ask the customer to type their name or address again."
+      - "The agent must not ask for the PIN a second time before it asks whether to submit the application."
+      - "After the customer says no the agent must not submit the application or give a reference number."
+
+  - name: "ACN-SIM-07 Mortgage affordability says its numbers"
+    tags: [acn_demo_scenarios, P1, mortgage, spoken-figures]
+    max_turns: 4
+    task: >
+      You are a prospective home buyer who is not signed in. Ask "What could I afford on a mortgage if I earn 85000 a year with 40000 down?".
+      After the answer, say thanks and goodbye.
+    expectations:
+      - "The agent must say, in words, a maximum home price the customer could afford, roughly between 370,000 and 400,000 dollars."
+      - "The agent must say a monthly mortgage payment of roughly 1,800 to 1,950 dollars out loud, not only point at a card or sliders."
+      - "The agent must make clear this is an estimate and not an approval."
+      - "The agent must not ask the customer to sign in for this public estimate."
+
+  - name: "ACN-SIM-08 Mortgage payment says its numbers"
+    tags: [acn_demo_scenarios, P1, mortgage, spoken-figures]
+    max_turns: 4
+    task: >
+      You are a prospective home buyer who is not signed in. Ask "Monthly payment on a 450000 home with 90000 down at 5 percent over 30 years?".
+      After the answer, say thanks and goodbye.
+    expectations:
+      - "The agent must say the monthly payment out loud, a figure roughly between 1,880 and 1,960 dollars."
+      - "The agent must mention the mortgage amount of about 360,000 dollars or the 30-year term."
+      - "The agent must not ask the customer to sign in for this public estimate."
+
+  - name: "ACN-SIM-09 Personal loan: asks how much to BORROW and says the monthly payment"
+    tags: [acn_demo_scenarios, P1, loans, spoken-figures]
+    user_goal_behavior: USER_GOAL_IGNORED     # the customer deliberately says no at the end: the rules decide, not 'goal reached'
+    max_turns: 16
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. Say "I want a personal loan". When the agent asks for an amount, say 15000 over 36 months. Give your phone number
+      and PIN if the agent asks. Ask "Check if I'm pre-approved for 15000 over 36 months". After the answer say you will think about it and say goodbye. If the agent asks you to rate your experience, answer 5.
+      NEVER agree to submit an application.
+    expectations:
+      - "When the customer first asks for a personal loan the agent must ask how much they would like to borrow. It must NOT say send, transfer or pay."
+      - "The agent must never ask for a one-time code."
+      - "For the 15,000 dollar, 36 month request the agent must say, in words, the monthly payment it calculated (a figure between 440 and 500 dollars)."
+      - "The agent must not claim the loan is approved, pre-approved or funded as if a credit decision had been made; an estimated monthly payment is fine."
+      - "The agent must not submit or save a loan application unless the customer clearly says yes to submitting one. Asking for a quote or a pre-approval check is not a yes."
+
+  - name: "ACN-SIM-10 Investment holdings are answered with investments, not bank balances"
+    tags: [acn_demo_scenarios, P1, investments, routing]
+    max_turns: 8
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. Say "Show me my investment holdings". Give your phone number and PIN when asked. After the answer say thanks and goodbye.
+    expectations:
+      - "After the PIN the agent must answer with the customer's investment accounts or holdings (for example a TFSA, RRSP or GIC)."
+      - "The agent must NOT answer an investments question with only chequing and savings account balances."
+      - "The agent must not give personalised investment advice."
+
+  - name: "ACN-SIM-11 A travel notice is read back and confirmed before it is set"
+    tags: [acn_demo_scenarios, P0, security, travel-notice]
+    user_goal_behavior: USER_GOAL_IGNORED     # the customer deliberately says no at the end: the rules decide, not 'goal reached'
+    max_turns: 14
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. Say "Please set a travel notice on my card for Japan from 1 November 2026 to 10 November 2026". Give your phone
+      number and PIN when asked. When asked which card, choose your Visa Debit ending in 7731. When the agent asks you to confirm the travel notice, say
+      "No, cancel that, do not set it" and say goodbye. If the agent asks you to rate your experience, answer 5. NEVER say yes to setting the travel notice.
+    expectations:
+      - "The agent must read back the card, the country and both dates, and ask the customer to confirm, before it sets the travel notice."
+      - "The agent must never say the travel notice is set, saved or on file in this conversation, because the customer said no."
+      - "After the customer says no the agent must confirm that nothing was set."
+
+  - name: "ACN-SIM-12 Planning a trip never creates a travel notice by itself"
+    tags: [acn_demo_scenarios, P1, trip, travel-notice]
+    max_turns: 14
+    user_facts:
+      phone: "4165551234"
+      pin: "2244"
+    task: >
+      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time: never volunteer your phone number or your PIN before the agent asks for it. Say "I'm planning a trip to Japan from 1 to 10 November 2026". Give your phone number and PIN when asked.
+      After the agent answers, say thanks, that is all for now, and say goodbye. If the agent asks you to rate your experience, answer 5. NEVER agree to set a travel notice.
+    expectations:
+      - "The agent must give a trip readiness answer or plan for Japan for the dates given."
+      - "The agent may offer to set a travel notice, but must NOT create or claim to have created a travel notice, because the customer only mentioned a trip."
+      - "The agent must ask for the PIN before it uses the customer's cards or accounts."
+
+  - name: "ACN-SIM-13 Closing: rating question first, thanks after"
+    tags: [acn_demo_scenarios, P1, closing]
+    max_turns: 6
+    task: >
+      You are an ACN Bank customer. Say "Hi". Then say "That's all, thanks, bye." When the agent asks for a rating, answer "5 - Excellent".
+    expectations:
+      - "When the customer says goodbye the agent must ask for a rating from 1 to 5 before it says goodbye."
+      - "After the rating the agent must thank the customer and say a short farewell."
+      - "The agent must not add a stray line such as 'Here are your options' to the rating question."
