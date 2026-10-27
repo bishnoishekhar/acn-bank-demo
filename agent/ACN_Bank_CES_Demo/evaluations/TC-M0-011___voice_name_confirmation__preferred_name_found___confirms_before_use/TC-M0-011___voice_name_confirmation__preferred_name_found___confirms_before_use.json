@@ -8,7 +8,7 @@
       "steps": [{
         "userInput": {
           "variables": {
-            "auth_level": 2.0,
+            "auth_level": "2",
             "auth_mode": "pin",
             "channel": "voice",
             "persona_id": "CUST_DOC_1988",

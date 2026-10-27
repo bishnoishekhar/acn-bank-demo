@@ -8,7 +8,7 @@
       "steps": [{
         "userInput": {
           "variables": {
-            "auth_level": 2.0,
+            "auth_level": "2",
             "auth_mode": "pin",
             "persona_id": "CUST-FRAUD-001",
             "preferred_language": "en-CA"

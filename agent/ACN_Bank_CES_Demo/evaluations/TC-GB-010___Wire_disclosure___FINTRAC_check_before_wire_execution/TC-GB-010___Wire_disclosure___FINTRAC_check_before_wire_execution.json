@@ -8,7 +8,7 @@
       "steps": [{
         "userInput": {
           "variables": {
-            "auth_level": 3.0,
+            "auth_level": "3",
             "auth_mode": "step_up",
             "persona_id": "CUST_DOC_1988",
             "preferred_language": "en-CA"

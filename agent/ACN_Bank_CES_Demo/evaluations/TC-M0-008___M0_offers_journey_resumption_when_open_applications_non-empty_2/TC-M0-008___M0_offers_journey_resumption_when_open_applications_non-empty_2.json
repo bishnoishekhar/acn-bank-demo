@@ -8,7 +8,7 @@
       "steps": [{
         "userInput": {
           "variables": {
-            "auth_level": 2.0,
+            "auth_level": "2",
             "auth_mode": "pin",
             "channel": "webchat",
             "open_applications": [{

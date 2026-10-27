@@ -8,7 +8,7 @@
       "steps": [{
         "userInput": {
           "variables": {
-            "auth_level": 0.0,
+            "auth_level": "0",
             "auth_mode": "caller_id",
             "persona_id": "CUST_DOC_1988"
           }
