@@ -274,7 +274,7 @@ def after_tool_callback_impl(tool, input_dict: dict[str, Any], callback_context,
     # AT-4: Ownership check
     customer_id = state.get("customer_id", "")
     data = response.get("data", {})
-    if isinstance(data, dict) and customer_id:
+    if isinstance(data, dict) and customer_id and _fsw_kind not in ('create', 'patch', 'delete'):   # writes are scoped by their path in before_tool
         resp_cid = data.get("customerId", data.get("customer_id", ""))
         if resp_cid and resp_cid != customer_id:
             logger.warning(f"AT-4 OWNERSHIP VIOLATION: {tool_name}")

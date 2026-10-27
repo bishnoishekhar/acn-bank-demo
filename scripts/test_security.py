@@ -280,5 +280,16 @@ ns["before_tool_callback_impl"](types.SimpleNamespace(name="update_customer_api_
 inp2 = dict(inp)
 r = ns["before_tool_callback_impl"](types.SimpleNamespace(name="update_customer_api_db_updateProfile"), inp2, ctx(st, "Yes go ahead"))
 chk("an ordinary profile patch still requires the document to exist", r is None and inp2.get("currentDocument.exists") is True, (r, inp2))
+
+print("== a saved write is reported as saved, even when the document carries a legacy customer id")
+at = dict(G)
+exec(open(f"{ROOT}/agents/acn_card_management/after_tool_callbacks/after_tool_callbacks_01/python_code.py", encoding="utf-8").read(), at)
+patched = {"data": {"name": "projects/p/databases/d/documents/customers/CUST_DOC_1988/cards/CARD-1988-001", "createTime": "2026-07-10T00:06:26Z", "updateTime": "2026-10-27T07:48:57Z",
+                    "fields": {"status": {"stringValue": "suspended"}, "customer_id": {"stringValue": "CUST-1988"}, "last_four": {"stringValue": "7731"}}}}
+r = at["after_tool_callback_impl"](types.SimpleNamespace(name="update_customer_api_db_updateCard"), {"cardId": "CARD-1988-001"}, ctx({"customer_id": "CUST_DOC_1988", "auth_level": "2"}), patched)
+chk("updateCard result is success (not NOT_FOUND) although the card's own customer_id is CUST-1988", isinstance(r, dict) and r.get("status") == "success" and r.get("code") != "NOT_FOUND", r)
+read = {"data": {"customerId": "CUST-ATTACKER", "balance": 5}}
+r2 = at["after_tool_callback_impl"](types.SimpleNamespace(name="manageCustomerDatabase_getAccounts"), {}, ctx({"customer_id": "CUST_DOC_1988", "auth_level": "2"}), read)
+chk("a READ that belongs to someone else is still refused (NOT_FOUND)", isinstance(r2, dict) and r2.get("code") == "NOT_FOUND", r2)
 print("\nALL PASS" if ok else "\nSOME FAILED")
 sys.exit(0 if ok else 1)

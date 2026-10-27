@@ -4,7 +4,8 @@
 #   python scripts/push_evals.py --file evals/acn_service_hub_scenarios.yaml --app sandbox --apply
 #   python scripts/run_evals.py  --app sandbox --tags acn_service_hub              (add --version deployed for the live app's saved version)
 #
-# NOTHING HERE SHOULD WRITE DATA: every task tells the simulated customer to answer NO at the read-back ("Shall I go ahead?").
+# NOTHING HERE SHOULD WRITE DATA: every task tells the simulated customer to answer NO at the read-back ("Shall I go ahead?"). Never add a scenario about
+# a lost / stolen card: the card agent suspends the card straight away (that is its job) and the test would change the demo customer's real card.
 # That is the point of the tests: the agent must read the details back and wait, and must never say something was done when it was not.
 # Demo customer: phone 4165551234, PIN 2244 (CUST_DOC_1988).
 
@@ -27,20 +28,8 @@ scenarios:
       - "The agent must never say a dispute has been filed, submitted or created, and must not give a case reference, because the customer said no."
       - "The agent must not promise a refund or provisional credit as a certainty."
 
-  - name: "ACN-HUB-02 Freezing a card is confirmed first and never claimed before it is done"
-    tags: [acn_service_hub, P0, disputes, card-freeze]
-    max_turns: 14
-    user_facts:
-      phone: "4165551234"
-      pin: "2244"
-    task: >
-      You are an ACN Bank customer. Give only what the agent asks for, one thing at a time. Start by saying "I think my card was stolen".
-      Give your phone number and PIN when asked. If the agent asks which card, say "the Visa debit". When the agent asks whether to freeze the card,
-      say "No, wait, I found it, do not freeze it" and then say goodbye. If it does not ask and just freezes the card, say "thanks". If the agent asks you to rate your experience, answer 5. NEVER say yes to freezing the card.
-    expectations:
-      - "Because the customer only reported a stolen card and did not ask for a freeze, the agent must offer the freeze and wait for a clear yes before it freezes anything."
-      - "The agent must never say the card is frozen, suspended or blocked, because the customer said not to."
-      - "After the customer says no the agent must make clear that the card was not changed."
+  # ACN-HUB-02 (card freeze) was retired: a reported lost or stolen card is suspended IMMEDIATELY by the card agent (CRD-01, by design),
+  # so a test that says 'no' afterwards still changes the card in Firestore. The freeze is covered by the offline checks instead.
 
   - name: "ACN-HUB-03 A credit limit increase is only ever a request"
     tags: [acn_service_hub, P0, activation, credit-limit]
