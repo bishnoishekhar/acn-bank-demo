@@ -293,36 +293,40 @@ body {
 button { font-family: inherit; cursor: pointer; border: none; outline: none; }
 a      { text-decoration: none; color: inherit; }
 
-/* ── 2. Top nav (TD Forest Green Header) ─────────────────────────────────── */
+/* ── 2. Top nav (TD Clean White Portal Header matching screenshot) ──────── */
 
 .top-nav {
   position: sticky;
   top: 0;
   z-index: 200;
-  height: var(--nav-h);
+  height: 60px;
   padding: 0 5%;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  background: #003F2D;
-  border-bottom: 2px solid #54B848;
-  box-shadow: 0 2px 14px rgba(0, 31, 22, 0.28);
+  background: #FFFFFF;
+  border-bottom: 1px solid #E5E7EB;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
 }
 
-.nav-logo {
+.nav-left-group {
   display: flex;
   align-items: center;
-  gap: 12px;
-  flex-shrink: 0;
-  user-select: none;
+  gap: 28px;
+  height: 100%;
+}
+
+.td-nav-logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
 }
 
 .td-nav-logo-box {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  background: #54B848;
+  width: 34px;
+  height: 34px;
+  border-radius: 4px;
+  background: #238234;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -330,100 +334,129 @@ a      { text-decoration: none; color: inherit; }
   font-size: 19px;
   font-weight: 900;
   letter-spacing: -0.5px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-}
-
-.td-nav-brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.td-nav-brand-name {
-  font-size: 19px;
-  font-weight: 850;
-  letter-spacing: -0.5px;
-  color: #FFFFFF;
-}
-
-.td-nav-brand-tagline {
-  font-size: 9px;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.72);
-  letter-spacing: 0.2px;
 }
 
 .nav-links {
   display: flex;
-  gap: 6px;
-  flex: 1;
-  justify-content: center;
   align-items: center;
+  gap: 4px;
+  height: 100%;
 }
 
-.nav-links a {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.88);
-  font-weight: 600;
-  padding: 6px 12px;
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
-  white-space: nowrap;
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #333333;
+  padding: 20px 14px 16px;
+  border-bottom: 4px solid transparent;
+  text-decoration: none;
+  transition: color 0.15s, border-color 0.15s;
+  height: 100%;
+  box-sizing: border-box;
+}
+.nav-link:hover {
+  color: #238234;
+}
+.nav-link.is-active {
+  color: #238234;
+  font-weight: 700;
+  border-bottom-color: #238234;
 }
 
-.nav-links a:hover {
-  color: #FFFFFF;
-  background: rgba(255, 255, 255, 0.12);
-}
-
-.nav-links a.is-active {
-  color: #FFFFFF;
-  background: rgba(84, 184, 72, 0.28);
-  border-bottom: 2px solid #54B848;
+.nav-chevron {
+  font-size: 10px;
+  opacity: 0.7;
+  margin-left: 2px;
 }
 
 .nav-actions {
   display: flex;
   align-items: center;
+  gap: 16px;
+}
+
+.nav-icon-link {
+  background: transparent;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background 0.15s;
+}
+.nav-icon-link:hover {
+  background: #E8F5E9;
+}
+
+.nav-lang {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #333333;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.nav-login-btn {
+  background: transparent;
+  border: none;
+  color: #238234;
+  font-size: 14px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.nav-login-btn:hover {
+  color: #1A6C2B;
+  background: #E8F5E9;
+}
+
+.nav-user-wrap {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  flex-shrink: 0;
 }
 
 .nav-greeting {
   font-size: 13px;
   font-weight: 600;
-  color: #FFFFFF;
-  white-space: nowrap;
+  color: #238234;
 }
 
-.nav-btn {
-  padding: 7px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 600;
-  transition: background 0.15s, opacity 0.15s;
-  white-space: nowrap;
+.nav-btn-link {
+  background: transparent;
+  border: 1px solid #238234;
+  color: #238234;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s;
 }
-
-.nav-btn-ghost {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  color: #FFFFFF;
-}
-.nav-btn-ghost:hover {
-  background: rgba(255, 255, 255, 0.22);
-  border-color: rgba(255, 255, 255, 0.5);
+.nav-btn-link:hover {
+  background: #238234;
   color: #FFFFFF;
 }
 
-/* Icon-only button in the nav (e.g. reset chat) */
 .nav-icon-btn {
   width: 32px;
   height: 32px;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: rgba(255, 255, 255, 0.85);
+  background: #F1F5F9;
+  border: 1px solid #CBD5E1;
+  color: #334155;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -432,96 +465,235 @@ a      { text-decoration: none; color: inherit; }
   transition: background 0.15s, color 0.15s;
 }
 .nav-icon-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  color: #FFFFFF;
+  background: #E2E8F0;
+  color: #0F172A;
 }
 
 .nav-btn-chat {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: #54B848;
-  border: 1px solid #439E38;
+  background: #238234;
   color: #FFFFFF;
+  font-size: 13px;
   font-weight: 700;
-  box-shadow: 0 2px 10px rgba(84, 184, 72, 0.35);
-  transition: background 0.15s, box-shadow 0.15s, transform 0.1s;
+  padding: 7px 16px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(35, 130, 52, 0.25);
+  cursor: pointer;
+  border: none;
+  transition: all 0.15s ease;
 }
 .nav-btn-chat:hover {
-  background: #439E38;
+  background: #1A6C2B;
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(84, 184, 72, 0.45);
+  box-shadow: 0 4px 12px rgba(35, 130, 52, 0.35);
 }
-
-/* Active state — panel is open */
 .nav-btn-chat--active {
-  background: #002B1F;
-  border-color: #54B848;
-  color: #FFFFFF;
-  box-shadow: 0 0 0 2px #54B848;
-}
-.nav-btn-chat--active:hover {
-  background: #001F16;
-  border-color: #54B848;
+  background: #003F2D;
+  box-shadow: 0 0 0 2px #238234;
 }
 
-.nav-btn-solid {
-  background: #54B848;
-  color: #FFFFFF;
-  box-shadow: 0 2px 10px rgba(84, 184, 72, 0.35);
+/* ── 2b. Hero Banner matching TD Bank Online Banking screenshot ──────────── */
+.td-hero-banner {
+  width: 100%;
+  height: 380px;
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.08)),
+    url('https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1600&q=80') center 32% / cover no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  box-sizing: border-box;
 }
-.nav-btn-solid:hover { background: #439E38; }
 
-/* ── 2b. TD Online Banking Sub-bar / Breadcrumb ───────────────────────────── */
-.td-subnav-bar {
+.td-hero-overlay-box {
+  background: #238234;
+  padding: 34px 44px;
+  max-width: 640px;
+  width: 90%;
+  border-radius: 3px;
+  text-align: center;
+  color: #FFFFFF;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.td-hero-title {
+  font-size: 32px;
+  font-weight: 800;
+  margin: 0 0 14px 0;
+  color: #FFFFFF;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.td-hero-desc {
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.55;
+  margin: 0;
+  color: #FFFFFF;
+  opacity: 0.96;
+}
+
+/* ── 2c. Circular Category Icon Bar ───────────────────────────────────────── */
+.td-icon-bar {
   background: #FFFFFF;
-  border-bottom: 1px solid #D6E2D9;
-  box-shadow: 0 1px 4px rgba(0, 63, 45, 0.04);
-  padding: 11px 5%;
+  padding: 34px 5% 18px;
+  width: 100%;
+  box-sizing: border-box;
 }
-.td-subnav-inner {
-  max-width: 1200px;
+
+.td-icon-bar-inner {
+  max-width: 1100px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
 }
-.td-breadcrumb {
+
+.td-icon-item {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 130px;
+  text-decoration: none;
+  padding: 4px;
+  transition: transform 0.15s ease;
+  outline: none;
+}
+.td-icon-item:hover {
+  transform: translateY(-3px);
+}
+
+.td-icon-circle {
+  width: 62px;
+  height: 62px;
+  border-radius: 50%;
+  border: 2px solid #238234;
+  background: #FFFFFF;
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12.5px;
-  color: #52685B;
+  justify-content: center;
+  transition: all 0.18s ease;
+  box-sizing: border-box;
 }
-.td-breadcrumb-root,
-.td-breadcrumb-item {
-  color: #003F2D;
+.td-icon-item:hover .td-icon-circle {
+  background: #E8F5E9;
+  box-shadow: 0 4px 14px rgba(35, 130, 52, 0.22);
+}
+.td-icon-item.is-active .td-icon-circle {
+  background: #238234;
+  border-color: #238234;
+}
+.td-icon-item.is-active .td-icon-circle svg {
+  stroke: #FFFFFF;
+}
+.td-icon-item.is-active .td-icon-circle circle {
+  fill: #FFFFFF;
+}
+
+.td-icon-label {
+  margin-top: 10px;
+  font-size: 13px;
   font-weight: 600;
+  color: #333333;
+  text-align: center;
+  line-height: 1.35;
 }
-.td-breadcrumb-sep {
-  color: #A3B5A9;
-  font-size: 11px;
-}
-.td-breadcrumb-current {
-  color: #54B848;
+.td-icon-item.is-active .td-icon-label {
+  color: #238234;
   font-weight: 700;
 }
-.td-subnav-quicklinks {
+
+.td-category-divider {
+  max-width: 1100px;
+  margin: 12px auto 36px;
+  border-bottom: 1px solid #E5E7EB;
+  width: 90%;
+}
+
+/* ── 2d. "Bank Cards" Feature Section with 3 Tiles ────────────────────────── */
+.td-cards-feature-wrap {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 5% 48px;
+  box-sizing: border-box;
+}
+
+.td-section-title {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 800;
+  color: #003F2D;
+  margin-bottom: 24px;
+  letter-spacing: -0.4px;
+}
+
+.td-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  max-width: 1060px;
+  margin: 0 auto 36px;
+}
+@media (max-width: 860px) {
+  .td-tiles-grid { grid-template-columns: 1fr; }
+}
+
+.td-tile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.td-tile-box {
+  width: 100%;
+  height: 230px;
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+
+.td-tile-box--green {
+  background: radial-gradient(circle at 100% 0%, rgba(255,255,255,0.18) 0%, transparent 60%), #238234;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 28px;
+  text-align: center;
+  color: #FFFFFF;
+}
+
+.td-tile-text {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.45;
+  margin-top: 16px;
+  color: #FFFFFF;
+}
+
+.td-tile-box--photo1 {
+  background: url('https://images.unsplash.com/photo-1563013544-824ae1b704d3?auto=format&fit=crop&w=600&q=80') center center / cover no-repeat;
+}
+
+.td-tile-box--photo2 {
+  background: url('https://images.unsplash.com/photo-1556742502-ec7c0e9f34b1?auto=format&fit=crop&w=600&q=80') center center / cover no-repeat;
+}
+
+.td-tile-indicator {
+  margin-top: 12px;
   display: flex;
   align-items: center;
-  gap: 18px;
-}
-.td-subnav-quicklinks a {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: #003F2D;
-  transition: color 0.15s;
-}
-.td-subnav-quicklinks a:hover {
-  color: #54B848;
-  text-decoration: underline;
+  justify-content: center;
 }
 
 /* ── 3. Dashboard shell ───────────────────────────────────────────────────── */

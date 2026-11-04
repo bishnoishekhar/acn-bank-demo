@@ -6,63 +6,10 @@ import MyQrCard from '../MyQrCard';
 import QrHistoryCard from '../QrHistoryCard';
 import { SpendingMiniWidgetsGrid, InvestmentCardWidget } from '../FinancialInsightsWidgets';
 
-const PRODUCTS = [
-  {
-    icon: '💳',
-    category: 'Accounts & Deposits',
-    badge: 'Popular',
-    title: 'Checking & Savings Accounts',
-    desc:  'Open a TD Beyond Checking, Convenience Checking, or high-yield Savings account in minutes — guided step by step with zero paperwork.',
-    intent: 'I want to apply for a product',
-  },
-  {
-    icon: '🏦',
-    category: 'Daily Banking',
-    badge: 'Instant',
-    title: 'Daily Banking & Transfers',
-    desc:  'Transfer funds between accounts, pay utility bills, send money with Direct Pay / Zelle®, and manage payees in a single conversation.',
-    intent: 'I want to do my daily banking',
-  },
-  {
-    icon: '📊',
-    category: 'Financial Health',
-    badge: 'Smart Insights',
-    title: 'Spending & Financial Intelligence',
-    desc:  'Check live balances, review recent statements, monitor categorized monthly spending trends, and review credit score health.',
-    intent: 'Analyze my spending',
-  },
-  {
-    icon: '📈',
-    category: 'Investing & Wealth',
-    badge: 'Up to 3.80%',
-    title: 'Guaranteed GICs & Term Deposits',
-    desc:  'Compare guaranteed TD GIC rates up to 3.80% and high-yield TFSA/RRSP options with interactive compound growth simulators.',
-    intent: 'Check GIC rates',
-  },
-  {
-    icon: '📱',
-    category: 'Financing',
-    badge: 'Budget-Friendly',
-    title: 'Lifestyle & Easy Payment Plans',
-    desc:  'Finance the tech, travel, or appliances you want today. Spread the cost across flexible monthly instalments with TD Easy Payment Plan.',
-    intent: 'I want to buy something on Easy Payment Plan',
-  },
-  {
-    icon: '🏠',
-    category: 'Home Lending',
-    badge: 'Pre-Approval',
-    title: 'TD Mortgages & Home Lending',
-    desc:  'Explore competitive fixed & variable mortgage rates, calculate down payments, and receive a fast pre-approval estimate in seconds.',
-    intent: 'I want a mortgage pre-approval estimate',
-  },
-];
-
 export default function Dashboard({ onOpenChat }) {
   const { authState, customerName, customer, customerId } = useAuth();
   const [customerBills, setCustomerBills] = useState([]);
-
-  // Hero card art shows the real cardholder once signed in, a placeholder before.
-  const cardHolder = customer?.legalName?.toUpperCase() || 'YOUR NAME HERE';
+  const [activeCategory, setActiveCategory] = useState('cards');
 
   useEffect(() => {
     if (authState !== 'authenticated' || !customerId) {
@@ -78,202 +25,309 @@ export default function Dashboard({ onOpenChat }) {
     };
   }, [authState, customerId]);
 
-  return (
-    <main className="dashboard">
+  const scrollToSection = (id, categoryId) => {
+    setActiveCategory(categoryId);
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
 
-      {/* ── TD Online Banking Sub-bar / Products & Services Breadcrumbs ── */}
-      <div className="td-subnav-bar">
-        <div className="td-subnav-inner">
-          <div className="td-breadcrumb">
-            <span className="td-breadcrumb-root">Online Banking</span>
-            <span className="td-breadcrumb-sep">/</span>
-            <span className="td-breadcrumb-item">Settings</span>
-            <span className="td-breadcrumb-sep">/</span>
-            <span className="td-breadcrumb-current">Products &amp; Services</span>
+  return (
+    <main className="dashboard td-portal-layout">
+
+      {/* ── 1. Hero Banner with Couple Photo & Centered Green Overlay Box ── */}
+      <section className="td-hero-banner" id="hero" aria-label="Products and Services overview">
+        <div className="td-hero-overlay-box">
+          <h1 className="td-hero-title">Products &amp; Services</h1>
+          <p className="td-hero-desc">
+            Need a checking account, a credit card or a personal loan?<br />
+            We can help with your financial needs and make banking easy.
+          </p>
+        </div>
+      </section>
+
+      {/* ── 2. Circular Icon Category Bar ── */}
+      <nav className="td-icon-bar" aria-label="Product Categories">
+        <div className="td-icon-bar-inner">
+
+          {/* 1. Bank Cards */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'cards' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('bank-cards-section', 'cards')}
+          >
+            <div className="td-icon-circle">
+              <svg width="28" height="20" viewBox="0 0 24 18" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="1" y="2" width="22" height="14" rx="2" />
+                <line x1="1" y1="7" x2="23" y2="7" />
+                <line x1="5" y1="12" x2="9" y2="12" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Bank Cards</span>
+          </button>
+
+          {/* 2. Bank Accounts */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'accounts' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('bank-accounts-section', 'accounts')}
+          >
+            <div className="td-icon-circle">
+              <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M21 6H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h17a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2z" />
+                <path d="M4 6V4a2 2 0 0 1 2-2h13a2 2 0 0 1 2 2v2" />
+                <circle cx="17.5" cy="13" r="1.5" fill="#238234" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Bank Accounts</span>
+          </button>
+
+          {/* 3. Loans & Lines of Credit */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'loans' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('loans-section', 'loans')}
+          >
+            <div className="td-icon-circle">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 6v12M15 9.5a2.5 2.5 0 0 0-2.5-2.5h-1a2.5 2.5 0 0 0 0 5h1a2.5 2.5 0 0 1 0 5h-1A2.5 2.5 0 0 1 9 14.5" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Loans &amp; Lines of Credit</span>
+          </button>
+
+          {/* 4. Investments */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'investments' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('investments-section', 'investments')}
+          >
+            <div className="td-icon-circle">
+              <svg width="26" height="22" viewBox="0 0 24 20" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="7" width="20" height="13" rx="2" />
+                <path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3" />
+                <path d="M2 12h20" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Investments</span>
+          </button>
+
+          {/* 5. Mobile Banking */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'mobile' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('mobile-section', 'mobile')}
+          >
+            <div className="td-icon-circle">
+              <svg width="22" height="26" viewBox="0 0 18 24" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="2" y="1" width="14" height="22" rx="3" />
+                <line x1="8" y1="19" x2="10" y2="19" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Mobile Banking</span>
+          </button>
+
+          {/* 6. Other Products & Services */}
+          <button
+            type="button"
+            className={`td-icon-item${activeCategory === 'other' ? ' is-active' : ''}`}
+            onClick={() => scrollToSection('other-products-section', 'other')}
+          >
+            <div className="td-icon-circle">
+              <svg width="26" height="24" viewBox="0 0 24 22" fill="none" stroke="#238234" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M2 8l10-6 10 6v2H2V8z" />
+                <line x1="4" y1="10" x2="4" y2="18" />
+                <line x1="9" y1="10" x2="9" y2="18" />
+                <line x1="15" y1="10" x2="15" y2="18" />
+                <line x1="20" y1="10" x2="20" y2="18" />
+                <rect x="1" y="18" width="22" height="3" rx="1" />
+              </svg>
+            </div>
+            <span className="td-icon-label">Other Products &amp; Services</span>
+          </button>
+
+        </div>
+      </nav>
+
+      {/* Horizontal Divider */}
+      <div className="td-category-divider" />
+
+      {/* ── 3. Bank Cards Feature Section (3 Tiles exactly matching screenshot) ── */}
+      <section className="td-cards-feature-wrap" id="bank-cards-section">
+        <h2 className="td-section-title">Bank Cards</h2>
+
+        <div className="td-tiles-grid">
+          {/* Tile 1: Solid Green Box */}
+          <div className="td-tile-card">
+            <div className="td-tile-box td-tile-box--green">
+              <svg width="34" height="26" viewBox="0 0 24 18" fill="none" stroke="#FFFFFF" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <rect x="1" y="2" width="22" height="14" rx="2" />
+                <line x1="1" y1="7" x2="23" y2="7" />
+                <line x1="5" y1="12" x2="9" y2="12" />
+              </svg>
+              <p className="td-tile-text">
+                Bank and shop worldwide with convenience and security.
+              </p>
+            </div>
+            <div className="td-tile-indicator">
+              <svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="#238234" strokeWidth="1.8">
+                <rect x="1" y="2" width="22" height="14" rx="2" />
+                <line x1="1" y1="7" x2="23" y2="7" />
+              </svg>
+            </div>
           </div>
-          <div className="td-subnav-quicklinks">
-            <a
-              href="#products"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Explore Products
-            </a>
-            <a
-              href="#cards-section"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('cards')?.scrollIntoView({ behavior: 'smooth' }) ||
-                document.getElementById('cards-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Credit Cards
-            </a>
-            <a
-              href="#home-insights-section"
-              onClick={(e) => {
-                e.preventDefault();
-                document.getElementById('home-insights-section')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              Wealth &amp; GICs
-            </a>
-            {authState === 'authenticated' && (
-              <a
-                href="#my-qr-section"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('my-qr-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Direct Pay QR
-              </a>
-            )}
+
+          {/* Tile 2: Photo 1 (Person smiling with laptop & card) */}
+          <div className="td-tile-card">
+            <div className="td-tile-box td-tile-box--photo1" aria-label="Customer using credit card online" />
+            <div className="td-tile-indicator">
+              <svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="#238234" strokeWidth="1.8">
+                <rect x="1" y="2" width="22" height="14" rx="2" />
+                <line x1="1" y1="7" x2="23" y2="7" />
+              </svg>
+            </div>
+          </div>
+
+          {/* Tile 3: Photo 2 (Person tapping card at checkout terminal) */}
+          <div className="td-tile-card">
+            <div className="td-tile-box td-tile-box--photo2" aria-label="Customer paying contactless with card" />
+            <div className="td-tile-indicator">
+              <svg width="24" height="18" viewBox="0 0 24 18" fill="none" stroke="#238234" strokeWidth="1.8">
+                <rect x="1" y="2" width="22" height="14" rx="2" />
+                <line x1="1" y1="7" x2="23" y2="7" />
+              </svg>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* ── Hero ── */}
-      <section className="hero" id="hero">
-        <div className="hero-inner">
+        {/* ── Interactive Credit Cards Catalog ── */}
+        <div id="cards" style={{ marginTop: 24 }}>
+          <CardsSection onOpenChat={onOpenChat} />
+        </div>
+      </section>
 
-          {/* Left: copy */}
-          <div className="hero-left">
-            <div className="hero-badge">
-              <span className="hero-badge-dot" aria-hidden="true" />
-              TD Bank Online Banking · Products &amp; Services
-            </div>
-
-            <h1>
-              Unexpectedly human.<br />
-              <span className="hero-accent">Banking made convenient.</span>
-            </h1>
-
-            <p>
-              Explore our full suite of personal accounts, cash back cards, mortgages,
-              and guaranteed investments. Fast, paperless, and backed 24/7 by the
-              intelligent TD Assistant — banking on your terms.
+      {/* ── 4. Bank Accounts Section (Checking & Savings) ── */}
+      <section className="td-content-section" id="bank-accounts-section" style={{ background: '#F8FAFC', padding: '48px 5%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="td-section-title" style={{ margin: 0 }}>Bank Accounts</h2>
+            <p style={{ color: '#52685B', fontSize: 14.5, margin: '8px 0 0' }}>
+              Everyday chequing and high-interest savings accounts tailored to your lifestyle.
             </p>
-
-            <div className="hero-ctas">
-              <button
-                className="btn-hero"
-                onClick={() => {
-                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Explore Products &amp; Services
-              </button>
-              <button
-                className="btn-hero-ghost"
-                onClick={() => onOpenChat('Analyze my spending')}
-              >
-                Financial Insights &amp; Tools
-              </button>
-            </div>
-
-            <div className="hero-stats" role="list" aria-label="Key statistics">
-              {[
-                { val: '50+',  lbl: 'Banking Services' },
-                { val: '<30s', lbl: 'Digital Decisions' },
-                { val: '24/7', lbl: 'Always On'         },
-                { val: '4.8★', lbl: 'Customer Rating'   },
-              ].map(({ val, lbl }) => (
-                <div key={lbl} className="hero-stat" role="listitem">
-                  <span className="stat-val">{val}</span>
-                  <span className="stat-lbl">{lbl}</span>
-                </div>
-              ))}
-            </div>
           </div>
 
-          {/* Right: animated TD credit card */}
-          <div className="hero-right" aria-hidden="true">
-            <div className="acn-card-stage">
-              <div className="acn-credit-card td-credit-card">
-                <div className="acn-cc-sheen" />
-                <div className="acn-cc-top">
-                  <div className="td-cc-logo-wrap">
-                    <span className="td-cc-logo-box">TD</span>
-                    <span className="acn-cc-bank">TD Bank</span>
-                  </div>
-                  <span className="acn-cc-flag">Cash Rewards · Visa</span>
-                </div>
-                <div className="acn-cc-chip" />
-                <div className="acn-cc-number">
-                  <span>5412</span><span>7534</span><span>8901</span><span>4242</span>
-                </div>
-                <div className="acn-cc-bottom">
-                  <div>
-                    <div className="acn-cc-label">Card Holder</div>
-                    <div className="acn-cc-value">{cardHolder}</div>
-                  </div>
-                  <div>
-                    <div className="acn-cc-label">Expires</div>
-                    <div className="acn-cc-value">09/29</div>
-                  </div>
-                  <div className="acn-cc-network">VISA</div>
-                </div>
-              </div>
-              <div className="acn-float acn-float-1">✅&nbsp; Transfer complete · 3s</div>
-              <div className="acn-float acn-float-2">🎁&nbsp; TD Rewards · 5× points</div>
+          <div className="product-grid" style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <div className="product-card">
+              <div className="product-icon">💳</div>
+              <h3>TD Beyond Checking</h3>
+              <p>Unlimited transactions, fee-free worldwide ATMs, and complimentary overdraft protection.</p>
+              <button className="card-cta" onClick={() => onOpenChat('I want to open a checking account')}>
+                Apply for Checking →
+              </button>
+            </div>
+            <div className="product-card">
+              <div className="product-icon">👛</div>
+              <h3>TD High-Yield Savings</h3>
+              <p>Earn high daily interest on every dollar with automated deposit round-ups and no minimum balance.</p>
+              <button className="card-cta" onClick={() => onOpenChat('I want to open a savings account')}>
+                Explore Savings →
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── My QR + Live QR History (receive side, Direct Pay) ── */}
-      {authState === 'authenticated' && customer?.customerId && customer.qrEnabled !== false && (
-        <section
-          id="my-qr-section"
-          style={{
-            maxWidth: 1120,
-            margin: '16px auto 28px',
-            padding: '0 24px',
-          }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: 16 }}>
-            <p className="section-label" style={{ marginBottom: 4 }}>TD Direct Pay QR · Receive Instant Transfers</p>
-            <p style={{ margin: 0, fontSize: 13, color: '#52685B' }}>
-              Signed in as <strong>{customer.legalName || customerName}</strong> — scan with the TD Bank Mobile App to send money directly to this account.
+      {/* ── 5. Loans & Lines of Credit ── */}
+      <section className="td-content-section" id="loans-section" style={{ padding: '48px 5%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="td-section-title" style={{ margin: 0 }}>Loans &amp; Lines of Credit</h2>
+            <p style={{ color: '#52685B', fontSize: 14.5, margin: '8px 0 0' }}>
+              Competitive fixed and variable rates for home purchases, renovations, and personal projects.
             </p>
           </div>
-          <div
-            style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'center',
-              alignItems: 'stretch',
-              gap: 24,
-            }}
-          >
-            <MyQrCard />
-            <QrHistoryCard />
-          </div>
-        </section>
-      )}
 
-      {/* ── Home Financial Insights & Spending Breakdown ── */}
-      <section
-        id="home-insights-section"
-        style={{
-          maxWidth: 1200,
-          margin: '0 auto 56px',
-          padding: '0 5%',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 24,
-        }}
-      >
-        <div>
-          <p className="section-label" style={{ marginBottom: 6 }}>
-            TD Financial Intelligence &amp; Cashflow Insights
-          </p>
-          <p style={{ margin: '0 0 16px', fontSize: 13.5, color: '#52685B' }}>
-            Real-time category spending breakdowns, upcoming utility bills, saving rate progress, and guaranteed GIC investment simulator.
-          </p>
+          <div className="product-grid" style={{ maxWidth: 1000, margin: '0 auto' }}>
+            <div className="product-card">
+              <div className="product-icon">🏠</div>
+              <h3>TD Mortgages &amp; Home Equity</h3>
+              <p>Calculate down payments, check pre-approval estimates, and lock in competitive fixed or variable rates.</p>
+              <button className="card-cta" onClick={() => onOpenChat('I want a mortgage pre-approval estimate')}>
+                Estimate Mortgage →
+              </button>
+            </div>
+            <div className="product-card">
+              <div className="product-icon">📱</div>
+              <h3>Lifestyle &amp; Easy Payment Plans</h3>
+              <p>Finance electronics, appliances, and travel over flexible monthly instalments with zero surprises.</p>
+              <button className="card-cta" onClick={() => onOpenChat('I want to buy something on Easy Payment Plan')}>
+                Explore EPP Plans →
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── 6. Investments & Guaranteed Growth ── */}
+      <section className="td-content-section" id="investments-section" style={{ background: '#F8FAFC', padding: '48px 5%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="td-section-title" style={{ margin: 0 }}>Investments</h2>
+            <p style={{ color: '#52685B', fontSize: 14.5, margin: '8px 0 0' }}>
+              Guaranteed Term Deposits &amp; GIC investments with CDIC protection and tax-free compounding.
+            </p>
+          </div>
+
+          <InvestmentCardWidget
+            payload={{ principal: 25000 }}
+            onAction={(utterance) => onOpenChat(utterance)}
+          />
+        </div>
+      </section>
+
+      {/* ── 7. Mobile Banking & Direct Pay QR ── */}
+      <section className="td-content-section" id="mobile-section" style={{ padding: '48px 5%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="td-section-title" style={{ margin: 0 }}>Mobile Banking</h2>
+            <p style={{ color: '#52685B', fontSize: 14.5, margin: '8px 0 0' }}>
+              Bank from anywhere with the TD mobile experience and instant Direct Pay QR transfers.
+            </p>
+          </div>
+
+          {authState === 'authenticated' && customer?.customerId && customer.qrEnabled !== false ? (
+            <div id="my-qr-section" style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 24 }}>
+              <MyQrCard />
+              <QrHistoryCard />
+            </div>
+          ) : (
+            <div style={{ textAlign: 'center', padding: '24px', background: '#FFFFFF', borderRadius: 12, border: '1px solid #D6E2D9', maxWidth: 600, margin: '0 auto' }}>
+              <p style={{ fontSize: 14, color: '#003F2D', fontWeight: 700, margin: '0 0 10px' }}>
+                Sign in to access your TD Direct Pay QR code
+              </p>
+              <p style={{ fontSize: 13, color: '#52685B', margin: '0 0 16px' }}>
+                Receive instant zero-fee money transfers directly into your checking account.
+              </p>
+              <button className="card-cta" onClick={() => onOpenChat('I want to do my daily banking')}>
+                Explore Daily Banking →
+              </button>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── 8. Other Products & Services / Financial Insights ── */}
+      <section className="td-content-section" id="other-products-section" style={{ background: '#F8FAFC', padding: '48px 5%' }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: 28 }}>
+            <h2 className="td-section-title" style={{ margin: 0 }}>Other Products &amp; Services</h2>
+            <p style={{ color: '#52685B', fontSize: 14.5, margin: '8px 0 0' }}>
+              Real-time cashflow intelligence, utility bill reminders, and 24/7 TD Assistant support.
+            </p>
+          </div>
+
           <SpendingMiniWidgetsGrid
             mode="dashboard"
             customerName={authState === 'authenticated' ? (customer?.legalName || customerName) : 'TD Demo Preview'}
@@ -281,69 +335,9 @@ export default function Dashboard({ onOpenChat }) {
             onAction={(utterance) => onOpenChat(utterance)}
           />
         </div>
-
-        <InvestmentCardWidget
-          payload={{ principal: 25000 }}
-          onAction={(utterance) => onOpenChat(utterance)}
-        />
       </section>
 
-      {/* ── Products & Services Catalog ── */}
-      <section className="products" id="products">
-        <div className="section-header-wrap" style={{ textAlign: 'center', marginBottom: 32 }}>
-          <p className="section-label" style={{ justifyContent: 'center' }}>
-            TD Products &amp; Services
-          </p>
-          <h2 style={{ fontSize: 28, fontWeight: 800, color: '#003F2D', margin: '4px 0 10px', letterSpacing: '-0.5px' }}>
-            Products built around how you live
-          </h2>
-          <p style={{ fontSize: 14.5, color: '#52685B', maxWidth: 640, margin: '0 auto' }}>
-            Select any banking solution below to learn more, calculate your savings, or begin an instant paperless application.
-          </p>
-        </div>
-
-        <div className="product-grid">
-          {PRODUCTS.map((p) => (
-            <div key={p.title} className="product-card">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <div className="product-icon" aria-hidden="true">{p.icon}</div>
-                {p.badge && (
-                  <span
-                    style={{
-                      fontSize: 10.5,
-                      fontWeight: 800,
-                      padding: '3px 8px',
-                      borderRadius: 999,
-                      background: '#E8F5E9',
-                      color: '#005030',
-                      border: '1px solid #C8E6C9',
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                    }}
-                  >
-                    {p.badge}
-                  </span>
-                )}
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#008542', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 4 }}>
-                {p.category}
-              </span>
-              <h3>{p.title}</h3>
-              <p>{p.desc}</p>
-              <button className="card-cta" onClick={() => onOpenChat(p.intent)}>
-                Explore &amp; Apply →
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Public card catalogue ── */}
-      <div id="cards-section">
-        <CardsSection onOpenChat={onOpenChat} />
-      </div>
-
-      {/* ── Site Footer ── */}
+      {/* ── 9. Site Footer ── */}
       <footer className="site-footer">
         <div className="site-footer-inner">
           <div className="footer-top">
@@ -352,36 +346,12 @@ export default function Dashboard({ onOpenChat }) {
               <span className="footer-brand">TD Bank</span>
             </div>
             <div className="footer-links">
-              <a
-                href="#products"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Products &amp; Services
-              </a>
-              <a
-                href="#cards-section"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('cards')?.scrollIntoView({ behavior: 'smooth' }) ||
-                  document.getElementById('cards-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Credit Cards
-              </a>
-              <a
-                href="#home-insights-section"
-                onClick={(e) => {
-                  e.preventDefault();
-                  document.getElementById('home-insights-section')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                Investing &amp; Wealth
-              </a>
+              <a href="#bank-cards-section">Bank Cards</a>
+              <a href="#bank-accounts-section">Bank Accounts</a>
+              <a href="#loans-section">Loans &amp; Mortgages</a>
+              <a href="#investments-section">Investments</a>
+              <a href="#mobile-section">Mobile Banking</a>
               <a href="#privacy" onClick={(e) => e.preventDefault()}>Privacy &amp; Security</a>
-              <a href="#terms" onClick={(e) => e.preventDefault()}>Terms of Service</a>
             </div>
           </div>
           <div className="footer-bottom">
