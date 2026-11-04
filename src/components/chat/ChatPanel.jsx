@@ -2019,7 +2019,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                       padding: '4px 10px',
                       borderRadius: 7,
                       border: 'none',
-                      background: '#002147',
+                      background: '#238234',
                       color: '#FFFFFF',
                       fontSize: 10,
                       fontWeight: 800,
@@ -2491,7 +2491,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                   padding: '6px 11px',
                                   borderRadius: 8,
                                   border: 'none',
-                                  background: '#002147',
+                                  background: '#238234',
                                   color: '#FFFFFF',
                                   fontSize: 11,
                                   fontWeight: 800,
@@ -2535,8 +2535,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                               fontSize: 10,
                               fontWeight: 700,
                               cursor: 'pointer',
-                              border: billerCategory === cat ? '1px solid #002147' : '1px solid #CBD5E1',
-                              background: billerCategory === cat ? '#002147' : '#F8FAFC',
+                              border: billerCategory === cat ? '1px solid #238234' : '1px solid #CBD5E1',
+                              background: billerCategory === cat ? '#238234' : '#F8FAFC',
                               color: billerCategory === cat ? '#FFFFFF' : '#475569',
                             }}
                           >
@@ -2582,7 +2582,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                 <div className="cp-menu-biller-sub">{b.sub}</div>
                               </div>
                             </div>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: '#002147' }}>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: '#238234' }}>
                               {isExpanded ? '▴' : 'Pay ›'}
                             </span>
                           </button>
@@ -2611,9 +2611,9 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                   style={{
                                     padding: '4px 9px',
                                     borderRadius: 999,
-                                    border: '1px solid #002147',
-                                    background: '#F0F9FF',
-                                    color: '#002147',
+                                    border: '1px solid #238234',
+                                    background: '#E8F5E9',
+                                    color: '#238234',
                                     fontSize: 11,
                                     fontWeight: 700,
                                     cursor: 'pointer',
@@ -2653,7 +2653,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                       padding: '4px 9px',
                                       borderRadius: 6,
                                       border: 'none',
-                                      background: '#002147',
+                                      background: '#238234',
                                       color: '#FFFFFF',
                                       fontSize: 11,
                                       fontWeight: 700,
@@ -2694,8 +2694,8 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                           width: '100%',
                           padding: '9px 12px',
                           borderRadius: 10,
-                          border: '1px solid #002147',
-                          background: 'linear-gradient(135deg, #002147 0%, #0F3A6D 100%)',
+                          border: '1px solid #003F2D',
+                          background: 'linear-gradient(135deg, #003F2D 0%, #238234 100%)',
                           color: '#FFFFFF',
                           fontSize: 12,
                           fontWeight: 800,
@@ -2777,7 +2777,7 @@ export default function ChatPanel({ isOpen, onClose, onReset, onExposeReset, onE
                                     padding: '4px 8px',
                                     borderRadius: 999,
                                     border: 'none',
-                                    background: '#002147',
+                                    background: '#238234',
                                     color: '#FFFFFF',
                                     fontSize: 10,
                                     fontWeight: 700,

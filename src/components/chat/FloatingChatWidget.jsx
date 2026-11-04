@@ -200,10 +200,10 @@ export default function FloatingChatWidget({
 
           {/* ── Header ── */}
           <div className="fc-header">
-            <div className="fc-avatar">A</div>
+            <div className="fc-avatar">TD</div>
             <div className="fc-info">
               <div className="fc-title">
-                ACN Bank AI {isAuthenticated && customerName ? `· ${customerName}` : ''}
+                TD Assistant {isAuthenticated && customerName ? `· ${customerName}` : ''}
               </div>
               <div className="fc-status">
                 <span className="fc-status-dot" />
@@ -216,9 +216,9 @@ export default function FloatingChatWidget({
               style={{
                 padding: '4px 9px',
                 borderRadius: 999,
-                border: '1px solid #BFDBFE',
-                background: activePopover === 'contact' ? '#002147' : '#EFF6FF',
-                color: activePopover === 'contact' ? '#FFFFFF' : '#002147',
+                border: '1px solid #C8E6C9',
+                background: activePopover === 'contact' ? '#238234' : '#E8F5E9',
+                color: activePopover === 'contact' ? '#FFFFFF' : '#003F2D',
                 fontSize: 10.5,
                 fontWeight: 800,
                 cursor: 'pointer',
@@ -442,7 +442,7 @@ export default function FloatingChatWidget({
                                 padding: '5px 10px',
                                 borderRadius: 8,
                                 border: 'none',
-                                background: '#002147',
+                                background: '#238234',
                                 color: '#FFFFFF',
                                 fontSize: 10.5,
                                 fontWeight: 800,
@@ -486,8 +486,8 @@ export default function FloatingChatWidget({
                             fontSize: 10,
                             fontWeight: 700,
                             cursor: 'pointer',
-                            border: billerCategory === cat ? '1px solid #002147' : '1px solid #CBD5E1',
-                            background: billerCategory === cat ? '#002147' : '#F8FAFC',
+                            border: billerCategory === cat ? '1px solid #238234' : '1px solid #CBD5E1',
+                            background: billerCategory === cat ? '#238234' : '#F8FAFC',
                             color: billerCategory === cat ? '#FFFFFF' : '#475569',
                           }}
                         >
@@ -526,7 +526,7 @@ export default function FloatingChatWidget({
                               <div className="cp-menu-biller-sub">{b.sub}</div>
                             </div>
                           </div>
-                          <span style={{ fontSize: 11, fontWeight: 700, color: '#002147' }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#238234' }}>
                             {isExpanded ? '▴' : 'Pay ›'}
                           </span>
                         </button>
@@ -541,9 +541,9 @@ export default function FloatingChatWidget({
                                 style={{
                                   padding: '3px 8px',
                                   borderRadius: 999,
-                                  border: '1px solid #002147',
-                                  background: '#F0F9FF',
-                                  color: '#002147',
+                                  border: '1px solid #238234',
+                                  background: '#E8F5E9',
+                                  color: '#238234',
                                   fontSize: 10.5,
                                   fontWeight: 700,
                                   cursor: 'pointer',
@@ -575,7 +575,7 @@ export default function FloatingChatWidget({
                                   padding: '3px 8px',
                                   borderRadius: 6,
                                   border: 'none',
-                                  background: '#002147',
+                                  background: '#238234',
                                   color: '#FFFFFF',
                                   fontSize: 10.5,
                                   fontWeight: 700,
@@ -614,14 +614,14 @@ export default function FloatingChatWidget({
                             padding: '8px 11px',
                             borderRadius: 9,
                             border: 'none',
-                            background: '#002147',
+                            background: '#238234',
                             color: '#FFFFFF',
                             fontSize: 11.5,
                             fontWeight: 800,
                             cursor: 'pointer',
                           }}
                         >
-                          ▦ Generate My ACN QR Pay Code →
+                          ▦ Generate My TD QR Pay Code →
                         </button>
                       </div>
                       {beneficiaries.map((ben) => {
@@ -795,8 +795,8 @@ export default function FloatingChatWidget({
       <button
         className="fc-fab"
         onClick={isOpen ? onClose : onOpen}
-        title={isOpen ? 'Minimise chat' : 'Open ACN Bank AI chat'}
-        aria-label={isOpen ? 'Minimise chat' : 'Open AI chat'}
+        title={isOpen ? 'Minimise chat' : 'Open TD Assistant'}
+        aria-label={isOpen ? 'Minimise chat' : 'Open TD Assistant'}
       >
         {unread > 0 && !isOpen && (
           <span className="fc-badge">{unread > 9 ? '9+' : unread}</span>
