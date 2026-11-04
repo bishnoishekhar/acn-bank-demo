@@ -332,19 +332,19 @@ export function SpendingMiniWidgetsGrid({
               style={{
                 padding: '3px 9px',
                 borderRadius: 999,
-                background: '#EFF6FF',
-                border: '1px solid #BFDBFE',
-                color: '#0056B3',
+                background: '#E8F5E9',
+                border: '1px solid #C8E6C9',
+                color: '#005030',
                 fontSize: 10,
                 fontWeight: 800,
                 letterSpacing: '0.05em',
                 textTransform: 'uppercase',
               }}
             >
-              ✦ Sep 20 – Oct 19 · Smart Insights
+              ✦ Sep 20 – Oct 19 · TD Insights
             </span>
             {customerName && (
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#64748B' }}>
+              <span style={{ fontSize: 11, fontWeight: 700, color: '#52685B' }}>
                 for {customerName}
               </span>
             )}
@@ -354,11 +354,11 @@ export function SpendingMiniWidgetsGrid({
               margin: '5px 0 0',
               fontSize: isChat ? 15 : 20,
               fontWeight: 800,
-              color: '#002147',
+              color: '#003F2D',
               letterSpacing: '-0.3px',
             }}
           >
-            Spending Breakdown & Cashflow Pulse
+            Spending Breakdown &amp; Cashflow Pulse
           </h3>
         </div>
         {onAction && (
@@ -368,15 +368,15 @@ export function SpendingMiniWidgetsGrid({
             style={{
               padding: '6px 12px',
               borderRadius: 999,
-              border: '1px solid #CBD5E1',
+              border: '1px solid #D6E2D9',
               background: '#FFFFFF',
-              color: '#002147',
+              color: '#003F2D',
               fontSize: 11,
               fontWeight: 700,
               cursor: 'pointer',
             }}
           >
-            Ask AI Advisor →
+            Ask TD Assistant →
           </button>
         )}
       </div>
@@ -815,11 +815,11 @@ export function InvestmentCardWidget({ payload = {}, onAction }) {
     <div
       style={{
         background: '#FFFFFF',
-        border: '1px solid #CBD5E1',
-        borderTop: '4px solid #0056B3',
+        border: '1px solid #D6E2D9',
+        borderTop: '4px solid #54B848',
         borderRadius: 18,
         padding: 16,
-        boxShadow: '0 10px 28px rgba(0, 33, 71, 0.08)',
+        boxShadow: '0 10px 28px rgba(0, 63, 45, 0.06)',
         color: '#0F172A',
         width: '100%',
         marginTop: 6,
@@ -835,17 +835,17 @@ export function InvestmentCardWidget({ payload = {}, onAction }) {
               display: 'inline-block',
               padding: '3px 9px',
               borderRadius: 999,
-              background: '#EFF6FF',
-              color: '#0056B3',
+              background: '#E8F5E9',
+              color: '#005030',
               fontSize: 10,
               fontWeight: 800,
               letterSpacing: '0.05em',
               textTransform: 'uppercase',
             }}
           >
-            📈 ACN Wealth · Non-Redeemable GIC & TFSA Projector
+            📈 TD Wealth · Non-Redeemable GIC &amp; TFSA Projector
           </span>
-          <h4 style={{ margin: '5px 0 0', fontSize: 16, fontWeight: 800, color: '#002147' }}>
+          <h4 style={{ margin: '5px 0 0', fontSize: 16, fontWeight: 800, color: '#003F2D' }}>
             {payload?.headline || 'Interactive Rate & Guaranteed Growth Simulator'}
           </h4>
         </div>

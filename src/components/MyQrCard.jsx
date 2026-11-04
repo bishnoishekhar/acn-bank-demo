@@ -68,7 +68,7 @@ export default function MyQrCard() {
         margin: 1,
         errorCorrectionLevel: 'M',
         color: {
-          dark: '#002147', // ACN Primary Navy
+          dark: '#003F2D', // TD Forest Green
           light: '#FFFFFFFF',
         },
       },
@@ -172,9 +172,9 @@ export default function MyQrCard() {
           transition: all 0.15s ease;
         }
         .myqr-chip.active {
-          background: #002147;
+          background: #003F2D;
           color: #ffffff;
-          border-color: #002147;
+          border-color: #003F2D;
         }
         .myqr-custom-row {
           display: flex;
@@ -208,7 +208,7 @@ export default function MyQrCard() {
           margin-top: 8px;
           padding: 3px 10px;
           border-radius: 999px;
-          background: #002147;
+          background: #003F2D;
           color: #ffffff;
           font-size: 12px;
           font-weight: 800;
@@ -216,7 +216,7 @@ export default function MyQrCard() {
         .myqr-brand {
           font-size: 11px;
           font-weight: 800;
-          color: #002147;
+          color: #003F2D;
           letter-spacing: 0.9px;
           margin-bottom: 12px;
         }
@@ -237,11 +237,11 @@ export default function MyQrCard() {
         .myqr-btn:active { transform: translateY(1px); }
         .myqr-btn-outline {
           background: #ffffff;
-          color: #002147;
-          border: 1px solid #B6C2CE;
+          color: #003F2D;
+          border: 1.5px solid #003F2D;
         }
         .myqr-btn-primary {
-          background: #002147;
+          background: #54B848;
           color: #ffffff;
         }
       `}</style>
@@ -249,7 +249,7 @@ export default function MyQrCard() {
       <div className="myqr-top-row">
         <span className="myqr-tag">
           <span className="myqr-live-dot" aria-hidden="true" />
-          ACN QR Pay · Receive
+          TD Direct Pay · Receive
         </span>
         {chequing && (
           <span className="myqr-bal-pill" title="Updates automatically when a QR transfer arrives">

@@ -115,8 +115,8 @@ export default function QrHistoryCard() {
         .qrhist-icon {
           width: 36px; height: 36px;
           border-radius: 10px;
-          background: #E6F2F5;
-          color: #002147;
+          background: #E8F5E9;
+          color: #003F2D;
           display: flex; align-items: center; justify-content: center;
           font-size: 16px; font-weight: 800;
           flex-shrink: 0;

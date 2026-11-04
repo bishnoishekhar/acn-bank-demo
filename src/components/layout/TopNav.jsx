@@ -6,18 +6,78 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
 
   return (
     <nav className="top-nav" role="navigation" aria-label="Main navigation">
-      {/* Logo */}
-      <div className="nav-logo">
-        <span className="nav-logo-mark" aria-hidden="true">»</span>
-        ACN Bank
+      {/* TD Bank Logo */}
+      <div className="nav-logo" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} style={{ cursor: 'pointer' }}>
+        <span className="td-nav-logo-box" aria-hidden="true">TD</span>
+        <div className="td-nav-brand-text">
+          <span className="td-nav-brand-name">TD Bank</span>
+          <span className="td-nav-brand-tagline">America's Most Convenient Bank®</span>
+        </div>
       </div>
 
-      {/* Centre nav links — always visible */}
+      {/* Centre nav links matching TD Online Banking */}
       <div className="nav-links">
-        <a href="#products">Products</a>
-        <a href="#services">Services</a>
-        <a href="#investing">Investing</a>
-        <a href="#about">About</a>
+        <a
+          href="#products"
+          className="nav-link is-active"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('products')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Products &amp; Services
+        </a>
+        <a
+          href="#accounts"
+          className="nav-link"
+          onClick={(e) => {
+            e.preventDefault();
+            onOpenChat('I want to do my daily banking');
+          }}
+        >
+          My Accounts
+        </a>
+        <a
+          href="#transfers"
+          className="nav-link"
+          onClick={(e) => {
+            e.preventDefault();
+            onOpenChat('I want to transfer money');
+          }}
+        >
+          Transfers &amp; Pay
+        </a>
+        <a
+          href="#cards"
+          className="nav-link"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('cards')?.scrollIntoView({ behavior: 'smooth' }) ||
+            document.getElementById('cards-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Credit Cards
+        </a>
+        <a
+          href="#investing"
+          className="nav-link"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('home-insights-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Investing &amp; GICs
+        </a>
+        <a
+          href="#insights"
+          className="nav-link"
+          onClick={(e) => {
+            e.preventDefault();
+            document.getElementById('home-insights-section')?.scrollIntoView({ behavior: 'smooth' });
+          }}
+        >
+          Insights
+        </a>
       </div>
 
       {/* Right-side actions */}
@@ -34,9 +94,9 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
                   document.getElementById('my-qr-section')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }, 80);
               }}
-              title="Jump to your ACN QR Pay code"
+              title="Jump to your Direct Pay QR code"
             >
-              ▦ My QR
+              ▦ Direct Pay QR
             </button>
             <button className="nav-btn nav-btn-ghost" onClick={onSignOut}>
               Sign out
@@ -64,11 +124,11 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
           </button>
         )}
 
-        {/* Chat toggle */}
+        {/* Chat toggle / TD Assistant */}
         <button
           className={`nav-btn nav-btn-chat${chatOpen ? ' nav-btn-chat--active' : ''}`}
           onClick={onOpenChat}
-          aria-label={chatOpen ? 'Close AI chat' : 'Open AI chat'}
+          aria-label={chatOpen ? 'Close TD Virtual Assistant' : 'Open TD Virtual Assistant'}
           aria-expanded={chatOpen}
         >
           {chatOpen ? (
@@ -83,7 +143,7 @@ export default function TopNav({ onOpenChat, onSignIn, onSignOut, onResetChat, c
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
           )}
-          Chat with AI
+          <span>TD Assistant</span>
         </button>
       </div>
     </nav>

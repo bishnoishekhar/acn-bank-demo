@@ -42,7 +42,7 @@ function CardArt({ card }) {
     >
       <div className="cs-art-sheen" />
       <div className="cs-art-top">
-        <span className="cs-art-bank">ACN Bank</span>
+        <span className="cs-art-bank">TD Bank</span>
         <span className="cs-art-tier">{card.tier}</span>
       </div>
       <div className="cs-art-chip" />
@@ -108,13 +108,12 @@ export default function CardsSection({ onOpenChat }) {
 
   return (
     <section className="cards-section" id="cards">
-      <p className="section-label">Credit cards · browse freely, no sign-in needed</p>
+      <p className="section-label">TD Credit Cards · Compare &amp; Apply</p>
 
       <div className="cs-head">
-        <h2 className="cs-title">Find a card that fits how you actually spend</h2>
+        <h2 className="cs-title">Find a TD card that fits how you actually spend</h2>
         <p className="cs-sub">
-          Compare fees, rates and rewards below — or ask the assistant to narrow it
-          down for you. You only need to sign in when you decide to apply.
+          Compare fees, interest rates, and TD Rewards below — or ask the TD Assistant to find your ideal match.
         </p>
 
         {/* Say what has been hidden and why, rather than silently shrinking the
